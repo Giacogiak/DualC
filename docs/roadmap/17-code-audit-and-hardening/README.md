@@ -42,7 +42,7 @@ status and trigger, and links to both.
   pages: the claim-by-claim re-scoping, the verification digests, the untested branch
   (moved out of `05` on 2026-09-18).
 - [`09-local-checks-gate/`](09-local-checks-gate/README.md) — the local checks gate (a folder since 2026-09-21)
-  (`scripts/check.py`) that stands in for CI in a repo with no remote: the check
+  (`scripts/check.py`) that stands in for CI: the check
   list, the doc-size ratchet, why every check was proven to fail, and exactly
   which of #31/#32/#33 it does and does not move.
 - [`10-docs-system-screening.md`](10-docs-system-screening.md) — the 2026-09-11 audit

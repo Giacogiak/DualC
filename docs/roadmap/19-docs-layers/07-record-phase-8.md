@@ -81,7 +81,7 @@ as one session: the plan is
   2026-10-20, or after the first session that edits both `src/` and `docs/design/`), with
   its run as `19/08/02-…`; the `OffsetField` observation on 17/03 #25 (the usage side is
   already said: the `offset` row of cmdref 11/01 and the 06 pointer carry the caveat); the merge of
-  `structure-docs` into `main` (every commit since 2026-09-17 sits on that branch; no remote
+  `structure-docs` into `main` (every commit since 2026-09-17 sits on that branch
   — the owner's decision, after this phase); the re-upload of the revised skill to claude.ai; the `tile-depth >= depth`
   console line, a MINOR-OPEN on 11/03 § 5 for a code session. No (a) finding is left
   unfixed.

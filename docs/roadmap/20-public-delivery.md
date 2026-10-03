@@ -132,11 +132,17 @@ clause and #33's sub-items updated; the dated pointers in 10 § 8, 01/01 § 2, 1
   had them), and `check.py --gpu` against that build passed **73/73**, the baked-source
   cases included — the harness found `cube.obj` next to itself.
 
-**Out of scope, named.** Creating the public remote and pushing (DualC has none — an
-outward-facing step the owner takes); the absolute `D:\…` paths quoted in historical
+**Out of scope, named.** Creating the public remote and pushing (an outward-facing step the
+owner takes; done, see the update below); the absolute `D:\…` paths quoted in historical
 roadmap text; `find_package` / 10 #8 Phase 2 (its trigger (a), a precompiled-distribution
 consumer, still stands; trigger (b) fired and is retired); the polyscope mechanism (sibling,
 opt-in; the owner's fork is upstream, 0 commits ahead).
+
+**Update — 2026-10-03: published.** The remote is <https://github.com/Giacogiak/DualC>. Its
+history is fresh: one root commit, `5989fb5` ("Initial public release of DualC"), with no
+parent. The 191 pre-publication commits were deliberately left off the remote and are kept
+offline by the owner, so the commit hashes cited anywhere in `docs/` before that date name
+commits of that archive, not of the public history.
 
 ---
 

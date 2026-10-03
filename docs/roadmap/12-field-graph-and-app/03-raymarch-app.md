@@ -53,7 +53,8 @@ still-deferred open-surface **clip mask** in §F (which masks an *open* surface 
 *second* field; this is half-space clipping of a *solid* body). UI sliders are
 deferred to the public release — the uniforms are the hook a slider / the Rhino
 side-car drives. *(2026-09-18: trigger for the sliders is row D-17 of the
-[decisions index](../../decisions/README.md).)*
+[decisions index](../../decisions/README.md); 2026-10-03: the public release happened, the
+sliders are PLANNED.)*
 
 ### Disk file-watch (auto-reload)
 **DONE (2026-07-03).** `dualc_field_view` now polls

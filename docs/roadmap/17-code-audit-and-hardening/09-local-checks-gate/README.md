@@ -1,7 +1,6 @@
 # The local checks gate — CI for a repo with no remote (#33)
 
-DualC has **no git remote** and is staying local, so there is nothing for a
-hosted CI service to trigger. But "there is no CI" is the stated blocker on three
+DualC has **no hosted CI**, so nothing but the owner triggers a check. But "there is no CI" is the stated blocker on three
 tracked items — [**#33**](../04-engineering-quality.md#33-build--tooling-hardening)
 had *"CI being set up"* as its literal trigger (reworded when this gate landed),
 [**#31**](../04-engineering-quality.md#31-make-the-cpugpu-parity-gate-binding) wants
@@ -12,12 +11,11 @@ deserved separating from the hosting question.
 ## What CI actually is, split in two
 
 - **(a) One reproducible gate** — a single command running every check, printing
-  pass/fail. Needs no server, no remote, no network. It carries nearly all the
+  pass/fail. Needs no server and no network. It carries nearly all the
   value and it did not exist.
 - **(b) Unattended triggering by something that is not you.** Genuinely absent
   locally. A git hook is an **honest substitute for the fast checks, not an
-  equivalent** — and without a remote `pre-push` never fires, so the build tier
-  has no automatic trigger at all. It stays *"run the one command"*.
+  equivalent** — so the build tier has no automatic trigger at all. It stays *"run the one command"*.
 
 Self-hosted Jenkins, a local bare mirror with a `post-receive` hook and a Task
 Scheduler job were all considered and rejected: real options, all ceremony for a

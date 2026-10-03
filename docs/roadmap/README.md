@@ -108,7 +108,8 @@ workflow, graded-onion; GLSL codegen completeness DONE 2026-06-24 —
    a zero-thickness open-surface preview, examples-layer only. DEFERRED
    ([D-16](../decisions/README.md)).
 4. **Section-plane UI sliders** ([12 § D.1](12-field-graph-and-app/03-raymarch-app.md#section-planes-viewport-inspection)) —
-   the `uClip[3]`/`uClipMask` uniforms are the hook. DEFERRED ([D-17](../decisions/README.md)).
+   the `uClip[3]`/`uClipMask` uniforms are the hook. PLANNED — its trigger, the public release,
+   fired 2026-10-03 ([D-17](../decisions/README.md)).
 5. **Web build (browser shell)** ([08](08-raymarch.md), [12](12-field-graph-and-app/README.md))
    — the shader already targets the WebGL2 subset; the browser shell + distribution
    remain. PLANNED, unscheduled.
