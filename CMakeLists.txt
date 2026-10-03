@@ -32,6 +32,15 @@ option(DUALC_BUILD_C_ABI
        "Build the C ABI shared library (dualc_capi) + C demo: a flat C boundary over the field-graph proxy+export path. Requires DUALC_BUILD_EXAMPLES (it links the host-side field-graph + export libs)."
        OFF)
 
+# The library is C++ only; examples/ and tests/ also compile the vendored
+# miniz.c. The Visual Studio generator compiles a .c file without C being
+# enabled, Ninja and Makefiles do not (CMAKE_C_COMPILE_OBJECT unset), so C is
+# enabled here, at top level so both sibling directories see it, and only when
+# they are built -- a consumer of the library alone still needs no C compiler.
+if(DUALC_BUILD_EXAMPLES OR DUALC_BUILD_TESTS)
+  enable_language(C)
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)

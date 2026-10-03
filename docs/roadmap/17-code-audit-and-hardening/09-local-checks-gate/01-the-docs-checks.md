@@ -31,7 +31,8 @@ same day, [10](../10-docs-system-screening.md).)*
 *(2026-09-17: the `frozen-decl` row is dated — nothing is frozen since 2026-09-11, [10](../10-docs-system-screening.md); the list is empty and the check holds vacuously.)*
 
 Build tier: `configure` → `build` → `warnings` → `ctest`. Opt-in `--gpu` tier:
-`parity`.
+`parity`. *(2026-10-03: the build tier picks its generator per OS and parses GCC/Ninja and
+CTest 4 output — [20 #49](../../20-public-delivery.md#49-linux-as-a-build-host).)*
 
 ### The semantic half
 

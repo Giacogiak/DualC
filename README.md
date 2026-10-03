@@ -54,7 +54,10 @@ cmake --build build --config Release -j
 ctest --test-dir build -C Release --output-on-failure
 ```
 
-With Ninja: `-G Ninja -DCMAKE_BUILD_TYPE=Release`, then `cmake --build build -j`. The GL
+With Ninja: `-G Ninja -DCMAKE_BUILD_TYPE=Release`, then `cmake --build build -j`. Builds and
+tests on Windows (Visual Studio 2022) and Linux (GCC 15, CMake 4, Ninja; on Ubuntu
+`sudo apt install cmake ninja-build g++`); the tests and examples also compile one C file
+(miniz), so they need a C compiler next to the C++ one. The GL
 tools and the C ABI are opt-in (`-DDUALC_BUILD_POLYSCOPE_VIEWER`, `_RAYMARCH_VIEWER`,
 `_FIELD_VIEW`, `_GLSL_PARITY`, `_C_ABI`, all `OFF` by default); none of them adds a dependency
 to `libdualc`. The build prelude and every flag are in the

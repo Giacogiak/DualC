@@ -27,7 +27,7 @@ then wrap it* — is **finished**, so what remains in DualC is the engine itself
 2026-08-19 audit's ledger ([17](17-code-audit-and-hardening/README.md)) as a standing queue.
 **NEXT** on that track: the rest of **#34**, then **#32**. **Public delivery**
 ([20](20-public-delivery.md)) opened 2026-09-21: the build no longer depends on a local
-geometry-central fork. **#48** — cooperative cancellation and progress through the
+geometry-central fork, and since 2026-10-03 it builds and passes the gate on Linux too (**#49**). **#48** — cooperative cancellation and progress through the
 pipeline and the ABI, Boletus's D-30 ask — landed 2026-09-22 and is merged into `main`
 (2026-10-02) ([14/05](14-c-abi/05-progress-and-cancel.md)); what it left open is D-44 / D-45,
 and the re-vendor is Boletus's ([15](15-boletus-handoff.md#dualc-retains--engine--abi-boletus-only-requests-these-upstream)).
@@ -37,11 +37,11 @@ the block records the table links ([D-43](../decisions/01-settled.md)).
 
 | Date | What landed | Record |
 | --- | --- | --- |
+| 2026-10-03 | **#49** — Linux is a build host: C enabled for the vendored `miniz.c`, the gate picks its generator per OS and reads CTest 4; full gate green with GCC 15 + Ninja. | [20](20-public-delivery.md#49-linux-as-a-build-host) |
 | 2026-09-22 | **#48** — a host-owned cancel token and a calling-thread progress callback through sampler, contourer and writers; ABI 0.5.0's `*_with_progress` twins; every export writes `.part` and renames (D-46). | [14/05](14-c-abi/05-progress-and-cancel.md) |
 | 2026-09-21 | **Cap relief** — the status snapshot trimmed by its own rule (D-43); the gate's record 17/09 split into a folder. | [19/10](19-docs-layers/10-cap-relief.md) |
 | 2026-09-21 | **#47** — geometry-central pinned to upstream and fetched at configure; nanort vendored; a clean clone builds with no manual step. | [20](20-public-delivery.md#47-pin-geometry-central-to-upstream-own-nanort-self-bootstrapping-clone) |
 | 2026-09-21 | **#46** — `OffsetField` forwards `cellOverlaps` on the cell grown by `\|r\|`; `offset(<TPMS>)` no longer prunes. | [17/03/02](17-code-audit-and-hardening/03-correctness-and-robustness/02-precision-and-celloverlaps.md#46-offsetfield-does-not-forward-celloverlaps) |
-| 2026-09-17 → 09-20 | **Docs restructuring** — `AGENTS.md`, the docs checks of `scripts/check.py` ([17/09](17-code-audit-and-hardening/09-local-checks-gate/README.md)), `docs/design/`, `docs/decisions/`, the roadmap consolidation, `raw/`, the semantic lint, the pre-merge loss audit. | [19](19-docs-layers/README.md) |
 
 **The shipped keystone (2026-06-14 … 2026-07-06)** — builds #1–#3, the C ABI (#19) and
 the client layer's move to Boletus, each DONE with its evidence in
@@ -137,7 +137,7 @@ workflow, graded-onion; GLSL codegen completeness DONE 2026-06-24 —
 | 17 | [Code audit & engine hardening](17-code-audit-and-hardening/README.md) | The tracked ledger of the 2026-08-19 code audit ([`docs/raw/study/`](../raw/study/README.md)): every finding with a disposition, the tracked items, the record pages, the 2026-09-11 docs-system screening. | **PARTIAL** — a standing ledger; per-item status in [17 § Tracked items](17-code-audit-and-hardening/README.md#tracked-items--status-at-a-glance) |
 | 18 | [C ABI — continued](18-c-abi-continued.md) | Retired 2026-09-18: its two entries are [14/04](14-c-abi/04-abi-0-4-0.md); the number is never reused. | tombstone — DONE |
 | 19 | [Docs layers](19-docs-layers/README.md) | The 2026-09-17 docs restructuring: the plan (immutable, `docs/raw/`), items #36–#45, the phase table, per-phase evidence, the semantic-lint runs. | Phases 0–8 **DONE** (2026-09-20); the lint runs keep landing in [19/08](19-docs-layers/08-semantic-lint/README.md) |
-| 20 | [Public delivery](20-public-delivery.md) | The repo as others build it: geometry-central pinned and fetched (options weighed), nanort vendored, the self-bootstrapping clean clone (#47). | **#47 DONE** (2026-09-21) |
+| 20 | [Public delivery](20-public-delivery.md) | The repo as others build it: geometry-central pinned and fetched (options weighed), nanort vendored, the self-bootstrapping clean clone (#47); Linux as a build host (#49). | **#47 DONE** (2026-09-21) · **#49 DONE** (2026-10-03) |
 
 ## How the blocks relate
 

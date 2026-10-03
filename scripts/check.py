@@ -29,6 +29,7 @@ import ast
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -1377,6 +1378,20 @@ def build_dir(ctx):
     return ctx.args.build_dir
 
 
+def generator_args(config):
+    """The one per-platform choice of the build tier (roadmap 20 #49).
+
+    Windows keeps the multi-config Visual Studio generator the gate was born
+    on. Elsewhere it is Ninja when on PATH, else CMake's default (Unix
+    Makefiles); both are single-config, so the build type is fixed here at
+    configure and `--config` / `-C` are inert afterwards.
+    """
+    if os.name == "nt":
+        return ["-G", "Visual Studio 17 2022", "-A", "x64"]
+    gen = ["-G", "Ninja"] if shutil.which("ninja") else []
+    return gen + ["-DCMAKE_BUILD_TYPE=%s" % config]
+
+
 @check("configure", "build", "cmake configure (reuses the build dir unless --clean)")
 def check_configure(ctx):
     bd = build_dir(ctx)
@@ -1385,8 +1400,8 @@ def check_configure(ctx):
     cache = os.path.join(ctx.root, bd, "CMakeCache.txt")
     if os.path.exists(cache) and not ctx.args.clean:
         return Result(SKIP, "%s already configured (use --clean to redo)" % bd)
-    cmd = ["cmake", "-S", ".", "-B", bd, "-G", "Visual Studio 17 2022", "-A", "x64",
-           "-DDUALC_BUILD_TESTS=ON", "-DDUALC_BUILD_EXAMPLES=ON"]
+    cmd = (["cmake", "-S", ".", "-B", bd] + generator_args(ctx.args.config) +
+           ["-DDUALC_BUILD_TESTS=ON", "-DDUALC_BUILD_EXAMPLES=ON"])
     rc, out = run(cmd, cwd=ctx.root)
     if rc == 127:
         return Result(SKIP, "cmake not on PATH")
@@ -1404,8 +1419,12 @@ def check_build(ctx):
     bd = build_dir(ctx)
     if not os.path.exists(os.path.join(ctx.root, bd, "CMakeCache.txt")):
         return Result(SKIP, "%s is not configured" % bd)
-    rc, out = run(["cmake", "--build", bd, "--config", ctx.args.config],
-                  cwd=ctx.root)
+    # --parallel: Unix Makefiles would otherwise build serially (Ninja and
+    # MSBuild-with-VS already pick their own job count).
+    cmd = ["cmake", "--build", bd, "--config", ctx.args.config]
+    if os.name != "nt":
+        cmd.append("--parallel")
+    rc, out = run(cmd, cwd=ctx.root)
     if rc == 127:
         return Result(SKIP, "cmake not on PATH")
     logdir = os.path.join(ctx.root, bd, "_check")
@@ -1418,14 +1437,19 @@ def check_build(ctx):
         pass
     ctx.build_log = out
     if rc != 0:
-        errs = [l.strip() for l in out.splitlines() if ": error " in l][:20]
+        # MSVC prints `: error C1234:`, GCC/Clang `: error:`.
+        errs = [l.strip() for l in out.splitlines()
+                if ": error " in l or ": error:" in l][:20]
         return Result(FAIL, "build failed", errs or ["see %s/_check/build.log" % bd])
     return Result(OK, "built (%s), log in %s/_check/build.log" % (ctx.args.config, bd))
 
 
 WARN_RE = re.compile(r"^\s*(.+?)\((\d+)[,)].*?:\s*warning\s+([A-Za-z]+\d+)\s*:\s*(.*)$")
 GNU_WARN_RE = re.compile(r"^\s*(.+?):(\d+):\d+:\s*warning:\s*(.*)$")
-TU_RE = re.compile(r"^\s{2}\S+\.(?:cpp|cc|cxx|c)\s*$")
+# One compiled TU per line: MSBuild echoes the bare source name indented by two
+# spaces; Ninja and Makefiles print a `Building CXX/C object ...` progress line.
+TU_RE = re.compile(r"^\s{2}\S+\.(?:cpp|cc|cxx|c)\s*$"
+                   r"|^\[\s*\d+(?:%|/\d+)\]\s+Building C(?:XX)? object ")
 
 
 @check("warnings", "build", "no DualC-origin compiler warnings in the build log")
@@ -1436,16 +1460,17 @@ def check_warnings(ctx):
     compiler bump or a geometry-central header change, and this reproduces
     exactly the check that was being done manually.
 
-    Scope caveat worth knowing: `/W4 /permissive-` is target_compile_options on
-    `dualc` PRIVATE, so it covers the CORE LIBRARY only -- tests and examples
-    build at the MSVC default. Raising them is roadmap 17 #33 work.
+    Scope caveat worth knowing: `/W4 /permissive-` (MSVC) or `-Wall -Wextra
+    -Wpedantic` (GCC/Clang) is target_compile_options on `dualc` PRIVATE, so it
+    covers the CORE LIBRARY only -- tests and examples build at the compiler
+    default. Raising them is roadmap 17 #33 work.
     """
     log = getattr(ctx, "build_log", None)
     if log is None:
         return Result(SKIP, "no build log (run without --only/--skip on build)")
     tus = sum(1 for l in log.split("\n") if TU_RE.match(l))
     if tus == 0:
-        # An incremental MSBuild recompiles nothing and prints nothing, so a
+        # An incremental build recompiles nothing and prints nothing, so a
         # scan here would be a green light over an empty input -- worse than no
         # check at all.
         return Result(SKIP, "build compiled 0 translation units (incremental) "
@@ -1494,11 +1519,13 @@ def check_ctest(ctx):
                    "--output-on-failure"], cwd=ctx.root)
     if rc == 127:
         return Result(SKIP, "ctest not on PATH")
-    m = re.search(r"(\d+)% tests passed, (\d+) tests failed out of (\d+)", out)
+    # CTest 3 prints "100% tests passed, 0 tests failed out of N"; CTest 4
+    # drops the failed clause when nothing failed.
+    m = re.search(r"(\d+)% tests passed(?:, (\d+) tests failed)? out of (\d+)", out)
     if not m:
         return Result(FAIL, "could not parse ctest output",
                       out.splitlines()[-15:])
-    failed, total = int(m.group(2)), int(m.group(3))
+    failed, total = int(m.group(2) or 0), int(m.group(3))
     if failed:
         names = [l.strip() for l in out.splitlines()
                  if re.search(r"\*\*\*Failed|\(Failed\)", l)][:20]
@@ -1523,9 +1550,13 @@ def check_parity(ctx):
     an R32F-renderable FBO, which no unattended local runner provides.
     """
     bd = build_dir(ctx)
-    exe = os.path.join(ctx.root, bd, "examples", ctx.args.config,
-                       "dualc_glsl_parity.exe")
-    if not os.path.exists(exe):
+    # Multi-config (VS) puts it under examples/<config>/, single-config
+    # (Ninja, Makefiles) directly under examples/.
+    name = "dualc_glsl_parity" + (".exe" if os.name == "nt" else "")
+    exe = next((p for p in (os.path.join(ctx.root, bd, "examples", ctx.args.config, name),
+                            os.path.join(ctx.root, bd, "examples", name))
+                if os.path.exists(p)), None)
+    if exe is None:
         return Result(SKIP, "dualc_glsl_parity not built "
                             "(configure with -DDUALC_BUILD_GLSL_PARITY=ON)")
     # cwd = repo root: findDemoMesh() accepts either the binary's own directory

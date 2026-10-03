@@ -26,8 +26,9 @@ The GL viewers are opt-in, each `OFF` by default and none a dependency of
 `-DDUALC_BUILD_RAYMARCH_VIEWER=ON` (10), `-DDUALC_BUILD_FIELD_VIEW=ON` (12) and
 `-DDUALC_BUILD_GLSL_PARITY=ON` (the field→GLSL parity harness). All four need a
 sibling Polyscope checkout at `../polyscope` (or `-DDUALC_POLYSCOPE_DIR=/path`)
-for its GLFW + glad. Built CLIs land in `build/examples/Release/`; run every
-recipe from there (append `.exe` on Windows, prefix `./` on POSIX). The build generates the
+for its GLFW + glad. Built CLIs land in `build/examples/` (Ninja, Makefiles) or
+`build/examples/Release/` (Visual Studio); run every recipe from there (append `.exe` on
+Windows, prefix `./` on POSIX). The build generates the
 demo meshes into `build/data/` and copies them next to every tool; to run recipes from the repo
 root instead, populate `data/` with `dualc_gen_demo all --dir data` ([09](09-dualc_gen_demo.md)).
 

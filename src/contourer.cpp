@@ -70,14 +70,6 @@ constexpr float kQefPinvDefault = 0.1f;
 // Helpers
 // ===========================================================================
 
-Vector3 cornerPos(const BBox& b, int cornerIdx) {
-  const auto& off = tables::kCornerOffset[static_cast<std::size_t>(cornerIdx)];
-  return Vector3{
-      off[0] ? b.max.x : b.min.x,
-      off[1] ? b.max.y : b.min.y,
-      off[2] ? b.max.z : b.min.z};
-}
-
 Vector3 clampToBox(const Vector3& v, const BBox& b) {
   return Vector3{std::clamp(v.x, b.min.x, b.max.x),
                  std::clamp(v.y, b.min.y, b.max.y),
