@@ -834,7 +834,6 @@ def check_flag_table(ctx):
     known = {t: set(re.findall(r'"(--[a-z][a-z0-9-]*)', s)) for t, s in srcs.items()}
     if "dualc_primitive" in known:
         known["dualc_primitive"] |= set(re.findall(r'"(--[a-z][a-z0-9-]*)', common))
-        known["dualc_view"] = known.get("dualc_view", set()) | known["dualc_primitive"]
     documented = {}
     for tool, name in page_of.items():
         documented[tool] = set()
@@ -842,9 +841,6 @@ def check_flag_table(ctx):
             if t and (rel == "docs/command_reference/%s" % name
                       or rel.startswith("docs/command_reference/%s/" % name)):
                 documented[tool] |= table_flags(t)
-    if "dualc_primitive" in documented and "dualc_view" in documented:
-        # dualc_view preloads dualc_primitive's post-op flags; page 02 documents them.
-        documented["dualc_view"] |= documented["dualc_primitive"]
     recipes = 0
     for rel, t in sorted(texts.items()):
         if t is None:
@@ -1477,7 +1473,7 @@ def check_warnings(ctx):
                             "-- use --clean for a meaningful scan")
     exclude = ("/_deps/", "\\_deps\\", "examples/third_party/",
                "examples\\third_party\\", "src/internal/third_party/",
-               "src\\internal\\third_party\\", "geometry-central", "polyscope")
+               "src\\internal\\third_party\\", "geometry-central")
     found, seen = [], set()
     for line in log.split("\n"):
         m = WARN_RE.match(line) or GNU_WARN_RE.match(line)

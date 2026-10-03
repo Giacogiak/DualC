@@ -9,8 +9,8 @@ local tree via `-DDUALC_GC_DIR`); MIT-licensed.
 
 A bare clone configures with no flags: geometry-central is fetched into the build tree at its
 pinned commit unless `-DDUALC_GC_DIR=/path` names a local tree (the resolution order is in
-`CMakeLists.txt` and `README.md`). The GL targets also need `../polyscope` (or
-`-DDUALC_POLYSCOPE_DIR=/path`).
+`CMakeLists.txt` and `README.md`). The GL targets fetch GLFW the same way (pinned release, or
+`-DDUALC_GLFW_DIR=/path`); glad is vendored.
 
 ```bash
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
@@ -20,8 +20,8 @@ ctest --test-dir build -C Release --output-on-failure
 ```
 
 Opt-in targets, all `OFF` by default and none of them a dependency of `libdualc`:
-`-DDUALC_BUILD_POLYSCOPE_VIEWER=ON`, `-DDUALC_BUILD_RAYMARCH_VIEWER=ON`,
-`-DDUALC_BUILD_FIELD_VIEW=ON`, `-DDUALC_BUILD_GLSL_PARITY=ON` (each needs a GL window, so no
+`-DDUALC_BUILD_RAYMARCH_VIEWER=ON`, `-DDUALC_BUILD_FIELD_VIEW=ON`,
+`-DDUALC_BUILD_GLSL_PARITY=ON` (each needs a GL window, so no
 CTest), `-DDUALC_BUILD_C_ABI=ON` (needs `DUALC_BUILD_EXAMPLES`). CLIs land in `build/examples/`
 (`…/Release/` with Visual Studio); demo meshes are gitignored and generated into `build/data/`
 (`dualc_gen_demo all --dir data` populates the repo's `data/` for root-run recipes).

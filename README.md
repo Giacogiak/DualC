@@ -36,14 +36,11 @@ geometry-central → Eigen 3.3.9 (skipped when an `Eigen3::Eigen` target or a sy
 found), and, with tests on, Catch2. Nothing else is fetched; the vendored code is listed in
 `THIRD_PARTY.md`.
 
-The GL viewers (opt-in) need a [polyscope](https://github.com/nmwsharp/polyscope) checkout next
-to the repo, or `-DDUALC_POLYSCOPE_DIR=/path`:
-
-```
-<parent>/
-├── DualC/                <- this repo
-└── polyscope/            <- optional, GL viewers only (clone with --recurse-submodules)
-```
+The GL tools (opt-in) add one more fetch, [GLFW](https://github.com/glfw/glfw) at its pinned 3.4
+release, unless `-DDUALC_GLFW_DIR=/path` names a local tree; the OpenGL loader (glad) is vendored.
+On Linux GLFW builds its X11 backend (Ubuntu: `sudo apt install libx11-dev libxrandr-dev
+libxinerama-dev libxcursor-dev libxi-dev`); pass `-DGLFW_BUILD_WAYLAND=ON` for a native Wayland
+backend as well.
 
 ## Build
 
@@ -58,8 +55,8 @@ With Ninja: `-G Ninja -DCMAKE_BUILD_TYPE=Release`, then `cmake --build build -j`
 tests on Windows (Visual Studio 2022) and Linux (GCC 15, CMake 4, Ninja; on Ubuntu
 `sudo apt install cmake ninja-build g++`); the tests and examples also compile one C file
 (miniz), so they need a C compiler next to the C++ one. The GL
-tools and the C ABI are opt-in (`-DDUALC_BUILD_POLYSCOPE_VIEWER`, `_RAYMARCH_VIEWER`,
-`_FIELD_VIEW`, `_GLSL_PARITY`, `_C_ABI`, all `OFF` by default); none of them adds a dependency
+tools and the C ABI are opt-in (`-DDUALC_BUILD_RAYMARCH_VIEWER`, `_FIELD_VIEW`,
+`_GLSL_PARITY`, `_C_ABI`, all `OFF` by default); none of them adds a dependency
 to `libdualc`. The build prelude and every flag are in the
 [command reference](docs/command_reference/README.md). Before committing, run the local gate
 `python scripts/check.py` — there is no CI; that command is it.
@@ -139,10 +136,8 @@ version:
 - [`dualc_field_view`](docs/command_reference/12-dualc_field_view/README.md) (opt-in) — the
   same field-graph compiled to GLSL and sphere-traced on the GPU: *the field you preview is
   the field you export*, at densities that would OOM the contourer.
-- [`dualc_view`](docs/command_reference/08-dualc_view.md) (opt-in, Polyscope) and
-  [`dualc_raymarch`](docs/command_reference/10-dualc_raymarch.md) (opt-in, custom GL) — the
-  interactive viewer with diagnostic overlays, and the analytic TPMS raymarcher that preceded
-  `dualc_field_view`.
+- [`dualc_raymarch`](docs/command_reference/10-dualc_raymarch.md) (opt-in) — the analytic
+  TPMS raymarcher that preceded `dualc_field_view`.
 - [`dualc_gen_demo`](docs/command_reference/09-dualc_gen_demo.md) — generates the demo
   meshes (they are gitignored; the generator is the source of truth). The build runs it into
   `build/data/` and copies the meshes next to every tool, so a clean clone needs no manual

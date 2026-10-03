@@ -90,6 +90,51 @@ manual. Docs:
 [`../command_reference/08-dualc_view.md`](../command_reference/08-dualc_view.md)
 rewritten (modes table, per-mode flags + live controls, recipes V1–V18).
 
+## #50 Retire dualc_view and the Polyscope dependency, own GLFW + glad
+
+**DONE — 2026-10-03.** `dualc_view` (#10, #21 above) and the Polyscope sibling checkout are
+removed; DualC's live preview is `dualc_field_view`
+([12/03](12-field-graph-and-app/03-raymarch-app.md)), which never re-contours and so stays live
+at any density — the capability that made the viewer. `dualc_view` was the only consumer of
+Polyscope, Dear ImGui and glm; the three GL targets (`dualc_raymarch`, `dualc_field_view`,
+`dualc_glsl_parity`) borrowed only GLFW and a generated glad loader from that checkout, so those
+two are now DualC's own: glad vendored byte-identical (`examples/third_party/glad/`, its own lib
+`dualc_examples_glad`, attributed in `THIRD_PARTY.md`), GLFW resolved as geometry-central is
+([20 #47](20-public-delivery.md#47-pin-geometry-central-to-upstream-own-nanort-self-bootstrapping-clone):
+an existing `glfw` target, a local tree via `-DDUALC_GLFW_DIR`, else `FetchContent` pinned to
+the 3.4 release commit, docs/tests/examples/install off). On Linux only GLFW's X11 backend is
+built unless `-DGLFW_BUILD_WAYLAND=ON`: X11 runs under XWayland, Wayland would add three dev
+packages to every Linux build. `dualc_raymarch` stays — the owner's scope was `dualc_view`
+only. Tool number 8 is retired, its page a stub mapping each use to its replacement
+([08](../command_reference/08-dualc_view.md)); the decision row is D-48. The gate lost its two
+`dualc_view` special cases (the post-op flag inheritance) and the `polyscope` warning exclusion.
+The `stb` split into its own lib outlives its reason (the LNK2005 with Polyscope's stb) and is
+kept: the mesh-only CLIs carry no PNG writer.
+
+**Rejected.** Vendoring GLFW itself — a platform tree of hundreds of files for one window; the
+pin-and-fetch pattern already in place for geometry-central covers it. Removing `dualc_raymarch`
+as well — not asked; it is the TPMS raymarcher the field viewer generalised, and costs nothing
+beyond the shared GL lib.
+
+**Verification.**
+- Full gate on the non-GL build: **PASS** (28 OK, configure and warnings skipped as incremental;
+  `ctest` 270/270). Nothing in `src/` moved.
+- GL configure from an empty tree with the three GL flags and no `DUALC_GLFW_DIR`: the pinned
+  GLFW fetch resolved (rung 3), configure done in 74 s; `dualc_field_view`, `dualc_raymarch` and
+  `dualc_glsl_parity` all built and linked (145 steps); the 81 warnings in the log all originate
+  in `_deps/geometry-central-src`, none in DualC sources, GLFW or glad.
+- Rung 2 (`-DDUALC_GLFW_DIR=../polyscope/deps/glfw`) also resolved on an earlier, offline attempt.
+- **Not run:** a window. This host has no X11 development headers, so GLFW was configured with
+  `-DGLFW_BUILD_X11=OFF` and `glfwInit` fails at runtime (no platform). Owed by the owner after
+  `sudo apt install libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev`: a
+  default GL configure, `dualc_field_view gyroid_box.json --snapshot` and `check.py --gpu`
+  (the parity count is unchanged by this item — no node, no codegen moved).
+
+Pages moved with it: `README.md` § Dependencies and § Build, `AGENTS.md`, `STRUCTURE.md`,
+`THIRD_PARTY.md`, the command-reference prelude, tool table and inventory, pages 08 (stub), 09
+(recipe G4), 10 and 12, `design/09` and the glossary's *Sibling checkout*, D-48, and the status
+snapshot.
+
 ---
 
 ← Back to the [Roadmap index](README.md).

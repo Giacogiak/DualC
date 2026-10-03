@@ -14,8 +14,8 @@ downloaded asset). The build runs `dualc_gen_demo all` itself into `build/data/`
 and copies the result next to every tool (target `dualc_demo_data`), so a clean
 clone needs no manual step; run `dualc_gen_demo all --dir <repo>/data` to
 populate the repo's `data/` for recipes launched from the root. Each shape targets a distinct topology / curvature /
-feature regime; pair them with `dualc_demo` (CLI) or `dualc_view` (interactive)
-for side-by-side visual QA. **Not generated** (hand-authored or downloaded, see
+feature regime; pair them with `dualc_demo` (CLI) or, as a `mesh(path=…)` source, with
+`dualc_field_view` (interactive) for side-by-side visual QA. **Not generated** (hand-authored or downloaded, see
 `THIRD_PARTY.md` § Demo mesh assets): `molde`, `foot`, `opA`/`opB`, `mesh-soup`
 (project-authored) and `bunny` (Stanford); recipes that name them need those files
 in place.
@@ -45,7 +45,7 @@ in place.
 | G1 | `dualc_gen_demo all --dir ../../../data` | Regenerate every generated demo mesh in `data/` from the build output folder (`--dir data` from the repo root); the `.obj` files are gitignored, this is their source. |
 | G2 | `dualc_demo torus.obj torus_dc.obj --depth 6` | Re-mesh the torus; output stays genus 1 (χ = 0). |
 | G3 | `dualc_demo --sharp bracket.obj bracket_sharp.obj --depth 6` | Sharp-feature toggle: the reentrant edge stays crisp (drop `--sharp` to see it round). |
-| G4 | `dualc_view knot.obj --depth 6` | Inspect the trefoil knot interactively (octree / heatmap overlays). |
+| G4 | `dualc_field_view --expr "mesh(path=\"knot.obj\")"` | Inspect the trefoil knot interactively (its baked narrow-band SDF, sphere-traced). |
 | G5 | `dualc_demo --gwn-field bunny.obj bunny_sealed.obj --depth 7` | Seal the open Stanford bunny scan (hole in the base) into a watertight solid. |
 
 ---

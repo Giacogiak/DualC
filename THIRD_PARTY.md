@@ -94,8 +94,8 @@ helper libraries:
   license retained at `examples/third_party/miniz_LICENSE.txt`.
 - **`stb_image_write.h`** (Public Domain / MIT — Sean Barrett) — PNG output for
   the `dualc_slice` heatmap; compiled into a separate `dualc_examples_img`
-  library linked **only** into `dualc_slice` (kept out of the shared lib so it
-  does not collide with the `stb` that polyscope vendors for `dualc_view`).
+  library linked **only** into `dualc_slice` and the GL plumbing's snapshot
+  path (kept out of the shared lib so the mesh-only CLIs carry no PNG writer).
   Origin: <https://github.com/nothings/stb>. `stb_impl.cpp` beside it is **our
   own** one-line translation unit (it defines `STB_IMAGE_WRITE_IMPLEMENTATION`
   and includes the header), not vendored code — it is MIT with the rest of DualC.
@@ -115,19 +115,24 @@ helper libraries:
   <https://github.com/zeux/meshoptimizer> (v1.2). Full license retained at
   `examples/third_party/meshoptimizer/meshoptimizer_LICENSE.txt`.
 
-## Opt-in GL-viewer dependencies (via the sibling Polyscope checkout)
+## Opt-in GL-target dependencies (`examples/third_party/glad/`, GLFW fetched)
 
-These are **not vendored in DualC** and are linked only into the opt-in viewer
-binaries — never into `libdualc`. They come from the sibling `polyscope`
-checkout's `deps/` (required for either `-DDUALC_BUILD_POLYSCOPE_VIEWER=ON` or
-`-DDUALC_BUILD_RAYMARCH_VIEWER=ON`). `dualc_view` links Polyscope itself;
-`dualc_raymarch` is a custom-GL app that links only `glfw` + `glad` directly.
-All permissive, consistent with the project posture:
+Linked only into the opt-in GL binaries (`dualc_raymarch`, `dualc_field_view`,
+`dualc_glsl_parity`) — never into `libdualc`. Both permissive:
 
-- **GLFW** (zlib) — window / GL context / input.
-- **glad** (Public Domain / MIT) — OpenGL 3.3 core loader.
-- **Dear ImGui** (MIT) and **glm** (MIT) — used by `dualc_view`; available to
-  `dualc_raymarch` too, though it uses neither in its keyboard/mouse build.
+- **glad** (Public Domain — generated output of <https://github.com/Dav1dde/glad>,
+  generator 0.1.34, `gl=3.3` core profile, no extensions) — the OpenGL loader:
+  `examples/third_party/glad/include/glad/glad.h`,
+  `examples/third_party/glad/include/KHR/khrplatform.h` (Khronos platform
+  types) and `examples/third_party/glad/src/glad.c`, compiled into
+  `dualc_examples_glad`. Taken byte-identical from the copy Polyscope bundled;
+  the licensing note travels with it as
+  `examples/third_party/glad/glad_LICENSE.txt`.
+- **GLFW** (zlib — <https://github.com/glfw/glfw>) — window / GL context /
+  input. **Not vendored**: `CMakeLists.txt` resolves an existing `glfw` target,
+  else a local tree named by `-DDUALC_GLFW_DIR`, else fetches the pinned 3.4
+  release commit into the build tree, with its docs, tests, examples and install
+  off. On Linux only its X11 backend is built unless `-DGLFW_BUILD_WAYLAND=ON`.
 
 ## Runtime dependencies (linked via geometry-central)
 

@@ -12,11 +12,10 @@ target_compile_features(dualc_demo PRIVATE cxx_std_17)
 #   miniz.{h,c}        -- MIT (deflate ZIP for 3MF). Needed by example_common's
 #                         writeField, so PUBLIC-linked into dualc_examples_common
 #                         (every CLI's -o .3mf path uses it).
-#   stb_image_write.h  -- Public Domain (PNG heatmaps). Used ONLY by dualc_slice,
-#                         so it lives in its OWN lib and is NOT pulled into
-#                         dualc_examples_common -- otherwise dualc_view would link
-#                         both this and polyscope's vendored stb, multiply-
-#                         defining the stbi_write_* symbols (LNK2005).
+#   stb_image_write.h  -- Public Domain (PNG output). Used only by dualc_slice
+#                         and the GL plumbing's snapshot path, so it lives in its
+#                         OWN lib and is NOT pulled into dualc_examples_common:
+#                         the mesh-only CLIs never carry a PNG writer.
 add_library(dualc_examples_io STATIC third_party/miniz.c)
 target_include_directories(dualc_examples_io
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/third_party)
@@ -127,41 +126,43 @@ add_executable(dualc_gen_demo dualc_gen_demo.cpp)
 target_link_libraries(dualc_gen_demo PRIVATE dualc::dualc dualc_demo_meshes)
 target_compile_features(dualc_gen_demo PRIVATE cxx_std_17)
 
-# --- Interactive Polyscope viewer (opt-in) ------------------------------
-# The viewer adds a heavy windowing/UI dependency (GLFW + GLAD + ImGui), so
-# it is gated on DUALC_BUILD_POLYSCOPE_VIEWER (default OFF). The library
-# binary is unaffected when the flag is off -- nothing here changes the
-# `dualc` target's link line.
-if(DUALC_BUILD_POLYSCOPE_VIEWER)
-  add_executable(dualc_view dualc_view.cpp)
-  target_link_libraries(dualc_view PRIVATE dualc::dualc dualc_examples_common polyscope)
-  target_compile_features(dualc_view PRIVATE cxx_std_17)
-endif()
-
-# --- Standalone GPU raymarch viewer (opt-in) ----------------------------
-# dualc_raymarch is a custom-GL app (NOT polyscope): it sphere-traces the
-# analytic TPMS field per pixel, so cost is O(pixels) and independent of
-# lattice density. It reuses ONLY the GLFW + glad targets that the sibling
-# polyscope checkout already vendors (both permissive: zlib / public domain);
-# libdualc is untouched. Like dualc_view it needs a GL window, so it has no
-# CTest. glm / imgui are also available from that checkout if a future ImGui
-# panel is wanted -- v1 uses keyboard + mouse controls and needs neither.
-# Shared GL plumbing (window/context, shader compile/link, uniform setters,
-# orbit camera, headless PNG snapshot) for the standalone GPU viewers and the
-# parity harness. Gated on any of them; PUBLIC-links GLFW + glad + stb (the same
-# permissive deps the raymarch viewer already used). dualc_examples_img (stb) is
-# safe here -- none of these targets link polyscope, so there is no second stb to
-# collide with (the LNK2005 that bites dualc_view).
+# --- GL targets (opt-in) -------------------------------------------------
+# The three GL targets below (dualc_raymarch, dualc_field_view, dualc_glsl_parity)
+# share one dependency pair, both permissive and both linked into these binaries
+# only -- libdualc is untouched:
+#   glad  -- the generated OpenGL 3.3 core loader (Public Domain), vendored under
+#            third_party/glad as its own lib: one C file + two headers, built
+#            like miniz above and warning-silenced the same way.
+#   glfw  -- window / context / input (zlib), resolved by the root CMakeLists
+#            (an existing target, DUALC_GLFW_DIR, or the pinned FetchContent).
+# Each needs a GL window, so none has a CTest; dualc_field_view's --snapshot and
+# the parity harness's hidden window are the scripted paths.
 if(DUALC_BUILD_RAYMARCH_VIEWER OR DUALC_BUILD_FIELD_VIEW OR DUALC_BUILD_GLSL_PARITY)
+  add_library(dualc_examples_glad STATIC third_party/glad/src/glad.c)
+  target_include_directories(dualc_examples_glad
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glad/include)
+  if(UNIX AND NOT APPLE)
+    # glad's loader dlopen()s libGL on Linux.
+    target_link_libraries(dualc_examples_glad PUBLIC ${CMAKE_DL_LIBS})
+  endif()
+  if(MSVC)
+    set_source_files_properties(third_party/glad/src/glad.c PROPERTIES COMPILE_OPTIONS "/W0")
+  else()
+    set_source_files_properties(third_party/glad/src/glad.c PROPERTIES COMPILE_OPTIONS "-w")
+  endif()
+
+  # Shared GL plumbing (window/context, shader compile/link, uniform setters,
+  # orbit camera, headless PNG snapshot) for the GPU viewers and the parity
+  # harness. PUBLIC-links glfw + glad + stb (the PNG writer, for the snapshot).
   add_library(dualc_examples_gl STATIC raymarch_gl.cpp)
-  target_link_libraries(dualc_examples_gl PUBLIC dualc::dualc dualc_examples_img glfw glad)
+  target_link_libraries(dualc_examples_gl
+    PUBLIC dualc::dualc dualc_examples_img glfw dualc_examples_glad)
   target_compile_features(dualc_examples_gl PUBLIC cxx_std_17)
   target_include_directories(dualc_examples_gl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
 
-# dualc_raymarch is a custom-GL app (NOT polyscope): it sphere-traces the
-# analytic TPMS field per pixel, so cost is O(pixels) and independent of lattice
-# density. Like dualc_view it needs a GL window, so it has no CTest.
+# dualc_raymarch is the first GPU app: it sphere-traces the analytic TPMS field
+# per pixel, so cost is O(pixels) and independent of lattice density.
 if(DUALC_BUILD_RAYMARCH_VIEWER)
   add_executable(dualc_raymarch dualc_raymarch.cpp)
   target_link_libraries(dualc_raymarch PRIVATE dualc::dualc dualc_examples_common dualc_examples_gl)

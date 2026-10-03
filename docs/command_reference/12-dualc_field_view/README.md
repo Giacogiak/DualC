@@ -24,8 +24,8 @@ part: they bake to a narrow-band `GL_R32F` 3D texture (`sampler3D`) for preview;
 **export stays exact**.
 
 **Opt-in build** (`-DDUALC_BUILD_FIELD_VIEW=ON`, the
-[build prelude](../README.md#build-prelude)): a custom-GL app on the GLFW + glad the
-sibling Polyscope checkout vendors; `libdualc` is unaffected. It needs a GL window,
+[build prelude](../README.md#build-prelude)): a custom-GL app on GLFW (fetched at its
+pinned release, or `-DDUALC_GLFW_DIR`) and the vendored glad loader; `libdualc` is unaffected. It needs a GL window,
 so it has no CTest — `--snapshot` renders one frame headless for scripted checks.
 
 ## CLI flags

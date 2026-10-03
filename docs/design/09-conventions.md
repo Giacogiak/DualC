@@ -89,7 +89,7 @@ forms, including the fiddlier alternates, are on the
 GLFW reports a key by its **physical US-layout position**, so a binding written as
 `GLFW_KEY_Z` or `GLFW_KEY_LEFT_BRACKET` lands on a different — often dead or AltGr — key on an
 AZERTY or QWERTZ keyboard. The rule for every GL viewer (`dualc_raymarch`,
-`dualc_field_view`; the Polyscope viewer takes its input through Polyscope's own UI):
+`dualc_field_view`):
 
 - A **letter** control is matched by the character the key prints (`glfwGetKeyName`), not
   by keycode: the section keys `x`/`y`/`z`/`f` are, and `z` is the case that bites (it swaps

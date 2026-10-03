@@ -22,8 +22,8 @@ of the input mesh uploaded as a small `GL_R32F` 3D texture and combined as
 `--bounds`. There is **no `--depth`** (nothing is contoured) and **no `-o`**
 (interactive only).
 
-**Opt-in build** (`-DDUALC_BUILD_RAYMARCH_VIEWER=ON` and a sibling Polyscope
-checkout for its GLFW + glad — the [build prelude](README.md#build-prelude));
+**Opt-in build** (`-DDUALC_BUILD_RAYMARCH_VIEWER=ON`; GLFW is fetched at its pinned
+release and glad is vendored — the [build prelude](README.md#build-prelude));
 `libdualc` is unaffected.
 
 ## CLI flags

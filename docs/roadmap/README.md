@@ -27,7 +27,9 @@ then wrap it* — is **finished**, so what remains in DualC is the engine itself
 2026-08-19 audit's ledger ([17](17-code-audit-and-hardening/README.md)) as a standing queue.
 **NEXT** on that track: the rest of **#34**, then **#32**. **Public delivery**
 ([20](20-public-delivery.md)) opened 2026-09-21: the build no longer depends on a local
-geometry-central fork, and since 2026-10-03 it builds and passes the gate on Linux too (**#49**). **#48** — cooperative cancellation and progress through the
+geometry-central fork, and since 2026-10-03 it builds and passes the gate on Linux too (**#49**); the same day **#50**
+retired `dualc_view` and the Polyscope sibling checkout, so the GL targets own their dependencies
+([07 #50](07-viewer-polyscope.md#50-retire-dualc_view-and-the-polyscope-dependency-own-glfw--glad)). **#48** — cooperative cancellation and progress through the
 pipeline and the ABI, Boletus's D-30 ask — landed 2026-09-22 and is merged into `main`
 (2026-10-02) ([14/05](14-c-abi/05-progress-and-cancel.md)); what it left open is D-44 / D-45,
 and the re-vendor is Boletus's ([15](15-boletus-handoff.md#dualc-retains--engine--abi-boletus-only-requests-these-upstream)).
@@ -37,11 +39,11 @@ the block records the table links ([D-43](../decisions/01-settled.md)).
 
 | Date | What landed | Record |
 | --- | --- | --- |
+| 2026-10-03 | **#50** — `dualc_view` and Polyscope retired; the GL targets build on a vendored glad and a GLFW fetched at its pinned release (or `-DDUALC_GLFW_DIR`), the sibling-checkout mechanism gone. | [07 #50](07-viewer-polyscope.md#50-retire-dualc_view-and-the-polyscope-dependency-own-glfw--glad) |
 | 2026-10-03 | **#49** — Linux is a build host: C enabled for the vendored `miniz.c`, the gate picks its generator per OS and reads CTest 4; full gate green with GCC 15 + Ninja. | [20](20-public-delivery.md#49-linux-as-a-build-host) |
 | 2026-09-22 | **#48** — a host-owned cancel token and a calling-thread progress callback through sampler, contourer and writers; ABI 0.5.0's `*_with_progress` twins; every export writes `.part` and renames (D-46). | [14/05](14-c-abi/05-progress-and-cancel.md) |
 | 2026-09-21 | **Cap relief** — the status snapshot trimmed by its own rule (D-43); the gate's record 17/09 split into a folder. | [19/10](19-docs-layers/10-cap-relief.md) |
 | 2026-09-21 | **#47** — geometry-central pinned to upstream and fetched at configure; nanort vendored; a clean clone builds with no manual step. | [20](20-public-delivery.md#47-pin-geometry-central-to-upstream-own-nanort-self-bootstrapping-clone) |
-| 2026-09-21 | **#46** — `OffsetField` forwards `cellOverlaps` on the cell grown by `\|r\|`; `offset(<TPMS>)` no longer prunes. | [17/03/02](17-code-audit-and-hardening/03-correctness-and-robustness/02-precision-and-celloverlaps.md#46-offsetfield-does-not-forward-celloverlaps) |
 
 **The shipped keystone (2026-06-14 … 2026-07-06)** — builds #1–#3, the C ABI (#19) and
 the client layer's move to Boletus, each DONE with its evidence in
@@ -124,7 +126,7 @@ workflow, graded-onion; GLSL codegen completeness DONE 2026-06-24 —
 | 04 | [Primitives & operators](04-primitives-and-operators.md) | The analytic primitive catalogue, decorators, domain operators, 2D lifts (`dualc_primitive`, `dualc_lift`). | DONE |
 | 05 | [TPMS lattices](05-tpms-lattices/README.md) | TPMS infill (`dualc_lattice`), the normalize-thickness fix; strut lattices (#17) and their enhancements (#17b); Lipschitz `cellOverlaps` (#18). | #16, #17 + Ph 3–5, #20 DONE; #18 DEFERRED |
 | 06 | [Field-on-plane slicing](06-slice.md) | `dualc_slice` field cross-section → PNG/SVG. | DONE |
-| 07 | [Interactive viewer](07-viewer-polyscope.md) | `dualc_view` Polyscope viewer (#10) + four-mode workbench (#21). | DONE |
+| 07 | [Interactive viewer](07-viewer-polyscope.md) | `dualc_view` Polyscope viewer (#10) + four-mode workbench (#21); its retirement with Polyscope, GLFW + glad owned (#50). | #10/#21 DONE; **#50 DONE** (2026-10-03) — tool retired |
 | 08 | [Analytic raymarch viewer](08-raymarch.md) | `dualc_raymarch` GPU sphere-tracer for dense lattices. | DONE |
 | 09 | [Input & output formats](09-io-formats.md) | STL/3MF/OBJ export dispatch; input vertex-normal handling. | export DONE; #7 DEFERRED |
 | 10 | [Infrastructure & integration](10-infrastructure-and-integration.md) | Build/install (#8), the **C ABI (#19)**, Python bindings (#9), benchmarks (#11), the demo-data generator (#12). | **#19 DONE**; #8 Ph2/#9/#11 DEFERRED; C# wrapper + `.gha` → **Boletus** ([15](15-boletus-handoff.md)) |

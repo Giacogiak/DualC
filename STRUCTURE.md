@@ -2,12 +2,12 @@
 
 Complete file-by-file map. Excludes `build/`, `.git/`, geometry-central (required;
 fetched into `build/_deps/` at its pinned commit, or a local tree named by
-`-DDUALC_GC_DIR`) and the **sibling** `../polyscope` (optional, GL viewers only),
-which live outside this repo.
+`-DDUALC_GC_DIR`) and GLFW (optional, GL targets only; fetched at its pinned release or a
+local tree named by `-DDUALC_GLFW_DIR`), which live outside this repo.
 
 ```
 DualC/
-├── CMakeLists.txt              Root build: defines `dualc` static lib + options, resolves geometry-central (target / DUALC_GC_DIR / FetchContent pin), wires the polyscope sibling
+├── CMakeLists.txt              Root build: defines `dualc` static lib + options, resolves geometry-central (target / DUALC_GC_DIR / FetchContent pin) and, for the GL targets, GLFW (target / DUALC_GLFW_DIR / FetchContent pin)
 ├── LICENSE                     MIT license (own code)
 ├── CITATION.cff               Citation metadata (GitHub "Cite this repository"); the credit request in README § License
 ├── README.md                  Front page: pitch, dependency layout, build, consume, minimal usage, tool list, doc pointer
@@ -94,8 +94,7 @@ DualC/
 │   ├── dualc_lattice.cpp      TPMS lattice infill bounded by a mesh; STL/3MF export
 │   ├── dualc_slice.cpp        Field cross-section on a plane → PNG heatmap + SVG contour (O(res²))
 │   ├── dualc_gen_demo.cpp     Generate the procedural demo meshes (the build runs it into build/data/)
-│   ├── dualc_view.cpp         OPT-IN Polyscope viewer (4 modes: lattice/primitive/boolean/csg; async re-contour)
-│   ├── dualc_raymarch.cpp     OPT-IN GPU sphere-trace viewer for dense TPMS (custom GL, reuses Polyscope's GLFW+glad)
+│   ├── dualc_raymarch.cpp     OPT-IN GPU sphere-trace viewer for dense TPMS (GLFW + the vendored glad)
 │   ├── dualc_field.cpp        General field-graph CLI: parse JSON graph → build → contour once → export
 │   ├── dualc_field_view.cpp   OPT-IN GPU viewer for ANY field-graph: compile to GLSL (field_glsl) → sphere-trace; live edit
 │   ├── dualc_glsl_parity.cpp  OPT-IN field→GLSL acceptance gate: GPU sceneSDF vs C++ valueAt, per node + the baked
@@ -108,11 +107,16 @@ DualC/
 │       ├── stb_impl.cpp         stb implementation TU
 │       ├── json.hpp             nlohmann/json single-header (MIT) for the field-graph; dualc_field only
 │       ├── json_LICENSE.txt
-│       └── meshoptimizer/       QEM decimation (MIT) for --decimate/--simplify; minimal verbatim subset
-│           ├── meshoptimizer.h        Upstream public header
-│           ├── simplifier.cpp         The QEM simplifier TU
-│           ├── vfetchoptimizer.cpp    Vertex-fetch optimization TU
-│           └── meshoptimizer_LICENSE.txt
+│       ├── meshoptimizer/       QEM decimation (MIT) for --decimate/--simplify; minimal verbatim subset
+│       │   ├── meshoptimizer.h        Upstream public header
+│       │   ├── simplifier.cpp         The QEM simplifier TU
+│       │   ├── vfetchoptimizer.cpp    Vertex-fetch optimization TU
+│       │   └── meshoptimizer_LICENSE.txt
+│       └── glad/                Generated OpenGL 3.3 core loader (PD) for the opt-in GL targets only
+│           ├── include/glad/glad.h    The loader header (gl=3.3, core profile)
+│           ├── include/KHR/khrplatform.h  Khronos platform types the header needs
+│           ├── src/glad.c             The loader TU (lib `dualc_examples_glad`)
+│           └── glad_LICENSE.txt
 │
 ├── capi/                      C ABI (#19, proxy + export) — opt-in `-DDUALC_BUILD_C_ABI=ON`; host-side
 │   │                            SHARED lib (links field_graph + example_common, NOT in libdualc)
@@ -190,6 +194,7 @@ DualC/
   `dualc_lift`, `dualc_csg_demo`, `dualc_lattice`, `dualc_slice`, `dualc_field`,
   `dualc_gen_demo`.
 - Opt-in, each behind its own `DUALC_BUILD_*` option and needing a GL window:
-  `dualc_view`, `dualc_raymarch`, `dualc_field_view`, `dualc_glsl_parity`.
+  `dualc_raymarch`, `dualc_field_view`, `dualc_glsl_parity` (with `dualc_examples_glad`, the
+  vendored loader they share).
 - `dualc_capi` (`dualc::capi`, shared) + `dualc_c_demo` — the C ABI, opt-in
   (`-DDUALC_BUILD_C_ABI=ON`).
