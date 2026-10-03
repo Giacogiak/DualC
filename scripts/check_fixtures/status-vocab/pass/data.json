@@ -1,0 +1,4 @@
+{
+  "status_tables": ["docs/roadmap/README.md"],
+  "status_vocab_only": {"tables": ["docs/decisions/README.md"]}
+}

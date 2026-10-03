@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "units": "mm",
+  "root": {
+    "op": "difference",
+    "in": [
+      {
+        "op": "intersection",
+        "in": [
+          { "op": "box", "min": [-2, -2, -2], "max": [2, 2, 2] },
+          {
+            "op": "onion",
+            "thickness": 0.3,
+            "in": [
+              {
+                "op": "normalize",
+                "in": [
+                  { "op": "gyroid", "wavelength": 1.0 }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      { "op": "sphere", "center": [0, 0, 0], "radius": 1.0 }
+    ]
+  }
+}

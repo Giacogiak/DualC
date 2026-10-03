@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="430" viewBox="0 0 1000 430" role="img">
+<defs><clipPath id="rk0"><rect x="40.00" y="116.00" width="200.00" height="200.00" rx="3"/></clipPath>
+<clipPath id="rk1"><rect x="360.00" y="116.00" width="200.00" height="200.00" rx="3"/></clipPath>
+<clipPath id="rk2"><rect x="680.00" y="116.00" width="200.00" height="200.00" rx="3"/></clipPath></defs>
+<rect width="1000" height="430" fill="#fcfcfb"/>
+<text x="28.00" y="34.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="15" font-weight="650" fill="#0b0b0b" text-anchor="start">Rank tells you what the solution actually is</text>
+<text x="28.00" y="55.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">The rank of A^T A is the number of independent normal directions among the samples. Below full rank the minimiser is not a point.</text>
+<text x="40.00" y="84.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="700" fill="#0b0b0b" text-anchor="start">RANK 1  —  a flat face</text>
+<text x="40.00" y="100.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">all normals parallel</text>
+<rect x="40.00" y="116.00" width="200.00" height="200.00" rx="3" fill="#ffffff" stroke="#c3c2b7" stroke-width="1.8"/>
+<g clip-path="url(#rk0)">
+<line x1="392.00" y1="184.00" x2="-248.00" y2="184.00" stroke="#86b6ef" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="6 4"/>
+<line x1="72.00" y1="184.00" x2="72.00" y2="159.10" stroke="#4a3aa7" stroke-width="2" stroke-linecap="round"/>
+<polygon points="72.00,154.00 74.45,159.48 69.55,159.48" fill="#4a3aa7" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="72.00" cy="184.00" r="4.40" fill="#eb6834" stroke="#ffffff" stroke-width="1.6"/>
+<line x1="444.00" y1="184.00" x2="-196.00" y2="184.00" stroke="#86b6ef" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="6 4"/>
+<line x1="124.00" y1="184.00" x2="124.00" y2="159.10" stroke="#4a3aa7" stroke-width="2" stroke-linecap="round"/>
+<polygon points="124.00,154.00 126.45,159.48 121.55,159.48" fill="#4a3aa7" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="124.00" cy="184.00" r="4.40" fill="#eb6834" stroke="#ffffff" stroke-width="1.6"/>
+<line x1="500.00" y1="184.00" x2="-140.00" y2="184.00" stroke="#86b6ef" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="6 4"/>
+<line x1="180.00" y1="184.00" x2="180.00" y2="159.10" stroke="#4a3aa7" stroke-width="2" stroke-linecap="round"/>
+<polygon points="180.00,154.00 182.45,159.48 177.55,159.48" fill="#4a3aa7" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="180.00" cy="184.00" r="4.40" fill="#eb6834" stroke="#ffffff" stroke-width="1.6"/>
+<line x1="44.00" y1="184.00" x2="236.00" y2="184.00" stroke="#1baf7a" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+<circle cx="126.00" cy="184.00" r="6.50" fill="#1baf7a" stroke="#ffffff" stroke-width="2"/>
+</g>
+<text x="40.00" y="348.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">the minimiser is a PLANE:</text>
+<text x="40.00" y="366.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">every point on the surface</text>
+<text x="40.00" y="384.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">plane is equally good</text>
+<text x="40.00" y="412.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">solution defaults to the mass point</text>
+<text x="360.00" y="84.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="700" fill="#0b0b0b" text-anchor="start">RANK 2  —  an edge</text>
+<text x="360.00" y="100.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">normals span a plane</text>
+<rect x="360.00" y="116.00" width="200.00" height="200.00" rx="3" fill="#ffffff" stroke="#c3c2b7" stroke-width="1.8"/>
+<g clip-path="url(#rk1)">
+<line x1="695.89" y1="279.66" x2="96.11" y2="56.34" stroke="#86b6ef" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="6 4"/>
+<line x1="396.00" y1="168.00" x2="404.69" y2="144.67" stroke="#4a3aa7" stroke-width="2" stroke-linecap="round"/>
+<polygon points="406.47,139.89 406.85,145.87 402.26,144.17" fill="#4a3aa7" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="396.00" cy="168.00" r="4.40" fill="#eb6834" stroke="#ffffff" stroke-width="1.6"/>
+<line x1="751.89" y1="255.66" x2="152.11" y2="32.34" stroke="#86b6ef" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="6 4"/>
+<line x1="452.00" y1="144.00" x2="460.69" y2="120.67" stroke="#4a3aa7" stroke-width="2" stroke-linecap="round"/>
+<polygon points="462.47,115.89 462.85,121.87 458.26,120.17" fill="#4a3aa7" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="452.00" cy="144.00" r="4.40" fill="#eb6834" stroke="#ffffff" stroke-width="1.6"/>
+<line x1="731.07" y1="-17.44" x2="284.93" y2="441.44" stroke="#86b6ef" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="6 4"/>
+<line x1="508.00" y1="212.00" x2="490.15" y2="194.64" stroke="#4a3aa7" stroke-width="2" stroke-linecap="round"/>
+<polygon points="486.49,191.09 492.12,193.15 488.71,196.66" fill="#4a3aa7" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="508.00" cy="212.00" r="4.40" fill="#eb6834" stroke="#ffffff" stroke-width="1.6"/>
+<line x1="703.07" y1="26.56" x2="256.93" y2="485.44" stroke="#86b6ef" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="6 4"/>
+<line x1="480.00" y1="256.00" x2="462.15" y2="238.64" stroke="#4a3aa7" stroke-width="2" stroke-linecap="round"/>
+<polygon points="458.49,235.09 464.12,237.15 460.71,240.66" fill="#4a3aa7" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="480.00" cy="256.00" r="4.40" fill="#eb6834" stroke="#ffffff" stroke-width="1.6"/>
+<line x1="420.00" y1="304.00" x2="532.00" y2="124.00" stroke="#1baf7a" stroke-width="4" stroke-linecap="round" opacity="0.55"/>
+<circle cx="476.00" cy="210.00" r="6.50" fill="#1baf7a" stroke="#ffffff" stroke-width="2"/>
+</g>
+<text x="360.00" y="348.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">the minimiser is a LINE:</text>
+<text x="360.00" y="366.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">any point along the crease</text>
+<text x="360.00" y="384.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">direction is equally good</text>
+<text x="360.00" y="412.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">constrained across the crease, free along it</text>
+<text x="680.00" y="84.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="700" fill="#0b0b0b" text-anchor="start">RANK 3  —  a corner</text>
+<text x="680.00" y="100.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">three non-coplanar normals</text>
+<rect x="680.00" y="116.00" width="200.00" height="200.00" rx="3" fill="#ffffff" stroke="#c3c2b7" stroke-width="1.8"/>
+<g clip-path="url(#rk2)">
+<line x1="1040.00" y1="180.00" x2="400.00" y2="180.00" stroke="#86b6ef" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="6 4"/>
+<line x1="720.00" y1="180.00" x2="720.00" y2="155.10" stroke="#4a3aa7" stroke-width="2" stroke-linecap="round"/>
+<polygon points="720.00,150.00 722.45,155.48 717.55,155.48" fill="#4a3aa7" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="720.00" cy="180.00" r="4.40" fill="#eb6834" stroke="#ffffff" stroke-width="1.6"/>
+<line x1="1076.00" y1="180.00" x2="436.00" y2="180.00" stroke="#86b6ef" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="6 4"/>
+<line x1="756.00" y1="180.00" x2="756.00" y2="155.10" stroke="#4a3aa7" stroke-width="2" stroke-linecap="round"/>
+<polygon points="756.00,150.00 758.45,155.48 753.55,155.48" fill="#4a3aa7" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="756.00" cy="180.00" r="4.40" fill="#eb6834" stroke="#ffffff" stroke-width="1.6"/>
+<line x1="804.00" y1="548.00" x2="804.00" y2="-92.00" stroke="#86b6ef" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="6 4"/>
+<line x1="804.00" y1="228.00" x2="828.90" y2="228.00" stroke="#4a3aa7" stroke-width="2" stroke-linecap="round"/>
+<polygon points="834.00,228.00 828.52,230.45 828.52,225.55" fill="#4a3aa7" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="804.00" cy="228.00" r="4.40" fill="#eb6834" stroke="#ffffff" stroke-width="1.6"/>
+<line x1="804.00" y1="592.00" x2="804.00" y2="-48.00" stroke="#86b6ef" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="6 4"/>
+<line x1="804.00" y1="272.00" x2="828.90" y2="272.00" stroke="#4a3aa7" stroke-width="2" stroke-linecap="round"/>
+<polygon points="834.00,272.00 828.52,274.45 828.52,269.55" fill="#4a3aa7" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="804.00" cy="272.00" r="4.40" fill="#eb6834" stroke="#ffffff" stroke-width="1.6"/>
+<circle cx="804.00" cy="180.00" r="7.50" fill="#0ca30c" stroke="#ffffff" stroke-width="2.2"/>
+</g>
+<text x="680.00" y="348.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">the minimiser is a POINT:</text>
+<text x="680.00" y="366.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">unique, and it is the corner.</text>
+<text x="680.00" y="384.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">This is the sharp-feature case.</text>
+<text x="680.00" y="412.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">the case DC exists to capture</text>
+</svg>

@@ -1,0 +1,4 @@
+# core.autocrlf is true on the developer machine, which would rewrite the git
+# hook with CRLF on checkout -- and Git-for-Windows' sh chokes on `#!/bin/sh\r`,
+# so the hook would silently stop running. Pin it to LF.
+scripts/hooks/* text eol=lf

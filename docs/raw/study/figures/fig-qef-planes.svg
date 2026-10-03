@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1010" height="560" viewBox="0 0 1010 560" role="img">
+<defs><clipPath id="qp"><rect x="70.00" y="96.00" width="320.00" height="320.00" rx="3"/></clipPath></defs>
+<rect width="1010" height="560" fill="#fcfcfb"/>
+<text x="28.00" y="34.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="15" font-weight="650" fill="#0b0b0b" text-anchor="start">The QEF: every Hermite sample is a plane; the vertex is their least-squares meeting point</text>
+<text x="28.00" y="55.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">E(x) = sum over i of (n_i . (x - p_i))^2  —  each term is the squared perpendicular distance from x to plane i.</text>
+<rect x="70.00" y="96.00" width="320.00" height="320.00" rx="3" fill="#ffffff" stroke="#c3c2b7" stroke-width="2"/>
+<text x="70.00" y="86.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">one cell, three Hermite samples</text>
+<g clip-path="url(#qp)">
+<line x1="255.60" y1="838.40" x2="-51.60" y2="-403.20" stroke="#86b6ef" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="7 5"/>
+<line x1="879.60" y1="217.60" x2="-387.60" y2="12.80" stroke="#86b6ef" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="7 5"/>
+<line x1="-269.20" y1="736.00" x2="806.00" y2="32.00" stroke="#86b6ef" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="7 5"/>
+<line x1="215.22" y1="253.74" x2="117.10" y2="278.01" stroke="#d03b3b" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="3 3"/>
+<line x1="102.00" y1="217.60" x2="140.84" y2="207.99" stroke="#4a3aa7" stroke-width="2.2" stroke-linecap="round"/>
+<polygon points="146.62,206.56 141.10,210.87 139.73,205.32" fill="#4a3aa7" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="102.00" cy="217.60" r="5.20" fill="#eb6834" stroke="#ffffff" stroke-width="1.8"/>
+<line x1="215.22" y1="253.74" x2="237.95" y2="113.08" stroke="#d03b3b" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="3 3"/>
+<line x1="246.00" y1="115.20" x2="252.41" y2="75.53" stroke="#4a3aa7" stroke-width="2.2" stroke-linecap="round"/>
+<polygon points="253.36,69.66 255.16,76.43 249.52,75.51" fill="#4a3aa7" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="246.00" cy="115.20" r="5.20" fill="#eb6834" stroke="#ffffff" stroke-width="1.8"/>
+<line x1="215.22" y1="253.74" x2="291.49" y2="370.22" stroke="#d03b3b" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="3 3"/>
+<line x1="268.40" y1="384.00" x2="290.44" y2="417.66" stroke="#4a3aa7" stroke-width="2.2" stroke-linecap="round"/>
+<polygon points="293.70,422.64 287.81,418.86 292.59,415.73" fill="#4a3aa7" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="268.40" cy="384.00" r="5.20" fill="#eb6834" stroke="#ffffff" stroke-width="1.8"/>
+<circle cx="205.47" cy="238.93" r="6.00" fill="none" stroke="#898781" stroke-width="2.2"/>
+<text x="194.47" y="228.93" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="end">mass point</text>
+<circle cx="215.22" cy="253.74" r="7.00" fill="#1baf7a" stroke="#ffffff" stroke-width="2.2"/>
+</g>
+<text x="229.22" y="275.74" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="650" fill="#0d6b4c" text-anchor="start">QEF minimiser</text>
+<circle cx="75.50" cy="447.00" r="4.50" fill="#eb6834" stroke="none" stroke-width="1.5"/>
+<text x="91.00" y="451.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">crossing point p_i</text>
+<line x1="70.00" y1="465.00" x2="84.00" y2="465.00" stroke="#4a3aa7" stroke-width="2.5" stroke-linecap="round"/>
+<text x="91.00" y="469.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">unit normal n_i</text>
+<line x1="70.00" y1="483.00" x2="84.00" y2="483.00" stroke="#86b6ef" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 3"/>
+<text x="91.00" y="487.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">the plane that sample defines</text>
+<line x1="70.00" y1="501.00" x2="84.00" y2="501.00" stroke="#d03b3b" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 3"/>
+<text x="91.00" y="505.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">residual: perpendicular distance to that plane</text>
+<rect x="470.00" y="84.00" width="502.00" height="194.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<text x="482.00" y="104.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="650" fill="#52514e" text-anchor="start">What is accumulated — ten numbers, whatever the sample count</text>
+<text x="488.00" y="128.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="13" font-weight="650" fill="#0b0b0b" text-anchor="start">E(x) = x^T (A^T A) x  -  2 x^T (A^T b)  +  b^T b</text>
+<text x="488.00" y="162.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="11.5" font-weight="700" fill="#184f95" text-anchor="start">A^T A</text>
+<text x="566.00" y="162.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">3x3 symmetric — upper triangle</text>
+<text x="870.00" y="162.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#898781" text-anchor="start">6 floats</text>
+<text x="488.00" y="187.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="11.5" font-weight="700" fill="#184f95" text-anchor="start">A^T b</text>
+<text x="566.00" y="187.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">right-hand side</text>
+<text x="870.00" y="187.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#898781" text-anchor="start">3 floats</text>
+<text x="488.00" y="212.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="11.5" font-weight="700" fill="#184f95" text-anchor="start">b^T b</text>
+<text x="566.00" y="212.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">constant term</text>
+<text x="870.00" y="212.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#898781" text-anchor="start">1 float</text>
+<text x="488.00" y="237.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="11.5" font-weight="700" fill="#184f95" text-anchor="start">massPoint</text>
+<text x="566.00" y="237.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">running SUM of the p_i (divided at solve time)</text>
+<text x="870.00" y="237.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#898781" text-anchor="start">3 floats + count</text>
+<text x="488.00" y="264.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">Rows of A are the unit normals; entries of b are n_i . p_i.</text>
+<rect x="470.00" y="294.00" width="502.00" height="112.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<text x="482.00" y="314.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="650" fill="#52514e" text-anchor="start">Why this form</text>
+<text x="488.00" y="332.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">A is never stored, so cost is O(1) per sample. And because the three</text>
+<text x="488.00" y="350.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">accumulators are sums, two QEFs ADD — which is exactly the property</text>
+<text x="488.00" y="368.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">adaptive collapse needs to merge eight children in constant time.</text>
+<text x="488.00" y="390.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#898781" text-anchor="start">(tryCollapse re-accumulates the raw samples instead — same answer, more work.)</text>
+<rect x="470.00" y="422.00" width="502.00" height="112.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<text x="482.00" y="442.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="650" fill="#52514e" text-anchor="start">The normal equations</text>
+<text x="488.00" y="466.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="13.5" font-weight="650" fill="#0b0b0b" text-anchor="start">(A^T A) x = A^T b</text>
+<text x="488.00" y="492.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">Solved by eigendecomposing the 3x3 with cyclic Jacobi, then applying a</text>
+<text x="488.00" y="510.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">TRUNCATED pseudo-inverse — the regularisation that makes flat and edge</text>
+<text x="488.00" y="528.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">configurations well-behaved rather than divergent.</text>
+</svg>

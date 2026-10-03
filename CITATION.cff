@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "If you use DualC, please credit it as below."
+title: "DualC"
+abstract: >-
+  A C++17 dual-contouring library: triangle meshes and real-valued implicit
+  fields go through a Hermite-data octree and come out as clean triangle meshes,
+  sharp features preserved.
+type: software
+authors:
+  - given-names: Giacomo
+    family-names: Forcina
+version: 0.5.0
+license: MIT
+repository-code: "https://github.com/Giacogiak/DualC"

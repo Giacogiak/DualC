@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DualC — interactive explorer</title>
+<style>
+  :root{
+    color-scheme: light;
+    --surface-1:#fcfcfb; --plane:#f4f4f1; --card:#ffffff;
+    --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+    --grid:#e1e0d9; --axis:#c3c2b7; --hair:rgba(11,11,11,.10);
+    --blue:#2a78d6; --blue-100:#cde2fb; --blue-250:#86b6ef; --blue-600:#184f95;
+    --orange:#eb6834; --aqua:#1baf7a; --yellow:#eda100; --magenta:#e87ba4;
+    --green:#008300; --violet:#4a3aa7; --red:#e34948;
+    --good:#0ca30c; --crit:#d03b3b; --warn:#fab219;
+    --font: system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono: ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:var(--font); background:var(--plane); color:var(--ink);
+    font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+  }
+  header{
+    background:var(--surface-1); border-bottom:1px solid var(--hair);
+    padding:26px 32px 0;
+  }
+  header .wrap{max-width:1180px;margin:0 auto}
+  h1{font-size:23px;margin:0 0 4px;letter-spacing:-.01em}
+  .sub{color:var(--ink-2);font-size:14px;margin:0 0 18px;max-width:780px}
+  nav{display:flex;gap:2px;flex-wrap:wrap}
+  nav button{
+    font:inherit;font-size:13px;font-weight:600;border:0;background:transparent;
+    color:var(--ink-2);padding:9px 14px;border-radius:7px 7px 0 0;cursor:pointer;
+    border-bottom:2.5px solid transparent;
+  }
+  nav button:hover{background:var(--plane);color:var(--ink)}
+  nav button[aria-selected="true"]{color:var(--blue-600);border-bottom-color:var(--blue)}
+  main{max-width:1180px;margin:0 auto;padding:26px 32px 80px}
+  section[hidden]{display:none}
+  h2{font-size:18px;margin:0 0 6px;letter-spacing:-.01em}
+  .lede{color:var(--ink-2);font-size:14px;margin:0 0 20px;max-width:840px}
+  .card{
+    background:var(--card);border:1px solid var(--grid);border-radius:10px;
+    padding:18px 20px;margin-bottom:16px;
+  }
+  .card h3{font-size:13px;font-weight:700;margin:0 0 12px;color:var(--ink-2);
+    letter-spacing:.05em;text-transform:uppercase}
+  .row{display:grid;gap:16px}
+  @media(min-width:940px){ .row.two{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)} }
+  .row.two{align-items:start}
+  .controls{display:flex;flex-wrap:wrap;gap:14px 20px;align-items:flex-end;margin-bottom:14px}
+  .ctl{display:flex;flex-direction:column;gap:4px;min-width:150px}
+  .ctl label{font-size:11.5px;color:var(--muted);font-weight:600;letter-spacing:.02em}
+  .ctl .val{font-family:var(--mono);font-size:11.5px;color:var(--ink);font-weight:600}
+  input[type=range]{width:100%;accent-color:var(--blue)}
+  .seg{display:inline-flex;border:1px solid var(--grid);border-radius:7px;overflow:hidden}
+  .seg button{
+    font:inherit;font-size:12px;font-weight:600;border:0;background:var(--card);
+    color:var(--ink-2);padding:6px 11px;cursor:pointer;border-right:1px solid var(--grid);
+  }
+  .seg button:last-child{border-right:0}
+  .seg button[aria-pressed="true"]{background:var(--blue);color:#fff}
+  .chk{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-2);cursor:pointer;user-select:none}
+  .chk input{accent-color:var(--blue);width:15px;height:15px}
+  canvas{display:block;width:100%;height:auto;border:1px solid var(--grid);border-radius:8px;background:#fff;touch-action:none}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:11px;font-size:12px;color:var(--ink-2)}
+  .legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+  .legend i.ln{height:3px;border-radius:2px;width:15px;vertical-align:3px}
+  .stat{display:flex;gap:22px;flex-wrap:wrap;margin-top:12px}
+  .stat div{font-size:12px;color:var(--muted)}
+  .stat b{display:block;font-size:19px;color:var(--ink);font-weight:650;font-variant-numeric:tabular-nums;line-height:1.25}
+  p{margin:0 0 11px}
+  .card p:last-child{margin-bottom:0}
+  code,.mono{font-family:var(--mono);font-size:.92em}
+  code{background:var(--plane);padding:1px 5px;border-radius:4px;border:1px solid var(--grid)}
+  ul{margin:0 0 11px;padding-left:19px}
+  li{margin-bottom:5px}
+  .note{font-size:12.5px;color:var(--muted)}
+  .flag{border-left:3px solid var(--crit);background:#fdf2f2;padding:11px 14px;border-radius:0 7px 7px 0;font-size:13px;margin:12px 0}
+  .flag b{color:var(--crit)}
+  .ok{border-left:3px solid var(--good);background:#f0faf0}
+  .ok b{color:#0a7a0a}
+  table{border-collapse:collapse;width:100%;font-size:13px}
+  th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--grid);vertical-align:top}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700}
+  td.mono{font-family:var(--mono);font-size:12px}
+  .pill{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:20px;color:#fff;letter-spacing:.03em}
+  .hint{font-size:12px;color:var(--muted);margin-top:9px}
+  .pipe{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+  .stage{border:1.6px solid var(--grid);border-radius:9px;padding:13px 15px;cursor:pointer;background:var(--card);transition:.12s}
+  .stage:hover{border-color:var(--blue-250)}
+  .stage[aria-pressed="true"]{border-color:var(--blue);box-shadow:0 0 0 3px rgba(42,120,214,.12)}
+  .stage h4{margin:0 0 3px;font-size:13.5px}
+  .stage .k{font-family:var(--mono);font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>DualC — interactive explorer</h1>
+  <p class="sub">Six panels covering the algorithms this library is built on. Everything here is computed live in the browser using the same rules the C++ implements — the 2D sandbox really does solve a QEF.</p>
+  <nav id="tabs" role="tablist"></nav>
+</div></header>
+
+<main>
+
+<!-- ============================================================ 1 -->
+<section id="tab-sandbox" role="tabpanel">
+  <h2>Dual contouring in two dimensions</h2>
+  <p class="lede">The shape below is built from analytic primitives, so its exact surface and its exact normals are known. Compare where marching squares can place a vertex with where the QEF places one.</p>
+
+  <div class="row two">
+    <div class="card">
+      <div class="controls">
+        <div class="ctl" style="min-width:200px">
+          <label>Shape</label>
+          <div class="seg" id="dc-shape">
+            <button data-v="wedge" aria-pressed="true">sharp corner</button>
+            <button data-v="circle">circle</button>
+            <button data-v="star">star</button>
+            <button data-v="union">union</button>
+          </div>
+        </div>
+        <div class="ctl"><label>Grid resolution <span class="val" id="dc-res-v">6</span></label>
+          <input type="range" id="dc-res" min="3" max="20" value="6"></div>
+        <div class="ctl" style="min-width:120px">
+          <label>Method</label>
+          <div class="seg" id="dc-method">
+            <button data-v="dc" aria-pressed="true">dual</button>
+            <button data-v="ms">marching</button>
+            <button data-v="both">both</button>
+          </div>
+        </div>
+      </div>
+      <div class="controls" style="margin-bottom:12px">
+        <label class="chk"><input type="checkbox" id="dc-normals" checked> show Hermite normals</label>
+        <label class="chk"><input type="checkbox" id="dc-clamp" checked> clamp vertices to their cell</label>
+        <label class="chk"><input type="checkbox" id="dc-blend"> average the normals at seams</label>
+      </div>
+      <canvas id="dc-canvas" width="920" height="920"></canvas>
+      <div class="legend">
+        <span><i style="background:var(--blue)"></i>corner inside</span>
+        <span><i style="background:#fff;border:1.5px solid var(--axis)"></i>corner outside</span>
+        <span><i style="background:var(--orange)"></i>edge crossing</span>
+        <span><i class="ln" style="background:var(--violet)"></i>Hermite normal</span>
+        <span><i class="ln" style="background:var(--aqua)"></i>dual contour</span>
+        <span><i class="ln" style="background:var(--orange)"></i>marching squares</span>
+        <span><i class="ln" style="background:var(--muted)"></i>true surface</span>
+      </div>
+      <div class="stat">
+        <div><b id="dc-err">—</b>max deviation from the true surface</div>
+        <div><b id="dc-verts">—</b>output vertices</div>
+        <div><b id="dc-cells">—</b>cells carrying data</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h3>What to try</h3>
+        <ul>
+          <li>Pick <b>sharp corner</b> and set the resolution low. The dual contour hits the corner exactly; marching squares cuts it off. Now raise the resolution — the chord gets smaller but never disappears.</li>
+          <li>Tick <b>average the normals at seams</b>. Every crossing near the corner now reports the same blended normal, the QEF loses rank, and the corner rounds over. That is exactly what happens on the mesh path when <code>interpolateNormals</code> is left at its default of <code>true</code>.</li>
+          <li>Untick <b>clamp vertices to their cell</b> on the star at low resolution and watch a vertex escape its cell.</li>
+          <li>Sweep the resolution slowly with <b>sharp corner</b> selected. At most settings the deviation sits at machine precision — but at one or two it jumps. Those are the cases where the corner falls almost exactly on a cell boundary, so the neighbouring cell's minimiser lands outside its own cell and gets clamped back in. The C++ does exactly the same thing: <code>clampToBox</code> is applied on both branches of the soft clamp.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>The rule being executed</h3>
+        <p>For each cell with at least one sign-changing edge, collect a sample <span class="mono">(p, n)</span> per crossing and minimise</p>
+        <p style="text-align:center" class="mono">E(x) = Σ (n<sub>i</sub> · (x − p<sub>i</sub>))²</p>
+        <p>by the mass-point-shifted normal equations with a truncated eigen pseudo-inverse — the same structure as <code>svd::QefSolver</code>, in two dimensions instead of three.</p>
+        <p>Then, for every grid edge whose endpoints disagree, join the vertices of the two cells that share it. In 3D that same rule joins the <em>four</em> cells sharing an edge, giving a quad.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 2 -->
+<section id="tab-qef" role="tabpanel" hidden>
+  <h2>The QEF, up close</h2>
+  <p class="lede">Drag the sample points and their normals. Watch the solution move, and watch the eigenvalues of A<sup>T</sup>A tell you what kind of solution you have.</p>
+
+  <div class="row two">
+    <div class="card">
+      <div class="controls">
+        <div class="ctl" style="min-width:230px">
+          <label>Configuration</label>
+          <div class="seg" id="qef-preset">
+            <button data-v="corner" aria-pressed="true">corner (rank 2)</button>
+            <button data-v="flat">flat (rank 1)</button>
+            <button data-v="noisy">noisy corner</button>
+          </div>
+        </div>
+        <div class="ctl"><label>qefRegularization (truncation) <span class="val" id="qef-tol-v">0.10</span></label>
+          <input type="range" id="qef-tol" min="0" max="90" value="10"></div>
+      </div>
+      <canvas id="qef-canvas" width="960" height="720"></canvas>
+      <p class="hint">Drag an orange point to move it; drag the tip of a violet arrow to rotate its normal.</p>
+      <div class="legend">
+        <span><i style="background:var(--orange)"></i>sample point p<sub>i</sub></span>
+        <span><i class="ln" style="background:var(--violet)"></i>normal n<sub>i</sub></span>
+        <span><i class="ln" style="background:var(--blue-250)"></i>the plane it defines</span>
+        <span><i style="background:var(--aqua)"></i>QEF minimiser</span>
+        <span><i style="background:#fff;border:1.5px solid var(--muted)"></i>mass point</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h3>The accumulated system</h3>
+        <table id="qef-table"><tbody></tbody></table>
+      </div>
+      <div class="card">
+        <h3>What the eigenvalues mean</h3>
+        <p id="qef-verdict" style="font-weight:600"></p>
+        <p class="note" id="qef-verdict-note"></p>
+      </div>
+      <div class="card">
+        <h3>Try this</h3>
+        <p>Set the configuration to <b>corner</b>, then drag the truncation threshold up past the smaller eigenvalue. The moment it crosses, the solver stops inverting that direction and the solution snaps back to the mass point along it. That is exactly the mechanism that keeps a flat cell well-behaved — and, when the threshold is wrong, the mechanism that loses a sharp feature.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 3 -->
+<section id="tab-octree" role="tabpanel" hidden>
+  <h2>Adaptive refinement and collapse</h2>
+  <p class="lede">A quadtree standing in for the octree. Refinement is purely geometric — split if the surface may pass through. Adaptivity to curvature only arrives afterwards, in the collapse pass.</p>
+
+  <div class="row two">
+    <div class="card">
+      <div class="controls">
+        <div class="ctl"><label>maxDepth <span class="val" id="oc-max-v">5</span></label>
+          <input type="range" id="oc-max" min="2" max="8" value="5"></div>
+        <div class="ctl"><label>minDepth <span class="val" id="oc-min-v">2</span></label>
+          <input type="range" id="oc-min" min="0" max="5" value="2"></div>
+        <div class="ctl"><label>simplificationError <span class="val" id="oc-eps-v">0.000</span></label>
+          <input type="range" id="oc-eps" min="0" max="100" value="0"></div>
+      </div>
+      <canvas id="oc-canvas" width="1000" height="1000"></canvas>
+      <div class="legend">
+        <span><i style="background:var(--blue-100)"></i>inside</span>
+        <span><i style="border:1.5px solid var(--orange)"></i>leaf carrying Hermite data</span>
+        <span><i style="border:1.5px solid var(--grid)"></i>pruned leaf, <code>leaf == nullptr</code></span>
+        <span><i style="border:1.5px solid var(--aqua)"></i>collapsed cell</span>
+      </div>
+      <div class="stat">
+        <div><b id="oc-leaves">—</b>leaves</div>
+        <div><b id="oc-data">—</b>carrying Hermite data</div>
+        <div><b id="oc-uniform">—</b>a uniform grid would be</div>
+        <div><b id="oc-collapsed">—</b>collapsed by the error pass</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h3>The three outcomes of <code>buildNode</code></h3>
+        <table><tbody>
+          <tr><td class="mono">depth &gt;= maxDepth</td><td>sample the 8 corner signs, populate the 12 edges, allocate <code>HermiteLeafData</code></td></tr>
+          <tr><td class="mono">depth &lt; minDepth</td><td>force a split regardless of geometry — this defends against an L-shaped part whose root-box centre sits in empty space</td></tr>
+          <tr><td class="mono">otherwise</td><td>split iff <code>cellOverlaps(bounds)</code>, else become a Hermite-less leaf</td></tr>
+        </tbody></table>
+      </div>
+      <div class="card">
+        <h3>Where the adaptivity really comes from</h3>
+        <p>Notice that raising <b>maxDepth</b> refines the <em>whole</em> surface uniformly — flat regions get exactly as many cells as curved ones. There is no error term in the refinement criterion at all.</p>
+        <p>Now raise <b>simplificationError</b>. The collapse pass merges children back into their parent wherever a single vertex can represent the merged region, guarded by three topology tests. That is where variable resolution is actually produced — and doing it after sampling is cheap, because the QEF error is already available.</p>
+        <div class="flag"><b>Untested.</b> Neither <code>simplifyHermiteOctree</code> nor <code>simplificationError</code> appears anywhere in <code>tests/</code>. It is the largest single coverage hole in the project.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 4 -->
+<section id="tab-sdf" role="tabpanel" hidden>
+  <h2>Field algebra: why hard booleans stay sharp</h2>
+  <p class="lede">Two primitives, one operator. The value decides the shape; the <em>gradient</em> decides whether the seam comes out as a crease or a fillet.</p>
+
+  <div class="row two">
+    <div class="card">
+      <div class="controls">
+        <div class="ctl" style="min-width:280px">
+          <label>Operator</label>
+          <div class="seg" id="sdf-op">
+            <button data-v="union" aria-pressed="true">union</button>
+            <button data-v="inter">intersection</button>
+            <button data-v="diff">difference</button>
+            <button data-v="smooth">smooth union</button>
+          </div>
+        </div>
+        <div class="ctl"><label>k (blend radius, world units) <span class="val" id="sdf-k-v">0.00</span></label>
+          <input type="range" id="sdf-k" min="0" max="80" value="0"></div>
+        <div class="ctl"><label>separation <span class="val" id="sdf-sep-v">1.05</span></label>
+          <input type="range" id="sdf-sep" min="0" max="100" value="52"></div>
+      </div>
+      <div class="controls" style="margin-bottom:12px">
+        <label class="chk"><input type="checkbox" id="sdf-field" checked> show the field as a distance ramp</label>
+        <label class="chk"><input type="checkbox" id="sdf-grad" checked> show the gradient the QEF would receive</label>
+      </div>
+      <canvas id="sdf-canvas" width="1120" height="620"></canvas>
+      <div class="legend">
+        <span><i class="ln" style="background:var(--ink)"></i>the composed zero level set</span>
+        <span><i class="ln" style="background:var(--violet)"></i>gradient at a crossing</span>
+        <span><i style="background:var(--blue-100)"></i>inside</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h3>What you are looking at</h3>
+        <p id="sdf-explain"></p>
+      </div>
+      <div class="card">
+        <h3>The whole trick, in four lines</h3>
+        <pre style="margin:0;font-family:var(--mono);font-size:11.5px;line-height:1.6;color:var(--ink-2);white-space:pre;overflow-x:auto">Vector3 UnionField::gradientAt(const Vector3&amp; p) const {
+  // Active operand = the one bounding the union here.
+  // Its un-blended gradient is what makes the seam sharp.
+  return (a_-&gt;valueAt(p) &lt;= b_-&gt;valueAt(p))
+             ? a_-&gt;gradientAt(p)
+             : b_-&gt;gradientAt(p);
+}</pre>
+        <p style="margin-top:12px">Because <code>edgeHit</code> takes the Hermite normal straight from <code>gradientAt</code>, one cell straddling a seam receives two <em>different</em> un-blended normals. Two independent plane constraints intersect at a point, and the QEF puts the vertex there.</p>
+        <div class="flag ok"><b>Note what this is not.</b> It is not a special case or a corner detector. <code>min</code> is differentiable everywhere except the seam and its derivative <em>is</em> the active operand's, so returning it is the correct subgradient — the sharpness falls out of the field algebra.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 5 -->
+<section id="tab-pipeline" role="tabpanel" hidden>
+  <h2>The pipeline, stage by stage</h2>
+  <p class="lede">Click a stage to see what it reads, what it writes and what it can get wrong.</p>
+
+  <div class="card">
+    <div class="pipe" id="pipe-stages"></div>
+  </div>
+  <div class="row two">
+    <div class="card" id="pipe-detail"></div>
+    <div class="card">
+      <h3>The one thing to remember</h3>
+      <p>Two stages, one data structure between them. The sampler is input-aware and contour-agnostic; the contourer is contour-aware and input-agnostic. <code>HermiteOctree</code> is the entire contract.</p>
+      <p><code>sampleMeshToHermiteOctree</code> is a three-line adapter that builds a <code>MeshSource</code> and calls <code>sampleFieldToHermiteOctree</code>. So the mesh path is a strict subset of the field path: one refinement algorithm to reason about, one to test, and a new input type never touches the contourer.</p>
+      <div class="flag"><b>The bug to volunteer.</b> <code>dualContourMesh</code> constructs its <code>MeshSource</code> with three arguments where <code>sampleMeshToHermiteOctree</code> passes four — so it silently drops <code>SamplerParams::signMethod</code>. Ask for generalized winding number on triangle soup through the one-call API and you get 3-ray parity instead, with no warning. No test catches it, because every sign-method test goes through the other entry point.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 6 -->
+<section id="tab-defence" role="tabpanel" hidden>
+  <h2>Known weaknesses, ranked</h2>
+  <p class="lede">Raising these yourself is stronger than being shown them. Each row is real, each has a fix, and each fix is small.</p>
+  <div class="card">
+    <table id="weak-table">
+      <thead><tr><th style="width:52px">rank</th><th>what</th><th>why it matters</th><th>the fix</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div class="card">
+    <h3>And the things that are genuinely good</h3>
+    <ul>
+      <li>The two-stage split with one sign-based contract, which makes the mesh path a strict subset of the field path.</li>
+      <li>The active-operand gradient rule: sharp features fall out of the field algebra rather than being detected.</li>
+      <li>The polynomial <code>smin</code> chosen precisely because its ∇h term cancels identically, so the gradient is a plain lerp of the operand gradients — exact, no extra evaluations.</li>
+      <li>Bit-identical output regardless of thread count, by construction rather than by locking.</li>
+      <li>Topological invariant testing: exact Euler characteristic and zero boundary edges on eight procedural meshes, plus byte-identity between the streaming and monolithic export paths.</li>
+      <li>A vendoring policy with teeth — the LGPL octree from the same upstream project was deliberately <em>not</em> copied; the tables and traversal were re-derived to keep the library permissive.</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<script>
+"use strict";
+/* ------------------------------------------------------------------ util */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const C = k => getComputedStyle(document.documentElement).getPropertyValue(k).trim();
+const COL = {};
+["ink","ink-2","muted","grid","axis","blue","blue-100","blue-250","blue-600",
+ "orange","aqua","yellow","magenta","green","violet","red","good","crit","warn","card"]
+ .forEach(k => COL[k] = C("--" + k));
+
+function seg(id, cb){
+  const root = $(id);
+  root.addEventListener("click", e => {
+    const b = e.target.closest("button"); if(!b) return;
+    root.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x===b));
+    cb(b.dataset.v);
+  });
+  return () => root.querySelector('[aria-pressed="true"]').dataset.v;
+}
+function hidpi(cv){
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = cv.width, h = cv.height;
+  cv.style.aspectRatio = w + "/" + h;
+  if (cv._dpr !== dpr){ cv._dpr = dpr; }
+  return cv.getContext("2d");
+}
+function line(g,x1,y1,x2,y2,col,w,dash){
+  g.save(); g.beginPath(); g.strokeStyle=col; g.lineWidth=w||2; g.lineCap="round";
+  if(dash) g.setLineDash(dash);
+  g.moveTo(x1,y1); g.lineTo(x2,y2); g.stroke(); g.restore();
+}
+function dot(g,x,y,r,fill,stroke,w){
+  g.beginPath(); g.arc(x,y,r,0,7); g.fillStyle=fill; g.fill();
+  if(stroke){ g.lineWidth=w||1.6; g.strokeStyle=stroke; g.stroke(); }
+}
+function arrow(g,x1,y1,x2,y2,col,w,head){
+  head = head || 8;
+  const a = Math.atan2(y2-y1,x2-x1);
+  line(g,x1,y1,x2-Math.cos(a)*head*0.8,y2-Math.sin(a)*head*0.8,col,w);
+  g.beginPath(); g.moveTo(x2,y2);
+  g.lineTo(x2-head*Math.cos(a-0.42), y2-head*Math.sin(a-0.42));
+  g.lineTo(x2-head*Math.cos(a+0.42), y2-head*Math.sin(a+0.42));
+  g.closePath(); g.fillStyle=col; g.fill();
+}
+function label(g,x,y,t,size,col,align,weight){
+  g.font = (weight||400)+" "+(size||13)+"px "+C("--font");
+  g.fillStyle = col || COL.ink; g.textAlign = align || "left"; g.textBaseline="alphabetic";
+  g.fillText(t,x,y);
+}
+
+/* ------------------------------------------------------- 2D QEF solver  */
+function qef2d(samples, fallback, relTol){
+  relTol = (relTol === undefined) ? 0.1 : relTol;
+  if(!samples.length) return {v:fallback, lam:[0,0], mass:fallback};
+  let mx=0,my=0;
+  for(const s of samples){ mx+=s.p[0]; my+=s.p[1]; }
+  mx/=samples.length; my/=samples.length;
+  let a00=0,a01=0,a11=0,b0=0,b1=0;
+  for(const s of samples){
+    let [nx,ny]=s.n; const L=Math.hypot(nx,ny)||1; nx/=L; ny/=L;
+    a00+=nx*nx; a01+=nx*ny; a11+=ny*ny;
+    const d = nx*(s.p[0]-mx)+ny*(s.p[1]-my);
+    b0+=d*nx; b1+=d*ny;
+  }
+  const tr=a00+a11, det=a00*a11-a01*a01;
+  const r=Math.sqrt(Math.max(tr*tr/4-det,0));
+  const l1=tr/2+r, l2=tr/2-r;
+  let evs;
+  if(Math.abs(a01)>1e-12){
+    evs=[[l1,[l1-a11,a01]],[l2,[l2-a11,a01]]].map(([l,v])=>{
+      const L=Math.hypot(v[0],v[1])||1; return [l,[v[0]/L,v[1]/L]];});
+  } else { evs=[[a00,[1,0]],[a11,[0,1]]]; }
+  const tol = relTol * Math.max(l1,1e-12);
+  let ox=0,oy=0;
+  for(const [lam,v] of evs){
+    if(lam<=tol) continue;
+    const c=(v[0]*b0+v[1]*b1)/lam; ox+=c*v[0]; oy+=c*v[1];
+  }
+  return {v:[mx+ox,my+oy], lam:[l1,l2], mass:[mx,my],
+          ata:[a00,a01,a11], atb:[b0,b1], evs:evs, tol:tol};
+}
+
+/* ------------------------------------------------------------ shapes    */
+function mkShape(kind, sep){
+  sep = (sep===undefined)?1.05:sep;
+  if(kind==="wedge"){
+    const Cc=[0.1379,-0.2611];
+    const n1=[Math.cos(-0.42),Math.sin(-0.42)], n2=[Math.cos(-2.05),Math.sin(-2.05)];
+    return {
+      val:p=>Math.max(n1[0]*(p[0]-Cc[0])+n1[1]*(p[1]-Cc[1]),
+                      n2[0]*(p[0]-Cc[0])+n2[1]*(p[1]-Cc[1])),
+      grad:p=>{const d1=n1[0]*(p[0]-Cc[0])+n1[1]*(p[1]-Cc[1]);
+               const d2=n2[0]*(p[0]-Cc[0])+n2[1]*(p[1]-Cc[1]);
+               return d1>=d2?n1:n2;}, corner:Cc};
+  }
+  if(kind==="circle"){
+    return {val:p=>Math.hypot(p[0],p[1])-0.78,
+            grad:p=>{const L=Math.hypot(p[0],p[1])||1;return [p[0]/L,p[1]/L];}};
+  }
+  if(kind==="star"){
+    return {val:p=>{
+        const r=Math.hypot(p[0],p[1]), a=Math.atan2(p[1],p[0]);
+        return r-(0.60+0.26*Math.cos(5*a));},
+      grad:p=>{
+        const e=1e-4, f=q=>{const r=Math.hypot(q[0],q[1]),a=Math.atan2(q[1],q[0]);
+          return r-(0.60+0.26*Math.cos(5*a));};
+        const gx=f([p[0]+e,p[1]])-f([p[0]-e,p[1]]);
+        const gy=f([p[0],p[1]+e])-f([p[0],p[1]-e]);
+        const L=Math.hypot(gx,gy)||1; return [gx/L,gy/L];}};
+  }
+  // union of a box and a disc — a shape with several sharp corners
+  const bx=[0.52,0.34], off=[-0.30,-0.10], disc=[0.42,0.16], dr=0.44;
+  const box=p=>{const dx=Math.abs(p[0]-off[0])-bx[0], dy=Math.abs(p[1]-off[1])-bx[1];
+    return Math.hypot(Math.max(dx,0),Math.max(dy,0))+Math.min(Math.max(dx,dy),0);};
+  const cir=p=>Math.hypot(p[0]-disc[0]*sep,p[1]-disc[1])-dr;
+  const gnum=(f,p)=>{const e=1e-4;
+    const gx=f([p[0]+e,p[1]])-f([p[0]-e,p[1]]);
+    const gy=f([p[0],p[1]+e])-f([p[0],p[1]-e]);
+    const L=Math.hypot(gx,gy)||1; return [gx/L,gy/L];};
+  return {val:p=>Math.min(box(p),cir(p)),
+          grad:p=>box(p)<=cir(p)?gnum(box,p):gnum(cir,p)};
+}
+
+function bisect(val,a,b){
+  let va=val(a);
+  for(let i=0;i<50;i++){
+    const m=[(a[0]+b[0])/2,(a[1]+b[1])/2], vm=val(m);
+    if((vm<0)===(va<0)){a=m;va=vm;} else {b=m;}
+  }
+  return [(a[0]+b[0])/2,(a[1]+b[1])/2];
+}
+
+function contour2d(shape, n, opts){
+  opts = opts||{};
+  const lo=-1.2, hi=1.2, c=(hi-lo)/n;
+  const P=(i,j)=>[lo+i*c, lo+j*c];
+  const sign=[], hx={}, vx={};
+  for(let i=0;i<=n;i++){ sign[i]=[]; for(let j=0;j<=n;j++) sign[i][j]=shape.val(P(i,j))<0; }
+  for(let i=0;i<=n;i++) for(let j=0;j<=n;j++){
+    if(i<n && sign[i][j]!==sign[i+1][j]){
+      const p=bisect(shape.val,P(i,j),P(i+1,j)); hx[i+","+j]={p:p,n:shape.grad(p)};
+    }
+    if(j<n && sign[i][j]!==sign[i][j+1]){
+      const p=bisect(shape.val,P(i,j),P(i,j+1)); vx[i+","+j]={p:p,n:shape.grad(p)};
+    }
+  }
+  if(opts.blend){
+    // Model the mesh path's default: normals are AREA-WEIGHTED VERTEX normals,
+    // i.e. smoothed across the surface. Sampling the gradient a little either
+    // side along the surface and averaging reproduces exactly that — identical
+    // away from a crease, averaged across one.
+    const smooth = s => {
+      const t=[-s.n[1],s.n[0]], e=c*0.55;
+      const g1=shape.grad([s.p[0]+t[0]*e, s.p[1]+t[1]*e]);
+      const g2=shape.grad([s.p[0]-t[0]*e, s.p[1]-t[1]*e]);
+      const ax=g1[0]+g2[0]+s.n[0], ay=g1[1]+g2[1]+s.n[1];
+      const L=Math.hypot(ax,ay)||1; s.nb=[ax/L,ay/L];
+    };
+    Object.values(hx).forEach(smooth); Object.values(vx).forEach(smooth);
+  }
+  const cells={};
+  for(let i=0;i<n;i++) for(let j=0;j<n;j++){
+    const src=[["h",i+","+j],["h",i+","+(j+1)],["v",i+","+j],["v",(i+1)+","+j]]
+      .map(([t,k])=>(t==="h"?hx:vx)[k]).filter(Boolean);
+    if(!src.length) continue;
+    const samples=src.map(s=>({p:s.p, n:(opts.blend && s.nb)?s.nb:s.n}));
+    const centre=[lo+(i+0.5)*c, lo+(j+0.5)*c];
+    let r=qef2d(samples,centre);
+    let v=r.v;
+    if(opts.clamp!==false){
+      const tol=c;   // clampToleranceCells = 1.0
+      const far = v[0]<lo+i*c-tol || v[0]>lo+(i+1)*c+tol ||
+                  v[1]<lo+j*c-tol || v[1]>lo+(j+1)*c+tol;
+      if(far) v=r.mass;
+      v=[Math.min(Math.max(v[0],lo+i*c),lo+(i+1)*c),
+         Math.min(Math.max(v[1],lo+j*c),lo+(j+1)*c)];
+    }
+    cells[i+","+j]={v:v, samples:samples};
+  }
+  const dual=[], ms=[];
+  for(const k in hx){ const [i,j]=k.split(",").map(Number);
+    const a=cells[i+","+(j-1)], b=cells[i+","+j];
+    if(a&&b) dual.push([a.v,b.v]); }
+  for(const k in vx){ const [i,j]=k.split(",").map(Number);
+    const a=cells[(i-1)+","+j], b=cells[i+","+j];
+    if(a&&b) dual.push([a.v,b.v]); }
+  for(let i=0;i<n;i++) for(let j=0;j<n;j++){
+    const pts=[["h",i+","+j],["h",i+","+(j+1)],["v",i+","+j],["v",(i+1)+","+j]]
+      .map(([t,k])=>(t==="h"?hx:vx)[k]).filter(Boolean).map(s=>s.p);
+    if(pts.length===2) ms.push([pts[0],pts[1]]);
+    else if(pts.length===4){ pts.sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
+      ms.push([pts[0],pts[1]]); ms.push([pts[2],pts[3]]); }
+  }
+  return {lo,hi,c,n,sign,hx,vx,cells,dual,ms,P};
+}
+
+/* =================================================== 1. DC SANDBOX ===== */
+(function(){
+  const cv=$("#dc-canvas"), g=cv.getContext("2d");
+  const getShape = seg("#dc-shape", draw);
+  const getMethod = seg("#dc-method", draw);
+  ["#dc-res"].forEach(id=>$(id).addEventListener("input",draw));
+  ["#dc-normals","#dc-clamp","#dc-blend"].forEach(id=>$(id).addEventListener("change",draw));
+
+  function draw(){
+    const n=+$("#dc-res").value; $("#dc-res-v").textContent=n;
+    const shape=mkShape(getShape());
+    const r=contour2d(shape,n,{clamp:$("#dc-clamp").checked, blend:$("#dc-blend").checked});
+    const method=getMethod();
+    const W=cv.width, H=cv.height, pad=44;
+    const S=Math.min(W-2*pad,H-2*pad)/(r.hi-r.lo);
+    const T=p=>[ (W-(r.hi-r.lo)*S)/2 + (p[0]-r.lo)*S,
+                 (H-(r.hi-r.lo)*S)/2 + (r.hi-p[1])*S ];
+    g.clearRect(0,0,W,H); g.fillStyle="#fff"; g.fillRect(0,0,W,H);
+
+    // filled interior via a fine raster of the sign field (cheap, drawn once)
+    const M=170, cw=(r.hi-r.lo)/M;
+    g.fillStyle=COL["blue-100"];
+    for(let j=0;j<M;j++){
+      let run=null;
+      for(let i=0;i<=M;i++){
+        const inside = i<M && shape.val([r.lo+(i+0.5)*cw, r.lo+(j+0.5)*cw])<0;
+        if(inside && run===null) run=i;
+        else if(!inside && run!==null){
+          const a=T([r.lo+run*cw, r.lo+(j+1)*cw]);
+          g.fillRect(a[0],a[1],(i-run)*cw*S+0.6,cw*S+0.6); run=null;
+        }
+      }
+    }
+    // true surface
+    g.save(); g.strokeStyle=COL.muted; g.lineWidth=5; g.globalAlpha=.32;
+    g.beginPath();
+    for(let j=0;j<M;j++) for(let i=0;i<M;i++){
+      const q=[[r.lo+i*cw,r.lo+j*cw],[r.lo+(i+1)*cw,r.lo+j*cw],
+               [r.lo+(i+1)*cw,r.lo+(j+1)*cw],[r.lo+i*cw,r.lo+(j+1)*cw]];
+      const vv=q.map(shape.val); const pts=[];
+      for(let a=0;a<4;a++){ const b=(a+1)%4;
+        if((vv[a]<0)!==(vv[b]<0)){ const t=vv[a]/(vv[a]-vv[b]);
+          pts.push([q[a][0]+t*(q[b][0]-q[a][0]), q[a][1]+t*(q[b][1]-q[a][1])]); } }
+      if(pts.length===2){ const A=T(pts[0]),B=T(pts[1]); g.moveTo(A[0],A[1]); g.lineTo(B[0],B[1]); }
+    }
+    g.stroke(); g.restore();
+
+    // grid
+    for(let i=0;i<=n;i++){
+      const a=T([r.lo+i*r.c,r.lo]), b=T([r.lo+i*r.c,r.hi]);
+      line(g,a[0],a[1],b[0],b[1],COL.grid,1);
+      const cc=T([r.lo,r.lo+i*r.c]), d=T([r.hi,r.lo+i*r.c]);
+      line(g,cc[0],cc[1],d[0],d[1],COL.grid,1);
+    }
+    // corner signs
+    const dotR = n>14?2.6:(n>9?3.2:4.2);
+    for(let i=0;i<=n;i++) for(let j=0;j<=n;j++){
+      const p=T(r.P(i,j));
+      dot(g,p[0],p[1],dotR, r.sign[i][j]?COL.blue:"#fff", r.sign[i][j]?COL.blue:COL.axis,1.4);
+    }
+    // crossings + normals
+    const all=[].concat(Object.values(r.hx),Object.values(r.vx));
+    if($("#dc-normals").checked && n<=12){
+      for(const s of all){ const p=T(s.p);
+        const nn = ($("#dc-blend").checked && s.nb)?s.nb:s.n;
+        arrow(g,p[0],p[1],p[0]+nn[0]*26,p[1]-nn[1]*26,COL.violet,1.9,6.5); }
+    }
+    for(const s of all){ const p=T(s.p); dot(g,p[0],p[1], n>14?2.6:3.6, COL.orange,"#fff",1.3); }
+
+    if(method==="ms"||method==="both")
+      for(const [a,b] of r.ms){ const A=T(a),B=T(b); line(g,A[0],A[1],B[0],B[1],COL.orange,3); }
+    if(method==="dc"||method==="both"){
+      for(const [a,b] of r.dual){ const A=T(a),B=T(b); line(g,A[0],A[1],B[0],B[1],COL.aqua,3); }
+      for(const k in r.cells){ const p=T(r.cells[k].v);
+        dot(g,p[0],p[1], n>14?3:4.4, COL.aqua,"#fff",1.5); }
+    }
+
+    // Deviation measured the honest way, for BOTH methods: sample the true field
+    // along each emitted segment and take the worst |f|. A vertex that happens to
+    // sit on the surface proves nothing if the segment between two vertices does not.
+    function segErr(segs){
+      let m=0;
+      for(const [a,b] of segs)
+        for(let t=1;t<8;t++){
+          const q=[a[0]+(b[0]-a[0])*t/8, a[1]+(b[1]-a[1])*t/8];
+          m=Math.max(m,Math.abs(shape.val(q)));
+        }
+      return m;
+    }
+    let nv=0; for(const k in r.cells) nv++;
+    const shown = (method==="ms") ? segErr(r.ms) : segErr(r.dual);
+    $("#dc-err").textContent = shown.toExponential(1);
+    $("#dc-verts").textContent = (method==="ms")? all.length : nv;
+    $("#dc-cells").textContent = nv;
+  }
+  draw();
+})();
+
+/* ======================================================= 2. QEF ======== */
+(function(){
+  const cv=$("#qef-canvas"), g=cv.getContext("2d");
+  let S=[];
+  const presets={
+    corner:[{p:[-0.42,0.30],n:[0,1]},{p:[-0.10,0.30],n:[0,1]},
+            {p:[0.34,-0.06],n:[1,0]},{p:[0.34,-0.42],n:[1,0]}],
+    flat:[{p:[-0.50,0.16],n:[0,1]},{p:[-0.06,0.16],n:[0,1]},{p:[0.42,0.16],n:[0,1]}],
+    noisy:[{p:[-0.42,0.30],n:[0.06,0.998]},{p:[-0.10,0.26],n:[-0.10,0.995]},
+           {p:[0.34,-0.06],n:[0.99,0.14]},{p:[0.30,-0.42],n:[0.995,-0.10]}]
+  };
+  const getP = seg("#qef-preset", v=>{ S=JSON.parse(JSON.stringify(presets[v])); draw(); });
+  S=JSON.parse(JSON.stringify(presets.corner));
+  $("#qef-tol").addEventListener("input",draw);
+
+  const W=cv.width,H=cv.height,R=Math.min(W,H)*0.285;
+  const T=p=>[W/2+p[0]*R*1.5, H/2-p[1]*R*1.5];
+  const Ti=q=>[(q[0]-W/2)/(R*1.5), (H/2-q[1])/(R*1.5)];
+
+  let drag=null;
+  function pick(q){
+    for(let i=0;i<S.length;i++){
+      const p=T(S[i].p);
+      if(Math.hypot(q[0]-p[0],q[1]-p[1])<15) return {i,what:"p"};
+      const t=[p[0]+S[i].n[0]*56, p[1]-S[i].n[1]*56];
+      if(Math.hypot(q[0]-t[0],q[1]-t[1])<15) return {i,what:"n"};
+    }
+    return null;
+  }
+  function evt(e){
+    const rct=cv.getBoundingClientRect();
+    const cx=(e.touches?e.touches[0].clientX:e.clientX)-rct.left;
+    const cy=(e.touches?e.touches[0].clientY:e.clientY)-rct.top;
+    return [cx*cv.width/rct.width, cy*cv.height/rct.height];
+  }
+  cv.addEventListener("pointerdown",e=>{ drag=pick(evt(e)); if(drag) cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener("pointermove",e=>{
+    const q=evt(e);
+    cv.style.cursor = pick(q)?"grab":"default";
+    if(!drag) return;
+    if(drag.what==="p") S[drag.i].p=Ti(q);
+    else{ const p=T(S[drag.i].p); let dx=q[0]-p[0], dy=-(q[1]-p[1]);
+      const L=Math.hypot(dx,dy)||1; S[drag.i].n=[dx/L,dy/L]; }
+    draw();
+  });
+  window.addEventListener("pointerup",()=>drag=null);
+
+  function draw(){
+    const relTol=+$("#qef-tol").value/100;
+    $("#qef-tol-v").textContent=relTol.toFixed(2);
+    const r=qef2d(S,[0,0],relTol);
+    g.clearRect(0,0,W,H); g.fillStyle="#fff"; g.fillRect(0,0,W,H);
+    // faint grid
+    for(let i=-3;i<=3;i++){
+      const a=T([i/3,-1.2]),b=T([i/3,1.2]); line(g,a[0],a[1],b[0],b[1],COL.grid,1);
+      const c=T([-1.2,i/3]),d=T([1.2,i/3]); line(g,c[0],c[1],d[0],d[1],COL.grid,1);
+    }
+    // planes
+    for(const s of S){
+      const d=[-s.n[1],s.n[0]];
+      const a=T([s.p[0]-d[0]*2,s.p[1]-d[1]*2]), b=T([s.p[0]+d[0]*2,s.p[1]+d[1]*2]);
+      line(g,a[0],a[1],b[0],b[1],COL["blue-250"],2,[8,6]);
+    }
+    // residuals
+    for(const s of S){
+      const dd=s.n[0]*(r.v[0]-s.p[0])+s.n[1]*(r.v[1]-s.p[1]);
+      const foot=[r.v[0]-s.n[0]*dd, r.v[1]-s.n[1]*dd];
+      const A=T(r.v),B=T(foot); line(g,A[0],A[1],B[0],B[1],COL.crit,1.6,[4,4]);
+    }
+    // samples
+    for(const s of S){
+      const p=T(s.p);
+      arrow(g,p[0],p[1],p[0]+s.n[0]*56,p[1]-s.n[1]*56,COL.violet,2.4,8);
+      dot(g,p[0]+s.n[0]*56,p[1]-s.n[1]*56,5,COL.violet,"#fff",1.6);
+      dot(g,p[0],p[1],6.5,COL.orange,"#fff",2);
+    }
+    const m=T(r.mass); dot(g,m[0],m[1],7,"#fff",COL.muted,2.2);
+    label(g,m[0]+12,m[1]+18,"mass point",12,COL.muted);
+    const v=T(r.v); dot(g,v[0],v[1],8.5,COL.aqua,"#fff",2.4);
+    label(g,v[0]+14,v[1]-10,"minimiser",12.5,"#0d6b4c","left",650);
+
+    // eigen directions of A^T A, drawn through the solution
+    g.save(); g.globalAlpha=.55;
+    for(const [lam,e] of r.evs){
+      const kept = lam>r.tol;
+      const a=T([r.v[0]-e[0]*0.22, r.v[1]-e[1]*0.22]);
+      const b=T([r.v[0]+e[0]*0.22, r.v[1]+e[1]*0.22]);
+      line(g,a[0],a[1],b[0],b[1], kept?COL.good:COL.crit, 3, kept?null:[4,4]);
+    }
+    g.restore();
+
+    // table
+    const rows=[
+      ["A<sup>T</sup>A", `[ ${r.ata[0].toFixed(3)}  ${r.ata[1].toFixed(3)} ; ${r.ata[1].toFixed(3)}  ${r.ata[2].toFixed(3)} ]`],
+      ["A<sup>T</sup>b (centred)", `[ ${r.atb[0].toFixed(3)}, ${r.atb[1].toFixed(3)} ]`],
+      ["eigenvalues λ", `${r.lam[0].toFixed(3)}, ${r.lam[1].toFixed(3)}`],
+      ["truncation cutoff", `${r.tol.toFixed(3)}   (= ${relTol.toFixed(2)} × λ<sub>max</sub>)`],
+      ["directions kept", `${r.evs.filter(([l])=>l>r.tol).length} of 2`],
+      ["mass point", `( ${r.mass[0].toFixed(3)}, ${r.mass[1].toFixed(3)} )`],
+      ["minimiser", `( ${r.v[0].toFixed(3)}, ${r.v[1].toFixed(3)} )`]
+    ];
+    $("#qef-table tbody").innerHTML = rows.map(
+      ([a,b])=>`<tr><td style="color:var(--muted);width:44%">${a}</td><td class="mono">${b}</td></tr>`).join("");
+
+    const kept=r.evs.filter(([l])=>l>r.tol).length;
+    const verdict=$("#qef-verdict"), note=$("#qef-verdict-note");
+    if(kept===2){ verdict.textContent="Rank 2 — a unique point."; verdict.style.color=COL.good;
+      note.textContent="Two independent normal directions, so both eigen-directions are inverted and the minimiser is pinned in the plane. In 3D this is the rank-3 corner case — the one dual contouring exists to capture."; }
+    else if(kept===1){ verdict.textContent="Rank 1 — a line of solutions."; verdict.style.color=COL.warn;
+      note.textContent="One direction is truncated, so the solver does not move along it and the solution stays at the mass point in that direction. That is the regularisation working: a flat cell gets a vertex at the centroid of its crossings, which is on the surface and inside the cell."; }
+    else { verdict.textContent="Fully truncated — the mass point."; verdict.style.color=COL.crit;
+      note.textContent="The threshold is above every eigenvalue, so nothing is inverted at all. Raise it far enough and you have thrown the whole solve away — which is exactly what the unintended upper cutoff in the vendored pinv() does above λ = 10."; }
+  }
+  draw();
+})();
+
+/* ==================================================== 3. OCTREE ======== */
+(function(){
+  const cv=$("#oc-canvas"), g=cv.getContext("2d");
+  ["#oc-max","#oc-min","#oc-eps"].forEach(id=>$(id).addEventListener("input",draw));
+
+  const shape=mkShape("star");
+  function overlaps(x,y,w){
+    let first=null;
+    const N=7;
+    for(let i=0;i<=N;i++) for(let j=0;j<=N;j++){
+      const v=shape.val([x+w*i/N, y+w*j/N])<0;
+      if(first===null) first=v; else if(v!==first) return true;
+    }
+    return false;
+  }
+  function draw(){
+    const maxd=+$("#oc-max").value, mind=Math.min(+$("#oc-min").value,maxd);
+    const eps=+$("#oc-eps").value/100;
+    $("#oc-max-v").textContent=maxd; $("#oc-min-v").textContent=mind;
+    $("#oc-eps-v").textContent=eps.toFixed(3);
+
+    const lo=-1.2, span=2.4;
+    const leaves=[];
+    (function build(x,y,w,d){
+      if(d>=maxd){ leaves.push({x,y,w,d,data:overlaps(x,y,w)}); return; }
+      if(d>=mind && !overlaps(x,y,w)){ leaves.push({x,y,w,d,data:false}); return; }
+      const h=w/2;
+      for(const dx of [0,h]) for(const dy of [0,h]) build(x+dx,y+dy,h,d+1);
+    })(lo,lo,span,0);
+
+    // a stand-in for the collapse pass: merge four sibling data leaves when a
+    // single vertex fits them within `eps`
+    let collapsed=0;
+    if(eps>0){
+      const byParent={};
+      for(const L of leaves){
+        if(L.d!==maxd) continue;
+        const pw=L.w*2, px=Math.round((L.x-lo)/pw)*pw+lo, py=Math.round((L.y-lo)/pw)*pw+lo;
+        (byParent[px.toFixed(4)+","+py.toFixed(4)+","+pw.toFixed(4)] ||= []).push(L);
+      }
+      for(const k in byParent){
+        const grp=byParent[k]; if(grp.length!==4) continue;
+        const [px,py,pw]=k.split(",").map(Number);
+        // residual proxy: how far the four cell centres' surface points deviate
+        // from a single plane fit through them
+        const pts=[];
+        const M=5;
+        for(let i=0;i<=M;i++) for(let j=0;j<=M;j++){
+          const p=[px+pw*i/M, py+pw*j/M];
+          if(Math.abs(shape.val(p))<pw*0.30) pts.push(p);
+        }
+        if(pts.length<3) continue;
+        let mx=0,my=0; pts.forEach(p=>{mx+=p[0];my+=p[1];}); mx/=pts.length; my/=pts.length;
+        let sxx=0,sxy=0,syy=0;
+        pts.forEach(p=>{const dx=p[0]-mx,dy=p[1]-my; sxx+=dx*dx; sxy+=dx*dy; syy+=dy*dy;});
+        const tr=sxx+syy, det=sxx*syy-sxy*sxy;
+        const lmin=tr/2-Math.sqrt(Math.max(tr*tr/4-det,0));
+        const resid=Math.sqrt(Math.max(lmin,0)/pts.length)/pw;   // scale-free
+        if(resid<=eps){
+          grp.forEach(L=>L.gone=true);
+          leaves.push({x:px,y:py,w:pw,d:maxd-1,data:true,collapsed:true});
+          collapsed+=4;
+        }
+      }
+    }
+
+    const W=cv.width,H=cv.height,pad=18;
+    const S=(Math.min(W,H)-2*pad)/span;
+    const T=p=>[pad+(p[0]-lo)*S, pad+(lo+span-p[1])*S];
+    g.clearRect(0,0,W,H); g.fillStyle="#fff"; g.fillRect(0,0,W,H);
+
+    // inside fill
+    const M=200, cw=span/M;
+    g.fillStyle=COL["blue-100"];
+    for(let j=0;j<M;j++){
+      let run=null;
+      for(let i=0;i<=M;i++){
+        const ins=i<M && shape.val([lo+(i+0.5)*cw, lo+(j+0.5)*cw])<0;
+        if(ins&&run===null) run=i;
+        else if(!ins&&run!==null){ const a=T([lo+run*cw, lo+(j+1)*cw]);
+          g.fillRect(a[0],a[1],(i-run)*cw*S+0.6,cw*S+0.6); run=null; }
+      }
+    }
+    let nleaf=0,ndata=0;
+    for(const L of leaves){
+      if(L.gone) continue;
+      nleaf++;
+      const a=T([L.x,L.y+L.w]);
+      let col=COL.grid, lw=1;
+      if(L.collapsed){ col=COL.aqua; lw=2; ndata++; }
+      else if(L.data){ col=COL.orange; lw=1.6; ndata++; }
+      g.strokeStyle=col; g.lineWidth=lw; g.strokeRect(a[0],a[1],L.w*S,L.w*S);
+    }
+    $("#oc-leaves").textContent=nleaf;
+    $("#oc-data").textContent=ndata;
+    $("#oc-uniform").textContent=Math.pow(4,maxd).toLocaleString();
+    $("#oc-collapsed").textContent=collapsed;
+  }
+  draw();
+})();
+
+/* ======================================================= 4. SDF ======== */
+(function(){
+  const cv=$("#sdf-canvas"), g=cv.getContext("2d");
+  const getOp = seg("#sdf-op", draw);
+  ["#sdf-k","#sdf-sep"].forEach(id=>$(id).addEventListener("input",draw));
+  ["#sdf-field","#sdf-grad"].forEach(id=>$(id).addEventListener("change",draw));
+
+  const box=(p,off)=>{const dx=Math.abs(p[0]-off)-0.46, dy=Math.abs(p[1])-0.30;
+    return Math.hypot(Math.max(dx,0),Math.max(dy,0))+Math.min(Math.max(dx,dy),0);};
+  const disc=(p,off)=>Math.hypot(p[0]-off,p[1]+0.06)-0.36;
+
+  function draw(){
+    const op=getOp();
+    let k=+$("#sdf-k").value/100; $("#sdf-k-v").textContent=k.toFixed(2);
+    const sep=(+$("#sdf-sep").value/100)*1.4-0.35; $("#sdf-sep-v").textContent=sep.toFixed(2);
+    if(op!=="smooth") k=0;
+    const A=p=>box(p,-0.30), B=p=>disc(p,sep);
+
+    function smin(a,b,k){ if(k<=1e-6) return {v:Math.min(a,b),h:(a<=b?1:0)};
+      const h=Math.min(Math.max(0.5+0.5*(b-a)/k,0),1);
+      return {v:(b+(a-b)*h)-k*h*(1-h), h:h}; }
+
+    function val(p){
+      const a=A(p), b=B(p);
+      if(op==="union") return Math.min(a,b);
+      if(op==="inter") return Math.max(a,b);
+      if(op==="diff")  return Math.max(a,-b);
+      return smin(a,b,k).v;
+    }
+    const gnum=(f,p)=>{const e=1e-4;
+      const gx=f([p[0]+e,p[1]])-f([p[0]-e,p[1]]);
+      const gy=f([p[0],p[1]+e])-f([p[0],p[1]-e]);
+      const L=Math.hypot(gx,gy)||1; return [gx/L,gy/L];};
+    function grad(p){
+      const a=A(p), b=B(p);
+      if(op==="union") return a<=b?gnum(A,p):gnum(B,p);
+      if(op==="inter") return a>=b?gnum(A,p):gnum(B,p);
+      if(op==="diff"){ if(a>=-b) return gnum(A,p);
+        const gb=gnum(B,p); return [-gb[0],-gb[1]]; }
+      const h=smin(a,b,k).h; const ga=gnum(A,p), gb=gnum(B,p);
+      return [gb[0]+(ga[0]-gb[0])*h, gb[1]+(ga[1]-gb[1])*h];
+    }
+
+    const W=cv.width,H=cv.height;
+    const lo=[-1.35,-0.80], hi=[1.35,0.80];
+    const S=Math.min(W/(hi[0]-lo[0]), H/(hi[1]-lo[1]));
+    const T=p=>[(p[0]-lo[0])*S, (hi[1]-p[1])*S];
+    g.clearRect(0,0,W,H); g.fillStyle="#fff"; g.fillRect(0,0,W,H);
+
+    const M=Math.round(W/4), cw=(hi[0]-lo[0])/M, MH=Math.round(H/4), ch=(hi[1]-lo[1])/MH;
+    if($("#sdf-field").checked){
+      const img=g.createImageData(M,MH);
+      for(let j=0;j<MH;j++) for(let i=0;i<M;i++){
+        const p=[lo[0]+(i+0.5)*cw, hi[1]-(j+0.5)*ch];
+        const v=val(p);
+        const band=Math.abs((v*7)%1);
+        let R,G,B2;
+        if(v<0){ const t=Math.min(-v*2.4,1);
+          R=205-95*t; G=226-70*t; B2=251-40*t; }
+        else { const t=Math.min(v*2.0,1);
+          R=255-6*t; G=255-30*t; B2=255-46*t; }
+        const shade = 0.90+0.10*Math.cos(band*Math.PI*2);
+        const o=(j*M+i)*4;
+        img.data[o]=R*shade; img.data[o+1]=G*shade; img.data[o+2]=B2*shade; img.data[o+3]=255;
+      }
+      const tmp=document.createElement("canvas"); tmp.width=M; tmp.height=MH;
+      tmp.getContext("2d").putImageData(img,0,0);
+      g.imageSmoothingEnabled=true; g.drawImage(tmp,0,0,W,H);
+    } else {
+      const MM=260, c2=(hi[0]-lo[0])/MM, r2=(hi[1]-lo[1])/Math.round(MM*H/W);
+      g.fillStyle=COL["blue-100"];
+      for(let j=0;j<Math.round(MM*H/W);j++){
+        let run=null;
+        for(let i=0;i<=MM;i++){
+          const ins=i<MM && val([lo[0]+(i+0.5)*c2, hi[1]-(j+0.5)*r2])<0;
+          if(ins&&run===null) run=i;
+          else if(!ins&&run!==null){ g.fillRect((run*c2)*S,(j*r2)*S,(i-run)*c2*S+.6,r2*S+.6); run=null; }
+        }
+      }
+    }
+    // zero level set
+    const MM=300, c2=(hi[0]-lo[0])/MM, rows=Math.round(MM*(hi[1]-lo[1])/(hi[0]-lo[0]));
+    const r2=(hi[1]-lo[1])/rows;
+    g.save(); g.strokeStyle=COL.ink; g.lineWidth=2.6; g.beginPath();
+    const segs=[];
+    for(let j=0;j<rows;j++) for(let i=0;i<MM;i++){
+      const q=[[lo[0]+i*c2, lo[1]+j*r2],[lo[0]+(i+1)*c2, lo[1]+j*r2],
+               [lo[0]+(i+1)*c2, lo[1]+(j+1)*r2],[lo[0]+i*c2, lo[1]+(j+1)*r2]];
+      const vv=q.map(val); const pts=[];
+      for(let a=0;a<4;a++){ const b=(a+1)%4;
+        if((vv[a]<0)!==(vv[b]<0)){ const t=vv[a]/(vv[a]-vv[b]);
+          pts.push([q[a][0]+t*(q[b][0]-q[a][0]), q[a][1]+t*(q[b][1]-q[a][1])]); } }
+      if(pts.length===2){ segs.push(pts); const Aa=T(pts[0]),Bb=T(pts[1]);
+        g.moveTo(Aa[0],Aa[1]); g.lineTo(Bb[0],Bb[1]); }
+    }
+    g.stroke(); g.restore();
+
+    if($("#sdf-grad").checked){
+      const step=Math.max(1,Math.floor(segs.length/46));
+      for(let i=0;i<segs.length;i+=step){
+        const p=[(segs[i][0][0]+segs[i][1][0])/2,(segs[i][0][1]+segs[i][1][1])/2];
+        const nn=grad(p); const q=T(p);
+        arrow(g,q[0],q[1],q[0]+nn[0]*24,q[1]-nn[1]*24,COL.violet,1.7,6);
+      }
+    }
+
+    const txt={
+      union:"Hard union: <code>min(a, b)</code>. Where the two shapes cross, the composed field is C0 — it has a kink, not a curve. The gradient is taken from whichever operand attains the minimum, so the arrows flip abruptly at the seam. Two different normals in one cell means two plane constraints, and the QEF lands the vertex on the crease.",
+      inter:"Hard intersection: <code>max(a, b)</code>. Same story with the sign reversed — the gradient comes from whichever operand attains the maximum.",
+      diff:"Difference: <code>max(a, −b)</code>. Note the sign flip on the carved operand: the carved surface faces inward relative to b, so its gradient is the <em>negated</em> b gradient. Getting that wrong inverts the normals on exactly one face of the result.",
+      smooth:"Smooth union: the Quilez polynomial <code>smin</code>. The field is now C-infinity, the gradient arrows rotate continuously through the blend band, and dual contouring reconstructs a fillet instead of a crease. Drag k to 0 and it degenerates exactly to the hard union. <b>Same pipeline; the field algebra alone decides sharp or smooth.</b>"
+    };
+    $("#sdf-explain").innerHTML = txt[op];
+  }
+  draw();
+})();
+
+/* =================================================== 5. PIPELINE ======= */
+(function(){
+  const stages=[
+    {id:"in", t:"Input", k:"mesh or FieldPtr",
+     reads:"A triangle mesh plus its geometry, or any object implementing three virtuals: valueAt, gradientAt, bounds.",
+     writes:"—",
+     wrong:"An unbounded field (a plane, an infinite cylinder, a repeat) throws unless SamplerParams::rootBounds is set. An <em>invalid</em> box, by contrast, silently becomes the unit cube."},
+    {id:"samp", t:"Sampler", k:"src/sampler.cpp",
+     reads:"The field, through exactly four calls: cellOverlaps for the refine/prune decision, isInside for the 8 corner signs, edgeHit for the crossings, and closestSurfacePoint as the miss fallback.",
+     writes:"A HermiteOctree: per-corner signs, and per sign-changing edge a position and a normal.",
+     wrong:"The default cellOverlaps assumes the field is Lipschitz-1. A steeper field can hide a surface bubble inside a cell that touches no corner — the cell is pruned and the geometry silently vanishes. TPMS override the test to always-overlap; the decorators forward that, but the domain operators do not."},
+    {id:"oct", t:"HermiteOctree", k:"the contract",
+     reads:"—",
+     writes:"cornerInside[8] as booleans (NOT corner values), 12 HermiteEdges, unique_ptr children.",
+     wrong:"Storing only signs is what lets the mesh and field paths share the contourer verbatim — and it is also why the saddle-face ambiguity has to be resolved by the inside-pair rule rather than by Schaefer's asymptotic decider, which needs the values."},
+    {id:"simp", t:"Collapse (optional)", k:"simplifyHermiteOctree",
+     reads:"The octree, in post-order, so children may already be pseudo-leaves.",
+     writes:"Merged pseudo-leaves wherever three topology gates pass and the merged QEF residual is under the threshold.",
+     wrong:"The acceptance test thresholds the normal-equation residual, not the geometric QEF energy — QefSolver::getError() is dead code. And the function takes a double rather than the params struct, so it hard-codes the pinv tolerance and ignores --qef-reg. Neither is covered by any test."},
+    {id:"cont", t:"Contourer", k:"src/contourer.cpp",
+     reads:"The octree, const. Per-leaf QEF solves are pre-computed in parallel into a side map, precisely because the input is const.",
+     writes:"A SurfaceMesh, a VertexPositionGeometry and a per-vertex normal vector.",
+     wrong:"One heap allocation per emitted triangle (std::vector&lt;std::vector&lt;size_t&gt;&gt;), because that is the shape geometry-central's constructor takes. At the documented 20.9M-face result, that is measurable."},
+    {id:"out", t:"Output", k:"mesh + normals",
+     reads:"—",
+     writes:"Triangles whose vertices are shared by identity rather than by position, so the result is closed and manifold without a weld pass — which is why ContourerParams::weldEdges is dead.",
+     wrong:"An empty result is replaced by a single placeholder triangle so geometry-central's constructor does not reject it, which makes 'no surface' indistinguishable from 'one triangle of surface'."}
+  ];
+  const wrap=$("#pipe-stages");
+  wrap.innerHTML = stages.map((s,i)=>
+    `<button class="stage" data-i="${i}" aria-pressed="${i===1}">
+       <h4>${s.t}</h4><div class="k">${s.k}</div></button>`).join("");
+  function show(i){
+    const s=stages[i];
+    $("#pipe-detail").innerHTML =
+      `<h3>${s.t}</h3>
+       <p><b>Reads.</b> ${s.reads}</p>
+       <p><b>Writes.</b> ${s.writes}</p>
+       <div class="flag"><b>What can go wrong.</b> ${s.wrong}</div>`;
+  }
+  wrap.addEventListener("click",e=>{
+    const b=e.target.closest(".stage"); if(!b) return;
+    wrap.querySelectorAll(".stage").forEach(x=>x.setAttribute("aria-pressed", x===b));
+    show(+b.dataset.i);
+  });
+  show(1);
+})();
+
+/* ================================================== 6. WEAKNESSES ====== */
+(function(){
+  const rows=[
+    ["1","<code>dualContourMesh</code> drops <code>signMethod</code>",
+     "The one-call API constructs MeshSource with three arguments where the other entry point passes four. Ask for generalized winding number on triangle soup and you silently get ray parity — the one method that cannot handle it.",
+     "One line. Better: have dualContourMesh call sampleMeshToHermiteOctree, or make MeshSource take the params struct.", "crit"],
+    ["2","<code>docs/ARCHITECTURE.md</code> is stale",
+     "It describes a flat canonical-edge contourer limited to uniform depth, says simplificationError is ignored, says manifold DC is unimplemented, and says PSEUDONORMAL is a no-op. All four are false.",
+     "Rewrite the four sections. Raise it yourself before the interviewer reads it.","crit"],
+    ["3","<code>cellOverlaps</code> hides a Lipschitz-1 assumption",
+     "Not machine-checkable, and the opt-out is a hand-written override that the decorators forward and the domain operators do not. A twisted or mirrored TPMS can silently drop surface cells.",
+     "<code>virtual double lipschitzBound() const { return 1.0; }</code> — one virtual replaces ten hand-written overrides and closes the whole class.","crit"],
+    ["4","<code>pinv</code> truncates large eigenvalues too",
+     "<code>fabs(1/x) &lt; tol</code> zeroes any eigenvalue above 1/tol = 10. Measured: a sharp corner from 11 aligned samples collapses to its centroid. Per-leaf solves are safe; the collapse path is materially affected.",
+     "Drop the second clause, or use the relative rule λ &lt; ε·λ<sub>max</sub>, which also makes the parameter invariant to sample count.","crit"],
+    ["5","Adaptive collapse has no tests at all",
+     "Zero occurrences of simplifyHermiteOctree or simplificationError in tests/. A documented three-part contract, entirely unverified.",
+     "Threshold 0 must be a bitwise no-op; a large threshold on a sphere must cut triangles while preserving χ = 2 and zero boundary edges; a thin neck must refuse to collapse.","warn"],
+    ["6","The six DC descent tables have no direct test",
+     "<code>dc_tables.h</code> claims they are validated in test_dc_tables.cpp. That file tests only the four basic shape tables. These are the classic transcription-error hot spot.",
+     "About 60 lines of combinatorics: assert childA ^ childB == (1 &lt;&lt; axis), assert every entry of kProcessEdgeMask[axis] really has that axis, and so on.","warn"],
+    ["7","<code>countRayHits</code>' epsilon is scale-relative",
+     "advance = max(tHit × 1e-5, 1e-6) is relative to the hit distance, not the model. At 2000 mm that is 0.02 mm, so thin walls and coincident triangles are skipped — and all three probe rays fail together.",
+     "Make it relative to the bounding-box diagonal, or replace the re-traversal loop with a single any-hit traversal with prim_id dedup.","warn"],
+    ["8","Threading determinism is a comment, not a test",
+     "The header promises bit-identical output regardless of numThreads. numThreads appears nowhere in the test suite.",
+     "Three lines: contour at 1, 2 and 0 threads and compare vertex counts, face counts and positions.","warn"],
+    ["9","<code>parallelFor</code> terminates on exception",
+     "No try/catch anywhere. A throw in a worker calls std::terminate; a throw in the main thread's own worker() unwinds past the join loop and terminates too. Reachable through any user-supplied field.",
+     "About ten lines of exception_ptr capture plus an atomic flag, join unconditionally, rethrow.","warn"],
+    ["10","One heap allocation per emitted triangle",
+     "std::vector&lt;std::vector&lt;size_t&gt;&gt; with push_back per triangle. At 20.9M faces, 20.9M tiny allocations.",
+     "A flat index array with per-face offsets, or vector&lt;array&lt;size_t,3&gt;&gt;, if geometry-central's template accepts it.","warn"],
+    ["11","The GLSL parity gate is not in CI",
+     "Every SDF formula exists twice — double on the CPU, float in the shader. 62 node-level comparisons keep them honest, but the harness needs a GL context, defaults OFF and has no CTest.",
+     "A headless-GL CI job (llvmpipe or SwiftShader), or a CPU reference evaluator for the emitted AST. Half of that is already done: the codegen library is deliberately GL-free.","warn"],
+    ["12","Two dead public parameters",
+     "<code>ContourerParams::weldEdges</code> and <code>SamplerParams::seed</code> are declared, documented and referenced nowhere.",
+     "Delete them, or document them as reserved no-ops. A public field that silently does nothing is worse than no field.","muted"],
+    ["13","No install rules or package config",
+     "$&lt;INSTALL_INTERFACE:include&gt; is declared but dead without install(TARGETS ... EXPORT ...), and CMAKE_SOURCE_DIR in the sibling probe means the project cannot even be add_subdirectory'd into a larger tree.",
+     "Add the export set and switch to CMAKE_CURRENT_SOURCE_DIR. This is the clearest single build-system criticism.","muted"],
+    ["14","Silent failure, everywhere",
+     "Invalid bounds become the unit cube; windingNumberFast without a tree returns 'all outside'; grid probes outside the baked region clip silently; the ray cap truncates without a word.",
+     "A Diagnostics struct returned alongside the octree. The pseudonormal build already computes whether the mesh is watertight and throws that knowledge away.","muted"]
+  ];
+  const cols={crit:COL.crit, warn:COL.warn, muted:COL.muted};
+  $("#weak-table tbody").innerHTML = rows.map(([n,w,why,fix,sev])=>
+    `<tr><td><span class="pill" style="background:${cols[sev]}">${n}</span></td>
+      <td style="font-weight:600">${w}</td><td style="color:var(--ink-2)">${why}</td>
+      <td style="color:var(--ink-2)">${fix}</td></tr>`).join("");
+})();
+
+/* ======================================================== tabs ========= */
+(function(){
+  const tabs=[["sandbox","2D sandbox"],["qef","The QEF"],["octree","Octree &amp; collapse"],
+              ["sdf","Field algebra"],["pipeline","Pipeline"],["defence","Weaknesses"]];
+  const nav=$("#tabs");
+  nav.innerHTML=tabs.map(([id,t],i)=>
+    `<button role="tab" data-id="${id}" aria-selected="${i===0}">${t}</button>`).join("");
+  nav.addEventListener("click",e=>{
+    const b=e.target.closest("button"); if(!b) return;
+    nav.querySelectorAll("button").forEach(x=>x.setAttribute("aria-selected", x===b));
+    tabs.forEach(([id])=>$("#tab-"+id).hidden = (id!==b.dataset.id));
+  });
+})();
+</script>
+</body>
+</html>

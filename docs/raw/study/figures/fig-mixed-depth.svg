@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="500" viewBox="0 0 1040 500" role="img">
+<defs></defs>
+<rect width="1040" height="500" fill="#fcfcfb"/>
+<text x="28.00" y="34.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="15" font-weight="650" fill="#0b0b0b" text-anchor="start">Mixed depth: two devices, and the bug that hid between them</text>
+<text x="28.00" y="55.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">After a collapse, adjacent surface leaves sit at different depths. Their integer coordinates are at different scales, so no lookup works.</text>
+<text x="56.00" y="96.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="700" fill="#0b0b0b" text-anchor="start">childOrSelf: a leaf descends to itself</text>
+<rect x="56.00" y="116.00" width="190.00" height="190.00" rx="3" fill="#ffffff" stroke="#c3c2b7" stroke-width="2"/>
+<text x="151.00" y="216.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="middle">coarse leaf</text>
+<rect x="56.00" y="116.00" width="95.00" height="95.00" rx="0" fill="none" stroke="#86b6ef" stroke-width="1.4" stroke-dasharray="4 3"/>
+<rect x="56.00" y="211.00" width="95.00" height="95.00" rx="0" fill="none" stroke="#86b6ef" stroke-width="1.4" stroke-dasharray="4 3"/>
+<rect x="151.00" y="116.00" width="95.00" height="95.00" rx="0" fill="none" stroke="#86b6ef" stroke-width="1.4" stroke-dasharray="4 3"/>
+<rect x="151.00" y="211.00" width="95.00" height="95.00" rx="0" fill="none" stroke="#86b6ef" stroke-width="1.4" stroke-dasharray="4 3"/>
+<text x="56.00" y="332.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">It has no children, but the recursion asks for</text>
+<text x="56.00" y="349.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">one anyway — and gets the leaf back, four times.</text>
+<text x="320.00" y="96.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="700" fill="#0b0b0b" text-anchor="start">the finest-cell rule</text>
+<rect x="320.00" y="116.00" width="190.00" height="190.00" rx="3" fill="#ffffff" stroke="#c3c2b7" stroke-width="1.8"/>
+<line x1="415.00" y1="116.00" x2="415.00" y2="306.00" stroke="#c3c2b7" stroke-width="1.8" stroke-linecap="round"/>
+<line x1="415.00" y1="211.00" x2="510.00" y2="211.00" stroke="#c3c2b7" stroke-width="1.8" stroke-linecap="round"/>
+<line x1="462.50" y1="211.00" x2="462.50" y2="306.00" stroke="#c3c2b7" stroke-width="1.8" stroke-linecap="round"/>
+<line x1="415.00" y1="258.50" x2="510.00" y2="258.50" stroke="#c3c2b7" stroke-width="1.8" stroke-linecap="round"/>
+<circle cx="462.50" cy="258.50" r="7.00" fill="#eb6834" stroke="#ffffff" stroke-width="2.2"/>
+<text x="367.50" y="163.50" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">coarse</text>
+<text x="486.25" y="282.25" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#184f95" text-anchor="middle">fine</text>
+<text x="320.00" y="332.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">A coarse cell's same-indexed edge sits on its</text>
+<text x="320.00" y="349.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">OUTER cube — a different segment entirely.</text>
+<text x="320.00" y="366.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">Only the finest cell's local edge is the</text>
+<text x="320.00" y="383.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">absolute minimal edge.</text>
+<text x="584.00" y="96.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="700" fill="#0b0b0b" text-anchor="start">the degenerate quad</text>
+<rect x="584.00" y="116.00" width="190.00" height="190.00" rx="0" fill="none" stroke="#e1e0d9" stroke-width="1.4"/>
+<rect x="584.00" y="116.00" width="95.00" height="190.00" rx="3" fill="#f4f8fe" stroke="#c3c2b7" stroke-width="1.8"/>
+<rect x="679.00" y="116.00" width="95.00" height="95.00" rx="3" fill="#ffffff" stroke="#c3c2b7" stroke-width="1.8"/>
+<rect x="679.00" y="211.00" width="95.00" height="95.00" rx="3" fill="#ffffff" stroke="#c3c2b7" stroke-width="1.8"/>
+<polygon points="631.50,211.00 726.50,163.50 726.50,258.50" fill="#1baf7a" stroke="#1baf7a" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" opacity="0.2"/>
+<polygon points="631.50,211.00 726.50,163.50 726.50,258.50" fill="none" stroke="#1baf7a" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="631.50" cy="211.00" r="6.00" fill="#1baf7a" stroke="#ffffff" stroke-width="2"/>
+<circle cx="726.50" cy="163.50" r="6.00" fill="#1baf7a" stroke="#ffffff" stroke-width="2"/>
+<circle cx="726.50" cy="258.50" r="6.00" fill="#1baf7a" stroke="#ffffff" stroke-width="2"/>
+<text x="631.50" y="237.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="middle">one cell fills</text>
+<text x="631.50" y="252.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="middle">two slots</text>
+<text x="584.00" y="332.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">Two of the four vertex indices coincide. After</text>
+<text x="584.00" y="349.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">dedupe you emit ONE triangle — not nothing.</text>
+<text x="584.00" y="366.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">Skipping the quad entirely is what produced</text>
+<text x="584.00" y="383.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">holes in an earlier version.</text>
+<rect x="56.00" y="406.00" width="928.00" height="76.00" rx="8" fill="#f9f9f7" stroke="#e1e0d9" stroke-width="1.4"/>
+<text x="76.00" y="434.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="700" fill="#d03b3b" text-anchor="start">The bug that hid here:</text>
+<text x="216.00" y="434.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">an earlier version picked the COARSEST of the four cells instead of the finest. The signs it read</text>
+<text x="76.00" y="456.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">then belonged to a different segment, so quads were emitted for edges that do not cross — 4,000 to 7,000 boundary edges after collapse.</text>
+</svg>

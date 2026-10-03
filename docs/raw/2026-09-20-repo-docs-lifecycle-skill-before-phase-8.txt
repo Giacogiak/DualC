@@ -1,0 +1,607 @@
+The repo-docs-lifecycle skill as it stood before roadmap 19 Phase 8 (2026-09-20).
+Imported verbatim from ~/.claude/skills/repo-docs-lifecycle/ (the source the harness loads as
+'repo-docs-lifecycle'; the claude.ai-synced copy 'anthropic-skills:repo-docs-lifecycle' was
+byte-identical at import). Four files, 28,415 bytes in total; each follows its header line.
+The revised skill is the subject of docs/roadmap/19-docs-layers/07-record-phase-8.md.
+
+=================================================================================
+FILE: SKILL.md  (4712 bytes)
+=================================================================================
+---
+name: repo-docs-lifecycle
+description: Manage the in-repo documentation lifecycle for library/CLI development projects that keep a docs/roadmap/ (development record) and docs/command_reference/ (usage catalogue). Use this skill at BOTH ends of every development session on such a project. Trigger it at SESSION START whenever the user wants to catch up, review the roadmap, see recent progress, or plan the next task/feature/fix ("let's plan", "what's next", "catch up on the project", "start a new session"). Trigger it at SESSION END whenever an implementation is finished or a plan concludes and the results must be persisted ("we're done", "close the session", "update the docs", "persist this", "write the report"), or whenever any feature/CLI/flag was created, changed, or removed — even if the user doesn't explicitly mention documentation. Also trigger when the user asks to reorganize, split, renumber, or refactor documentation files.
+---
+
+# Repo Docs Lifecycle
+
+Development knowledge must never remain stranded in a chat thread. This skill
+makes the repository itself the single source of truth: the roadmap records
+*why and how* the project evolved; the command reference records *how to use*
+what exists. Any future agent thread must be able to reconstruct full context
+from the repo alone, finding exactly the granular piece of information it
+needs.
+
+## The two moments
+
+This skill covers two distinct moments with different needs. Decide which one
+applies, then read **only** the matching workflow file:
+
+| Moment | When | Read |
+| --- | --- | --- |
+| **Session start** | Catching up and building a plan for a new task | [references/session_start.md](references/session_start.md) |
+| **Session end** | A plan is implemented; persist all gained knowledge | [references/session_end.md](references/session_end.md) |
+
+Both workflows depend on the shared documentation contract in
+[references/doc_conventions.md](references/doc_conventions.md) — read it in
+both cases, before the workflow file.
+
+If a session ends with work only partially done, still run the session-end
+workflow: record the partial state, what was verified, and what remains, so
+the next thread can resume without the chat history.
+
+## Expected repository layout
+
+```
+<repo>/
+├── README.md            (project front page)
+├── STRUCTURE.md         (codebase layout guide)
+└── docs/
+    ├── roadmap/
+    │   ├── README.md            (master index — the entry point)
+    │   └── NN-topic-slug.md     (numbered topic files)
+    └── command_reference/
+        ├── README.md            (catalogue index + shared options)
+        └── NN-toolname.md       (one page per CLI tool)
+```
+
+If the project doesn't yet have this layout, create the missing pieces
+following the templates in doc_conventions.md before proceeding.
+
+## Non-negotiable principles
+
+1. **Nothing stays in the chat.** Every insight, fix, evaluation, decision,
+   rejected approach, benchmark number, and roadmap change produced during a
+   session is written into the repo docs before the session closes.
+2. **Every level has a README index.** The top-level README, the roadmap
+   README, and the command_reference README each reference every file below
+   them, capturing the hierarchy so an agent knows exactly where to look.
+3. **Files are numbered and topical.** Content is organized by topic/aspect,
+   one topic per file, with zero-padded numeric prefixes giving a stable
+   reading order.
+4. **The command reference grows with the code.** Every CLI surface created,
+   changed, or expanded gets its reference page created or updated in the same
+   session — with flag tables and ready-to-run example recipes.
+5. **No file ever grows too big.** For **skill-era files** (created or kept
+   under the limit since the skill's adoption), exceeding **~300 lines or
+   ~2,500 words (~15 KB)** — whichever trips first, since long single-line
+   paragraphs defeat a line count — MUST be split before the session closes;
+   semantic drift (one file covering multiple coherent topics) SHOULD
+   trigger a split even below it. **Legacy files** already over the limit
+   when the skill arrives are handled by **containment, not correction**:
+   they are FROZEN — never split, never appended to. New content that
+   topically belongs to a frozen file goes to a numbered **continuation
+   file** instead (see doc_conventions.md §Legacy containment); only
+   surgical one-line edits (a status update, an open-item resolution note,
+   each linking to the continuation) are made in place. Restructuring a
+   frozen file is a separate, explicitly user-requested pass — never a
+   session-close side effect.
+
+=================================================================================
+FILE: references/doc_conventions.md  (12059 bytes)
+=================================================================================
+# Documentation conventions (shared contract)
+
+The contract both workflows enforce. Derived from a mature reference project
+(DualC); when in doubt, prefer these conventions over inventing new ones.
+
+## Contents
+
+1. [File naming & numbering](#1-file-naming--numbering)
+2. [Cross-referencing rules](#2-cross-referencing-rules)
+3. [Roadmap: README index anatomy](#3-roadmap-readme-index-anatomy)
+4. [Roadmap: topic file anatomy](#4-roadmap-topic-file-anatomy)
+5. [Status vocabulary](#5-status-vocabulary)
+6. [Command reference: README index anatomy](#6-command-reference-readme-index-anatomy)
+7. [Command reference: tool page anatomy](#7-command-reference-tool-page-anatomy)
+8. [Writing style](#8-writing-style)
+
+---
+
+## 1. File naming & numbering
+
+- Pattern: `NN-topic-slug.md` — zero-padded two-digit prefix, lowercase
+  kebab-case slug (`05-tpms-lattices.md`, `11-dualc_field.md`).
+- **Numbers are IDs, not taxonomy.** A number records accretion order and
+  identity — nothing else. New topics take the next free number; existing
+  numbers are never reused for a different topic, and files are **never
+  renumbered to restore semantic order** (renumbering breaks every inbound
+  reference for zero information gain). Semantic grouping and reading order
+  live exclusively in the README indexes, which are cheap to reorder; gaps
+  from retired numbers are proof the ID rule is being honored, not
+  untidiness to fix. Likewise, item IDs (`#17`) are assigned at birth, kept
+  for life across files and splits, and are the **preferred addressing
+  scheme** in prose and anchors.
+- In `command_reference/`, the slug is the exact binary/tool name
+  (`07-dualc_slice.md`). In `roadmap/`, the slug names the topic/aspect
+  (`03-booleans-csg.md`).
+- One coherent topic per file. If a topic outgrows one file, split into
+  sub-aspects, each with its own number (renumbering procedure:
+  session_end.md §Refactoring).
+- **Subfolder promotion**: when a page's topic is too large for one ≤300-line
+  file even after semantic tightening, the page becomes a **folder with the
+  same number+slug** (`11-dualc_field.md` → `11-dualc_field/`). The folder's
+  `README.md` is the overview + mini-index; children restart local numbering
+  (`01-vocabulary.md`, `02-strut-lattices.md`, …). The parent index keeps its
+  single row for the topic/tool, linking the folder README — so the top-level
+  1:1 mapping survives and the hierarchy stays fully index-captured. The same
+  pattern applies to roadmap topics.
+
+## 1b. Legacy containment (pre-existing oversize files)
+
+A **legacy file** is one already over the size limit (~300 lines / ~2,500
+words / ~15 KB) at the moment the skills start maintaining the repo. Rules:
+
+- **Frozen**: never split, never restructured, and — critically — **never
+  appended to**. Every append deepens the problem the limit exists to
+  prevent.
+- **Continuation files** receive the new content: the next free number,
+  slug `<original-slug>-continued` (`16-strut-lattices-continued.md`
+  continuing `05-tpms-lattices.md`'s strut thread). First line of the
+  intro: `Continues [05](05-tpms-lattices.md); new entries land here from
+  <date>.` The frozen file gains one line at its end: `Continued in
+  [16](…)`. Both README index rows name the relationship, so navigation
+  never depends on guessing.
+- **Permitted in-place edits** to a frozen file are one-liners only: a
+  status word/date updated, an open item annotated as resolved with a link
+  to the continuation entry that resolved it. No paragraphs, no new entries.
+- A continuation file is a normal skill-era file: the size invariant applies
+  to it in full.
+- Frozen files are inventoried once in the roadmap README (a short "Legacy
+  files (frozen)" note or a status suffix in their index rows) — visible,
+  not nagged about at every session close.
+
+## 2. Cross-referencing rules
+
+References are the navigation fabric — be generous and **granular**:
+
+- Always link file + anchor when pointing at a specific item:
+  `[05 #17](05-tpms-lattices.md#17-strut-based-lattices...)`, not just the file.
+- Shorthand: refer to topic files by their number in prose — `[11 step 5]`,
+  `[12 §D]` — with the link carrying the full path.
+- Roadmap topic pages link to the matching command_reference pages
+  (`../command_reference/NN-tool.md`) and vice versa
+  (`../roadmap/NN-topic.md`) whenever a feature is discussed.
+- Every non-README file ends with a footer:
+  `← Back to the [Roadmap index](README.md).` (or Command Reference index).
+- Section headings that will be link targets must be **frozen at birth**: a
+  heading contains only the item ID and title (`## #17 Strut lattices`) —
+  never status, dates, or anything else that mutates, because the anchor is
+  derived from the heading text and every status change would silently break
+  all inbound links. Status and date go on the first body line under the
+  heading (`**DONE (2026-07-06).** Delivered: …`) where they can change
+  freely.
+- **Link, don't duplicate.** Each fact class has exactly one home: usage
+  facts (flags, defaults, recipes) live only in the command reference;
+  historical facts (rationale, evidence, rejected approaches) live only in
+  the roadmap record. When the other side needs the information, it links —
+  duplicated content is where the two copies start drifting apart.
+
+## 3. Roadmap: README index anatomy
+
+The roadmap README.md is the **master index and current-state snapshot**.
+Required sections, in order:
+
+```markdown
+# <Project> — Roadmap & development record
+
+<Purpose paragraph: what this folder is, organized-by-topic, entries preserved
+chronologically within topic; links to ../command_reference/ and any
+architecture doc.>
+
+**Status legend:** **DONE** · **NEXT** (picked up next) · **PLANNED** ·
+**DEFERRED** (with a trigger to revisit).
+
+## Current focus
+<Narrative of the active thrust: what was re-sequenced/decided when, with
+dates and links to the rationale. Bullet list of the headline items with their
+status and one-line evidence.>
+
+## Next up
+<Prioritized track(s), highest-priority-first, each item linking to the topic
+file holding its rationale. DEFERRED items name their revisit trigger.>
+
+## Principal blocks
+| # | Topic | What it covers | Status |
+| --- | --- | --- | --- |
+<one row per topic file: number, linked title, one-line scope, compact status>
+
+## How the blocks relate
+<Short narrative of the dependency/architecture story across topics.>
+```
+
+The **Principal blocks table is the completeness invariant**: every
+`NN-*.md` in the folder appears exactly once, with a status that matches the
+file's content.
+
+## 4. Roadmap: topic file anatomy
+
+```markdown
+# <Topic title>
+
+<Intro paragraph: scope of this topic, how it builds on / relates to other
+topics (links), where the usage documentation lives (command_reference links).>
+
+> **Open items found <date>** (blockquote — running list of discovered
+> issues/ideas with links to where they came from; strike or annotate when
+> resolved.)
+
+## <Milestone / phase / item heading — frozen; no status or dates here>
+**DONE (<date>).** Delivered:
+- <concrete artifacts: files, classes, CLIs, flags>
+- <design decisions and their rationale>
+
+Verified: <test counts, parity numbers, byte-identical checks, benchmarks —
+concrete evidence, not adjectives.>
+
+## #<n> <Next item — frozen title>
+**PLANNED** | **DEFERRED** — <proposed approach. If DEFERRED: the explicit
+trigger that revisits it.>
+
+---
+
+← Back to the [Roadmap index](README.md).
+```
+
+Key rules:
+
+- **Entries are chronological within the topic and preserved verbatim** —
+  this is a development *record*. Never rewrite history; append follow-ups
+  (`**Follow-up (<date>):** ...`) and update statuses instead.
+- **Date-stamp every event**: completions, re-evaluations, discoveries,
+  scope changes (`DONE (2026-06-14)`, `Open items found 2026-06-12`).
+- **Record evidence** with every DONE: what was verified and how.
+- **Record rejected/changed approaches** and why — an analyzed-and-dropped
+  idea (with rationale) prevents a future thread from re-exploring it.
+- Numbered items (`#17`, `#19`) keep their number for life, across files.
+
+## 5. Status vocabulary
+
+| Status | Meaning |
+| --- | --- |
+| **DONE** | Implemented and verified; carries a date and evidence. |
+| **NEXT** | The item picked up next. |
+| **PLANNED** | Scheduled, approach sketched, not yet sequenced. |
+| **DEFERRED** | Consciously postponed — MUST name the trigger to revisit. |
+| **DROPPED** | Analyzed and rejected — MUST record the rationale. |
+
+Partial completion is expressed by qualifying, not inventing statuses:
+`CORE DONE (<date>); Phases 3-5 PLANNED`.
+
+Two additional grep-able markers cover documentation debt:
+
+| Marker | Meaning |
+| --- | --- |
+| `**Reconstructed (<date>) from commit <hash>**` | The entry was written retroactively from a commit, not at implementation time; treat its detail as best-effort, not first-hand. |
+| `DRIFT-PENDING:` | Something required by the contract is missing (verification evidence, rationale, a recipe) and MUST NOT be fabricated — the line states exactly what is owed. Session end sweeps for this keyword; a marker is only removed by supplying what it asks for. |
+
+## 6. Command reference: README index anatomy
+
+```markdown
+# <Project> — Complete Command Reference
+
+<Purpose paragraph: exhaustive catalogue claim — every tool, flag, decorator,
+recipe. One page per tool; this page holds the shared preludes.>
+
+<Build prelude: the exact commands to build and reach the executables,
+platform notes.>
+
+## The <N> tools (binaries)
+| # | Tool | Purpose | Page |
+| --- | --- | --- | --- |
+<one row per tool page, linked>
+
+<Optional shared sections: cross-tool keyboard maps, shared/common options
+table, export-format dispatch, "where X is documented" redirect tables for
+features that are nodes/flags rather than tools.>
+```
+
+Like the roadmap index, the tool table is the completeness invariant: every
+`NN-*.md` page appears exactly once.
+
+## 7. Command reference: tool page anatomy
+
+```markdown
+# Tool <N>: `tool_name` (<one-phrase role>)
+
+<One-sentence summary.>
+
+```
+tool_name <required> [--flag VALUE] [--switch]
+          [--more flags, wrapped]
+```
+
+<Prose: what it composes/does, complexity/cost characteristics, how it
+relates to sibling tools, what it intentionally does NOT do.>
+
+| Flag | Default | Meaning |
+| --- | --- | --- |
+| `<input>` | (required) | ... |
+| `--flag V` | `default` | ... |
+
+<**Caveats in bold prose**: sharp edges, common failure modes, exact warning
+messages the user will see and what they mean, platform notes.>
+
+## Recipes
+| # | Command | What it builds |
+| --- | --- | --- |
+| X1 | `tool_name ... ready-to-run with defaults` | <result> |
+| X2 | `tool_name ... a realistic advanced case` | <result> |
+
+---
+
+← Back to the [Command Reference index](README.md) for the build prelude and common options.
+```
+
+Key rules:
+
+- **Every flag is in the table** with its real default. "Anything the user
+  must know" lives here — parameters, flags, decorators, sub-commands, exit
+  behaviors, output naming.
+- **Recipes are ready-to-run**: copy-paste commands using real sample data,
+  numbered with a per-tool letter prefix (`S1`, `S2` for slice…), each with a
+  one-line statement of what it produces.
+- Document **failure modes with their exact messages** (e.g. what an empty
+  output means and which warning accompanies it).
+- Features exposed as nodes/options of another tool are documented **inside
+  that tool's page** with a redirect row in the README — no phantom pages.
+
+## 8. Writing style
+
+- Dense, precise, technical prose; no filler. Bold the load-bearing terms.
+- Concrete numbers over adjectives ("~49× lower peak RAM", "62/62 pass",
+  "10–49 min → ~40 s"), with the benchmark linked.
+- Prefer tables for enumerable facts (flags, tools, statuses); prose for
+  rationale and narrative.
+- Write for a **future agent with zero chat context**: spell out paths,
+  exact commands, exact names. Never write "as discussed" or "see above
+  conversation".
+
+=================================================================================
+FILE: references/session_start.md  (4106 bytes)
+=================================================================================
+# Session start — gather context, build the plan
+
+Goal: reconstruct full project context **from the repo alone**, then produce a
+plan for one specific task/improvement, grounded in the roadmap's current
+state. Do not rely on chat memory from other threads; the repo is the source
+of truth.
+
+## 1. Orient
+
+Read, in this order, drilling down only as far as the task requires:
+
+1. **Top-level `README.md`** — what the project is.
+2. **`STRUCTURE.md`** — where things live in the codebase.
+3. **`docs/roadmap/README.md`** — the master index. Extract:
+   - the **Current focus** narrative (what thrust is active, what was
+     recently re-sequenced and why);
+   - the **Next up** priority order;
+   - the **Principal blocks** table (topic map + statuses).
+
+## 2. Catch up on recent history
+
+- `git log --oneline -n 30` (adjust depth to the gap since the last
+  documented date in the roadmap). Compare against the roadmap: any commits
+  not yet reflected in the docs are **undocumented drift**. On detection,
+  offer the user two options (never fix silently, never merely warn):
+  1. **Immediate micro-pass** (recommended, ~minutes): reconstruct what the
+     commit diff supports into the proper roadmap topic file and
+     command_reference page, marking the entry
+     `**Reconstructed (<date>) from commit <hash>**` and every unrecoverable
+     gap (rationale, verification evidence, recipes) with a
+     **`DRIFT-PENDING:`** line stating exactly what is missing. Never
+     fabricate the gaps — no invented verification, no recipes for
+     unverified behavior.
+  2. **Leave a trace**: write only the `DRIFT-PENDING` marker (one dated line
+     in the relevant roadmap topic file + a mention in the README status row)
+     so the debt is in-repo and grep-able; the session-end workflow of any
+     future session picks it up.
+- `git status` / current branch — note uncommitted work or an active feature
+  branch.
+- Check the newest dates appearing in roadmap files vs. the newest commits.
+
+## 3. Drill into the task's topic
+
+Once a candidate task is identified (by the user, or proposed from the
+**Next up** list):
+
+- Read the roadmap **topic file(s)** covering it. For oversize legacy
+  files, read **surgically**: locate the relevant sections first
+  (`grep -n "^#" file.md` for the heading map, `grep -n` for the item ID),
+  then read only those line ranges — never load 1,500 lines wholesale. If a
+  frozen file has a continuation file, read the continuation too — the
+  newest state of the thread lives there. — the item's history,
+  proposed approach, open items in the blockquote, deferral triggers, and
+  every cross-linked section it points to (follow `[NN §X]` links; they were
+  placed to be followed).
+- Read the **command_reference page(s)** of any tool the task touches — the
+  current user-facing contract you must preserve or consciously change.
+- Read the relevant source files identified via STRUCTURE.md.
+
+## 4. Produce the plan
+
+The plan states:
+
+1. **Task**, phrased against the roadmap item(s) it advances (by number:
+   "advances #17 Phase 4").
+2. **Current state** — what exists now, with evidence from docs/code.
+3. **Approach** — concrete steps, files to touch, expected new/changed CLI
+   surface.
+4. **Verification** — how success will be demonstrated (tests, parity
+   counts, benchmarks, byte-identical checks), matching the evidence style
+   the roadmap already uses.
+5. **Documentation impact forecast** — which roadmap topic files and which
+   command_reference pages will need updates at session end; whether a new
+   topic/tool page or a refactoring is likely. This makes the session-end
+   pass cheap and never forgotten.
+
+If the plan **deviates from the roadmap** (new task, changed approach,
+re-prioritization), say so explicitly — the deviation itself is knowledge
+that must land in the roadmap at session end.
+
+## 5. Confirm before implementing
+
+Present the plan to the user for confirmation or adjustment before touching
+code. Keep the confirmed plan's structure — it becomes the checklist the
+session-end workflow reports against.
+
+=================================================================================
+FILE: references/session_end.md  (7538 bytes)
+=================================================================================
+# Session end — persist knowledge, maintain the docs
+
+Goal: after implementation, move **everything** of value out of the chat and
+into the repo docs, then verify and (if needed) refactor the structure. When
+this workflow completes, a fresh agent thread must be able to pick up the
+project with zero loss.
+
+Run all five steps, in order. Step 4 (refactoring check) and step 5
+(integrity audit) are mandatory even when steps 1–3 changed little.
+
+## 1. Harvest the session
+
+First, sweep for outstanding debt: `grep -rn "DRIFT-PENDING" docs/`. For each
+marker: resolve it this session if the missing piece is now producible (run
+the verification, record the evidence, add the deferred recipe, remove the
+marker) — otherwise leave the marker in place and mention it in the closing
+report. Markers are never removed without supplying what they ask for.
+
+Then list, from the whole session (plan, implementation, debugging,
+evaluations):
+
+- features/CLI surfaces **created, changed, expanded, or removed**;
+- fixes, and the root-cause insight behind each;
+- design decisions taken, alternatives **considered and rejected** (with why);
+- evaluations/benchmarks run, with their numbers;
+- roadmap deviations: tasks added, re-scoped, re-sequenced, deferred
+  (with trigger), or dropped (with rationale);
+- open items discovered but not addressed;
+- verification evidence (test counts, parity results, identical-output
+  checks).
+
+Every list item must land in step 2 or 3. Nothing stays only in the chat.
+
+## 2. Update the roadmap (`docs/roadmap/`)
+
+Per doc_conventions.md §4–5:
+
+- Routing first: if the target topic file is a **frozen legacy file**
+  (over-limit before skill adoption — see doc_conventions.md §1b), do NOT
+  append to it; write the entry in its **continuation file** (creating it,
+  with the two-way `Continues/Continued in` links and index rows, if this is
+  the first continuation). In-place edits to the frozen file: one-liners
+  only.
+- In each affected (non-frozen) **topic file**: append the dated entry (milestone DONE
+  with Delivered/Verified, or Follow-up), update item statuses, annotate
+  resolved open items, add newly discovered open items to the blockquote,
+  record rejected approaches and deferral triggers.
+- If the work opened a genuinely **new topic**, create the next-numbered
+  topic file (intro, cross-links, footer) rather than stretching an existing
+  one.
+- Update **`roadmap/README.md`**: Current focus narrative, Next up ordering,
+  the affected rows of the Principal blocks table (status column must match
+  the topic file), and — if a topic was added — a new table row and, when
+  relevant, a sentence in "How the blocks relate".
+
+## 3. Update the command reference (`docs/command_reference/`)
+
+For **every** CLI surface touched (new tool, new flag, changed default,
+changed behavior, new node/decorator, removed option) — per
+doc_conventions.md §6–7:
+
+- New tool → create the next-numbered `NN-toolname.md` page (synopsis, prose,
+  full flag table, caveats, Recipes) and add its row to the README tool table.
+- Changed tool → update its page: synopsis, flag table row(s), caveats
+  (including new failure modes and their exact messages), and add/adjust
+  recipes demonstrating the new capability.
+- Feature landed as a node/option of an existing tool → document it inside
+  that tool's page; add a redirect row in the README if users might look for
+  it as a standalone tool.
+- Update shared README sections when affected (common options, keyboard
+  maps, build prelude).
+
+Recipes rule: any newly added capability gets **at least one ready-to-run
+recipe** exercising it.
+
+## 4. Refactoring check
+
+Check **every file** in `docs/roadmap/` and `docs/command_reference/`
+(`wc -l -w -c docs/roadmap/*.md docs/command_reference/*.md`, including
+subfolders):
+
+- **Hard trigger — size**: a file exceeding **~300 lines or ~2,500 words
+  (~15 KB)** — whichever trips first; long single-line paragraphs defeat a
+  pure line count — MUST be split
+  before the session closes. No file is ever left over the limit. In a repo
+  maintained by this skill from the start, this only ever concerns the file(s)
+  that grew past the limit this session, so the cost stays small.
+- **Soft trigger — semantics**: split even a shorter file when it covers
+  more than one coherent topic/aspect, when readers must scroll through
+  unrelated material to find one item, or when new features changed the
+  project's shape enough that the doc structure no longer mirrors it.
+- **Legacy files are exempt by design**: files already over the limit
+  before skill adoption are FROZEN (doc_conventions.md §1b) — contained via
+  continuation files, never split at session close. Splitting them is a
+  separate, explicitly user-requested pass (manual or via a dedicated
+  retrofit skill), never a session-close side effect. Ensure they are
+  inventoried once in the roadmap README; do not re-report them every
+  session.
+
+### Split procedure
+
+1. **Partition semantically**, not mechanically: identify the coherent
+   sub-topics; each becomes one file with one clear scope. Chronological
+   entries stay verbatim and stay in date order within their new home.
+2. **Number the new files** with the next free numbers (never reuse a
+   retired number for a different topic). If the original file survives as
+   the "overview" of the topic, it keeps its number and gains a mini-index
+   linking its children; otherwise it is replaced and its number retired.
+3. **Repair every cross-reference**: search the whole repo for links and
+   shorthand mentions to the old file/anchors
+   (`grep -rn "old-file-name" .` and `grep -rn "#old-anchor" docs/`) and
+   update each to the new file+anchor. Anchors must be re-derived from the
+   new headings, not assumed.
+4. **Update the README indexes**: the Principal blocks / tool table gets the
+   new rows (and the old row updated or removed); hierarchy must remain
+   fully captured by the indexes.
+5. Add footers to the new files.
+
+## 5. Integrity audit
+
+Before declaring the session closed, verify:
+
+- [ ] Every file in `docs/roadmap/` appears exactly once in the roadmap
+      README's Principal blocks table; statuses match file contents.
+- [ ] Every file in `docs/command_reference/` appears exactly once in its
+      README's tool table.
+- [ ] No **skill-era** file (roadmap or command_reference) exceeds ~300
+      lines / ~2,500 words / ~15 KB — per step 4,
+      any offender was split. Frozen legacy files are exempt
+      (containment, §1b) and no session content was appended to them.
+- [ ] **Repo-wide link check** — scan every `](...)` target in `docs/`
+      (not just files edited this session): **fix** every broken relative
+      link whose correct target is determinable (renamed/renumbered/moved
+      file, stale anchor); **report** any breakage that cannot be resolved
+      confidently (e.g. the target file genuinely doesn't exist anywhere)
+      instead of guessing. Spot-check anchors of links created or moved.
+- [ ] Every DONE recorded this session carries a date and verification
+      evidence.
+- [ ] Every DEFERRED carries a trigger; every DROPPED carries a rationale.
+- [ ] Each new/changed capability has a command_reference recipe.
+- [ ] Top-level README.md / STRUCTURE.md updated if the project's shape or
+      build story changed.
+- [ ] Nothing from the step-1 harvest list is left undocumented.
+
+Report the outcome to the user as a short summary: files created/updated,
+splits performed, and anything intentionally left open.
+

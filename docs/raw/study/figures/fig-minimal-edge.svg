@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="540" viewBox="0 0 1040 540" role="img">
+<defs></defs>
+<rect width="1040" height="540" fill="#fcfcfb"/>
+<text x="28.00" y="34.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="15" font-weight="650" fill="#0b0b0b" text-anchor="start">The output rule: one quad per sign-changing grid edge</text>
+<text x="28.00" y="55.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">Marching cubes walks cells and emits polygons inside them. Dual contouring walks edges and emits polygons AROUND them.</text>
+<text x="96.00" y="116.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">the four cells sharing one grid edge, seen end-on</text>
+<rect x="96.00" y="132.00" width="108.00" height="108.00" rx="0" fill="#ffffff" stroke="#c3c2b7" stroke-width="1.7"/>
+<rect x="96.00" y="240.00" width="108.00" height="108.00" rx="0" fill="#ffffff" stroke="#c3c2b7" stroke-width="1.7"/>
+<rect x="204.00" y="132.00" width="108.00" height="108.00" rx="0" fill="#ffffff" stroke="#c3c2b7" stroke-width="1.7"/>
+<rect x="204.00" y="240.00" width="108.00" height="108.00" rx="0" fill="#ffffff" stroke="#c3c2b7" stroke-width="1.7"/>
+<polygon points="162.96,203.28 251.52,188.16 242.88,285.36 152.16,272.40" fill="#1baf7a" stroke="#1baf7a" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" opacity="0.18"/>
+<polygon points="162.96,203.28 251.52,188.16 242.88,285.36 152.16,272.40" fill="none" stroke="#1baf7a" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/>
+<line x1="162.96" y1="203.28" x2="242.88" y2="285.36" stroke="#1baf7a" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="4 3"/>
+<circle cx="162.96" cy="203.28" r="6.00" fill="#1baf7a" stroke="#ffffff" stroke-width="2"/>
+<circle cx="251.52" cy="188.16" r="6.00" fill="#1baf7a" stroke="#ffffff" stroke-width="2"/>
+<circle cx="242.88" cy="285.36" r="6.00" fill="#1baf7a" stroke="#ffffff" stroke-width="2"/>
+<circle cx="152.16" cy="272.40" r="6.00" fill="#1baf7a" stroke="#ffffff" stroke-width="2"/>
+<circle cx="204.00" cy="240.00" r="8.50" fill="#eb6834" stroke="#ffffff" stroke-width="2.4"/>
+<circle cx="204.00" cy="240.00" r="3.00" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="226.00" y="206.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="650" fill="#8a3410" text-anchor="start">the shared edge,</text>
+<text x="226.00" y="221.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="650" fill="#8a3410" text-anchor="start">end-on</text>
+<line x1="358.00" y1="260.00" x2="358.00" y2="150.00" stroke="#eb6834" stroke-width="4" stroke-linecap="round"/>
+<circle cx="358.00" cy="260.00" r="6.50" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/>
+<circle cx="358.00" cy="150.00" r="6.50" fill="#ffffff" stroke="#c3c2b7" stroke-width="2"/>
+<text x="370.00" y="264.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#184f95" text-anchor="start">inside</text>
+<text x="370.00" y="154.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#898781" text-anchor="start">outside</text>
+<text x="340.00" y="290.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">the signs disagree,</text>
+<text x="340.00" y="306.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">so the surface crosses</text>
+<text x="340.00" y="322.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">here exactly once</text>
+<text x="96.00" y="400.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="400" fill="#52514e" text-anchor="start">Each of the four cells contributes its own QEF vertex. Together they</text>
+<text x="96.00" y="419.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="400" fill="#52514e" text-anchor="start">form one quad, split into two triangles along a diagonal.</text>
+<text x="96.00" y="446.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="400" fill="#52514e" text-anchor="start">Every grid edge whose endpoints disagree is crossed exactly once, so</text>
+<text x="96.00" y="465.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="400" fill="#52514e" text-anchor="start">it owns exactly one quad — no double counting, no search.</text>
+<text x="96.00" y="492.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="400" fill="#52514e" text-anchor="start">With manifold DC each cell may own more than one vertex; each of the</text>
+<text x="96.00" y="511.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="400" fill="#52514e" text-anchor="start">four resolves its OWN local edge to its OWN component.</text>
+<rect x="560.00" y="84.00" width="456.00" height="210.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<text x="572.00" y="104.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="650" fill="#52514e" text-anchor="start">Winding is decided by one bit</text>
+<text x="578.00" y="128.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">corner0Inside = the sign at the LOW endpoint of the edge along its axis.</text>
+<line x1="600.00" y1="238.00" x2="600.00" y2="168.00" stroke="#eb6834" stroke-width="3.5" stroke-linecap="round"/>
+<circle cx="600.00" cy="238.00" r="6.00" fill="#2a78d6" stroke="#2a78d6" stroke-width="2"/>
+<circle cx="600.00" cy="168.00" r="6.00" fill="#ffffff" stroke="#c3c2b7" stroke-width="2"/>
+<text x="612.00" y="242.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">low corner inside</text>
+<line x1="662.00" y1="204.00" x2="715.20" y2="204.00" stroke="#1baf7a" stroke-width="2.4" stroke-linecap="round"/>
+<polygon points="722.00,204.00 714.70,207.26 714.70,200.74" fill="#1baf7a" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="662.00" y="190.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="600" fill="#0d6b4c" text-anchor="start">CCW as tabulated</text>
+<text x="662.00" y="226.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#898781" text-anchor="start">outward normal along +axis</text>
+<line x1="830.00" y1="238.00" x2="830.00" y2="168.00" stroke="#eb6834" stroke-width="3.5" stroke-linecap="round"/>
+<circle cx="830.00" cy="238.00" r="6.00" fill="#ffffff" stroke="#c3c2b7" stroke-width="2"/>
+<circle cx="830.00" cy="168.00" r="6.00" fill="#2a78d6" stroke="#2a78d6" stroke-width="2"/>
+<text x="842.00" y="242.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">low corner outside</text>
+<line x1="892.00" y1="204.00" x2="945.20" y2="204.00" stroke="#1baf7a" stroke-width="2.4" stroke-linecap="round"/>
+<polygon points="952.00,204.00 944.70,207.26 944.70,200.74" fill="#1baf7a" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="892.00" y="190.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="600" fill="#d03b3b" text-anchor="start">triangles reversed</text>
+<text x="892.00" y="226.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#898781" text-anchor="start">outward normal along -axis</text>
+<rect x="560.00" y="310.00" width="456.00" height="128.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<text x="572.00" y="330.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="650" fill="#52514e" text-anchor="start">kQuadCCWPlus — the one asymmetry in the tables</text>
+<text x="578.00" y="348.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">X: {0, 1, 2, 3}</text>
+<text x="578.00" y="370.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="12" font-weight="700" fill="#d03b3b" text-anchor="start">Y: {0, 3, 2, 1}</text>
+<text x="578.00" y="392.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">Z: {0, 1, 2, 3}</text>
+<text x="720.00" y="348.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">edgeProc's four-cell ordering uses the axis</text>
+<text x="720.00" y="366.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">pair (Y,Z) for X, (X,Z) for Y and (X,Y) for Z.</text>
+<text x="720.00" y="384.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">(X,Z) is LEFT-handed with respect to +Y, so</text>
+<text x="720.00" y="402.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">the traversal order flips for that axis alone.</text>
+<text x="578.00" y="424.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#898781" text-anchor="start">An obvious interviewer probe — be able to explain it cold.</text>
+<rect x="560.00" y="454.00" width="456.00" height="76.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<text x="572.00" y="474.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="650" fill="#52514e" text-anchor="start">If a neighbour is missing</text>
+<text x="578.00" y="492.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">leafVertexIndex returns -1 and the quad is skipped entirely —</text>
+<text x="578.00" y="510.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">which is how the refined region's outer boundary stays clean.</text>
+</svg>

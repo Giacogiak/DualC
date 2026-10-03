@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="516" viewBox="0 0 1000 516" role="img">
+<defs></defs>
+<rect width="1000" height="516" fill="#fcfcfb"/>
+<text x="28.00" y="34.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="15" font-weight="650" fill="#0b0b0b" text-anchor="start">The DualC pipeline: two stages, one contract</text>
+<text x="28.00" y="54.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">The sampler is input-aware and contour-agnostic. The contourer is contour-aware and input-agnostic.</text>
+<rect x="28.00" y="84.00" width="172.00" height="150.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<text x="114.00" y="108.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="700" fill="#898781" text-anchor="middle" letter-spacing="0.08em">INPUT</text>
+<rect x="46.00" y="122.00" width="136.00" height="42.00" rx="6" fill="#cde2fb" stroke="#2a78d6" stroke-width="1.6"/>
+<text x="114.00" y="143.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="600" fill="#184f95" text-anchor="middle">triangle mesh</text>
+<text x="114.00" y="178.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="middle">or</text>
+<rect x="46.00" y="186.00" width="136.00" height="42.00" rx="6" fill="#fdeee7" stroke="#eb6834" stroke-width="1.6"/>
+<text x="114.00" y="207.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="600" fill="#8a3410" text-anchor="middle">implicit field</text>
+<rect x="232.00" y="84.00" width="216.00" height="182.00" rx="8" fill="#ffffff" stroke="#2a78d6" stroke-width="1.8"/>
+<text x="340.00" y="108.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="700" fill="#2a78d6" text-anchor="middle" letter-spacing="0.08em">SAMPLER</text>
+<text x="340.00" y="128.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">src/sampler.cpp</text>
+<circle cx="258.00" cy="152.00" r="3.00" fill="#2a78d6" stroke="none" stroke-width="1.5"/>
+<text x="270.00" y="156.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">auto-fit root bounds</text>
+<circle cx="258.00" cy="176.00" r="3.00" fill="#2a78d6" stroke="none" stroke-width="1.5"/>
+<text x="270.00" y="180.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">refine while cellOverlaps</text>
+<circle cx="258.00" cy="200.00" r="3.00" fill="#2a78d6" stroke="none" stroke-width="1.5"/>
+<text x="270.00" y="204.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">8 corner signs at maxDepth</text>
+<circle cx="258.00" cy="224.00" r="3.00" fill="#2a78d6" stroke="none" stroke-width="1.5"/>
+<text x="270.00" y="228.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">edgeHit -&gt; point + normal</text>
+<rect x="482.00" y="84.00" width="216.00" height="182.00" rx="8" fill="#f4f8fe" stroke="#86b6ef" stroke-width="1.8"/>
+<text x="590.00" y="108.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="700" fill="#184f95" text-anchor="middle" letter-spacing="0.08em">THE CONTRACT</text>
+<text x="590.00" y="128.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="12" font-weight="600" fill="#184f95" text-anchor="middle">HermiteOctree</text>
+<text x="500.00" y="156.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">cornerInside[8]  (bool)</text>
+<text x="500.00" y="178.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">edges[12] {pos, normal,</text>
+<text x="500.00" y="200.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">            hasCrossing}</text>
+<text x="500.00" y="222.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">children[8], bounds, depth</text>
+<text x="500.00" y="250.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">signs give topology;</text>
+<text x="500.00" y="266.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">points + normals give geometry</text>
+<rect x="732.00" y="84.00" width="216.00" height="182.00" rx="8" fill="#ffffff" stroke="#1baf7a" stroke-width="1.8"/>
+<text x="840.00" y="108.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="700" fill="#0d6b4c" text-anchor="middle" letter-spacing="0.08em">CONTOURER</text>
+<text x="840.00" y="128.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="11" font-weight="400" fill="#898781" text-anchor="middle">src/contourer.cpp</text>
+<circle cx="758.00" cy="152.00" r="3.00" fill="#1baf7a" stroke="none" stroke-width="1.5"/>
+<text x="770.00" y="156.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">one QEF vertex per sheet</text>
+<circle cx="758.00" cy="176.00" r="3.00" fill="#1baf7a" stroke="none" stroke-width="1.5"/>
+<text x="770.00" y="180.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">cellProc / faceProc / edgeProc</text>
+<circle cx="758.00" cy="200.00" r="3.00" fill="#1baf7a" stroke="none" stroke-width="1.5"/>
+<text x="770.00" y="204.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">quad per minimal edge</text>
+<circle cx="758.00" cy="224.00" r="3.00" fill="#1baf7a" stroke="none" stroke-width="1.5"/>
+<text x="770.00" y="228.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">optional adaptive collapse</text>
+<line x1="206.00" y1="175.00" x2="220.05" y2="175.00" stroke="#898781" stroke-width="2" stroke-linecap="round"/>
+<polygon points="226.00,175.00 219.61,177.85 219.61,172.15" fill="#898781" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<line x1="456.00" y1="175.00" x2="470.05" y2="175.00" stroke="#898781" stroke-width="2" stroke-linecap="round"/>
+<polygon points="476.00,175.00 469.61,177.85 469.61,172.15" fill="#898781" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<line x1="706.00" y1="175.00" x2="720.05" y2="175.00" stroke="#898781" stroke-width="2" stroke-linecap="round"/>
+<polygon points="726.00,175.00 719.61,177.85 719.61,172.15" fill="#898781" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="732.00" y="300.00" width="216.00" height="46.00" rx="6" fill="#eefaf5" stroke="#1baf7a" stroke-width="1.6"/>
+<text x="840.00" y="328.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="600" fill="#0d6b4c" text-anchor="middle">SurfaceMesh + normals</text>
+<line x1="840.00" y1="270.00" x2="840.00" y2="290.05" stroke="#898781" stroke-width="2" stroke-linecap="round"/>
+<polygon points="840.00,296.00 837.15,289.61 842.85,289.61" fill="#898781" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="28.00" y="366.00" width="920.00" height="62.00" rx="6" fill="#f9f9f7" stroke="#e1e0d9" stroke-width="1.4"/>
+<text x="46.00" y="390.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="11.5" font-weight="600" fill="#0b0b0b" text-anchor="start">sampleMeshToHermiteOctree()</text>
+<text x="268.00" y="390.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">is a three-line adapter: it builds a MeshSource and calls</text>
+<text x="586.00" y="390.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="11.5" font-weight="600" fill="#0b0b0b" text-anchor="start">sampleFieldToHermiteOctree()</text>
+<text x="46.00" y="412.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">So the mesh path is a strict subset of the field path — one refinement algorithm to reason about, one to test.</text>
+<text x="28.00" y="462.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="400" fill="#52514e" text-anchor="start">A leaf entirely inside or outside the surface carries no HermiteLeafData at all (leaf == nullptr, 680 bytes not allocated),</text>
+<text x="28.00" y="483.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="400" fill="#52514e" text-anchor="start">which is what makes the octree adaptive in memory before any collapse pass runs.</text>
+</svg>

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="520" viewBox="0 0 1060 520" role="img">
+<defs></defs>
+<rect width="1060" height="520" fill="#fcfcfb"/>
+<text x="28.00" y="34.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="15" font-weight="650" fill="#0b0b0b" text-anchor="start">The soft clamp: three regimes for one QEF minimiser</text>
+<text x="28.00" y="55.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">clampVertexToCell is on by default; clampToleranceCells defaults to 1.0, so the tolerance band is one cell width on every side.</text>
+<text x="40.00" y="100.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="700" fill="#0ca30c" text-anchor="start">INSIDE THE CELL</text>
+<rect x="40.00" y="128.00" width="252.00" height="252.00" rx="3" fill="none" stroke="#0ca30c" stroke-width="1.4" stroke-dasharray="5 4" opacity="0.5"/>
+<text x="42.00" y="120.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">tolerance band</text>
+<rect x="124.00" y="212.00" width="84.00" height="84.00" rx="3" fill="#ffffff" stroke="#c3c2b7" stroke-width="2"/>
+<circle cx="159.28" cy="249.80" r="6.50" fill="#0ca30c" stroke="#ffffff" stroke-width="2"/>
+<text x="40.00" y="414.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">The normal case. The componentwise</text>
+<text x="40.00" y="432.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">clamp is a no-op.</text>
+<text x="380.00" y="100.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="700" fill="#fab219" text-anchor="start">SLIGHTLY OUTSIDE</text>
+<rect x="380.00" y="128.00" width="252.00" height="252.00" rx="3" fill="none" stroke="#fab219" stroke-width="1.4" stroke-dasharray="5 4" opacity="0.5"/>
+<text x="382.00" y="120.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">tolerance band</text>
+<rect x="464.00" y="212.00" width="84.00" height="84.00" rx="3" fill="#ffffff" stroke="#c3c2b7" stroke-width="2"/>
+<line x1="594.20" y1="235.52" x2="560.02" y2="229.42" stroke="#fab219" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="3 3"/>
+<polygon points="555.00,228.52 560.82,227.07 559.96,231.89" fill="#fab219" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="594.20" cy="235.52" r="5.50" fill="none" stroke="#fab219" stroke-width="2"/>
+<circle cx="548.00" cy="235.52" r="6.50" fill="#fab219" stroke="#ffffff" stroke-width="2"/>
+<text x="380.00" y="414.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">Legal for DC — a vertex may sit outside its</text>
+<text x="380.00" y="432.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">own cell as long as connectivity is unchanged.</text>
+<text x="380.00" y="450.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">Componentwise-clamped back to the wall.</text>
+<text x="720.00" y="100.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="700" fill="#d03b3b" text-anchor="start">FAR OUTSIDE</text>
+<rect x="720.00" y="128.00" width="252.00" height="252.00" rx="3" fill="none" stroke="#d03b3b" stroke-width="1.4" stroke-dasharray="5 4" opacity="0.5"/>
+<text x="722.00" y="120.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">tolerance band</text>
+<rect x="804.00" y="212.00" width="84.00" height="84.00" rx="3" fill="#ffffff" stroke="#c3c2b7" stroke-width="2"/>
+<line x1="1001.40" y1="149.00" x2="857.26" y2="244.19" stroke="#d03b3b" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="3 3"/>
+<polygon points="853.00,247.00 856.22,241.94 858.92,246.02" fill="#d03b3b" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="1001.40" cy="149.00" r="5.50" fill="none" stroke="#d03b3b" stroke-width="2"/>
+<circle cx="846.00" cy="254.00" r="6.50" fill="#d03b3b" stroke="#ffffff" stroke-width="2"/>
+<text x="859.00" y="258.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">mass point</text>
+<text x="720.00" y="414.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">Drifted more than clampToleranceCells cell</text>
+<text x="720.00" y="432.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">widths: the solve is judged degenerate and</text>
+<text x="720.00" y="450.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">the MASS POINT is substituted instead.</text>
+<text x="40.00" y="488.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">Why not a hard clamp everywhere: it pinned flat-region vertices to cell walls and produced visible faceting. Measured on the rim study,</text>
+<text x="40.00" y="506.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">--no-clamp slightly WORSENED roughness (2.72% -&gt; 2.94% sharp edges), so the clamp is stabilising rather than the cause of that artefact.</text>
+</svg>

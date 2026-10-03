@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="620" viewBox="0 0 1060 620" role="img">
+<defs></defs>
+<rect width="1060" height="620" fill="#fcfcfb"/>
+<text x="28.00" y="34.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="15" font-weight="650" fill="#0b0b0b" text-anchor="start">Four ownership idioms, each chosen for a reason — and one seam to watch</text>
+<text x="28.00" y="55.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">Be able to name all four and justify each. The pimpl destructors in particular are a reliable 'do they actually know this' probe.</text>
+<rect x="40.00" y="84.00" width="480.00" height="216.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<rect x="40.00" y="84.00" width="5.00" height="216.00" rx="2" fill="#1baf7a" stroke="none" stroke-width="1.5"/>
+<text x="60.00" y="110.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="13" font-weight="700" fill="#0b0b0b" text-anchor="start">unique_ptr tree</text>
+<text x="60.00" y="128.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">HermiteNode</text>
+<text x="60.00" y="152.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">array&lt;unique_ptr&lt;HermiteNode&gt;, 8&gt; children</text>
+<text x="60.00" y="169.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">unique_ptr&lt;HermiteLeafData&gt; leaf</text>
+<text x="60.00" y="186.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start"></text>
+<text x="60.00" y="203.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">Destruction is automatic and recursive.</text>
+<text x="60.00" y="220.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">Adaptive collapse frees an entire subtree</text>
+<text x="60.00" y="237.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">with one children[c].reset().</text>
+<text x="60.00" y="254.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">HermiteOctree is move-only, noexcept moves,</text>
+<text x="60.00" y="271.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">copy deleted, destructor OUT OF LINE.</text>
+<rect x="540.00" y="84.00" width="480.00" height="216.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<rect x="540.00" y="84.00" width="5.00" height="216.00" rx="2" fill="#2a78d6" stroke="none" stroke-width="1.5"/>
+<text x="560.00" y="110.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="13" font-weight="700" fill="#0b0b0b" text-anchor="start">pimpl</text>
+<text x="560.00" y="128.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">MeshBVH, MeshSource, GridField, WindingNumberField</text>
+<text x="560.00" y="152.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">unique_ptr&lt;Impl&gt; impl_;</text>
+<text x="560.00" y="169.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start"></text>
+<text x="560.00" y="186.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">All FOUR define ~T() out of line in the .cpp</text>
+<text x="560.00" y="203.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">where Impl is complete — the classic trap is</text>
+<text x="560.00" y="220.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">that unique_ptr to an incomplete type needs a</text>
+<text x="560.00" y="237.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">complete type where the deleter is instantiated.</text>
+<text x="560.00" y="254.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start"></text>
+<text x="560.00" y="271.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">Handled correctly in every case.</text>
+<rect x="40.00" y="316.00" width="480.00" height="216.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<rect x="40.00" y="316.00" width="5.00" height="216.00" rx="2" fill="#4a3aa7" stroke="none" stroke-width="1.5"/>
+<text x="60.00" y="342.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="13" font-weight="700" fill="#0b0b0b" text-anchor="start">shared_ptr DAG</text>
+<text x="60.00" y="360.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">the field graph</text>
+<text x="60.00" y="384.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">using FieldPtr = shared_ptr&lt;ImplicitField&gt;</text>
+<text x="60.00" y="401.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start"></text>
+<text x="60.00" y="418.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">Factories take by value and move in, so there</text>
+<text x="60.00" y="435.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">is ONE atomic increment per operand at graph-</text>
+<text x="60.00" y="452.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">construction time and ZERO thereafter: nodes</text>
+<text x="60.00" y="469.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">dereference, and the sampler takes</text>
+<text x="60.00" y="486.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">const ImplicitField&amp;.</text>
+<text x="60.00" y="503.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start"></text>
+<text x="60.00" y="520.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">No cycles are possible, so no weak_ptr.</text>
+<rect x="540.00" y="316.00" width="480.00" height="216.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<rect x="540.00" y="316.00" width="5.00" height="216.00" rx="2" fill="#eb6834" stroke="none" stroke-width="1.5"/>
+<text x="560.00" y="342.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="13" font-weight="700" fill="#0b0b0b" text-anchor="start">non-owning reference</text>
+<text x="560.00" y="360.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">SignOracle</text>
+<text x="560.00" y="384.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">const MeshBVH&amp; bvh_;</text>
+<text x="560.00" y="401.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start"></text>
+<text x="560.00" y="418.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">Correct in MeshSource::Impl ONLY because of</text>
+<text x="560.00" y="435.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">member DECLARATION ORDER — members initialise</text>
+<text x="560.00" y="452.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">in declaration order, so bvh exists before</text>
+<text x="560.00" y="469.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">oracle(bvh, ...) binds to it.</text>
+<text x="560.00" y="486.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start"></text>
+<text x="560.00" y="503.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">Reorder the two declarations and it still</text>
+<text x="560.00" y="520.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">compiles, binding to an unconstructed object.</text>
+<rect x="40.00" y="548.00" width="980.00" height="60.00" rx="8" fill="#fbe9e9" stroke="#d03b3b" stroke-width="1.4"/>
+<text x="60.00" y="576.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="700" fill="#d03b3b" text-anchor="start">The seam:</text>
+<text x="132.00" y="576.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">the public API and the octree are double; the BVH is entirely float and the QEF solver is entirely float. Two independent narrowings —</text>
+<text x="60.00" y="596.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">invisible on a 100 mm part near the origin, fatal at 500 000 mm where a float ULP is 0.03 mm. Neither re-centres, and neither warns.</text>
+</svg>

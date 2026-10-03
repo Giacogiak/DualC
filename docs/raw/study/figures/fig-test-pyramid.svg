@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="700" viewBox="0 0 1180 700" role="img">
+<defs></defs>
+<rect width="1180" height="700" fill="#fcfcfb"/>
+<text x="28.00" y="34.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="15" font-weight="650" fill="#0b0b0b" text-anchor="start">The test suite as a pyramid: 182 cases, 22 files, four strengths of evidence</text>
+<text x="28.00" y="55.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">Each tier proves something the tier below cannot. The top tier is the strongest because there is no tolerance left to argue about.</text>
+<rect x="355.00" y="100.00" width="470.00" height="88.00" rx="6" fill="#ffffff" stroke="#d03b3b" stroke-width="1.8"/>
+<rect x="355.00" y="100.00" width="470.00" height="3.00" rx="1.5" fill="#d03b3b" stroke="none" stroke-width="1.5"/>
+<text x="590.00" y="126.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="700" fill="#d03b3b" text-anchor="middle">byte-identity between two paths</text>
+<text x="590.00" y="146.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10" font-weight="400" fill="#52514e" text-anchor="middle">tiled streaming STL == monolithic, sorted float triples compared with ==</text>
+<text x="590.00" y="161.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10" font-weight="400" fill="#52514e" text-anchor="middle">test_streaming_export.cpp (8 cases) · test_field_glsl.cpp bake identity</text>
+<rect x="310.00" y="204.00" width="560.00" height="88.00" rx="6" fill="#ffffff" stroke="#4a3aa7" stroke-width="1.8"/>
+<rect x="310.00" y="204.00" width="560.00" height="3.00" rx="1.5" fill="#4a3aa7" stroke="none" stroke-width="1.5"/>
+<text x="590.00" y="230.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="700" fill="#4a3aa7" text-anchor="middle">differential vs an independent oracle</text>
+<text x="590.00" y="250.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10" font-weight="400" fill="#52514e" text-anchor="middle">revolve(circle) == torus at 1e-9 · tiled strut lattice == a hand-tiled</text>
+<text x="590.00" y="265.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10" font-weight="400" fill="#52514e" text-anchor="middle">union over 343 cells at 400 seeded points, worst &lt; 1e-9</text>
+<text x="590.00" y="280.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10" font-weight="400" fill="#52514e" text-anchor="middle">test_lift.cpp (7) · test_strut_lattice.cpp (7)</text>
+<rect x="265.00" y="308.00" width="650.00" height="88.00" rx="6" fill="#ffffff" stroke="#eb6834" stroke-width="1.8"/>
+<rect x="265.00" y="308.00" width="650.00" height="3.00" rx="1.5" fill="#eb6834" stroke="none" stroke-width="1.5"/>
+<text x="590.00" y="334.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="700" fill="#eb6834" text-anchor="middle">topological invariants</text>
+<text x="590.00" y="354.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10" font-weight="400" fill="#52514e" text-anchor="middle">exact Euler characteristic and zero boundary edges on 8 procedural meshes:</text>
+<text x="590.00" y="369.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10" font-weight="400" fill="#52514e" text-anchor="middle">chi = 2 sphere/cylinder/bracket, 0 torus/knot/hexbore, -2 genus-2</text>
+<text x="590.00" y="384.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10" font-weight="400" fill="#52514e" text-anchor="middle">test_demo_meshes.cpp (8) · test_tpms.cpp (11) · test_sampler.cpp (6)</text>
+<rect x="220.00" y="412.00" width="740.00" height="88.00" rx="6" fill="#ffffff" stroke="#2a78d6" stroke-width="1.8"/>
+<rect x="220.00" y="412.00" width="740.00" height="3.00" rx="1.5" fill="#2a78d6" stroke="none" stroke-width="1.5"/>
+<text x="590.00" y="438.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="700" fill="#2a78d6" text-anchor="middle">analytic ground truth</text>
+<text x="590.00" y="458.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10" font-weight="400" fill="#52514e" text-anchor="middle">closed-form values at topological landmarks: box off-corner = sqrt(3),</text>
+<text x="590.00" y="473.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10" font-weight="400" fill="#52514e" text-anchor="middle">octant triangle winding number = 0.125 at 1e-9, Lidinoid F(0) = -1.35</text>
+<text x="590.00" y="488.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10" font-weight="400" fill="#52514e" text-anchor="middle">test_primitives.cpp (34) · test_implicit.cpp (15) · test_mesh_bvh.cpp (9)</text>
+<rect x="175.00" y="516.00" width="830.00" height="88.00" rx="6" fill="#ffffff" stroke="#1baf7a" stroke-width="1.8"/>
+<rect x="175.00" y="516.00" width="830.00" height="3.00" rx="1.5" fill="#1baf7a" stroke="none" stroke-width="1.5"/>
+<text x="590.00" y="542.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="700" fill="#1baf7a" text-anchor="middle">white-box unit tests on internals</text>
+<text x="590.00" y="562.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10" font-weight="400" fill="#52514e" text-anchor="middle">reached via target_include_directories(dualc_tests PRIVATE src/)</text>
+<text x="590.00" y="577.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10" font-weight="400" fill="#52514e" text-anchor="middle">partitionCubeEdges on hand-authored signs · solveLeaf on a hand-built leaf</text>
+<text x="590.00" y="592.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10" font-weight="400" fill="#52514e" text-anchor="middle">test_cube_components.cpp (9) · test_contourer.cpp (3) · test_dc_tables.cpp (5)</text>
+<rect x="28.00" y="100.00" width="210.00" height="186.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<text x="40.00" y="120.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="650" fill="#52514e" text-anchor="start">Outside the pyramid</text>
+<text x="46.00" y="148.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="650" fill="#52514e" text-anchor="start">20 CLI smoke tests</text>
+<text x="46.00" y="165.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">exit code only — none checks</text>
+<text x="46.00" y="181.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">that the output file parses</text>
+<text x="46.00" y="210.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="650" fill="#52514e" text-anchor="start">1 C-compiled ABI test</text>
+<text x="46.00" y="227.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">proves the header is C-clean</text>
+<text x="46.00" y="256.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="650" fill="#d03b3b" text-anchor="start">dualc_glsl_parity 62/62</text>
+<text x="46.00" y="273.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">run manually — not in CTest</text>
+<rect x="958.00" y="100.00" width="198.00" height="186.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<text x="970.00" y="120.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="650" fill="#52514e" text-anchor="start">Wiring</text>
+<text x="976.00" y="146.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">Catch2 v3.5.4</text>
+<text x="976.00" y="164.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#898781" text-anchor="start">FetchContent, by TAG</text>
+<text x="976.00" y="188.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">Catch2WithMain</text>
+<text x="976.00" y="206.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#898781" text-anchor="start">no hand-written main()</text>
+<text x="976.00" y="230.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">catch_discover_tests</text>
+<text x="976.00" y="248.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#898781" text-anchor="start">one CTest entry per case</text>
+<text x="976.00" y="272.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#0b0b0b" text-anchor="start">~202 CTest entries</text>
+<rect x="28.00" y="648.00" width="1128.00" height="42.00" rx="8" fill="#fbe9e9" stroke="#d03b3b" stroke-width="1.4"/>
+<text x="48.00" y="675.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">Zero tests exist for simplifyHermiteOctree or simplificationError, for the six DC descent tables, or for the documented thread-count determinism guarantee.</text>
+</svg>

@@ -1,0 +1,2990 @@
+{
+  "_comment": [
+    "Triage verdicts for scripts/docs_loss_audit.py, one entry per audit (keyed by the base commit's",
+    "first 7 hex). Item keys are sha1[:12] of (unit + normalised unit text) as the script prints them;",
+    "`text` is a human excerpt the script never reads back. `thresholds` pin the script's constants:",
+    "a mismatch voids the triage (exit 2). intentional/superseded need `record` (path#anchor on the",
+    "head tree) + `quote` (>= 4 words found in that record); restored needs `commit`; noise needs",
+    "`note` (items) or `pattern` (rules). A rule needs unit + source + max_matches + verdict, and a",
+    "`category` from the removal catalogue of the record when it absorbs partial/gone sentences.",
+    "`untriaged_max` is a ratchet: it only goes down."
+  ],
+  "audits": {
+    "3d73220": {
+      "_comment": "structure-docs pre-merge audit (roadmap 19); record docs/roadmap/19-docs-layers/09-pre-merge-loss-audit.md",
+      "base": "3d7322092a60b8686210ffb4f617b1e6fe2728e0",
+      "head_at_triage": "a4e3204901f0d93bc37611d16a528ae87420dad8",
+      "scope": [
+        "docs/roadmap/",
+        "docs/command_reference/",
+        "docs/ARCHITECTURE.md",
+        "docs/report-quality-inspection-contouring.md",
+        "docs/study/README.md"
+      ],
+      "annex": [
+        "docs/ARCHITECTURE.md"
+      ],
+      "thresholds": {
+        "MIN_WORDS": 6,
+        "K_LONG": 8,
+        "K_SHORT": 4,
+        "KEPT_SCK": 0.6,
+        "REWRITTEN_SC4": 0.6,
+        "PARTIAL_SC4": 0.3,
+        "CTX_WORDS": 3,
+        "CTX_MIN_HIT": 2,
+        "TOP_K_FILES": 5
+      },
+      "untriaged_max": 0,
+      "items": {
+        "d7e2660b8ebf": {
+          "unit": "heading",
+          "source": "docs/command_reference/11-dualc_field/04-workflow-open-surface.md",
+          "text": "workflow-isolate---thicken---skin---union-a-tpms-lattice-1  (Workflow: isolate -> thicken -> skin ->",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "delete the heading if its text equals the H1, promote its level if not",
+          "note": "split-residue duplicate heading deleted (item 6)"
+        },
+        "8391906ac9e9": {
+          "unit": "heading",
+          "source": "docs/command_reference/11-dualc_field/05-decimation.md",
+          "text": "decimation---decimate----simplify-1  (Decimation (`--decimate` / `--simplify`))",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "delete the heading if its text equals the H1, promote its level if not",
+          "note": "split-residue duplicate heading deleted (item 6)"
+        },
+        "e4282b73bed2": {
+          "unit": "heading",
+          "source": "docs/command_reference/11-dualc_field/06-streaming-tiled-export.md",
+          "text": "streaming--tiled-export---tile-depth-1  (Streaming / tiled export (`--tile-depth`))",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "delete the heading if its text equals the H1, promote its level if not",
+          "note": "split-residue duplicate heading deleted (item 6)"
+        },
+        "cc791413f61c": {
+          "unit": "heading",
+          "source": "docs/command_reference/11-dualc_field/07-mem-budget.md",
+          "text": "auto-budget---mem-budget-1  (Auto-budget (`--mem BUDGET`))",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "delete the heading if its text equals the H1, promote its level if not",
+          "note": "split-residue duplicate heading deleted (item 6)"
+        },
+        "b43612c14680": {
+          "unit": "heading",
+          "source": "docs/command_reference/12-dualc_field_view/03-recipes-by-node.md",
+          "text": "recipes-by-node-category-the-full-vocabulary-1  (Recipes by node category (the full vocabulary))",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "delete the heading if its text equals the H1, promote its level if not",
+          "note": "split-residue duplicate heading deleted (item 6)"
+        },
+        "04f59a3935e2": {
+          "unit": "heading",
+          "source": "docs/command_reference/12-dualc_field_view/04-open-surface-preview.md",
+          "text": "isolating-a-tpms-surface-inside-a-volume-meshless-preview-1  (Isolating a TPMS surface inside a volu",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "delete the heading if its text equals the H1, promote its level if not",
+          "note": "split-residue duplicate heading deleted (item 6)"
+        },
+        "b834fc5005dd": {
+          "unit": "heading",
+          "source": "docs/roadmap/11-dense-lattice-deliverable/02-phase-0-benchmark.md",
+          "text": "phase-0-benchmark-1  (Phase 0 benchmark)",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "H1 renamed (it repeated its section heading)",
+          "note": "11/02's duplicate H1 renamed"
+        },
+        "7486bf44b4cb": {
+          "unit": "heading",
+          "source": "docs/command_reference/06-dualc_lattice.md",
+          "text": "output-mode-recipes  (Output mode recipes)",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "renamed three recipe headings that already existed",
+          "note": "uniform ## Recipes heading; dated append 2026-09-20"
+        },
+        "61f706f029d0": {
+          "unit": "heading",
+          "source": "docs/command_reference/11-dualc_field/05-decimation.md",
+          "text": "recipes---decimation  (Recipes - decimation)",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "renamed three recipe headings that already existed",
+          "note": "uniform ## Recipes heading; dated append 2026-09-20"
+        },
+        "791d3ab586c2": {
+          "unit": "heading",
+          "source": "docs/command_reference/11-dualc_field/08-3mf-and-weld.md",
+          "text": "recipes---tiled--welded-3mf  (Recipes - tiled & welded 3MF)",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "renamed three recipe headings that already existed",
+          "note": "uniform ## Recipes heading; dated append 2026-09-20"
+        },
+        "da75a61cffce": {
+          "unit": "identifier",
+          "source": "docs/command_reference/04-dualc_lift.md",
+          "text": "--offset R",
+          "verdict": "superseded",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "the 0 / R table row was the wrong one and is gone",
+          "note": "dualc_lift --offset default is 1, named O; the R row was wrong (item 1)"
+        },
+        "6c08a88cea7f": {
+          "unit": "identifier",
+          "source": "docs/command_reference/06-dualc_lattice.md",
+          "text": "T3",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "the types table, which is not a recipe table, is re-lettered",
+          "note": "T1-T6 types re-lettered Y1-Y6 (T collision)"
+        },
+        "34eb493b0464": {
+          "unit": "identifier",
+          "source": "docs/command_reference/06-dualc_lattice.md",
+          "text": "T4",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "the types table, which is not a recipe table, is re-lettered",
+          "note": "T1-T6 types re-lettered Y1-Y6 (T collision)"
+        },
+        "9105d839b1aa": {
+          "unit": "identifier",
+          "source": "docs/command_reference/06-dualc_lattice.md",
+          "text": "T5",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "the types table, which is not a recipe table, is re-lettered",
+          "note": "T1-T6 types re-lettered Y1-Y6 (T collision)"
+        },
+        "89415e690de5": {
+          "unit": "identifier",
+          "source": "docs/command_reference/06-dualc_lattice.md",
+          "text": "T6",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "the types table, which is not a recipe table, is re-lettered",
+          "note": "T1-T6 types re-lettered Y1-Y6 (T collision)"
+        },
+        "853943360954": {
+          "unit": "identifier",
+          "source": "docs/command_reference/08-dualc_view.md",
+          "text": "-DDUALC_POLYSCOPE_DIR=/path/to/polyscope",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "moved verbatim, minus their dates",
+          "note": "build line moved to the shared sections / AGENTS.md; -DDUALC_POLYSCOPE_DIR=/path stands"
+        },
+        "81b012021eda": {
+          "unit": "identifier",
+          "source": "docs/command_reference/08-dualc_view.md",
+          "text": "data\\bunny.obj",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "POSIX-safe paths on 07, 08, 10",
+          "note": "backslash Windows paths became POSIX paths"
+        },
+        "bb8178c22bbc": {
+          "unit": "identifier",
+          "source": "docs/command_reference/08-dualc_view.md",
+          "text": "dualc_view --op smooth-union data\\bunny.obj data\\bunny.obj --k 0.3",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "POSIX-safe paths on 07, 08, 10",
+          "note": "backslash Windows paths became POSIX paths"
+        },
+        "aa8f91d7f808": {
+          "unit": "identifier",
+          "source": "docs/command_reference/08-dualc_view.md",
+          "text": "dualc_view --recipe twisted-mesh data\\bunny.obj",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "POSIX-safe paths on 07, 08, 10",
+          "note": "backslash Windows paths became POSIX paths"
+        },
+        "a37d4d555b39": {
+          "unit": "identifier",
+          "source": "docs/command_reference/10-dualc_raymarch.md",
+          "text": "dualc_raymarch data\\bunny.obj --type gyroid --offset 1.0 --normalize-thickness",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "POSIX-safe paths on 07, 08, 10",
+          "note": "backslash Windows paths became POSIX paths"
+        },
+        "a6ccbc4f5221": {
+          "unit": "identifier",
+          "source": "docs/command_reference/10-dualc_raymarch.md",
+          "text": "data\\foot.obj",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "POSIX-safe paths on 07, 08, 10",
+          "note": "backslash Windows paths became POSIX paths"
+        },
+        "e44cbfb1ec58": {
+          "unit": "identifier",
+          "source": "docs/command_reference/10-dualc_raymarch.md",
+          "text": "D:\\DualC\\data\\foot.obj",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "POSIX-safe paths on 07, 08, 10",
+          "note": "backslash Windows paths became POSIX paths"
+        },
+        "86bb6202c197": {
+          "unit": "identifier",
+          "source": "docs/command_reference/11-dualc_field/README.md",
+          "text": "dualc_field_view <graph.fld|.json>",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "the two Tool-12 commands in 11/02 moved to 12/02",
+          "note": "the dualc_field_view synopsis is on 12/README:7 as <graph.fld|graph.json|->"
+        },
+        "4589043b3e09": {
+          "unit": "identifier",
+          "source": "docs/report-quality-inspection-contouring.md",
+          "text": "docs/roadmap/11-dense-lattice-deliverable.md",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "the two stale prose paths",
+          "note": "quality report -> 12/08; its stale prose paths and the 05 #20 citation became links"
+        },
+        "6a677ea2b5e3": {
+          "unit": "identifier",
+          "source": "docs/report-quality-inspection-contouring.md",
+          "text": "docs/roadmap/05-tpms-lattices/README.md#20",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "the two stale prose paths",
+          "note": "quality report -> 12/08; its stale prose paths and the 05 #20 citation became links"
+        },
+        "fc12b54c63d1": {
+          "unit": "identifier",
+          "source": "docs/roadmap/05-tpms-lattices/03-crystal-blending.md",
+          "text": "project_dualc_strut_lattices.md",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "auto-memory note (05/03) and user_guidance.md (07) gone",
+          "note": "chat residue (item 9)"
+        },
+        "0b3d436a8c6c": {
+          "unit": "identifier",
+          "source": "docs/roadmap/07-viewer-polyscope.md",
+          "text": "user_guidance.md",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "auto-memory note (05/03) and user_guidance.md (07) gone",
+          "note": "chat residue (item 9)"
+        },
+        "b1290c054371": {
+          "unit": "identifier",
+          "source": "docs/roadmap/10-infrastructure-and-integration.md",
+          "text": "dualc_field_create_from_json/_from_expr",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "its eleven-name entry-point list are links into 14",
+          "note": "10's entry-point list -> links into 14 (item 7)"
+        },
+        "2e762c50cd54": {
+          "unit": "identifier",
+          "source": "docs/roadmap/10-infrastructure-and-integration.md",
+          "text": "dualc_field_create_from_json_with_meshes/_from_expr_with_meshes",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "its eleven-name entry-point list are links into 14",
+          "note": "10's entry-point list -> links into 14 (item 7)"
+        },
+        "074c61822541": {
+          "unit": "identifier",
+          "source": "docs/roadmap/11-dense-lattice-deliverable/03-streaming-export.md",
+          "text": "dualc_field --mem 4G",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "11/03's --mem suffix grammar",
+          "note": "usage example replaced by a link to the command_reference grammar (item 8)"
+        },
+        "803f4d31e75e": {
+          "unit": "identifier",
+          "source": "docs/roadmap/13-graded-tpms/README.md",
+          "text": "docs/command_reference/12-dualc_field_view.md",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "13/01 and 13/README link 05 and the cmdref folders",
+          "note": "stale prose path retargeted (item 9)"
+        },
+        "2766f87e8530": {
+          "unit": "identifier",
+          "source": "docs/roadmap/14-c-abi/02-surface-and-contract.md",
+          "text": "out==NULL",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "per-function table in 14/02 § 3.2 removed in favour of the header",
+          "note": "stale 0.3.0 per-function table removed; capi/dualc_c.h and capi/README.md are the home (item 5.1)"
+        },
+        "1042cfe5da45": {
+          "unit": "identifier",
+          "source": "docs/roadmap/14-c-abi/02-surface-and-contract.md",
+          "text": "*out=NULL",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "per-function table in 14/02 § 3.2 removed in favour of the header",
+          "note": "stale 0.3.0 per-function table removed; capi/dualc_c.h and capi/README.md are the home (item 5.1)"
+        },
+        "5dcf3c644c52": {
+          "unit": "identifier",
+          "source": "docs/roadmap/14-c-abi/02-surface-and-contract.md",
+          "text": "{\"version\":1,\"units\":\"mm\",\"root\":<node>}",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "per-function table in 14/02 § 3.2 removed in favour of the header",
+          "note": "stale 0.3.0 per-function table removed; capi/dualc_c.h and capi/README.md are the home (item 5.1)"
+        },
+        "a6ea963330fc": {
+          "unit": "identifier",
+          "source": "docs/roadmap/14-c-abi/02-surface-and-contract.md",
+          "text": "dualc_field_create_from_expr",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "per-function table in 14/02 § 3.2 removed in favour of the header",
+          "note": "stale 0.3.0 per-function table removed; capi/dualc_c.h and capi/README.md are the home (item 5.1)"
+        },
+        "86817030ccab": {
+          "unit": "identifier",
+          "source": "docs/roadmap/14-c-abi/02-surface-and-contract.md",
+          "text": "meshCount=0",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "per-function table in 14/02 § 3.2 removed in favour of the header",
+          "note": "stale 0.3.0 per-function table removed; capi/dualc_c.h and capi/README.md are the home (item 5.1)"
+        },
+        "a75577dfaa63": {
+          "unit": "identifier",
+          "source": "docs/roadmap/14-c-abi/02-surface-and-contract.md",
+          "text": "_from_json",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "per-function table in 14/02 § 3.2 removed in favour of the header",
+          "note": "stale 0.3.0 per-function table removed; capi/dualc_c.h and capi/README.md are the home (item 5.1)"
+        },
+        "aefdef7b8750": {
+          "unit": "identifier",
+          "source": "docs/roadmap/14-c-abi/02-surface-and-contract.md",
+          "text": "meshes=NULL",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "per-function table in 14/02 § 3.2 removed in favour of the header",
+          "note": "stale 0.3.0 per-function table removed; capi/dualc_c.h and capi/README.md are the home (item 5.1)"
+        },
+        "d1b2d6ed8d3b": {
+          "unit": "identifier",
+          "source": "docs/roadmap/README.md",
+          "text": "07§6",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "a rewritten snapshot: tombstone rows, the ledger clause, restated numbers out",
+          "note": "roadmap README row rewritten as a snapshot; the 07 § 6 pointer is a link now"
+        },
+        "2943e95d97aa": {
+          "unit": "identifier",
+          "source": "docs/ARCHITECTURE.md",
+          "text": "‖ATb‖2",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/02-record-phase-3.md#record--phase-3-the-design-layer",
+          "quote": "the pinv/energy pair (§ 4.6 and § 9",
+          "note": "ARCH § 4.6 history sentence; the record is 01/02 § 4.9 (collapse thresholded the wrong quantity)"
+        },
+        "64bd814f7ccf": {
+          "unit": "identifier",
+          "source": "docs/roadmap/17-code-audit-and-hardening/README.md",
+          "text": "03-correctness-and-robustness.md",
+          "verdict": "intentional",
+          "record": "docs/roadmap/17-code-audit-and-hardening/03-correctness-and-robustness/README.md#tracked-items--correctness--robustness-2226",
+          "quote": "The page became this folder on 2026-09-20",
+          "note": "17/03 became a same-numbered folder; the link texts were retargeted"
+        },
+        "8d9437df65b4": {
+          "unit": "evidence",
+          "source": "docs/command_reference/03-dualc_boolean.md",
+          "text": "0.25  [default, sets, units]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "fd4be7941947": {
+          "unit": "evidence",
+          "source": "docs/command_reference/06-dualc_lattice.md",
+          "text": "50%  [bare]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "6b225057419a": {
+          "unit": "evidence",
+          "source": "docs/command_reference/11-dualc_field/02-strut-lattices.md",
+          "text": "0.06  [fragments, needs, shell]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "4eb39a16c965": {
+          "unit": "evidence",
+          "source": "docs/command_reference/11-dualc_field/02-strut-lattices.md",
+          "text": "0.012  [cell, coarse, box]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "6782cc6bcd86": {
+          "unit": "evidence",
+          "source": "docs/command_reference/11-dualc_field/03-graded-and-morph.md",
+          "text": "0.15  [strut, average, fcc]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "5fba0b30e944": {
+          "unit": "evidence",
+          "source": "docs/command_reference/11-dualc_field/05-decimation.md",
+          "text": "0.25  [120,596, 4x, 0.026mm, 0.128mm]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "2d420939920b": {
+          "unit": "evidence",
+          "source": "docs/command_reference/11-dualc_field/05-decimation.md",
+          "text": "0.05  [24,118, 20x, 0.056mm, 0.096mm]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "91cbd746e033": {
+          "unit": "evidence",
+          "source": "docs/command_reference/11-dualc_field/05-decimation.md",
+          "text": "0.25  []",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "9ce93d38f90b": {
+          "unit": "evidence",
+          "source": "docs/command_reference/11-dualc_field/05-decimation.md",
+          "text": "0.05  []",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "00733956e0e5": {
+          "unit": "evidence",
+          "source": "docs/command_reference/11-dualc_field/06-streaming-tiled-export.md",
+          "text": "10%  [440MB]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "c6dfc857e83f": {
+          "unit": "evidence",
+          "source": "docs/command_reference/11-dualc_field/06-streaming-tiled-export.md",
+          "text": "440MB  [10%]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "3a766ba8a645": {
+          "unit": "evidence",
+          "source": "docs/command_reference/11-dualc_field/06-streaming-tiled-export.md",
+          "text": "2MB  [140%]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "6d73b11ec791": {
+          "unit": "evidence",
+          "source": "docs/command_reference/11-dualc_field/06-streaming-tiled-export.md",
+          "text": "140%  [2MB]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "8a497e95c56f": {
+          "unit": "evidence",
+          "source": "docs/command_reference/11-dualc_field/06-streaming-tiled-export.md",
+          "text": "3x  [vertices, larger, repeats]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "11/06's \"Why STL\"",
+          "note": "11/06 rationale -> 11/03 § 5; the ~1/3 figure stays on 11/08"
+        },
+        "63b5092a82f3": {
+          "unit": "evidence",
+          "source": "docs/command_reference/12-dualc_field_view/README.md",
+          "text": "0.35  [lower, very, trade]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "9cf157fec389": {
+          "unit": "evidence",
+          "source": "docs/command_reference/12-dualc_field_view/README.md",
+          "text": "0.25  [lower, very, trade]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "9e832f204b36": {
+          "unit": "evidence",
+          "source": "docs/roadmap/01-core-dual-contouring/02-bug-catalogue.md",
+          "text": "2026-08-21  []",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "5b4aed2d77cf": {
+          "unit": "evidence",
+          "source": "docs/roadmap/05-tpms-lattices/03-crystal-blending.md",
+          "text": "2026-07-09  []",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "d6ce78cb28fc": {
+          "unit": "evidence",
+          "source": "docs/roadmap/05-tpms-lattices/02-strut-enhancements.md",
+          "text": "2026-07-07  []",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "78a5f9e0ec8c": {
+          "unit": "evidence",
+          "source": "docs/roadmap/05-tpms-lattices/README.md",
+          "text": "2026-05-26  []",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "d814f158b1cd": {
+          "unit": "evidence",
+          "source": "docs/roadmap/05-tpms-lattices/README.md",
+          "text": "2026-06-01  []",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "9fad8eedfa6f": {
+          "unit": "evidence",
+          "source": "docs/roadmap/10-infrastructure-and-integration.md",
+          "text": "v0.3.0  [from_expr_with_meshes, host, dualc_field_create_from_json_with_meshes]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "affa98ed3ad0": {
+          "unit": "evidence",
+          "source": "docs/roadmap/11-dense-lattice-deliverable/01-decision.md",
+          "text": "2026-06-02  []",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "e7b3cc8c4eb3": {
+          "unit": "evidence",
+          "source": "docs/roadmap/12-field-graph-and-app/README.md",
+          "text": "2026-06-12  []",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "2a786de12efb": {
+          "unit": "evidence",
+          "source": "docs/roadmap/11-dense-lattice-deliverable/04-streaming-3mf-record.md",
+          "text": "2026-07-03  []",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "48bae4e02705": {
+          "unit": "evidence",
+          "source": "docs/roadmap/12-field-graph-and-app/03-raymarch-app.md",
+          "text": "2026-06-14  []",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "e87854a66995": {
+          "unit": "evidence",
+          "source": "docs/roadmap/12-field-graph-and-app/04-preview-performance.md",
+          "text": "2026-07-09  [laptops, triggered, hybrid-graphics]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "26283c63ad64": {
+          "unit": "evidence",
+          "source": "docs/roadmap/13-graded-tpms/02-design-and-plan.md",
+          "text": "0.04  []",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "a445861982a9": {
+          "unit": "evidence",
+          "source": "docs/roadmap/13-graded-tpms/02-design-and-plan.md",
+          "text": "0.18  []",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "587f9d1042e4": {
+          "unit": "evidence",
+          "source": "docs/roadmap/14-c-abi/03-implementation-and-verification.md",
+          "text": "2026-06-17  []",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "14ede6dd8590": {
+          "unit": "evidence",
+          "source": "docs/roadmap/14-c-abi/02-surface-and-contract.md",
+          "text": "0.2.0  [stood, ownership, they]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "f89948fb309b": {
+          "unit": "evidence",
+          "source": "docs/roadmap/14-c-abi/02-surface-and-contract.md",
+          "text": "0.3.0  [dualc, never, e.g]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "80bb07455d40": {
+          "unit": "evidence",
+          "source": "docs/roadmap/14-c-abi/README.md",
+          "text": "2026-09-09  [entries, land, page]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "d47baa9641dc": {
+          "unit": "evidence",
+          "source": "docs/roadmap/14-c-abi/README.md",
+          "text": "2026-09-09  [entries, new, continued]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "d4f75cd23c8e": {
+          "unit": "evidence",
+          "source": "docs/roadmap/15-boletus-handoff.md",
+          "text": "2026-07-03  [recompute-bounds-on-reload, see, change]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "e8cd0fb963cf": {
+          "unit": "evidence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/04-engineering-quality.md",
+          "text": "2.3x  [pay, corrected, fit]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "5d85e407d9ae": {
+          "unit": "evidence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/04-engineering-quality.md",
+          "text": "245,376  [source]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "d8ce13215fd7": {
+          "unit": "evidence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/04-engineering-quality.md",
+          "text": "58,158  [source]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "17fa24297034": {
+          "unit": "evidence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/07-repeat-tiling-fix.md",
+          "text": "0.55  [value]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "3e104c5d6f17": {
+          "unit": "evidence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/07-repeat-tiling-fix.md",
+          "text": "246/246  [ctest]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "9fc364d6bc4a": {
+          "unit": "evidence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/10-docs-system-screening.md",
+          "text": "2026-09-11  [record, footer, scripts/check.py]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "5d6d23ffb86f": {
+          "unit": "evidence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/README.md",
+          "text": "2026-09-01  [update, landed, closing]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "cdb42081ba1d": {
+          "unit": "evidence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/README.md",
+          "text": "2026-09-01  [resolved, pre-change, discrepancy]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "cef332ea4be1": {
+          "unit": "evidence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/README.md",
+          "text": "2026-09-09  [update, landed, rank]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "737bf237dca9": {
+          "unit": "evidence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/README.md",
+          "text": "2.3x  [pay, recorded, cells]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "cbaaf015b2d6": {
+          "unit": "evidence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/README.md",
+          "text": "2026-09-10  [update, opened, first]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "f93effedc1d7": {
+          "unit": "evidence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/README.md",
+          "text": "2026-09-10  [update, second, batch]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "9fe14a5cfb3a": {
+          "unit": "evidence",
+          "source": "docs/roadmap/README.md",
+          "text": "2026-06-12  [findings, strategic, open]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "83a215f702d6": {
+          "unit": "evidence",
+          "source": "docs/roadmap/README.md",
+          "text": "2026-08-25  [gpu, mesh-preview, correctness]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "5c318aae169b": {
+          "unit": "evidence",
+          "source": "docs/roadmap/README.md",
+          "text": "0.4.0  [2026-09-09, frozen, diagnostics, continuation]",
+          "verdict": "noise",
+          "note": "same-file presence check: the token still occurs on the head version of its own page (its row moved or its neighbours were reworded); cleared by that check, not read one by one"
+        },
+        "f12a457dbfd3": {
+          "unit": "evidence",
+          "source": "docs/command_reference/01-dualc_demo.md",
+          "text": "1.10  [dualc_demo, gwn-field, depth]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "01 (1.1-1.10 -> D1-D10, the prose reference updated)",
+          "note": "recipe IDs 1.1-1.10 became D1-D10"
+        },
+        "0867510c42de": {
+          "unit": "evidence",
+          "source": "docs/command_reference/01-dualc_demo.md",
+          "text": "1.10  [see, workflow, soup]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "01 (1.1-1.10 -> D1-D10, the prose reference updated)",
+          "note": "recipe IDs 1.1-1.10 became D1-D10"
+        },
+        "b4c677113a93": {
+          "unit": "evidence",
+          "source": "docs/command_reference/03-dualc_boolean.md",
+          "text": "2026-08-25  [changed, enclosed, exact]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "is gone from every usage page; what remains of those words is inside link anchors",
+          "note": "S2 § 8.3 residue: dates, 'since', parity counts off the usage pages (item 5)"
+        },
+        "1b51c0fbf680": {
+          "unit": "evidence",
+          "source": "docs/command_reference/09-dualc_gen_demo.md",
+          "text": "2026-09-11  [added, yields, triangles]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "is gone from every usage page; what remains of those words is inside link anchors",
+          "note": "S2 § 8.3 residue: dates, 'since', parity counts off the usage pages (item 5)"
+        },
+        "b524df9e8ef3": {
+          "unit": "evidence",
+          "source": "docs/command_reference/10-dualc_raymarch.md",
+          "text": "2026-08-25  [5%, holes, roadmap, dissolve]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "is gone from every usage page; what remains of those words is inside link anchors",
+          "note": "S2 § 8.3 residue: dates, 'since', parity counts off the usage pages (item 5)"
+        },
+        "d5c9888f204b": {
+          "unit": "evidence",
+          "source": "docs/command_reference/12-dualc_field_view/02-nodes-and-examples.md",
+          "text": "2026-06-24  [bounds, viewer, own]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "is gone from every usage page; what remains of those words is inside link anchors",
+          "note": "S2 § 8.3 residue: dates, 'since', parity counts off the usage pages (item 5)"
+        },
+        "8665f903967b": {
+          "unit": "evidence",
+          "source": "docs/command_reference/12-dualc_field_view/02-nodes-and-examples.md",
+          "text": "69/69  [dualc_glsl_parity, gpu, field]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "is gone from every usage page; what remains of those words is inside link anchors",
+          "note": "S2 § 8.3 residue: dates, 'since', parity counts off the usage pages (item 5)"
+        },
+        "7c4b96194220": {
+          "unit": "evidence",
+          "source": "docs/command_reference/README.md",
+          "text": "2026-09-10  [since, parameter, cannot]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "is gone from every usage page; what remains of those words is inside link anchors",
+          "note": "S2 § 8.3 residue: dates, 'since', parity counts off the usage pages (item 5)"
+        },
+        "81f70979b051": {
+          "unit": "evidence",
+          "source": "docs/command_reference/README.md",
+          "text": "2026-09-09  [since, every, tool]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "is gone from every usage page; what remains of those words is inside link anchors",
+          "note": "S2 § 8.3 residue: dates, 'since', parity counts off the usage pages (item 5)"
+        },
+        "7da2d23883dd": {
+          "unit": "evidence",
+          "source": "docs/command_reference/11-dualc_field/05-decimation.md",
+          "text": "5.19M  [reproduces, faces, decimate]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "11/05's measured table",
+          "note": "11/05 measurement -> 12/08/01; the acceptance counts are precise in 12/06 (5,189,100 -> 518,856, p99 0.049 mm)"
+        },
+        "b5739d17635d": {
+          "unit": "evidence",
+          "source": "docs/command_reference/11-dualc_field/05-decimation.md",
+          "text": "519k  [reproduces, faces, decimate]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "11/05's measured table",
+          "note": "11/05 measurement -> 12/08/01; the acceptance counts are precise in 12/06 (5,189,100 -> 518,856, p99 0.049 mm)"
+        },
+        "b541ec2cb745": {
+          "unit": "evidence",
+          "source": "docs/command_reference/11-dualc_field/05-decimation.md",
+          "text": "0.1mm  [larger, tessellation, far]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "11/05's measured table",
+          "note": "11/05 measurement -> 12/08/01; the acceptance counts are precise in 12/06 (5,189,100 -> 518,856, p99 0.049 mm)"
+        },
+        "486063b8e0d6": {
+          "unit": "evidence",
+          "source": "docs/command_reference/11-dualc_field/05-decimation.md",
+          "text": "0.077mm  [error, smoothing, max]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "11/05's measured table",
+          "note": "11/05 measurement -> 12/08/01; the acceptance counts are precise in 12/06 (5,189,100 -> 518,856, p99 0.049 mm)"
+        },
+        "1c864cf97d47": {
+          "unit": "evidence",
+          "source": "docs/command_reference/11-dualc_field/05-decimation.md",
+          "text": "2026  [off, flag, back]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "11/05's measured table",
+          "note": "11/05 measurement -> 12/08/01; the acceptance counts are precise in 12/06 (5,189,100 -> 518,856, p99 0.049 mm)"
+        },
+        "50d24692eb37": {
+          "unit": "evidence",
+          "source": "docs/command_reference/11-dualc_field/06-streaming-tiled-export.md",
+          "text": "1/3  [sharing, stl, within-tile]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "11/06's \"Why STL\"",
+          "note": "11/06 rationale -> 11/03 § 5; the ~1/3 figure stays on 11/08"
+        },
+        "801dd2ad923d": {
+          "unit": "evidence",
+          "source": "docs/command_reference/06-dualc_lattice.md",
+          "text": "1/3  [shell, stl, offset]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "the ~⅓ figure in two places",
+          "note": "06's T13 row links the export-formats table; the figure lives on 11/08 and the cmdref README"
+        },
+        "f0c92d516666": {
+          "unit": "evidence",
+          "source": "docs/command_reference/11-dualc_field/04-workflow-open-surface.md",
+          "text": "1/3  [depth, thinnest, cell]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "The thin-feature rule → design/10",
+          "note": "the thin-feature rule has one home, design/10 (item 4)"
+        },
+        "3312560850a5": {
+          "unit": "evidence",
+          "source": "docs/command_reference/README.md",
+          "text": "15KB  [past, size, grew]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "and lost its process history and dated lines",
+          "note": "cmdref README 'Legacy pages (frozen)' paragraph and process history gone (item 5)"
+        },
+        "a625de0c252e": {
+          "unit": "evidence",
+          "source": "docs/command_reference/README.md",
+          "text": "17/10  [roadmap, promoted, passes]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "and lost its process history and dated lines",
+          "note": "cmdref README 'Legacy pages (frozen)' paragraph and process history gone (item 5)"
+        },
+        "4bf051cf7e01": {
+          "unit": "evidence",
+          "source": "docs/roadmap/12-field-graph-and-app/README.md",
+          "text": "28/28  [2026-06-14, 2026-06-24, 2026-06-24, 2026-06-24, 2026-06-24, 62/62, gate, node, dualc_glsl_pa",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "12/README's cells lose",
+          "note": "restated numbers out of 12/README's cells; homes 12/02, 12/06, 17/README Latest verification"
+        },
+        "7f71cbb45f8e": {
+          "unit": "evidence",
+          "source": "docs/roadmap/12-field-graph-and-app/README.md",
+          "text": "5.19M  [2026-07-05, 519k, 0.049mm, decimate, faces, export]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "12/README's cells lose",
+          "note": "restated numbers out of 12/README's cells; homes 12/02, 12/06, 17/README Latest verification"
+        },
+        "d5be792a7b3c": {
+          "unit": "evidence",
+          "source": "docs/roadmap/12-field-graph-and-app/README.md",
+          "text": "519k  [2026-07-05, 5.19M, 0.049mm, decimate, faces, export]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "12/README's cells lose",
+          "note": "restated numbers out of 12/README's cells; homes 12/02, 12/06, 17/README Latest verification"
+        },
+        "b56056596de4": {
+          "unit": "evidence",
+          "source": "docs/roadmap/05-tpms-lattices/02-strut-enhancements.md",
+          "text": "66/66  [currently, build, count]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "\"currently 66/66\" and \"update it\" become a link",
+          "note": "05/02's restated parity count became a link"
+        },
+        "150959035958": {
+          "unit": "evidence",
+          "source": "docs/roadmap/12-field-graph-and-app/README.md",
+          "text": "2026-08-25  [entries, new, continued]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "16 and 18 are nine-line tombstones",
+          "note": "'new entries land in 16/18' pointers; 16 -> 12/07, 18 -> 14/04"
+        },
+        "c922bc4c514f": {
+          "unit": "evidence",
+          "source": "docs/roadmap/16-field-graph-and-app-continued.md",
+          "text": "2026-08-25  [land, file, entries]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "16 and 18 are nine-line tombstones",
+          "note": "'new entries land in 16/18' pointers; 16 -> 12/07, 18 -> 14/04"
+        },
+        "72b3aca8f8dd": {
+          "unit": "evidence",
+          "source": "docs/roadmap/18-c-abi-continued.md",
+          "text": "2026-09-09  [land, block, entries]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "16 and 18 are nine-line tombstones",
+          "note": "'new entries land in 16/18' pointers; 16 -> 12/07, 18 -> 14/04"
+        },
+        "ffb99bc19e19": {
+          "unit": "evidence",
+          "source": "docs/roadmap/06-slice.md",
+          "text": "4096  [max, evaluates, default]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "06's --plane/--res defaults",
+          "note": "usage default is a link to the command_reference page (item 8)"
+        },
+        "4faac3e4496b": {
+          "unit": "evidence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/04-engineering-quality.md",
+          "text": "0.15  [truth, sign, reported]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "#34's four landed bullets are one line + link each (their text is verbatim in",
+          "note": "17/04's #34 record -> 17/07, 17/08 verbatim"
+        },
+        "b320de1dc2c7": {
+          "unit": "evidence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/04-engineering-quality.md",
+          "text": "0.55  [reported, truth, fold]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "#34's four landed bullets are one line + link each (their text is verbatim in",
+          "note": "17/04's #34 record -> 17/07, 17/08 verbatim"
+        },
+        "feb787ca8bfb": {
+          "unit": "evidence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/04-engineering-quality.md",
+          "text": "246/246  [ctest, handed, cost]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "#34's four landed bullets are one line + link each (their text is verbatim in",
+          "note": "17/04's #34 record -> 17/07, 17/08 verbatim"
+        },
+        "71b101dde6b4": {
+          "unit": "evidence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/README.md",
+          "text": "235/235  [now, ctest, already]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "every per-batch ctest count survives on those pages",
+          "note": "17/README's Update paragraphs are dated one-liners; counts and hashes on the record pages (item 7)"
+        },
+        "84eb88638182": {
+          "unit": "evidence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/README.md",
+          "text": "d48ad98  [first, winding_number, failing]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "every per-batch ctest count survives on those pages",
+          "note": "17/README's Update paragraphs are dated one-liners; counts and hashes on the record pages (item 7)"
+        },
+        "9ae12d40b47e": {
+          "unit": "evidence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/README.md",
+          "text": "246/246  [ctest, full, claims]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "every per-batch ctest count survives on those pages",
+          "note": "17/README's Update paragraphs are dated one-liners; counts and hashes on the record pages (item 7)"
+        },
+        "f656a3780f30": {
+          "unit": "evidence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/README.md",
+          "text": "253/253  [ctest, reflection, legitimate]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "every per-batch ctest count survives on those pages",
+          "note": "17/README's Update paragraphs are dated one-liners; counts and hashes on the record pages (item 7)"
+        },
+        "9e587e956040": {
+          "unit": "evidence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/README.md",
+          "text": "255/255  [ctest, parity, cap]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "every per-batch ctest count survives on those pages",
+          "note": "17/README's Update paragraphs are dated one-liners; counts and hashes on the record pages (item 7)"
+        },
+        "c8c404dc1e53": {
+          "unit": "evidence",
+          "source": "docs/roadmap/README.md",
+          "text": "2026-07-09  [node, oracle-verified, crystal-morph]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "a rewritten snapshot: tombstone rows, the ledger clause, restated numbers out",
+          "note": "roadmap README rewritten as a snapshot; numbers in their homes"
+        },
+        "391f0ffd85a5": {
+          "unit": "evidence",
+          "source": "docs/roadmap/README.md",
+          "text": "2026-07-09  [celloverlaps, deferred, lipschitz]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "a rewritten snapshot: tombstone rows, the ledger clause, restated numbers out",
+          "note": "roadmap README rewritten as a snapshot; numbers in their homes"
+        },
+        "f284ebd8ba9a": {
+          "unit": "evidence",
+          "source": "docs/roadmap/README.md",
+          "text": "2026-06-17  [generator, host-side, demo-data]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "a rewritten snapshot: tombstone rows, the ledger clause, restated numbers out",
+          "note": "roadmap README rewritten as a snapshot; numbers in their homes"
+        },
+        "7f36c8b0b2f2": {
+          "unit": "evidence",
+          "source": "docs/roadmap/README.md",
+          "text": "30/30  [2026-06-17, parity, graded, thickness]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "a rewritten snapshot: tombstone rows, the ledger clause, restated numbers out",
+          "note": "roadmap README rewritten as a snapshot; numbers in their homes"
+        },
+        "bc3bafa5cca1": {
+          "unit": "evidence",
+          "source": "docs/roadmap/README.md",
+          "text": "2026-09-11  [passes, continuations, split]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "a rewritten snapshot: tombstone rows, the ledger clause, restated numbers out",
+          "note": "roadmap README rewritten as a snapshot; numbers in their homes"
+        },
+        "bf28cc48336a": {
+          "unit": "evidence",
+          "source": "docs/roadmap/README.md",
+          "text": "17/10  [passes, continuations, split]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "a rewritten snapshot: tombstone rows, the ledger clause, restated numbers out",
+          "note": "roadmap README rewritten as a snapshot; numbers in their homes"
+        },
+        "c0844aebb083": {
+          "unit": "evidence",
+          "source": "docs/roadmap/13-graded-tpms/README.md",
+          "text": "2026-06-17  [superseded, status, scheduled]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "13/01 and 13/README link 05 and the cmdref folders",
+          "note": "13/README banner reworded (item 9)"
+        },
+        "0ab5e295f020": {
+          "unit": "evidence",
+          "source": "docs/ARCHITECTURE.md",
+          "text": "76,228  [edges, mdc, pinch]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/02-record-phase-3.md#record--phase-3-the-design-layer",
+          "quote": "The molde/cube vertex and face counts (two copies in § 4.5/§ 4.6) → links to the quality-bar table",
+          "note": "ARCH copies of the molde/cube counts -> links to 01 § 5, where the table is"
+        },
+        "8dc13534527f": {
+          "unit": "evidence",
+          "source": "docs/ARCHITECTURE.md",
+          "text": "38,113  [edges, mdc, pinch]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/02-record-phase-3.md#record--phase-3-the-design-layer",
+          "quote": "The molde/cube vertex and face counts (two copies in § 4.5/§ 4.6) → links to the quality-bar table",
+          "note": "ARCH copies of the molde/cube counts -> links to 01 § 5, where the table is"
+        },
+        "959115477347": {
+          "unit": "evidence",
+          "source": "docs/ARCHITECTURE.md",
+          "text": "76,228  [drops, face, count]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/02-record-phase-3.md#record--phase-3-the-design-layer",
+          "quote": "The molde/cube vertex and face counts (two copies in § 4.5/§ 4.6) → links to the quality-bar table",
+          "note": "ARCH copies of the molde/cube counts -> links to 01 § 5, where the table is"
+        },
+        "dd07643b450c": {
+          "unit": "evidence",
+          "source": "docs/ARCHITECTURE.md",
+          "text": "38,116  [drops, face, count]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/02-record-phase-3.md#record--phase-3-the-design-layer",
+          "quote": "The molde/cube vertex and face counts (two copies in § 4.5/§ 4.6) → links to the quality-bar table",
+          "note": "ARCH copies of the molde/cube counts -> links to 01 § 5, where the table is"
+        },
+        "06d42937e38d": {
+          "unit": "evidence",
+          "source": "docs/ARCHITECTURE.md",
+          "text": "76,228  [down, boundary, collapse]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/02-record-phase-3.md#record--phase-3-the-design-layer",
+          "quote": "The molde/cube vertex and face counts (two copies in § 4.5/§ 4.6) → links to the quality-bar table",
+          "note": "ARCH copies of the molde/cube counts -> links to 01 § 5, where the table is"
+        },
+        "59f65d0eeadc": {
+          "unit": "evidence",
+          "source": "docs/ARCHITECTURE.md",
+          "text": "162,876  [cube, likewise, euler]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/02-record-phase-3.md#record--phase-3-the-design-layer",
+          "quote": "The molde/cube vertex and face counts (two copies in § 4.5/§ 4.6) → links to the quality-bar table",
+          "note": "ARCH copies of the molde/cube counts -> links to 01 § 5, where the table is"
+        },
+        "7e703fbe0148": {
+          "unit": "evidence",
+          "source": "docs/ARCHITECTURE.md",
+          "text": "38,116  [down, boundary, collapse]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/02-record-phase-3.md#record--phase-3-the-design-layer",
+          "quote": "The molde/cube vertex and face counts (two copies in § 4.5/§ 4.6) → links to the quality-bar table",
+          "note": "ARCH copies of the molde/cube counts -> links to 01 § 5, where the table is"
+        },
+        "99fbe8b9f2df": {
+          "unit": "evidence",
+          "source": "docs/ARCHITECTURE.md",
+          "text": "81,440  [cube, likewise, euler]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/02-record-phase-3.md#record--phase-3-the-design-layer",
+          "quote": "The molde/cube vertex and face counts (two copies in § 4.5/§ 4.6) → links to the quality-bar table",
+          "note": "ARCH copies of the molde/cube counts -> links to 01 § 5, where the table is"
+        },
+        "a79206e5adf8": {
+          "unit": "evidence",
+          "source": "docs/ARCHITECTURE.md",
+          "text": "84x  [rather, band, floor]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/02-record-phase-3.md#record--phase-3-the-design-layer",
+          "quote": "Every dated change record became the present-tense fact plus a link to the roadmap entry that changed it",
+          "note": "ARCH 'Fixed since' / 'since <date>' history -> present tense + link; the dated record is on 17 (84x band on 17/03/01:44)"
+        },
+        "a9ab0a194235": {
+          "unit": "evidence",
+          "source": "docs/ARCHITECTURE.md",
+          "text": "2026-09-09  [since, least, normal]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/02-record-phase-3.md#record--phase-3-the-design-layer",
+          "quote": "Every dated change record became the present-tense fact plus a link to the roadmap entry that changed it",
+          "note": "ARCH 'Fixed since' / 'since <date>' history -> present tense + link; the dated record is on 17 (84x band on 17/03/01:44)"
+        },
+        "a7ee043f083a": {
+          "unit": "evidence",
+          "source": "docs/ARCHITECTURE.md",
+          "text": "2026-08-31  [written, parallelfor, list]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/02-record-phase-3.md#record--phase-3-the-design-layer",
+          "quote": "Every dated change record became the present-tense fact plus a link to the roadmap entry that changed it",
+          "note": "ARCH 'Fixed since' / 'since <date>' history -> present tense + link; the dated record is on 17 (84x band on 17/03/01:44)"
+        },
+        "dc92601086e8": {
+          "unit": "evidence",
+          "source": "docs/ARCHITECTURE.md",
+          "text": "2026-09-01  [written, contourerparams, list]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/02-record-phase-3.md#record--phase-3-the-design-layer",
+          "quote": "Every dated change record became the present-tense fact plus a link to the roadmap entry that changed it",
+          "note": "ARCH 'Fixed since' / 'since <date>' history -> present tense + link; the dated record is on 17 (84x band on 17/03/01:44)"
+        },
+        "aa5ebbb0e972": {
+          "unit": "evidence",
+          "source": "docs/ARCHITECTURE.md",
+          "text": "2026-09-09  [changed, now, case]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/02-record-phase-3.md#record--phase-3-the-design-layer",
+          "quote": "Every dated change record became the present-tense fact plus a link to the roadmap entry that changed it",
+          "note": "ARCH 'Fixed since' / 'since <date>' history -> present tense + link; the dated record is on 17 (84x band on 17/03/01:44)"
+        },
+        "0f5e0800349a": {
+          "unit": "heading",
+          "source": "docs/ARCHITECTURE.md",
+          "text": "dualc---architecture  (DualC - Architecture)",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/02-record-phase-3.md#record--phase-3-the-design-layer",
+          "quote": "The section → page mapping, which this entry is the record of",
+          "note": "ARCH sections compiled into docs/design/ pages with their own headings (mapping table in 19/02)"
+        },
+        "b27c55ae0120": {
+          "unit": "heading",
+          "source": "docs/ARCHITECTURE.md",
+          "text": "34-sign-determination  (3.4 Sign determination)",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/02-record-phase-3.md#record--phase-3-the-design-layer",
+          "quote": "The section → page mapping, which this entry is the record of",
+          "note": "ARCH sections compiled into docs/design/ pages with their own headings (mapping table in 19/02)"
+        },
+        "f122db0317c1": {
+          "unit": "heading",
+          "source": "docs/ARCHITECTURE.md",
+          "text": "samplerparams---see-includedualcsamplerh  (`SamplerParams` - see [`include/dualc/sampler.h`](../incl",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/02-record-phase-3.md#record--phase-3-the-design-layer",
+          "quote": "The section → page mapping, which this entry is the record of",
+          "note": "ARCH sections compiled into docs/design/ pages with their own headings (mapping table in 19/02)"
+        },
+        "7c6354f25556": {
+          "unit": "heading",
+          "source": "docs/ARCHITECTURE.md",
+          "text": "contourerparams---see-includedualccontourerh  (`ContourerParams` - see [`include/dualc/contourer.h`]",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/02-record-phase-3.md#record--phase-3-the-design-layer",
+          "quote": "The section → page mapping, which this entry is the record of",
+          "note": "ARCH sections compiled into docs/design/ pages with their own headings (mapping table in 19/02)"
+        },
+        "9a4dcccab858": {
+          "unit": "heading",
+          "source": "docs/ARCHITECTURE.md",
+          "text": "9-limitations--future-work  (9. Limitations & future work)",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/02-record-phase-3.md#record--phase-3-the-design-layer",
+          "quote": "The section → page mapping, which this entry is the record of",
+          "note": "ARCH sections compiled into docs/design/ pages with their own headings (mapping table in 19/02)"
+        },
+        "0e2509fdc367": {
+          "unit": "heading",
+          "source": "docs/ARCHITECTURE.md",
+          "text": "10-the-implicit-field-layer-v2---sdf--dc  (10. The implicit-field layer (v2 - \"SDF + DC\"))",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/02-record-phase-3.md#record--phase-3-the-design-layer",
+          "quote": "The section → page mapping, which this entry is the record of",
+          "note": "ARCH sections compiled into docs/design/ pages with their own headings (mapping table in 19/02)"
+        },
+        "11fe260f91d5": {
+          "unit": "heading",
+          "source": "docs/ARCHITECTURE.md",
+          "text": "102-data-flow  (10.2 Data flow)",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/02-record-phase-3.md#record--phase-3-the-design-layer",
+          "quote": "The section → page mapping, which this entry is the record of",
+          "note": "ARCH sections compiled into docs/design/ pages with their own headings (mapping table in 19/02)"
+        },
+        "c2d0f1b465ee": {
+          "unit": "heading",
+          "source": "docs/ARCHITECTURE.md",
+          "text": "104-the-library  (10.4 The library)",
+          "verdict": "intentional",
+          "record": "docs/roadmap/19-docs-layers/02-record-phase-3.md#record--phase-3-the-design-layer",
+          "quote": "The section → page mapping, which this entry is the record of",
+          "note": "ARCH sections compiled into docs/design/ pages with their own headings (mapping table in 19/02)"
+        },
+        "fbf136b4555b": {
+          "unit": "sentence",
+          "source": "docs/command_reference/04-dualc_lift.md",
+          "text": "Option `--offset O` (default `1`): profile `x` maps to `radius - O`.",
+          "verdict": "superseded",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "the 0 / R table row was the wrong one and is gone",
+          "note": "dualc_lift --offset: default 1, named O, fixed from dualc_lift.cpp:116"
+        },
+        "ce87625dd0c7": {
+          "unit": "sentence",
+          "source": "docs/command_reference/04-dualc_lift.md",
+          "text": "`--offset R` ; `0` ; Revolve only: ring radius - distance from the profile to the axis.",
+          "verdict": "superseded",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "the 0 / R table row was the wrong one and is gone",
+          "note": "dualc_lift --offset: default 1, named O, fixed from dualc_lift.cpp:116"
+        },
+        "7a6108230fc2": {
+          "unit": "sentence",
+          "source": "docs/command_reference/11-dualc_field/07-mem-budget.md",
+          "text": "- The chosen `D` is clamped to `[2, --depth - 1]`.",
+          "verdict": "superseded",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "the only hard bound is D ≥ 2, D = depth still tiles",
+          "note": "11/07 said D is clamped to [2, depth-1]; the search range is --mem's, not a clamp (design/10)"
+        },
+        "2a8842ee7db8": {
+          "unit": "sentence",
+          "source": "docs/ARCHITECTURE.md",
+          "text": "`maxDepth` is checked first and unconditionally; `minDepth > maxDepth` is not an error, `maxDepth` s",
+          "verdict": "superseded",
+          "record": "docs/roadmap/19-docs-layers/02-record-phase-3.md#record--phase-3-the-design-layer",
+          "quote": "Two present-tense claims that were false, corrected against the code",
+          "note": "ARCH § 3.3 said minDepth > maxDepth is not validated; sampleFieldToHermiteOctree throws (design/01:28)"
+        }
+      },
+      "rules": [
+        {
+          "id": "cr-readme-re",
+          "unit": "sentence",
+          "source": "docs/command_reference/README.md",
+          "max_matches": 16,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 6 item 5 — the README split before it grew (build prelude, feature map, matrix, shared sections to 00)",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "the two shared behaviour sections (rejected parameters, diagnostics warnings) moved verbatim",
+          "note": "read: feature-map rows restructured, frozen paragraph gone (item 5), thin-feature/keyboard to design (item 4), diagnostics history on 17/05:140"
+        },
+        {
+          "id": "cr-readme-pa",
+          "unit": "sentence",
+          "source": "docs/command_reference/README.md",
+          "max_matches": 8,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 6 item 5 — the README split before it grew (build prelude, feature map, matrix, shared sections to 00)",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "the two shared behaviour sections (rejected parameters, diagnostics warnings) moved verbatim",
+          "note": "read: feature-map rows restructured, frozen paragraph gone (item 5), thin-feature/keyboard to design (item 4), diagnostics history on 17/05:140"
+        },
+        {
+          "id": "cr-readme-go",
+          "unit": "sentence",
+          "source": "docs/command_reference/README.md",
+          "max_matches": 10,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 6 item 5 — the README split before it grew (build prelude, feature map, matrix, shared sections to 00)",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "the two shared behaviour sections (rejected parameters, diagnostics warnings) moved verbatim",
+          "note": "read: feature-map rows restructured, frozen paragraph gone (item 5), thin-feature/keyboard to design (item 4), diagnostics history on 17/05:140"
+        },
+        {
+          "id": "cr-1106-re",
+          "unit": "sentence",
+          "source": "docs/command_reference/11-dualc_field/06-streaming-tiled-export.md",
+          "max_matches": 9,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 6 item 3 — 11/06 Why-STL rationale is 11/03 § 5; video analogy deleted; D-range corrected (item 1)",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "was link-not-move wherever the record already held it",
+          "note": "read: STL/PLY/3MF rationale on 11/03 § 5 and § 5a; --collapse exclusion kept at 11/06:102; D >= 2 rule corrected from source (item 1)"
+        },
+        {
+          "id": "cr-1106-pa",
+          "unit": "sentence",
+          "source": "docs/command_reference/11-dualc_field/06-streaming-tiled-export.md",
+          "max_matches": 4,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 6 item 3 — 11/06 Why-STL rationale is 11/03 § 5; video analogy deleted; D-range corrected (item 1)",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "was link-not-move wherever the record already held it",
+          "note": "read: STL/PLY/3MF rationale on 11/03 § 5 and § 5a; --collapse exclusion kept at 11/06:102; D >= 2 rule corrected from source (item 1)"
+        },
+        {
+          "id": "cr-1106-go",
+          "unit": "sentence",
+          "source": "docs/command_reference/11-dualc_field/06-streaming-tiled-export.md",
+          "max_matches": 19,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 6 item 3 — 11/06 Why-STL rationale is 11/03 § 5; video analogy deleted; D-range corrected (item 1)",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "was link-not-move wherever the record already held it",
+          "note": "read: STL/PLY/3MF rationale on 11/03 § 5 and § 5a; --collapse exclusion kept at 11/06:102; D >= 2 rule corrected from source (item 1)"
+        },
+        {
+          "id": "cr-12rm-re",
+          "unit": "sentence",
+          "source": "docs/command_reference/12-dualc_field_view/README.md",
+          "max_matches": 5,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 6 item 3 — 12/README performance rationale is 12/04; flags in the table; opt-in build in the README prelude",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "was link-not-move wherever the record already held it",
+          "note": "read: --preview-scale default/range on the flag table, --snapshot row, heavy-scene/dGPU tips on 12/04 and 12/03"
+        },
+        {
+          "id": "cr-12rm-pa",
+          "unit": "sentence",
+          "source": "docs/command_reference/12-dualc_field_view/README.md",
+          "max_matches": 7,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 6 item 3 — 12/README performance rationale is 12/04; flags in the table; opt-in build in the README prelude",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "was link-not-move wherever the record already held it",
+          "note": "read: --preview-scale default/range on the flag table, --snapshot row, heavy-scene/dGPU tips on 12/04 and 12/03"
+        },
+        {
+          "id": "cr-12rm-go",
+          "unit": "sentence",
+          "source": "docs/command_reference/12-dualc_field_view/README.md",
+          "max_matches": 17,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 6 item 3 — 12/README performance rationale is 12/04; flags in the table; opt-in build in the README prelude",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "was link-not-move wherever the record already held it",
+          "note": "read: --preview-scale default/range on the flag table, --snapshot row, heavy-scene/dGPU tips on 12/04 and 12/03"
+        },
+        {
+          "id": "cr-01-re",
+          "unit": "sentence",
+          "source": "docs/command_reference/01-dualc_demo.md",
+          "max_matches": 3,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 6 item 3 — 01's oracle algorithms are design/02; recipe IDs D1–D10",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "was link-not-move wherever the record already held it",
+          "note": "read: 3-ray majority parity, pseudonormal, GWN w > 0.5 and --gwn-field on design/02"
+        },
+        {
+          "id": "cr-01-pa",
+          "unit": "sentence",
+          "source": "docs/command_reference/01-dualc_demo.md",
+          "max_matches": 6,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 6 item 3 — 01's oracle algorithms are design/02; recipe IDs D1–D10",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "was link-not-move wherever the record already held it",
+          "note": "read: 3-ray majority parity, pseudonormal, GWN w > 0.5 and --gwn-field on design/02"
+        },
+        {
+          "id": "cr-01-go",
+          "unit": "sentence",
+          "source": "docs/command_reference/01-dualc_demo.md",
+          "max_matches": 14,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 6 item 3 — 01's oracle algorithms are design/02; recipe IDs D1–D10",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "was link-not-move wherever the record already held it",
+          "note": "read: 3-ray majority parity, pseudonormal, GWN w > 0.5 and --gwn-field on design/02"
+        },
+        {
+          "id": "cr-1103-re",
+          "unit": "sentence",
+          "source": "docs/command_reference/11-dualc_field/03-graded-and-morph.md",
+          "max_matches": 12,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 6 item 4 — mix blends values: one home on design/10 (and D-28); 11/03 keeps a five-line reminder",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "one home + link for the six multi-copy facts",
+          "note": "read: the critical callout is design/10 § mix; conservative refinement kept at 11/03:127; ASCII ramp deleted"
+        },
+        {
+          "id": "cr-1103-pa",
+          "unit": "sentence",
+          "source": "docs/command_reference/11-dualc_field/03-graded-and-morph.md",
+          "max_matches": 4,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 6 item 4 — mix blends values: one home on design/10 (and D-28); 11/03 keeps a five-line reminder",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "one home + link for the six multi-copy facts",
+          "note": "read: the critical callout is design/10 § mix; conservative refinement kept at 11/03:127; ASCII ramp deleted"
+        },
+        {
+          "id": "cr-1103-go",
+          "unit": "sentence",
+          "source": "docs/command_reference/11-dualc_field/03-graded-and-morph.md",
+          "max_matches": 9,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 6 item 4 — mix blends values: one home on design/10 (and D-28); 11/03 keeps a five-line reminder",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "one home + link for the six multi-copy facts",
+          "note": "read: the critical callout is design/10 § mix; conservative refinement kept at 11/03:127; ASCII ramp deleted"
+        },
+        {
+          "id": "cr-1201-re",
+          "unit": "sentence",
+          "source": "docs/command_reference/12-dualc_field_view/01-controls.md",
+          "max_matches": 2,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 6 items 3/4 — keyboard layout to the README map + design/09; side-car paragraphs to 12/03; section-plane mechanism 12/03",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "one home + link for the six multi-copy facts",
+          "note": "read: layout-independence rule on design/09, Boletus side-car on 12/03, plane half-space maths on 12/03 § Section planes"
+        },
+        {
+          "id": "cr-1201-pa",
+          "unit": "sentence",
+          "source": "docs/command_reference/12-dualc_field_view/01-controls.md",
+          "max_matches": 6,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 6 items 3/4 — keyboard layout to the README map + design/09; side-car paragraphs to 12/03; section-plane mechanism 12/03",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "one home + link for the six multi-copy facts",
+          "note": "read: layout-independence rule on design/09, Boletus side-car on 12/03, plane half-space maths on 12/03 § Section planes"
+        },
+        {
+          "id": "cr-1201-go",
+          "unit": "sentence",
+          "source": "docs/command_reference/12-dualc_field_view/01-controls.md",
+          "max_matches": 11,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 6 items 3/4 — keyboard layout to the README map + design/09; side-car paragraphs to 12/03; section-plane mechanism 12/03",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "one home + link for the six multi-copy facts",
+          "note": "read: layout-independence rule on design/09, Boletus side-car on 12/03, plane half-space maths on 12/03 § Section planes"
+        },
+        {
+          "id": "cr-08-re",
+          "unit": "sentence",
+          "source": "docs/command_reference/08-dualc_view.md",
+          "max_matches": 8,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 6 item 3 — 08's coalescing and heavy-gate paragraphs are 07 § 10; opt-in build in the README prelude; POSIX paths",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "was link-not-move wherever the record already held it",
+          "note": "read: IsItemDeactivatedAfterEdit/pendingState on 07:13; safety gate kept at 08:96; WGL note kept at 08:109"
+        },
+        {
+          "id": "cr-08-pa",
+          "unit": "sentence",
+          "source": "docs/command_reference/08-dualc_view.md",
+          "max_matches": 4,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 6 item 3 — 08's coalescing and heavy-gate paragraphs are 07 § 10; opt-in build in the README prelude; POSIX paths",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "was link-not-move wherever the record already held it",
+          "note": "read: IsItemDeactivatedAfterEdit/pendingState on 07:13; safety gate kept at 08:96; WGL note kept at 08:109"
+        },
+        {
+          "id": "cr-08-go",
+          "unit": "sentence",
+          "source": "docs/command_reference/08-dualc_view.md",
+          "max_matches": 6,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 6 item 3 — 08's coalescing and heavy-gate paragraphs are 07 § 10; opt-in build in the README prelude; POSIX paths",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "was link-not-move wherever the record already held it",
+          "note": "read: IsItemDeactivatedAfterEdit/pendingState on 07:13; safety gate kept at 08:96; WGL note kept at 08:109"
+        },
+        {
+          "id": "cr-06-re",
+          "unit": "sentence",
+          "source": "docs/command_reference/06-dualc_lattice.md",
+          "max_matches": 9,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 6 items 2/3 — 06's derivation moved verbatim to 05 § 16 (dated append); flags in a real flag table; types re-lettered",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "was link-not-move wherever the record already held it",
+          "note": "read: λ/T derivation and tuning advice under 05 § 16; defaults in the flag table; 2-T/λ volume-fraction table kept"
+        },
+        {
+          "id": "cr-06-pa",
+          "unit": "sentence",
+          "source": "docs/command_reference/06-dualc_lattice.md",
+          "max_matches": 2,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 6 items 2/3 — 06's derivation moved verbatim to 05 § 16 (dated append); flags in a real flag table; types re-lettered",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "was link-not-move wherever the record already held it",
+          "note": "read: λ/T derivation and tuning advice under 05 § 16; defaults in the flag table; 2-T/λ volume-fraction table kept"
+        },
+        {
+          "id": "cr-06-go",
+          "unit": "sentence",
+          "source": "docs/command_reference/06-dualc_lattice.md",
+          "max_matches": 5,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 6 items 2/3 — 06's derivation moved verbatim to 05 § 16 (dated append); flags in a real flag table; types re-lettered",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "was link-not-move wherever the record already held it",
+          "note": "read: λ/T derivation and tuning advice under 05 § 16; defaults in the flag table; 2-T/λ volume-fraction table kept"
+        },
+        {
+          "id": "cr-1105-re",
+          "unit": "sentence",
+          "source": "docs/command_reference/11-dualc_field/05-decimation.md",
+          "max_matches": 10,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 6 item 3 — 11/05's measured table is 12/08/01, its collapse-energy history 01/02 § 4.9; acceptance counts precise on 12/06",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "was link-not-move wherever the record already held it",
+          "note": "read: table rows on 12/08/01:167-172; 5.19 M -> 519 k is 5,189,100 -> 518,856 on 12/06:32; residual-vs-energy history on 01/02"
+        },
+        {
+          "id": "cr-1105-pa",
+          "unit": "sentence",
+          "source": "docs/command_reference/11-dualc_field/05-decimation.md",
+          "max_matches": 2,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 6 item 3 — 11/05's measured table is 12/08/01, its collapse-energy history 01/02 § 4.9; acceptance counts precise on 12/06",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "was link-not-move wherever the record already held it",
+          "note": "read: table rows on 12/08/01:167-172; 5.19 M -> 519 k is 5,189,100 -> 518,856 on 12/06:32; residual-vs-energy history on 01/02"
+        },
+        {
+          "id": "cr-1105-go",
+          "unit": "sentence",
+          "source": "docs/command_reference/11-dualc_field/05-decimation.md",
+          "max_matches": 6,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 6 item 3 — 11/05's measured table is 12/08/01, its collapse-energy history 01/02 § 4.9; acceptance counts precise on 12/06",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "was link-not-move wherever the record already held it",
+          "note": "read: table rows on 12/08/01:167-172; 5.19 M -> 519 k is 5,189,100 -> 518,856 on 12/06:32; residual-vs-energy history on 01/02"
+        },
+        {
+          "id": "cr-03-re",
+          "unit": "sentence",
+          "source": "docs/command_reference/03-dualc_boolean.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 6 items 2/4/5 — 03 got a real flag table; --collapse semantics one home on 11/05; dated 'Changed 2026-08-25' residue off the usage page (fact on 12/07 § H2)",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "Real flag tables with source defaults and complete synopses",
+          "note": "read: --k 0.25, --depth 7, --collapse 0, --sharp in the flag table; topology-safe merge rule on 11/05:129; enclosed-cavity fix recorded on 12/07:94"
+        },
+        {
+          "id": "cr-03-pa",
+          "unit": "sentence",
+          "source": "docs/command_reference/03-dualc_boolean.md",
+          "max_matches": 4,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 6 items 2/4/5 — 03 got a real flag table; --collapse semantics one home on 11/05; dated 'Changed 2026-08-25' residue off the usage page (fact on 12/07 § H2)",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "Real flag tables with source defaults and complete synopses",
+          "note": "read: --k 0.25, --depth 7, --collapse 0, --sharp in the flag table; topology-safe merge rule on 11/05:129; enclosed-cavity fix recorded on 12/07:94"
+        },
+        {
+          "id": "cr-03-go",
+          "unit": "sentence",
+          "source": "docs/command_reference/03-dualc_boolean.md",
+          "max_matches": 9,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 6 items 2/4/5 — 03 got a real flag table; --collapse semantics one home on 11/05; dated 'Changed 2026-08-25' residue off the usage page (fact on 12/07 § H2)",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "Real flag tables with source defaults and complete synopses",
+          "note": "read: --k 0.25, --depth 7, --collapse 0, --sharp in the flag table; topology-safe merge rule on 11/05:129; enclosed-cavity fix recorded on 12/07:94"
+        },
+        {
+          "id": "cr-1102-re",
+          "unit": "sentence",
+          "source": "docs/command_reference/11-dualc_field/02-strut-lattices.md",
+          "max_matches": 11,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 6 items 3/4 — 11/02's tapered-strut why/how is 05/02 § Phase 4; PowerShell quoting and mix callouts have one home; recipe comments shortened to IDs",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "was link-not-move wherever the record already held it",
+          "note": "read: stress-aligned/printability/aesthetics rationale and the RoundCone split on 05/02 § Phase 4; mix gap-not-bond on design/10; thin-wall depth rule on design/10"
+        },
+        {
+          "id": "cr-1102-pa",
+          "unit": "sentence",
+          "source": "docs/command_reference/11-dualc_field/02-strut-lattices.md",
+          "max_matches": 7,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 6 items 3/4 — 11/02's tapered-strut why/how is 05/02 § Phase 4; PowerShell quoting and mix callouts have one home; recipe comments shortened to IDs",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "was link-not-move wherever the record already held it",
+          "note": "read: stress-aligned/printability/aesthetics rationale and the RoundCone split on 05/02 § Phase 4; mix gap-not-bond on design/10; thin-wall depth rule on design/10"
+        },
+        {
+          "id": "cr-1102-go",
+          "unit": "sentence",
+          "source": "docs/command_reference/11-dualc_field/02-strut-lattices.md",
+          "max_matches": 19,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 6 items 3/4 — 11/02's tapered-strut why/how is 05/02 § Phase 4; PowerShell quoting and mix callouts have one home; recipe comments shortened to IDs",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "was link-not-move wherever the record already held it",
+          "note": "read: stress-aligned/printability/aesthetics rationale and the RoundCone split on 05/02 § Phase 4; mix gap-not-bond on design/10; thin-wall depth rule on design/10"
+        },
+        {
+          "id": "cr-11rm-re",
+          "unit": "sentence",
+          "source": "docs/command_reference/11-dualc_field/README.md",
+          "max_matches": 7,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 6 items 2/4/5 — 11/README: benchmark figure is a link (03, 12/README, 11/02 hold 10–49 min), -o by extension, --collapse links 11/05, Tool-12 pointer reworded",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "one home + link for the six multi-copy facts",
+          "note": "read: 'Why this matters' keeps the claim and links the Phase 0 benchmark; flag rows link their one home"
+        },
+        {
+          "id": "cr-11rm-pa",
+          "unit": "sentence",
+          "source": "docs/command_reference/11-dualc_field/README.md",
+          "max_matches": 3,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 6 items 2/4/5 — 11/README: benchmark figure is a link (03, 12/README, 11/02 hold 10–49 min), -o by extension, --collapse links 11/05, Tool-12 pointer reworded",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "one home + link for the six multi-copy facts",
+          "note": "read: 'Why this matters' keeps the claim and links the Phase 0 benchmark; flag rows link their one home"
+        },
+        {
+          "id": "cr-11rm-go",
+          "unit": "sentence",
+          "source": "docs/command_reference/11-dualc_field/README.md",
+          "max_matches": 6,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 6 items 2/4/5 — 11/README: benchmark figure is a link (03, 12/README, 11/02 hold 10–49 min), -o by extension, --collapse links 11/05, Tool-12 pointer reworded",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "one home + link for the six multi-copy facts",
+          "note": "read: 'Why this matters' keeps the claim and links the Phase 0 benchmark; flag rows link their one home"
+        },
+        {
+          "id": "cr-1202-re",
+          "unit": "sentence",
+          "source": "docs/command_reference/12-dualc_field_view/02-nodes-and-examples.md",
+          "max_matches": 2,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 6 items 1/4/5 — shell quoting has one home (design/09 + 11/01); 'As of 2026-06-24' and parity-count residue off the page; 'press l' corrected (auto-reload)",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "one home + link for the six multi-copy facts",
+          "note": "read: strut vocabulary on 11/01:92 and 11/02; PowerShell rule on design/09; reload row on 12/README:110"
+        },
+        {
+          "id": "cr-1202-pa",
+          "unit": "sentence",
+          "source": "docs/command_reference/12-dualc_field_view/02-nodes-and-examples.md",
+          "max_matches": 4,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 6 items 1/4/5 — shell quoting has one home (design/09 + 11/01); 'As of 2026-06-24' and parity-count residue off the page; 'press l' corrected (auto-reload)",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "one home + link for the six multi-copy facts",
+          "note": "read: strut vocabulary on 11/01:92 and 11/02; PowerShell rule on design/09; reload row on 12/README:110"
+        },
+        {
+          "id": "cr-1202-go",
+          "unit": "sentence",
+          "source": "docs/command_reference/12-dualc_field_view/02-nodes-and-examples.md",
+          "max_matches": 9,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 6 items 1/4/5 — shell quoting has one home (design/09 + 11/01); 'As of 2026-06-24' and parity-count residue off the page; 'press l' corrected (auto-reload)",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "one home + link for the six multi-copy facts",
+          "note": "read: strut vocabulary on 11/01:92 and 11/02; PowerShell rule on design/09; reload row on 12/README:110"
+        },
+        {
+          "id": "cr-10-re",
+          "unit": "sentence",
+          "source": "docs/command_reference/10-dualc_raymarch.md",
+          "max_matches": 5,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 6 items 2/4/5 — opt-in build in the README prelude; layout-independent keys on design/09; missing-mesh message quoted from source",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "Real flag tables with source defaults and complete synopses",
+          "note": "read: 'cannot open mesh' line at 10:95; keyboard rule on design/09 and the README map; section-plane mechanism on 12/03"
+        },
+        {
+          "id": "cr-10-go",
+          "unit": "sentence",
+          "source": "docs/command_reference/10-dualc_raymarch.md",
+          "max_matches": 6,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 6 items 2/4/5 — opt-in build in the README prelude; layout-independent keys on design/09; missing-mesh message quoted from source",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "Real flag tables with source defaults and complete synopses",
+          "note": "read: 'cannot open mesh' line at 10:95; keyboard rule on design/09 and the README map; section-plane mechanism on 12/03"
+        },
+        {
+          "id": "cr-02-re",
+          "unit": "sentence",
+          "source": "docs/command_reference/02-dualc_primitive.md",
+          "max_matches": 7,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 6 item 2 — 02's scattered commands became recipes C1–C7",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "Real flag tables with source defaults and complete synopses"
+        },
+        {
+          "id": "cr-02-go",
+          "unit": "sentence",
+          "source": "docs/command_reference/02-dualc_primitive.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 6 item 2 — 02's scattered commands became recipes C1–C7",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "Real flag tables with source defaults and complete synopses"
+        },
+        {
+          "id": "cr-04-re",
+          "unit": "sentence",
+          "source": "docs/command_reference/04-dualc_lift.md",
+          "max_matches": 5,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 6 items 1/2 — 04's flag table moved above recipes L1–L8; the --offset row corrected",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "Real flag tables with source defaults and complete synopses"
+        },
+        {
+          "id": "cr-1101-re",
+          "unit": "sentence",
+          "source": "docs/command_reference/11-dualc_field/01-op-vocabulary.md",
+          "max_matches": 16,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 6 item 2 — 11/01's recipe E with an ID'd comment header",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "Real flag tables with source defaults and complete synopses"
+        },
+        {
+          "id": "cr-1101-go",
+          "unit": "sentence",
+          "source": "docs/command_reference/11-dualc_field/01-op-vocabulary.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 6 item 2 — 11/01's recipe E with an ID'd comment header",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "Real flag tables with source defaults and complete synopses"
+        },
+        {
+          "id": "cr-1104-re",
+          "unit": "sentence",
+          "source": "docs/command_reference/11-dualc_field/04-workflow-open-surface.md",
+          "max_matches": 2,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 6 items 3/4 — 11/04: thin-feature rule and PowerShell quoting have one home; '514 553 triangles, ~4 min' deleted, not re-recorded (12/05 dates the verification)",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "11/04's \"514 553 triangles, ~4 min\" is not re-recorded",
+          "note": "read: wall >= 2-3 cells on design/10; W1 points at 12/04's O1"
+        },
+        {
+          "id": "cr-1104-pa",
+          "unit": "sentence",
+          "source": "docs/command_reference/11-dualc_field/04-workflow-open-surface.md",
+          "max_matches": 3,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 6 items 3/4 — 11/04: thin-feature rule and PowerShell quoting have one home; '514 553 triangles, ~4 min' deleted, not re-recorded (12/05 dates the verification)",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "11/04's \"514 553 triangles, ~4 min\" is not re-recorded",
+          "note": "read: wall >= 2-3 cells on design/10; W1 points at 12/04's O1"
+        },
+        {
+          "id": "cr-1104-go",
+          "unit": "sentence",
+          "source": "docs/command_reference/11-dualc_field/04-workflow-open-surface.md",
+          "max_matches": 2,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 6 items 3/4 — 11/04: thin-feature rule and PowerShell quoting have one home; '514 553 triangles, ~4 min' deleted, not re-recorded (12/05 dates the verification)",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "11/04's \"514 553 triangles, ~4 min\" is not re-recorded",
+          "note": "read: wall >= 2-3 cells on design/10; W1 points at 12/04's O1"
+        },
+        {
+          "id": "cr-1107-re",
+          "unit": "sentence",
+          "source": "docs/command_reference/11-dualc_field/07-mem-budget.md",
+          "max_matches": 9,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 6 item 2 — 11/07 recipes U with ID'd headers; --tile-depth-wins note quoted from source",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "Real flag tables with source defaults and complete synopses"
+        },
+        {
+          "id": "cr-1107-pa",
+          "unit": "sentence",
+          "source": "docs/command_reference/11-dualc_field/07-mem-budget.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 6 item 2 — 11/07 recipes U with ID'd headers; --tile-depth-wins note quoted from source",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "Real flag tables with source defaults and complete synopses"
+        },
+        {
+          "id": "cr-1203-re",
+          "unit": "sentence",
+          "source": "docs/command_reference/12-dualc_field_view/03-recipes-by-node.md",
+          "max_matches": 4,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 6 items 2/4/5 — 12/03 recipes N1–N19; 'Since 2026-06-24' residue off the page; quoting rule has one home",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "one home + link for the six multi-copy facts"
+        },
+        {
+          "id": "cr-1203-go",
+          "unit": "sentence",
+          "source": "docs/command_reference/12-dualc_field_view/03-recipes-by-node.md",
+          "max_matches": 4,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 6 items 2/4/5 — 12/03 recipes N1–N19; 'Since 2026-06-24' residue off the page; quoting rule has one home",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "one home + link for the six multi-copy facts"
+        },
+        {
+          "id": "cr-1203-pa",
+          "unit": "sentence",
+          "source": "docs/command_reference/12-dualc_field_view/03-recipes-by-node.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 6 items 2/4/5 — 12/03 recipes N1–N19; 'Since 2026-06-24' residue off the page; quoting rule has one home",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "one home + link for the six multi-copy facts"
+        },
+        {
+          "id": "cr-1204-re",
+          "unit": "sentence",
+          "source": "docs/command_reference/12-dualc_field_view/04-open-surface-preview.md",
+          "max_matches": 2,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 6 items 2/4 — 12/04 recipes O1–O5; the PowerShell inline equivalent is one line + the design/09 rule",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "one home + link for the six multi-copy facts"
+        },
+        {
+          "id": "cr-1204-go",
+          "unit": "sentence",
+          "source": "docs/command_reference/12-dualc_field_view/04-open-surface-preview.md",
+          "max_matches": 2,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 6 items 2/4 — 12/04 recipes O1–O5; the PowerShell inline equivalent is one line + the design/09 rule",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "one home + link for the six multi-copy facts"
+        },
+        {
+          "id": "cr-05-re",
+          "unit": "sentence",
+          "source": "docs/command_reference/05-dualc_csg_demo.md",
+          "max_matches": 4,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 6 item 2 — 05 recipes re-tabled with letter IDs",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "Real flag tables with source defaults and complete synopses"
+        },
+        {
+          "id": "cr-09-re",
+          "unit": "sentence",
+          "source": "docs/command_reference/09-dualc_gen_demo.md",
+          "max_matches": 5,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 6 item 2 — 09 recipes re-tabled with letter IDs",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "Real flag tables with source defaults and complete synopses"
+        },
+        {
+          "id": "cr-1108-re",
+          "unit": "sentence",
+          "source": "docs/command_reference/11-dualc_field/08-3mf-and-weld.md",
+          "max_matches": 3,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 6 item 2 — 11/08 recipes re-tabled with letter IDs",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "Real flag tables with source defaults and complete synopses"
+        },
+        {
+          "id": "cr-07-re",
+          "unit": "sentence",
+          "source": "docs/command_reference/07-dualc_slice.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 6 item 2 — synopsis line reflowed",
+          "record": "docs/roadmap/19-docs-layers/05-record-phase-6.md#record--phase-6-the-command-reference-cleanup",
+          "quote": "Real flag tables with source defaults and complete synopses"
+        },
+        {
+          "id": "rm-readme-re",
+          "unit": "sentence",
+          "source": "docs/roadmap/README.md",
+          "max_matches": 5,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5a — roadmap/README.md rewritten as a snapshot (index rows, ledger clause, tombstones, restated numbers out, DEFERRED cited to decisions rows)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "a rewritten snapshot: tombstone rows, the ledger clause, restated numbers out",
+          "note": "read: every row is one clause + link; the facts (re-scoped ABI, keystone, deferred items with triggers) sit on 12, 14, 15, 17 and decisions/"
+        },
+        {
+          "id": "rm-readme-pa",
+          "unit": "sentence",
+          "source": "docs/roadmap/README.md",
+          "max_matches": 31,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 5a — roadmap/README.md rewritten as a snapshot (index rows, ledger clause, tombstones, restated numbers out, DEFERRED cited to decisions rows)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "a rewritten snapshot: tombstone rows, the ledger clause, restated numbers out",
+          "note": "read: every row is one clause + link; the facts (re-scoped ABI, keystone, deferred items with triggers) sit on 12, 14, 15, 17 and decisions/"
+        },
+        {
+          "id": "rm-readme-go",
+          "unit": "sentence",
+          "source": "docs/roadmap/README.md",
+          "max_matches": 19,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 5a — roadmap/README.md rewritten as a snapshot (index rows, ledger clause, tombstones, restated numbers out, DEFERRED cited to decisions rows)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "a rewritten snapshot: tombstone rows, the ledger clause, restated numbers out",
+          "note": "read: every row is one clause + link; the facts (re-scoped ABI, keystone, deferred items with triggers) sit on 12, 14, 15, 17 and decisions/"
+        },
+        {
+          "id": "rm-17rm-re",
+          "unit": "sentence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/README.md",
+          "max_matches": 5,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b item 7 — 17/README's five Update paragraphs are dated one-liners; the facts are on 17/03/01, 17/04, 17/05, 17/07, 17/08 and 12/07",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "every per-batch ctest count survives on those pages",
+          "note": "read: d48ad98 / 6 µm plate on 17/03/01:59-63; 678 vertices on 17/07:72; scaled(f,s) complement on 17/08:98; BBox{} sentinel on 17/04:156; 228 -> 229 on 12/07:157; never-fires warning on 17/05:140"
+        },
+        {
+          "id": "rm-17rm-pa",
+          "unit": "sentence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/README.md",
+          "max_matches": 4,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 5b item 7 — 17/README's five Update paragraphs are dated one-liners; the facts are on 17/03/01, 17/04, 17/05, 17/07, 17/08 and 12/07",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "every per-batch ctest count survives on those pages",
+          "note": "read: d48ad98 / 6 µm plate on 17/03/01:59-63; 678 vertices on 17/07:72; scaled(f,s) complement on 17/08:98; BBox{} sentinel on 17/04:156; 228 -> 229 on 12/07:157; never-fires warning on 17/05:140"
+        },
+        {
+          "id": "rm-17rm-go",
+          "unit": "sentence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/README.md",
+          "max_matches": 22,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 5b item 7 — 17/README's five Update paragraphs are dated one-liners; the facts are on 17/03/01, 17/04, 17/05, 17/07, 17/08 and 12/07",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "every per-batch ctest count survives on those pages",
+          "note": "read: d48ad98 / 6 µm plate on 17/03/01:59-63; 678 vertices on 17/07:72; scaled(f,s) complement on 17/08:98; BBox{} sentinel on 17/04:156; 228 -> 229 on 12/07:157; never-fires warning on 17/05:140"
+        },
+        {
+          "id": "rm-02-re",
+          "unit": "sentence",
+          "source": "docs/roadmap/02-implicit-sdf-foundation.md",
+          "max_matches": 6,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 8 lint — roadmap 02's v2 section reduced to one sentence + link per heading; its gotchas have homes (design/08 § 10.4, design/10, 02:50)",
+          "record": "docs/roadmap/19-docs-layers/07-record-phase-8.md#record--phase-8-the-semantic-lint-and-the-shrunken-skill",
+          "quote": "roadmap 02's v2 section reduced to one sentence + link per heading",
+          "note": "read: field algebra, primitives inventory, combinators, lifts are design/08 and the cmdref inventory; infinite bounds design/08 § 10.5; 'compare geometry, not counts' kept at 02:50"
+        },
+        {
+          "id": "rm-02-pa",
+          "unit": "sentence",
+          "source": "docs/roadmap/02-implicit-sdf-foundation.md",
+          "max_matches": 6,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 8 lint — roadmap 02's v2 section reduced to one sentence + link per heading; its gotchas have homes (design/08 § 10.4, design/10, 02:50)",
+          "record": "docs/roadmap/19-docs-layers/07-record-phase-8.md#record--phase-8-the-semantic-lint-and-the-shrunken-skill",
+          "quote": "roadmap 02's v2 section reduced to one sentence + link per heading",
+          "note": "read: field algebra, primitives inventory, combinators, lifts are design/08 and the cmdref inventory; infinite bounds design/08 § 10.5; 'compare geometry, not counts' kept at 02:50"
+        },
+        {
+          "id": "rm-02-go",
+          "unit": "sentence",
+          "source": "docs/roadmap/02-implicit-sdf-foundation.md",
+          "max_matches": 10,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 8 lint — roadmap 02's v2 section reduced to one sentence + link per heading; its gotchas have homes (design/08 § 10.4, design/10, 02:50)",
+          "record": "docs/roadmap/19-docs-layers/07-record-phase-8.md#record--phase-8-the-semantic-lint-and-the-shrunken-skill",
+          "quote": "roadmap 02's v2 section reduced to one sentence + link per heading",
+          "note": "read: field algebra, primitives inventory, combinators, lifts are design/08 and the cmdref inventory; infinite bounds design/08 § 10.5; 'compare geometry, not counts' kept at 02:50"
+        },
+        {
+          "id": "rm-1402-re",
+          "unit": "sentence",
+          "source": "docs/roadmap/14-c-abi/02-surface-and-contract.md",
+          "max_matches": 7,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b item 5.1 — the stale 0.3.0 per-function table of 14/02 § 3.2 removed in favour of capi/dualc_c.h and capi/README.md",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "per-function table in 14/02 § 3.2 removed in favour of the header",
+          "note": "read: every row was a 0.3.0 signature + contract sentence; the header comments and capi/README.md are the home, the § 3.3 mapping table stays"
+        },
+        {
+          "id": "rm-1402-pa",
+          "unit": "sentence",
+          "source": "docs/roadmap/14-c-abi/02-surface-and-contract.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 5b item 5.1 — the stale 0.3.0 per-function table of 14/02 § 3.2 removed in favour of capi/dualc_c.h and capi/README.md",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "per-function table in 14/02 § 3.2 removed in favour of the header",
+          "note": "read: every row was a 0.3.0 signature + contract sentence; the header comments and capi/README.md are the home, the § 3.3 mapping table stays"
+        },
+        {
+          "id": "rm-1402-go",
+          "unit": "sentence",
+          "source": "docs/roadmap/14-c-abi/02-surface-and-contract.md",
+          "max_matches": 11,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 5b item 5.1 — the stale 0.3.0 per-function table of 14/02 § 3.2 removed in favour of capi/dualc_c.h and capi/README.md",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "per-function table in 14/02 § 3.2 removed in favour of the header",
+          "note": "read: every row was a 0.3.0 signature + contract sentence; the header comments and capi/README.md are the home, the § 3.3 mapping table stays"
+        },
+        {
+          "id": "rm-1704-re",
+          "unit": "sentence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/04-engineering-quality.md",
+          "max_matches": 10,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5a — 17/04 split for the cap: #34's bullets to 17/07 and 17/08 verbatim, #28/#30/#33 records to 17/12; the strut-oracle note is the ledger row 17/README:33",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "#34's four landed bullets are one line + link each (their text is verbatim in",
+          "note": "read: +0.55/-0.15 sign flip on 17/07:28-30; BBox{} sentinel and scaled(f,s) on 17/04:156-164 and 17/08:98; ctest 246/246 on 17/07:84"
+        },
+        {
+          "id": "rm-1704-pa",
+          "unit": "sentence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/04-engineering-quality.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 5a — 17/04 split for the cap: #34's bullets to 17/07 and 17/08 verbatim, #28/#30/#33 records to 17/12; the strut-oracle note is the ledger row 17/README:33",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "#34's four landed bullets are one line + link each (their text is verbatim in",
+          "note": "read: +0.55/-0.15 sign flip on 17/07:28-30; BBox{} sentinel and scaled(f,s) on 17/04:156-164 and 17/08:98; ctest 246/246 on 17/07:84"
+        },
+        {
+          "id": "rm-1704-go",
+          "unit": "sentence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/04-engineering-quality.md",
+          "max_matches": 8,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 5a — 17/04 split for the cap: #34's bullets to 17/07 and 17/08 verbatim, #28/#30/#33 records to 17/12; the strut-oracle note is the ledger row 17/README:33",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "#34's four landed bullets are one line + link each (their text is verbatim in",
+          "note": "read: +0.55/-0.15 sign flip on 17/07:28-30; BBox{} sentinel and scaled(f,s) on 17/04:156-164 and 17/08:98; ctest 246/246 on 17/07:84"
+        },
+        {
+          "id": "rm-12rm-re",
+          "unit": "sentence",
+          "source": "docs/roadmap/12-field-graph-and-app/README.md",
+          "max_matches": 3,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5c — 12/README's long cells are status + date + link (sentences on 12/02, 12/03, 12/04, 14, 12/06); one Boletus pointer; 16 tombstoned into 12/07",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/03-session-5c.md#phase-5-session-5c--the-evidence-pass",
+          "quote": "five long cells (B, D.1, D.2, the C ABI row, G) are status + date + link",
+          "note": "read: #3 build (STL/3MF, ~49x) on 11/03; side-car on 15 and 12/03; 3MF one-third figure on 11/08"
+        },
+        {
+          "id": "rm-12rm-pa",
+          "unit": "sentence",
+          "source": "docs/roadmap/12-field-graph-and-app/README.md",
+          "max_matches": 3,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 5c — 12/README's long cells are status + date + link (sentences on 12/02, 12/03, 12/04, 14, 12/06); one Boletus pointer; 16 tombstoned into 12/07",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/03-session-5c.md#phase-5-session-5c--the-evidence-pass",
+          "quote": "five long cells (B, D.1, D.2, the C ABI row, G) are status + date + link",
+          "note": "read: #3 build (STL/3MF, ~49x) on 11/03; side-car on 15 and 12/03; 3MF one-third figure on 11/08"
+        },
+        {
+          "id": "rm-12rm-go",
+          "unit": "sentence",
+          "source": "docs/roadmap/12-field-graph-and-app/README.md",
+          "max_matches": 12,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 5c — 12/README's long cells are status + date + link (sentences on 12/02, 12/03, 12/04, 14, 12/06); one Boletus pointer; 16 tombstoned into 12/07",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/03-session-5c.md#phase-5-session-5c--the-evidence-pass",
+          "quote": "five long cells (B, D.1, D.2, the C ABI row, G) are status + date + link",
+          "note": "read: #3 build (STL/3MF, ~49x) on 11/03; side-car on 15 and 12/03; 3MF one-third figure on 11/08"
+        },
+        {
+          "id": "rm-10-re",
+          "unit": "sentence",
+          "source": "docs/roadmap/10-infrastructure-and-integration.md",
+          "max_matches": 7,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b item 7 — 10's dead API sketch deleted (dated), 'why a C ABI' and the entry-point list are links into 14, wrapper plans moved to 15",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "its dead API sketch (never shipped; deleted, the deletion dated)"
+        },
+        {
+          "id": "rm-10-pa",
+          "unit": "sentence",
+          "source": "docs/roadmap/10-infrastructure-and-integration.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 5b item 7 — 10's dead API sketch deleted (dated), 'why a C ABI' and the entry-point list are links into 14, wrapper plans moved to 15",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "its dead API sketch (never shipped; deleted, the deletion dated)"
+        },
+        {
+          "id": "rm-10-go",
+          "unit": "sentence",
+          "source": "docs/roadmap/10-infrastructure-and-integration.md",
+          "max_matches": 10,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 5b item 7 — 10's dead API sketch deleted (dated), 'why a C ABI' and the entry-point list are links into 14, wrapper plans moved to 15",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "its dead API sketch (never shipped; deleted, the deletion dated)"
+        },
+        {
+          "id": "rm-15-re",
+          "unit": "sentence",
+          "source": "docs/roadmap/15-boletus-handoff.md",
+          "max_matches": 4,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b item 7 — 15's file-watch and discrete-GPU paragraphs keep the Boletus-side facts and link 12/03 / 12/04 (dGPU auto-select on 12/04:126)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "15's file-watch and discrete-GPU paragraphs keep the Boletus-side facts"
+        },
+        {
+          "id": "rm-15-pa",
+          "unit": "sentence",
+          "source": "docs/roadmap/15-boletus-handoff.md",
+          "max_matches": 2,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 5b item 7 — 15's file-watch and discrete-GPU paragraphs keep the Boletus-side facts and link 12/03 / 12/04 (dGPU auto-select on 12/04:126)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "15's file-watch and discrete-GPU paragraphs keep the Boletus-side facts"
+        },
+        {
+          "id": "rm-15-go",
+          "unit": "sentence",
+          "source": "docs/roadmap/15-boletus-handoff.md",
+          "max_matches": 4,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 5b item 7 — 15's file-watch and discrete-GPU paragraphs keep the Boletus-side facts and link 12/03 / 12/04 (dGPU auto-select on 12/04:126)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "15's file-watch and discrete-GPU paragraphs keep the Boletus-side facts"
+        },
+        {
+          "id": "rm-1705-re",
+          "unit": "sentence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/05-diagnostics-channel.md",
+          "max_matches": 6,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5a — 17/05's intro lost its 'plan for this session' / frozen-page paragraph; its tables and digests moved to 17/11",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "17/05's intro also lost the"
+        },
+        {
+          "id": "rm-1705-pa",
+          "unit": "sentence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/05-diagnostics-channel.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 5a — 17/05's intro lost its 'plan for this session' / frozen-page paragraph; its tables and digests moved to 17/11",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "17/05's intro also lost the"
+        },
+        {
+          "id": "rm-1705-go",
+          "unit": "sentence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/05-diagnostics-channel.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 5a — 17/05's intro lost its 'plan for this session' / frozen-page paragraph; its tables and digests moved to 17/11",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "17/05's intro also lost the"
+        },
+        {
+          "id": "rm-1203-re",
+          "unit": "sentence",
+          "source": "docs/roadmap/12-field-graph-and-app/03-raymarch-app.md",
+          "max_matches": 5,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b item 11 — 12/03's section-planes entry links design/09 for the keyboard rule",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "12/03's section-planes entry links"
+        },
+        {
+          "id": "rm-1203-pa",
+          "unit": "sentence",
+          "source": "docs/roadmap/12-field-graph-and-app/03-raymarch-app.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 5b item 11 — 12/03's section-planes entry links design/09 for the keyboard rule",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "12/03's section-planes entry links"
+        },
+        {
+          "id": "rm-1203-go",
+          "unit": "sentence",
+          "source": "docs/roadmap/12-field-graph-and-app/03-raymarch-app.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 5b item 11 — 12/03's section-planes entry links design/09 for the keyboard rule",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "12/03's section-planes entry links"
+        },
+        {
+          "id": "rm-1205-re",
+          "unit": "sentence",
+          "source": "docs/roadmap/12-field-graph-and-app/05-open-surface.md",
+          "max_matches": 4,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b item 7 — 12/05's Hermite-tag paragraph links 01 Tier-4 item 14; cmdref link retargeted",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "12/05's Hermite-tag paragraph links"
+        },
+        {
+          "id": "rm-1205-pa",
+          "unit": "sentence",
+          "source": "docs/roadmap/12-field-graph-and-app/05-open-surface.md",
+          "max_matches": 2,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 5b item 7 — 12/05's Hermite-tag paragraph links 01 Tier-4 item 14; cmdref link retargeted",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "12/05's Hermite-tag paragraph links"
+        },
+        {
+          "id": "rm-1205-go",
+          "unit": "sentence",
+          "source": "docs/roadmap/12-field-graph-and-app/05-open-surface.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 5b item 7 — 12/05's Hermite-tag paragraph links 01 Tier-4 item 14; cmdref link retargeted",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "12/05's Hermite-tag paragraph links"
+        },
+        {
+          "id": "rm-16-re",
+          "unit": "sentence",
+          "source": "docs/roadmap/16-field-graph-and-app-continued.md",
+          "max_matches": 4,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5a — 16: tombstone / 'entries land in the continuation' pointers; 16 -> 12/07, 18 -> 14/04 byte-for-byte",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "16 and 18 are nine-line tombstones"
+        },
+        {
+          "id": "rm-16-pa",
+          "unit": "sentence",
+          "source": "docs/roadmap/16-field-graph-and-app-continued.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 5a — 16: tombstone / 'entries land in the continuation' pointers; 16 -> 12/07, 18 -> 14/04 byte-for-byte",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "16 and 18 are nine-line tombstones"
+        },
+        {
+          "id": "rm-16-go",
+          "unit": "sentence",
+          "source": "docs/roadmap/16-field-graph-and-app-continued.md",
+          "max_matches": 2,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 5a — 16: tombstone / 'entries land in the continuation' pointers; 16 -> 12/07, 18 -> 14/04 byte-for-byte",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "16 and 18 are nine-line tombstones"
+        },
+        {
+          "id": "rm-18-re",
+          "unit": "sentence",
+          "source": "docs/roadmap/18-c-abi-continued.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5a — 18: tombstone / 'entries land in the continuation' pointers; 16 -> 12/07, 18 -> 14/04 byte-for-byte",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "16 and 18 are nine-line tombstones"
+        },
+        {
+          "id": "rm-18-pa",
+          "unit": "sentence",
+          "source": "docs/roadmap/18-c-abi-continued.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 5a — 18: tombstone / 'entries land in the continuation' pointers; 16 -> 12/07, 18 -> 14/04 byte-for-byte",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "16 and 18 are nine-line tombstones"
+        },
+        {
+          "id": "rm-18-go",
+          "unit": "sentence",
+          "source": "docs/roadmap/18-c-abi-continued.md",
+          "max_matches": 2,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 5a — 18: tombstone / 'entries land in the continuation' pointers; 16 -> 12/07, 18 -> 14/04 byte-for-byte",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "16 and 18 are nine-line tombstones"
+        },
+        {
+          "id": "rm-14README-go",
+          "unit": "sentence",
+          "source": "docs/roadmap/14-c-abi/README.md",
+          "max_matches": 2,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 5a — 14/README: tombstone / 'entries land in the continuation' pointers; 16 -> 12/07, 18 -> 14/04 byte-for-byte",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "16 and 18 are nine-line tombstones"
+        },
+        {
+          "id": "rm-0502-re",
+          "unit": "sentence",
+          "source": "docs/roadmap/05-tpms-lattices/02-strut-enhancements.md",
+          "max_matches": 5,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5a — 05/02's 'currently 66/66' and 'update it' become a link",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "\"currently 66/66\" and \"update it\" become a link"
+        },
+        {
+          "id": "rm-0502-go",
+          "unit": "sentence",
+          "source": "docs/roadmap/05-tpms-lattices/02-strut-enhancements.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 5a — 05/02's 'currently 66/66' and 'update it' become a link",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "\"currently 66/66\" and \"update it\" become a link"
+        },
+        {
+          "id": "rm-0503-re",
+          "unit": "sentence",
+          "source": "docs/roadmap/05-tpms-lattices/03-crystal-blending.md",
+          "max_matches": 3,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b item 9 — chat residue ('the advisor caught' -> 'caught in review')",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "Chat residue scrubbed at every S1 § 6 site"
+        },
+        {
+          "id": "rm-0503-pa",
+          "unit": "sentence",
+          "source": "docs/roadmap/05-tpms-lattices/03-crystal-blending.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 5b item 9 — chat residue ('the advisor caught' -> 'caught in review')",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "Chat residue scrubbed at every S1 § 6 site"
+        },
+        {
+          "id": "rm-11rm-re",
+          "unit": "sentence",
+          "source": "docs/roadmap/11-dense-lattice-deliverable/README.md",
+          "max_matches": 4,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b item 9 — chat residue ('the user commits manually' reworded); ~49x restatement out",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "Chat residue scrubbed at every S1 § 6 site"
+        },
+        {
+          "id": "rm-11rm-go",
+          "unit": "sentence",
+          "source": "docs/roadmap/11-dense-lattice-deliverable/README.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 5b item 9 — chat residue ('the user commits manually' reworded); ~49x restatement out",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "Chat residue scrubbed at every S1 § 6 site"
+        },
+        {
+          "id": "rm-1102-go",
+          "unit": "sentence",
+          "source": "docs/roadmap/11-dense-lattice-deliverable/02-phase-0-benchmark.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 5b item 9 — 'the table above' became a link to 01 § The decision (directional)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "11/02's \"table above\" links 11/01",
+          "note": "directional pointer became a link (5b item 6)"
+        },
+        {
+          "id": "rm-13rm-go",
+          "unit": "sentence",
+          "source": "docs/roadmap/13-graded-tpms/README.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 5b item 9 — 'the analysis above' became a link to 13/01 (directional)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "its two \"above\" pointers link 13/01",
+          "note": "directional pointer became a link (5b item 6)"
+        },
+        {
+          "id": "rm-1708-go",
+          "unit": "sentence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/08-argument-validation.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 5a — 17/08 § Still open in #34 is a link to the ledger entry (the doc-only bullets are 17/04:150)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "17/08 § Still open in #34 is a link to the ledger entry"
+        },
+        {
+          "id": "rm-1710-re",
+          "unit": "sentence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/10-docs-system-screening.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b item 7 — 17/10's R1 lists the seven checks and links 17/09 § The semantic half",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "17/10's R1 lists the seven checks and links"
+        },
+        {
+          "id": "rm-1710-go",
+          "unit": "sentence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/10-docs-system-screening.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 5b item 7 — 17/10's R1 lists the seven checks and links 17/09 § The semantic half",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "17/10's R1 lists the seven checks and links"
+        },
+        {
+          "id": "rm-1204-re",
+          "unit": "sentence",
+          "source": "docs/roadmap/12-field-graph-and-app/04-preview-performance.md",
+          "max_matches": 2,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b item 8 — 12/04's --preview-scale default and range are a link to the command_reference page",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "12/04's --preview-scale default and range"
+        },
+        {
+          "id": "rm-1204-pa",
+          "unit": "sentence",
+          "source": "docs/roadmap/12-field-graph-and-app/04-preview-performance.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 5b item 8 — 12/04's --preview-scale default and range are a link to the command_reference page",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "12/04's --preview-scale default and range"
+        },
+        {
+          "id": "rep-re",
+          "unit": "sentence",
+          "source": "docs/report-quality-inspection-contouring.md",
+          "max_matches": 12,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5a item 4 — the quality report is 12/08/ (README + 01-measurements + 02-decimation-approaches); its banner is one status sentence pointing at § G and row D-26",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "The banner is one status sentence pointing at § G and row",
+          "note": "read: banner lines 3-13 gone (status on 12/README § G); every table row is on 12/08/01-02 reflowed"
+        },
+        {
+          "id": "rep-pa",
+          "unit": "sentence",
+          "source": "docs/report-quality-inspection-contouring.md",
+          "max_matches": 2,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 5a item 4 — the quality report is 12/08/ (README + 01-measurements + 02-decimation-approaches); its banner is one status sentence pointing at § G and row D-26",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "The banner is one status sentence pointing at § G and row",
+          "note": "read: banner lines 3-13 gone (status on 12/README § G); every table row is on 12/08/01-02 reflowed"
+        },
+        {
+          "id": "rep-go",
+          "unit": "sentence",
+          "source": "docs/report-quality-inspection-contouring.md",
+          "max_matches": 2,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 5a item 4 — the quality report is 12/08/ (README + 01-measurements + 02-decimation-approaches); its banner is one status sentence pointing at § G and row D-26",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/01-session-5a.md#phase-5-session-5a--the-structural-moves",
+          "quote": "The banner is one status sentence pointing at § G and row",
+          "note": "read: banner lines 3-13 gone (status on 12/README § G); every table row is on 12/08/01-02 reflowed"
+        },
+        {
+          "id": "study-re",
+          "unit": "sentence",
+          "source": "docs/study/README.md",
+          "max_matches": 8,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 7 — docs/study/README.md git mv'd to docs/raw/study/ (R087): its two status notes moved verbatim to ERRATA.md with a pointer in their place",
+          "record": "docs/roadmap/19-docs-layers/06-record-phase-7.md#record--phase-7-raw-and-the-study-pack",
+          "quote": "moved verbatim to ERRATA.md"
+        },
+        {
+          "id": "arch-re",
+          "unit": "sentence",
+          "source": "docs/ARCHITECTURE.md",
+          "max_matches": 62,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 3 — ARCHITECTURE.md compiled into docs/design/ by the section → page mapping of 19/02: status banner dropped (history), 'Fixed since' callouts became present tense + a link to the roadmap entry, line pins removed, molde/cube counts and the § 10.4 inventory deduped to their one home",
+          "record": "docs/roadmap/19-docs-layers/02-record-phase-3.md#record--phase-3-the-design-layer",
+          "quote": "Every dated change record became the present-tense fact plus a link to the roadmap entry that changed it",
+          "note": "read: history sentences have roadmap homes (signMethod drop, pinv/energy, nine wrappers -> 01/02 § 4.9; parallelFor, weldEdges/qefTolerance -> 17/04; ray parity -> 17/03/01; diagnostics -> 17/05); 'refine on corner signs' rejected on design/01:201; six tables design/05:80; float/double seam design/07:43"
+        },
+        {
+          "id": "arch-pa",
+          "unit": "sentence",
+          "source": "docs/ARCHITECTURE.md",
+          "max_matches": 27,
+          "verdict": "intentional",
+          "bucket": "partial",
+          "category": "Phase 3 — ARCHITECTURE.md compiled into docs/design/ by the section → page mapping of 19/02: status banner dropped (history), 'Fixed since' callouts became present tense + a link to the roadmap entry, line pins removed, molde/cube counts and the § 10.4 inventory deduped to their one home",
+          "record": "docs/roadmap/19-docs-layers/02-record-phase-3.md#record--phase-3-the-design-layer",
+          "quote": "Every dated change record became the present-tense fact plus a link to the roadmap entry that changed it",
+          "note": "read: history sentences have roadmap homes (signMethod drop, pinv/energy, nine wrappers -> 01/02 § 4.9; parallelFor, weldEdges/qefTolerance -> 17/04; ray parity -> 17/03/01; diagnostics -> 17/05); 'refine on corner signs' rejected on design/01:201; six tables design/05:80; float/double seam design/07:43"
+        },
+        {
+          "id": "arch-go",
+          "unit": "sentence",
+          "source": "docs/ARCHITECTURE.md",
+          "max_matches": 33,
+          "verdict": "intentional",
+          "bucket": "gone",
+          "category": "Phase 3 — ARCHITECTURE.md compiled into docs/design/ by the section → page mapping of 19/02: status banner dropped (history), 'Fixed since' callouts became present tense + a link to the roadmap entry, line pins removed, molde/cube counts and the § 10.4 inventory deduped to their one home",
+          "record": "docs/roadmap/19-docs-layers/02-record-phase-3.md#record--phase-3-the-design-layer",
+          "quote": "Every dated change record became the present-tense fact plus a link to the roadmap entry that changed it",
+          "note": "read: history sentences have roadmap homes (signMethod drop, pinv/energy, nine wrappers -> 01/02 § 4.9; parallelFor, weldEdges/qefTolerance -> 17/04; ray parity -> 17/03/01; diagnostics -> 17/05); 'refine on corner signs' rejected on design/01:201; six tables design/05:80; float/double seam design/07:43"
+        },
+        {
+          "id": "rm-rw-01coredualcontouring01engineeringrecord",
+          "unit": "sentence",
+          "source": "docs/roadmap/01-core-dual-contouring/01-engineering-record.md",
+          "max_matches": 4,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b — a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten (short units whose single shingle misses on a one-word edit, link retargets, dated clauses)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten"
+        },
+        {
+          "id": "rm-rw-01coredualcontouring02bugcatalogue",
+          "unit": "sentence",
+          "source": "docs/roadmap/01-core-dual-contouring/02-bug-catalogue.md",
+          "max_matches": 3,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b — a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten (short units whose single shingle misses on a one-word edit, link retargets, dated clauses)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten"
+        },
+        {
+          "id": "rm-rw-01coredualcontouring",
+          "unit": "sentence",
+          "source": "docs/roadmap/01-core-dual-contouring/README.md",
+          "max_matches": 5,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b — a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten (short units whose single shingle misses on a one-word edit, link retargets, dated clauses)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten"
+        },
+        {
+          "id": "rm-rw-03booleanscsg",
+          "unit": "sentence",
+          "source": "docs/roadmap/03-booleans-csg.md",
+          "max_matches": 2,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b — a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten (short units whose single shingle misses on a one-word edit, link retargets, dated clauses)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten"
+        },
+        {
+          "id": "rm-rw-04primitivesandoperators",
+          "unit": "sentence",
+          "source": "docs/roadmap/04-primitives-and-operators.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b — a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten (short units whose single shingle misses on a one-word edit, link retargets, dated clauses)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten"
+        },
+        {
+          "id": "rm-rw-05tpmslattices01strutlattices",
+          "unit": "sentence",
+          "source": "docs/roadmap/05-tpms-lattices/01-strut-lattices.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b — a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten (short units whose single shingle misses on a one-word edit, link retargets, dated clauses)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten"
+        },
+        {
+          "id": "rm-rw-05tpmslattices",
+          "unit": "sentence",
+          "source": "docs/roadmap/05-tpms-lattices/README.md",
+          "max_matches": 3,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b — a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten (short units whose single shingle misses on a one-word edit, link retargets, dated clauses)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten"
+        },
+        {
+          "id": "rm-rw-07viewerpolyscope",
+          "unit": "sentence",
+          "source": "docs/roadmap/07-viewer-polyscope.md",
+          "max_matches": 2,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b — a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten (short units whose single shingle misses on a one-word edit, link retargets, dated clauses)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten"
+        },
+        {
+          "id": "rm-rw-08raymarch",
+          "unit": "sentence",
+          "source": "docs/roadmap/08-raymarch.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b — a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten (short units whose single shingle misses on a one-word edit, link retargets, dated clauses)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten"
+        },
+        {
+          "id": "rm-rw-09ioformats",
+          "unit": "sentence",
+          "source": "docs/roadmap/09-io-formats.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b — a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten (short units whose single shingle misses on a one-word edit, link retargets, dated clauses)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten"
+        },
+        {
+          "id": "rm-rw-11denselatticedeliverable01decision",
+          "unit": "sentence",
+          "source": "docs/roadmap/11-dense-lattice-deliverable/01-decision.md",
+          "max_matches": 2,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b — a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten (short units whose single shingle misses on a one-word edit, link retargets, dated clauses)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten"
+        },
+        {
+          "id": "rm-rw-11denselatticedeliverable04streaming3mfrecord",
+          "unit": "sentence",
+          "source": "docs/roadmap/11-dense-lattice-deliverable/04-streaming-3mf-record.md",
+          "max_matches": 2,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b — a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten (short units whose single shingle misses on a one-word edit, link retargets, dated clauses)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten"
+        },
+        {
+          "id": "rm-rw-12fieldgraphandapp01fieldgraph",
+          "unit": "sentence",
+          "source": "docs/roadmap/12-field-graph-and-app/01-field-graph.md",
+          "max_matches": 7,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b — a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten (short units whose single shingle misses on a one-word edit, link retargets, dated clauses)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten"
+        },
+        {
+          "id": "rm-rw-12fieldgraphandapp02glslcodegen",
+          "unit": "sentence",
+          "source": "docs/roadmap/12-field-graph-and-app/02-glsl-codegen.md",
+          "max_matches": 3,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b — a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten (short units whose single shingle misses on a one-word edit, link retargets, dated clauses)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten"
+        },
+        {
+          "id": "rm-rw-12fieldgraphandapp06decimation",
+          "unit": "sentence",
+          "source": "docs/roadmap/12-field-graph-and-app/06-decimation.md",
+          "max_matches": 2,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b — a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten (short units whose single shingle misses on a one-word edit, link retargets, dated clauses)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten"
+        },
+        {
+          "id": "rm-rw-13gradedtpms01analysis",
+          "unit": "sentence",
+          "source": "docs/roadmap/13-graded-tpms/01-analysis.md",
+          "max_matches": 5,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b — a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten (short units whose single shingle misses on a one-word edit, link retargets, dated clauses)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten"
+        },
+        {
+          "id": "rm-rw-13gradedtpms02designandplan",
+          "unit": "sentence",
+          "source": "docs/roadmap/13-graded-tpms/02-design-and-plan.md",
+          "max_matches": 7,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b — a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten (short units whose single shingle misses on a one-word edit, link retargets, dated clauses)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten"
+        },
+        {
+          "id": "rm-rw-14cabi03implementationandverification",
+          "unit": "sentence",
+          "source": "docs/roadmap/14-c-abi/03-implementation-and-verification.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b — a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten (short units whose single shingle misses on a one-word edit, link retargets, dated clauses)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten"
+        },
+        {
+          "id": "rm-rw-17codeauditandhardening03correctnessandrobustness",
+          "unit": "sentence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/03-correctness-and-robustness.md",
+          "max_matches": 1,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b — a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten (short units whose single shingle misses on a one-word edit, link retargets, dated clauses)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten"
+        },
+        {
+          "id": "rm-rw-17codeauditandhardening07repeattilingfix",
+          "unit": "sentence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/07-repeat-tiling-fix.md",
+          "max_matches": 5,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b — a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten (short units whose single shingle misses on a one-word edit, link retargets, dated clauses)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten"
+        },
+        {
+          "id": "rm-rw-17codeauditandhardening09localchecksgate",
+          "unit": "sentence",
+          "source": "docs/roadmap/17-code-audit-and-hardening/09-local-checks-gate.md",
+          "max_matches": 8,
+          "verdict": "intentional",
+          "bucket": "rewritten",
+          "category": "Phase 5b — a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten (short units whose single shingle misses on a one-word edit, link retargets, dated clauses)",
+          "record": "docs/roadmap/19-docs-layers/04-record-phase-5/02-session-5b.md#phase-5-session-5b--conflicts-chronology-duplicates-residue",
+          "quote": "a record entry takes a dated one-line append; a duplicate loses its copy, not its home; index READMEs are rewritten"
+        }
+      ]
+    }
+  }
+}

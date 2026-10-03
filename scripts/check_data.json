@@ -1,0 +1,195 @@
+{
+  "_comment": [
+    "Declared exceptions for scripts/check.py. Everything here is a deliberate,",
+    "reviewable decision -- widening any list should show up in a diff.",
+    "",
+    "The size contract (~300 lines / ~2,500 words / 15 KB) applies to every",
+    "page: nothing is frozen since 2026-09-11 (docs/roadmap/17-code-audit-and-",
+    "hardening/10-docs-system-screening.md), `frozen` below is empty, and the",
+    "'Legacy ... (frozen)' paragraphs that once declared the contract were",
+    "removed on 2026-09-17 (roadmap 19, Phase 0). Its prose home is",
+    "docs/README.md, section Conventions. The 'frozen-decl' check",
+    "stays as the mechanism: should a file ever be frozen again, its entry",
+    "names the README paragraph that declares it (see `frozen_sections`)."
+  ],
+
+  "size_caps": { "lines": 300, "words": 2500, "bytes": 15360 },
+
+  "size_scope": ["docs/"],
+
+  "frozen_sections": {
+    "_comment": "The paragraph, in each index, that declares files frozen. The frozen-decl check reads from this marker to the next blank line and looks for each entry's `token` INSIDE that paragraph -- searching the whole README would match the index table instead and certify nothing. Empty since 2026-09-17: the two declaring paragraphs were removed when nothing was frozen any more; add a marker here together with any future `frozen` entry."
+  },
+
+  "frozen": [],
+
+  "frozen_prefixes": [
+    "docs/raw/"
+  ],
+
+  "flag_table_exempt": ["--help"],
+
+  "footer_roots": ["docs/roadmap/", "docs/command_reference/", "docs/design/", "docs/decisions/"],
+  "footer_marker": "\u2190 Back to",
+
+  "status_words": ["DONE", "NEXT", "PLANNED", "DEFERRED", "DROPPED", "PARTIAL"],
+
+  "status_tables": [
+    "docs/roadmap/README.md",
+    "docs/roadmap/17-code-audit-and-hardening/README.md"
+  ],
+
+  "status_vocab_only": {
+    "_comment": "Tables status-vocab reads in addition to status_tables and status-sync does not: their Status cells use the legend, but their links land on the record anchor of the decision (often a bullet under a DONE heading), so the first-body-line comparison status-sync makes would be false disagreement. decisions-index checks these rows' anchors and triggers instead.",
+    "tables": [
+      "docs/decisions/README.md",
+      "docs/decisions/01-settled.md"
+    ]
+  },
+
+  "heading_status_baseline": {
+    "_comment": "Headings that carried a status word or a date when the heading-status check landed (2026-09-11). The contract froze headings at birth; these predate it and are live link targets, so they are not rewritten (that would break inbound anchors). Per-file counts may only go DOWN -- when a legacy file is split (the explicitly requested pass), its entry goes away.",
+    "docs/roadmap/02-implicit-sdf-foundation.md": 2,
+    "docs/roadmap/03-booleans-csg.md": 1,
+    "docs/roadmap/04-primitives-and-operators.md": 3,
+    "docs/roadmap/06-slice.md": 1,
+    "docs/roadmap/07-viewer-polyscope.md": 2,
+    "docs/roadmap/08-raymarch.md": 2,
+    "docs/roadmap/09-io-formats.md": 2,
+    "docs/roadmap/10-infrastructure-and-integration.md": 6,
+    "docs/roadmap/17-code-audit-and-hardening/README.md": 1
+  },
+
+  "root_entry_files": {
+    "_comment": "The entry files, each with its line cap (0 = none), read by claude-md (restated facts) and root-entry (shape). AGENTS.md is the canonical entry file since 2026-09-17 (roadmap 19, Phase 1); CLAUDE.md is its one-line `@AGENTS.md` import.",
+    "AGENTS.md": 80,
+    "CLAUDE.md": 0
+  },
+
+  "claude_md_forbidden": {
+    "test/parity count": "\\b\\d{2,3}/\\d{2,3}\\b",
+    "version number": "\\bv?0\\.\\d\\.\\d\\b",
+    "item range": "#\\d+\u2013#\\d+",
+    "primitive count": "~?\\d+ (analytic |registry )?primitives"
+  },
+
+  "root_entry_forbidden": {
+    "_comment": "Shape rules for the entry files (the root-entry check); restated facts are claude_md_forbidden's. Digits before a slash catch both an NN/NN count and a 17/09 pointer -- the entry file links, it never cites.",
+    "digits before a slash": "\\d/",
+    "version": "\\bv0\\.",
+    "item range": "#\\d+\u2013#\\d+",
+    "ISO date": "\\b20\\d\\d-\\d\\d-\\d\\d\\b"
+  },
+
+  "doc_lag": {
+    "_comment": "doc-lag (report only; --strict fails): the newest code commit is more than max_commits code commits or max_days days past the newest docs/ commit.",
+    "code_paths": ["src/", "include/", "examples/", "capi/"],
+    "max_commits": 5,
+    "max_days": 7
+  },
+
+  "decisions_index": {
+    "_comment": "decisions-index: every DROPPED/DEFERRED entry under scope needs a row in index whose link lands on its heading. The index is the README only (its 01-settled.md child holds the DONE-by-decision rows, which the check does not read).",
+    "index": "docs/decisions/README.md",
+    "scope": "docs/roadmap/"
+  },
+
+  "design_no_history": {
+    "_comment": "design-no-history: the compiled layer describes the present. SKIPs while the folder does not exist (roadmap 19 Phase 3 creates it). Case-insensitive regexes.",
+    "scope": "docs/design/",
+    "patterns": {
+      "ISO date": "\\b20\\d\\d-\\d\\d-\\d\\d\\b",
+      "since": "\\bsince\\b",
+      "used to": "\\bused to\\b",
+      "now": "\\bnow\\b",
+      "no longer": "\\bno longer\\b",
+      "fixed since": "\\bfixed since\\b"
+    }
+  },
+
+  "heading_hierarchy_baseline": {
+    "_comment": "Split residue grandfathered per file when heading-hierarchy landed (2026-09-17): a ### directly under the H1, or a second heading repeating the H1. Counts may only go DOWN; Phase 5 of roadmap 19 removed the roadmap entries (2026-09-18) and Phase 6 the command_reference ones (2026-09-20). Empty since; it stays empty."
+  },
+
+  "stale_paths_baseline": {
+    "_comment": "Prose and link text still naming NN-slug.md where NN-slug/ is a folder, grandfathered per file when stale-paths landed (2026-09-17). Counts may only go DOWN; Phase 5 of roadmap 19 retargeted the roadmap entries (2026-09-18) and Phase 6 the command_reference ones (2026-09-20). Empty since; it stays empty."
+  },
+
+  "directional_words": ["above", "below", "this section"],
+
+  "usage_in_record": {
+    "_comment": "usage-in-record (report only): a table in the record whose header has one of these columns is a copy of the usage contract.",
+    "scope": "docs/roadmap/",
+    "headers": ["Flag", "Default", "Option"]
+  },
+
+  "size_baseline": {
+    "_comment": "Files already over a cap when the gate landed (2026-09-10). The check fails if one GROWS on any axis, or if any unlisted file CROSSES a cap. To add content anyway, edit the number here in the same commit -- the diff is the point. This list should only ever shrink. Empty since 2026-09-18: docs/ARCHITECTURE.md left it when roadmap 19 Phase 3 split it into docs/design/; the quality-inspection report, roadmap/README.md, 17/04 and 17/05 when Phase 5 split or condensed them -- every page is under the cap."
+  },
+
+  "semantic_lint_runs": {
+    "_comment": "Where /docs-semantic-lint writes its runs. The owner's command (~/.claude/commands/, outside every repo) is one file for DualC and Boletus alike; the only per-repo fact it needs -- this folder -- is read from here instead of being hardcoded in the command (roadmap 19/07, decision D-41). The folder is also an index root; the `semantic-lint-runs` check keeps the two in step and every run named NN-<date>-<slug>.md with its date on the first body line.",
+    "folder": "docs/roadmap/19-docs-layers/08-semantic-lint"
+  },
+
+  "index_roots": [
+    "docs/command_reference/12-dualc_field_view",
+    "docs/roadmap/14-c-abi",
+    "docs/roadmap/13-graded-tpms",
+    "docs/roadmap/11-dense-lattice-deliverable",
+    "docs/roadmap",
+    "docs/command_reference",
+    "docs/command_reference/11-dualc_field",
+    "docs/roadmap/12-field-graph-and-app",
+    "docs/roadmap/01-core-dual-contouring",
+    "docs/roadmap/05-tpms-lattices",
+    "docs/roadmap/17-code-audit-and-hardening",
+    "docs/roadmap/12-field-graph-and-app/08-quality-inspection-gyroid-shell",
+    "docs/roadmap/19-docs-layers",
+    "docs/roadmap/19-docs-layers/04-record-phase-5",
+    "docs/roadmap/19-docs-layers/08-semantic-lint",
+    "docs/roadmap/17-code-audit-and-hardening/03-correctness-and-robustness",
+    "docs/roadmap/17-code-audit-and-hardening/09-local-checks-gate",
+    "docs/raw/study",
+    "docs/raw",
+    "docs/design",
+    "docs/decisions"
+  ],
+
+  "ordered_item_files": [
+    "docs/roadmap/17-code-audit-and-hardening/03-correctness-and-robustness/01-parallelfor-and-ray-parity.md",
+    "docs/roadmap/17-code-audit-and-hardening/03-correctness-and-robustness/02-precision-and-celloverlaps.md",
+    "docs/roadmap/17-code-audit-and-hardening/03-correctness-and-robustness/03-diagnostics-item.md",
+    "docs/roadmap/17-code-audit-and-hardening/04-engineering-quality.md"
+  ],
+
+  "external_link_prefixes": [
+    "http://", "https://", "mailto:", "file:"
+  ],
+
+  "out_of_repo_links": {
+    "_comment": "Relative links that deliberately leave the repo. They resolve only where the sibling project is checked out, so they are reported as informational, never as broken.",
+    "prefixes": ["../../../Boletus/", "../../Boletus/"]
+  },
+
+  "structure_summarized_prefixes": {
+    "_comment": "Directories STRUCTURE.md documents with a one-line summary instead of file-by-file. Listing one here is a decision, not a silent widening. Since 2026-09-17 (roadmap 19, Phase 1) each docs/ folder is one line: its README is the file-by-file index, and STRUCTURE.md had been repeating the indexes line for line.",
+    "docs/command_reference/": "one line; indexed by docs/command_reference/README.md",
+    "docs/roadmap/": "one line; indexed by docs/roadmap/README.md",
+    "docs/raw/": "one line; indexed by docs/raw/README.md",
+    "docs/design/": "one line; indexed by docs/design/README.md",
+    "docs/decisions/": "one line; indexed by docs/decisions/README.md",
+    "scripts/check_fixtures/": "one line; miniature pass/fail trees for `check.py --selftest`, one pair per docs check"
+  },
+
+  "structure_ignore": [
+    ".gitignore"
+  ],
+
+  "third_party_roots": [
+    "examples/third_party/",
+    "src/internal/third_party/"
+  ],
+
+  "parity_expected_cases": 73
+}

@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "units": "mm",
+  "root": {
+    "op": "intersection",
+    "in": [
+      { "op": "mesh", "path": "cube.obj" },
+      {
+        "op": "onion",
+        "thickness": 0.1,
+        "in": [
+          {
+            "op": "normalize",
+            "in": [
+              { "op": "gyroid", "wavelength": 0.5 }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

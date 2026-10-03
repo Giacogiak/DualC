@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="632" viewBox="0 0 1060 632" role="img">
+<defs><clipPath id="sg0"><rect x="60.00" y="134.00" width="250.00" height="250.00" rx="3"/></clipPath>
+<clipPath id="sg1"><rect x="540.00" y="134.00" width="250.00" height="250.00" rx="3"/></clipPath></defs>
+<rect width="1060" height="632" fill="#fcfcfb"/>
+<text x="28.00" y="34.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="15" font-weight="650" fill="#0b0b0b" text-anchor="start">The gradient trick: one line of code is the whole sharp-feature story</text>
+<text x="28.00" y="55.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">A hard union is min(a, b). min is differentiable everywhere except the seam, and its derivative IS the active operand's —</text>
+<text x="28.00" y="72.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">so returning it is correct subgradient selection, not a hack.</text>
+<text x="60.00" y="118.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="700" fill="#0ca30c" text-anchor="start" letter-spacing="0.03em">ACTIVE OPERAND'S GRADIENT   (what DualC does)</text>
+<rect x="60.00" y="134.00" width="250.00" height="250.00" rx="3" fill="#ffffff" stroke="#c3c2b7" stroke-width="1.8"/>
+<g clip-path="url(#sg0)">
+<polygon points="185.00,384.00 310.00,384.00 310.00,134.00 185.00,134.00" fill="#cde2fb" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="185.00,384.00 310.00,384.00 310.00,269.00 185.00,269.00" fill="#ffffff" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="185.00,269.00 310.00,269.00 310.00,134.00 185.00,134.00" fill="#cde2fb" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="60.00" y="134.00" width="250.00" height="250.00" rx="0" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<polygon points="185.00,384.00 310.00,384.00 310.00,134.00 185.00,134.00" fill="#cde2fb" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="60.00,384.00 310.00,384.00 310.00,269.00 60.00,269.00" fill="#cde2fb" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<line x1="185.00" y1="269.00" x2="185.00" y2="134.00" stroke="#898781" stroke-width="4.5" stroke-linecap="round" opacity="0.35"/>
+<line x1="60.00" y1="269.00" x2="185.00" y2="269.00" stroke="#898781" stroke-width="4.5" stroke-linecap="round" opacity="0.35"/>
+<rect x="130.00" y="214.00" width="110.00" height="110.00" rx="2" fill="none" stroke="#1baf7a" stroke-width="2.2"/>
+<line x1="185.00" y1="33.80" x2="185.00" y2="433.80" stroke="#86b6ef" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="6 4"/>
+<line x1="185.00" y1="233.80" x2="150.95" y2="233.80" stroke="#4a3aa7" stroke-width="2.2" stroke-linecap="round"/>
+<polygon points="145.00,233.80 151.39,230.95 151.39,236.65" fill="#4a3aa7" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="185.00" cy="233.80" r="5.00" fill="#eb6834" stroke="#ffffff" stroke-width="1.7"/>
+<line x1="354.20" y1="269.00" x2="-45.80" y2="269.00" stroke="#86b6ef" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="6 4"/>
+<line x1="154.20" y1="269.00" x2="154.20" y2="234.95" stroke="#4a3aa7" stroke-width="2.2" stroke-linecap="round"/>
+<polygon points="154.20,229.00 157.05,235.39 151.35,235.39" fill="#4a3aa7" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="154.20" cy="269.00" r="5.00" fill="#eb6834" stroke="#ffffff" stroke-width="1.7"/>
+<circle cx="185.00" cy="269.00" r="8.00" fill="#0ca30c" stroke="#ffffff" stroke-width="2.4"/>
+</g>
+<text x="60.00" y="416.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">Two independent plane constraints. AᵀA is full rank,</text>
+<text x="60.00" y="435.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">and the minimiser is exactly where the planes cross.</text>
+<text x="60.00" y="460.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="650" fill="#0a7a0a" text-anchor="start">The corner survives at ANY resolution.</text>
+<text x="540.00" y="118.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="700" fill="#d03b3b" text-anchor="start" letter-spacing="0.03em">AVERAGED GRADIENT   (what a naive blend gives)</text>
+<rect x="540.00" y="134.00" width="250.00" height="250.00" rx="3" fill="#ffffff" stroke="#c3c2b7" stroke-width="1.8"/>
+<g clip-path="url(#sg1)">
+<polygon points="665.00,384.00 790.00,384.00 790.00,134.00 665.00,134.00" fill="#cde2fb" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="665.00,384.00 790.00,384.00 790.00,269.00 665.00,269.00" fill="#ffffff" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="665.00,269.00 790.00,269.00 790.00,134.00 665.00,134.00" fill="#cde2fb" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="540.00" y="134.00" width="250.00" height="250.00" rx="0" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<polygon points="665.00,384.00 790.00,384.00 790.00,134.00 665.00,134.00" fill="#cde2fb" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="540.00,384.00 790.00,384.00 790.00,269.00 540.00,269.00" fill="#cde2fb" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<line x1="665.00" y1="269.00" x2="665.00" y2="134.00" stroke="#898781" stroke-width="4.5" stroke-linecap="round" opacity="0.35"/>
+<line x1="540.00" y1="269.00" x2="665.00" y2="269.00" stroke="#898781" stroke-width="4.5" stroke-linecap="round" opacity="0.35"/>
+<rect x="610.00" y="214.00" width="110.00" height="110.00" rx="2" fill="none" stroke="#1baf7a" stroke-width="2.2"/>
+<line x1="806.40" y1="92.40" x2="523.60" y2="375.20" stroke="#86b6ef" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="6 4"/>
+<line x1="665.00" y1="233.80" x2="640.93" y2="209.73" stroke="#4a3aa7" stroke-width="2.2" stroke-linecap="round"/>
+<polygon points="636.72,205.52 643.26,208.02 639.22,212.06" fill="#4a3aa7" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="665.00" cy="233.80" r="5.00" fill="#eb6834" stroke="#ffffff" stroke-width="1.7"/>
+<line x1="775.60" y1="127.60" x2="492.80" y2="410.40" stroke="#86b6ef" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="6 4"/>
+<line x1="634.20" y1="269.00" x2="610.13" y2="244.93" stroke="#4a3aa7" stroke-width="2.2" stroke-linecap="round"/>
+<polygon points="605.92,240.72 612.46,243.22 608.42,247.26" fill="#4a3aa7" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="634.20" cy="269.00" r="5.00" fill="#eb6834" stroke="#ffffff" stroke-width="1.7"/>
+<circle cx="649.60" cy="251.40" r="8.00" fill="#d03b3b" stroke="#ffffff" stroke-width="2.4"/>
+</g>
+<text x="540.00" y="416.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">One repeated constraint. AᵀA is rank 1, the solve falls</text>
+<text x="540.00" y="435.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">back to the mass point, and the corner rounds over.</text>
+<text x="540.00" y="460.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="650" fill="#d03b3b" text-anchor="start">The error is proportional to the cell size, at every depth.</text>
+<rect x="60.00" y="508.00" width="940.00" height="106.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<text x="72.00" y="528.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="650" fill="#52514e" text-anchor="start">The causal chain — be able to walk it out loud</text>
+<circle cx="90.00" cy="548.00" r="11.00" fill="#cde2fb" stroke="#2a78d6" stroke-width="1.6"/>
+<text x="90.00" y="552.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="700" fill="#184f95" text-anchor="middle">1</text>
+<text x="108.00" y="544.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">min(a,b) is C0 at the seam;</text>
+<text x="108.00" y="559.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">its a.e. gradient is the</text>
+<text x="108.00" y="574.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">active operand's</text>
+<line x1="242.00" y1="548.00" x2="255.75" y2="548.00" stroke="#898781" stroke-width="1.6" stroke-linecap="round"/>
+<polygon points="260.00,548.00 255.43,550.04 255.43,545.96" fill="#898781" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="276.00" cy="548.00" r="11.00" fill="#cde2fb" stroke="#2a78d6" stroke-width="1.6"/>
+<text x="276.00" y="552.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="700" fill="#184f95" text-anchor="middle">2</text>
+<text x="294.00" y="544.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">combinators override</text>
+<text x="294.00" y="559.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">gradientAt to return that,</text>
+<text x="294.00" y="574.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">never an average</text>
+<line x1="428.00" y1="548.00" x2="441.75" y2="548.00" stroke="#898781" stroke-width="1.6" stroke-linecap="round"/>
+<polygon points="446.00,548.00 441.43,550.04 441.43,545.96" fill="#898781" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="462.00" cy="548.00" r="11.00" fill="#cde2fb" stroke="#2a78d6" stroke-width="1.6"/>
+<text x="462.00" y="552.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="700" fill="#184f95" text-anchor="middle">3</text>
+<text x="480.00" y="544.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">edgeHit takes the Hermite</text>
+<text x="480.00" y="559.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">normal from gradientAt —</text>
+<text x="480.00" y="574.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">one line, implicit_field.cpp</text>
+<line x1="614.00" y1="548.00" x2="627.75" y2="548.00" stroke="#898781" stroke-width="1.6" stroke-linecap="round"/>
+<polygon points="632.00,548.00 627.43,550.04 627.43,545.96" fill="#898781" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="648.00" cy="548.00" r="11.00" fill="#cde2fb" stroke="#2a78d6" stroke-width="1.6"/>
+<text x="648.00" y="552.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="700" fill="#184f95" text-anchor="middle">4</text>
+<text x="666.00" y="544.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">the QEF receives two</text>
+<text x="666.00" y="559.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">UN-BLENDED normals in the</text>
+<text x="666.00" y="574.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">seam cell</text>
+<line x1="800.00" y1="548.00" x2="813.75" y2="548.00" stroke="#898781" stroke-width="1.6" stroke-linecap="round"/>
+<polygon points="818.00,548.00 813.43,550.04 813.43,545.96" fill="#898781" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="834.00" cy="548.00" r="11.00" fill="#cde2fb" stroke="#2a78d6" stroke-width="1.6"/>
+<text x="834.00" y="552.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="700" fill="#184f95" text-anchor="middle">5</text>
+<text x="852.00" y="544.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">two plane constraints</text>
+<text x="852.00" y="559.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">intersect: the vertex lands</text>
+<text x="852.00" y="574.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">on the ridge</text>
+</svg>

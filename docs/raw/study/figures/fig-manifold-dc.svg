@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="632" viewBox="0 0 1060 632" role="img">
+<defs></defs>
+<rect width="1060" height="632" fill="#fcfcfb"/>
+<text x="28.00" y="34.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="15" font-weight="650" fill="#0b0b0b" text-anchor="start">Manifold dual contouring: one vertex per surface SHEET, not per cell</text>
+<text x="28.00" y="55.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">Two separate sheets through one cell would be bridged by a single vertex, producing an edge shared by more than two faces.</text>
+<line x1="80.00" y1="354.20" x2="230.00" y2="354.20" stroke="#c3c2b7" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="3 3" opacity="0.55"/>
+<line x1="80.00" y1="204.20" x2="230.00" y2="204.20" stroke="#c3c2b7" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="170.00" y1="267.80" x2="320.00" y2="267.80" stroke="#c3c2b7" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="170.00" y1="117.80" x2="320.00" y2="117.80" stroke="#c3c2b7" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="80.00" y1="354.20" x2="80.00" y2="204.20" stroke="#c3c2b7" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="3 3" opacity="0.55"/>
+<line x1="230.00" y1="354.20" x2="230.00" y2="204.20" stroke="#c3c2b7" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="170.00" y1="267.80" x2="170.00" y2="117.80" stroke="#c3c2b7" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="320.00" y1="267.80" x2="320.00" y2="117.80" stroke="#c3c2b7" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="80.00" y1="354.20" x2="170.00" y2="267.80" stroke="#c3c2b7" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="3 3" opacity="0.55"/>
+<line x1="230.00" y1="354.20" x2="320.00" y2="267.80" stroke="#c3c2b7" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="80.00" y1="204.20" x2="170.00" y2="117.80" stroke="#c3c2b7" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="230.00" y1="204.20" x2="320.00" y2="117.80" stroke="#c3c2b7" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="80.00" y1="354.20" x2="230.00" y2="354.20" stroke="#2a78d6" stroke-width="3.4" stroke-linecap="round" opacity="0.85"/>
+<line x1="80.00" y1="354.20" x2="80.00" y2="204.20" stroke="#2a78d6" stroke-width="3.4" stroke-linecap="round" opacity="0.85"/>
+<line x1="80.00" y1="354.20" x2="170.00" y2="267.80" stroke="#2a78d6" stroke-width="3.4" stroke-linecap="round" opacity="0.85"/>
+<line x1="170.00" y1="117.80" x2="320.00" y2="117.80" stroke="#eb6834" stroke-width="3.4" stroke-linecap="round" opacity="0.85"/>
+<line x1="320.00" y1="267.80" x2="320.00" y2="117.80" stroke="#eb6834" stroke-width="3.4" stroke-linecap="round" opacity="0.85"/>
+<line x1="230.00" y1="204.20" x2="320.00" y2="117.80" stroke="#eb6834" stroke-width="3.4" stroke-linecap="round" opacity="0.85"/>
+<circle cx="80.00" cy="354.20" r="6.00" fill="#2a78d6" stroke="#2a78d6" stroke-width="1.8"/>
+<text x="66.00" y="372.20" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="11" font-weight="600" fill="#184f95" text-anchor="end">0</text>
+<circle cx="230.00" cy="354.20" r="6.00" fill="#ffffff" stroke="#c3c2b7" stroke-width="1.8"/>
+<text x="241.00" y="372.20" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="11" font-weight="600" fill="#898781" text-anchor="start">1</text>
+<circle cx="80.00" cy="204.20" r="6.00" fill="#ffffff" stroke="#c3c2b7" stroke-width="1.8"/>
+<text x="66.00" y="195.20" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="11" font-weight="600" fill="#898781" text-anchor="end">2</text>
+<circle cx="230.00" cy="204.20" r="6.00" fill="#ffffff" stroke="#c3c2b7" stroke-width="1.8"/>
+<text x="241.00" y="195.20" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="11" font-weight="600" fill="#898781" text-anchor="start">3</text>
+<circle cx="170.00" cy="267.80" r="6.00" fill="#ffffff" stroke="#c3c2b7" stroke-width="1.8"/>
+<text x="156.00" y="285.80" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="11" font-weight="600" fill="#898781" text-anchor="end">4</text>
+<circle cx="320.00" cy="267.80" r="6.00" fill="#ffffff" stroke="#c3c2b7" stroke-width="1.8"/>
+<text x="331.00" y="285.80" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="11" font-weight="600" fill="#898781" text-anchor="start">5</text>
+<circle cx="170.00" cy="117.80" r="6.00" fill="#ffffff" stroke="#c3c2b7" stroke-width="1.8"/>
+<text x="156.00" y="108.80" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="11" font-weight="600" fill="#898781" text-anchor="end">6</text>
+<circle cx="320.00" cy="117.80" r="6.00" fill="#2a78d6" stroke="#2a78d6" stroke-width="1.8"/>
+<text x="331.00" y="108.80" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="11" font-weight="600" fill="#184f95" text-anchor="start">7</text>
+<circle cx="125.60" cy="309.28" r="7.50" fill="#2a78d6" stroke="#ffffff" stroke-width="2.2"/>
+<circle cx="274.40" cy="162.72" r="7.50" fill="#eb6834" stroke="#ffffff" stroke-width="2.2"/>
+<text x="56.00" y="100.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">corners 0 and 7 inside:</text>
+<text x="56.00" y="117.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">two disjoint surface patches</text>
+<line x1="56.00" y1="341.00" x2="70.00" y2="341.00" stroke="#2a78d6" stroke-width="2.5" stroke-linecap="round"/>
+<text x="77.00" y="345.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">component 0: edges {0, 4, 8}</text>
+<line x1="56.00" y1="359.00" x2="70.00" y2="359.00" stroke="#eb6834" stroke-width="2.5" stroke-linecap="round"/>
+<text x="77.00" y="363.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">component 1: edges {3, 7, 11}</text>
+<text x="56.00" y="388.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">One QEF per component, hence one vertex per component.</text>
+<rect x="420.00" y="84.00" width="300.00" height="274.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<text x="432.00" y="104.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="650" fill="#52514e" text-anchor="start">partitionCubeEdges: union-find</text>
+<text x="438.00" y="122.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">over the 12 EDGES, not the corners</text>
+<text x="438.00" y="150.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="700" fill="#0b0b0b" text-anchor="start">for each of the 6 faces</text>
+<text x="438.00" y="174.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">count crossings on its 4 boundary edges</text>
+<text x="438.00" y="198.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">0 crossings  -&gt;  nothing to do</text>
+<text x="438.00" y="222.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#1baf7a" text-anchor="start">2 crossings  -&gt;  unite them</text>
+<text x="438.00" y="246.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="700" fill="#d03b3b" text-anchor="start">4 crossings  -&gt;  the SADDLE case</text>
+<text x="438.00" y="278.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">std::array&lt;int8_t,12&gt; parent, path halving,</text>
+<text x="438.00" y="295.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">no union-by-rank (depth is at most 12).</text>
+<text x="438.00" y="312.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">O(1), allocation-free, at most 4 components.</text>
+<text x="438.00" y="334.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">Component IDs are compacted in edge order —</text>
+<text x="438.00" y="351.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">deterministic but arbitrary, and tests check both.</text>
+<rect x="744.00" y="84.00" width="288.00" height="274.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<text x="756.00" y="104.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="650" fill="#52514e" text-anchor="start">The saddle ambiguity</text>
+<rect x="810.00" y="140.00" width="150.00" height="150.00" rx="3" fill="#ffffff" stroke="#c3c2b7" stroke-width="1.8"/>
+<circle cx="810.00" cy="140.00" r="6.00" fill="#2a78d6" stroke="#2a78d6" stroke-width="1.9"/>
+<circle cx="960.00" cy="140.00" r="6.00" fill="#ffffff" stroke="#c3c2b7" stroke-width="1.9"/>
+<circle cx="960.00" cy="290.00" r="6.00" fill="#2a78d6" stroke="#2a78d6" stroke-width="1.9"/>
+<circle cx="810.00" cy="290.00" r="6.00" fill="#ffffff" stroke="#c3c2b7" stroke-width="1.9"/>
+<circle cx="885.00" cy="140.00" r="5.00" fill="#eb6834" stroke="#ffffff" stroke-width="1.6"/>
+<circle cx="960.00" cy="215.00" r="5.00" fill="#eb6834" stroke="#ffffff" stroke-width="1.6"/>
+<circle cx="885.00" cy="290.00" r="5.00" fill="#eb6834" stroke="#ffffff" stroke-width="1.6"/>
+<circle cx="810.00" cy="215.00" r="5.00" fill="#eb6834" stroke="#ffffff" stroke-width="1.6"/>
+<path d="M 810 215.0 Q 828 158 885.0 140" fill="none" stroke="#1baf7a" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 960 215.0 Q 942 272 885.0 290" fill="none" stroke="#1baf7a" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="762.00" y="320.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">The inside-pair rule: join the two crossings</text>
+<text x="762.00" y="337.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">that share an INSIDE corner. One of two</text>
+<text x="762.00" y="354.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">topologically valid choices.</text>
+<rect x="420.00" y="374.00" width="612.00" height="140.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<text x="432.00" y="394.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="650" fill="#52514e" text-anchor="start">Why not the principled decider?</text>
+<text x="438.00" y="418.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">Schaefer's asymptotic decider resolves the ambiguity exactly — but it needs the corner SDF</text>
+<text x="438.00" y="436.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">VALUES, and HermiteLeafData stores only std::array&lt;bool,8&gt; cornerInside.</text>
+<text x="438.00" y="466.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">That is not laziness: keeping the contract sign-based is exactly what lets the mesh path and</text>
+<text x="438.00" y="484.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">the field path share the contourer verbatim. Eight doubles per leaf (64 B) would buy the decider.</text>
+<rect x="56.00" y="530.00" width="976.00" height="76.00" rx="8" fill="#f9f9f7" stroke="#e1e0d9" stroke-width="1.4"/>
+<text x="76.00" y="558.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="700" fill="#0b0b0b" text-anchor="start">Measured:</text>
+<text x="160.00" y="558.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">molde at depth 7 goes from 3 non-manifold edges to 0, at +3 vertices and an identical face count.</text>
+<text x="76.00" y="580.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">Manifold DC is ON by default (ContourerParams::manifoldDC); the --no-manifold path is byte-identical to single-vertex DC.</text>
+</svg>

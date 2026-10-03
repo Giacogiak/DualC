@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cmake --build /d/DualC/build --config Release --target dualc_demo dualc_tests)",
+      "Bash(ctest --test-dir /d/DualC/build -C Release --output-on-failure)",
+      "Bash(time ./dualc_demo.exe cube.obj cube_dc.obj)",
+      "Bash(time ./dualc_demo.exe molde.obj molde_dc_v3.obj)",
+      "Bash(cmake --build /d/DualC/build --config Release --target dualc_demo)",
+      "Bash(./dualc_demo.exe --help)",
+      "Bash(./dualc_demo.exe cube.obj cube_smooth.obj)",
+      "Bash(awk 'BEGIN{minx=1e9;miny=1e9;minz=1e9;maxx=-1e9;maxy=-1e9;maxz=-1e9} /^v / {if\\($2<minx\\)minx=$2;if\\($3<miny\\)miny=$3;if\\($4<minz\\)minz=$4;if\\($2>maxx\\)maxx=$2;if\\($3>maxy\\)maxy=$3;if\\($4>maxz\\)maxz=$4} END{printf \"    x=[%g,%g] y=[%g,%g] z=[%g,%g]\\\\n\",minx,maxx,miny,maxy,minz,maxz}' cube_smooth.obj)",
+      "Bash(./dualc_demo.exe --sharp cube.obj cube_sharp.obj)",
+      "Bash(awk 'BEGIN{minx=1e9;miny=1e9;minz=1e9;maxx=-1e9;maxy=-1e9;maxz=-1e9} /^v / {if\\($2<minx\\)minx=$2;if\\($3<miny\\)miny=$3;if\\($4<minz\\)minz=$4;if\\($2>maxx\\)maxx=$2;if\\($3>maxy\\)maxy=$3;if\\($4>maxz\\)maxz=$4} END{printf \"    x=[%g,%g] y=[%g,%g] z=[%g,%g]\\\\n\",minx,maxx,miny,maxy,minz,maxz}' cube_sharp.obj)",
+      "Bash(awk '/^v / { sx = \\($2 == 0.5 || $2 == -0.5\\) ? 1 : 0; sy = \\($3 == 0.5 || $3 == -0.5\\) ? 1 : 0; sz = \\($4 == 0.5 || $4 == -0.5\\) ? 1 : 0; if \\(sx+sy+sz==3\\) c3++; if \\(sx+sy+sz==2\\) c2++; if \\(sx+sy+sz==1\\) c1++; } END { printf \"    3-axis-pinned \\(true cube corners\\): %d  2-pinned \\(cube edges\\): %d  1-pinned \\(cube faces\\): %d\\\\n\", c3+0, c2+0, c1+0 }' cube_sharp.obj)",
+      "Bash(time ./dualc_boolean.exe union opA.obj opB.obj --depth 7 -o q_union.obj)",
+      "Bash(time ./dualc_boolean.exe smooth-union opA.obj opB.obj --k 30 --depth 7 -o q_sunion.obj)",
+      "Bash(python -c ' *)",
+      "Bash(time ./dualc_boolean.exe smooth-union opA.obj opB.obj --k 30 --depth 7 --bake 96 -o q_baked.obj)",
+      "Bash(./dualc_demo.exe molde.obj molde_check.obj)"
+    ]
+  }
+}

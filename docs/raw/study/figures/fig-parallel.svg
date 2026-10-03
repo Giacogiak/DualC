@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="560" viewBox="0 0 1060 560" role="img">
+<defs></defs>
+<rect width="1060" height="560" fill="#fcfcfb"/>
+<text x="28.00" y="34.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="15" font-weight="650" fill="#0b0b0b" text-anchor="start">Fork at depth 3: parallel where it is embarrassing, serial where it must be</text>
+<text x="28.00" y="55.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">The output is bit-identical regardless of thread count. That is a stronger guarantee than 'thread-safe', and for a manufacturing kernel it is a correctness property.</text>
+<line x1="270.00" y1="128.00" x2="165.00" y2="184.00" stroke="#e1e0d9" stroke-width="1.4" stroke-linecap="round"/>
+<line x1="270.00" y1="128.00" x2="375.00" y2="184.00" stroke="#e1e0d9" stroke-width="1.4" stroke-linecap="round"/>
+<line x1="165.00" y1="184.00" x2="112.50" y2="240.00" stroke="#e1e0d9" stroke-width="1.4" stroke-linecap="round"/>
+<line x1="165.00" y1="184.00" x2="217.50" y2="240.00" stroke="#e1e0d9" stroke-width="1.4" stroke-linecap="round"/>
+<line x1="375.00" y1="184.00" x2="322.50" y2="240.00" stroke="#e1e0d9" stroke-width="1.4" stroke-linecap="round"/>
+<line x1="375.00" y1="184.00" x2="427.50" y2="240.00" stroke="#e1e0d9" stroke-width="1.4" stroke-linecap="round"/>
+<line x1="112.50" y1="240.00" x2="86.25" y2="296.00" stroke="#e1e0d9" stroke-width="1.4" stroke-linecap="round"/>
+<line x1="112.50" y1="240.00" x2="138.75" y2="296.00" stroke="#e1e0d9" stroke-width="1.4" stroke-linecap="round"/>
+<line x1="217.50" y1="240.00" x2="191.25" y2="296.00" stroke="#e1e0d9" stroke-width="1.4" stroke-linecap="round"/>
+<line x1="217.50" y1="240.00" x2="243.75" y2="296.00" stroke="#e1e0d9" stroke-width="1.4" stroke-linecap="round"/>
+<line x1="322.50" y1="240.00" x2="296.25" y2="296.00" stroke="#e1e0d9" stroke-width="1.4" stroke-linecap="round"/>
+<line x1="322.50" y1="240.00" x2="348.75" y2="296.00" stroke="#e1e0d9" stroke-width="1.4" stroke-linecap="round"/>
+<line x1="427.50" y1="240.00" x2="401.25" y2="296.00" stroke="#e1e0d9" stroke-width="1.4" stroke-linecap="round"/>
+<line x1="427.50" y1="240.00" x2="453.75" y2="296.00" stroke="#e1e0d9" stroke-width="1.4" stroke-linecap="round"/>
+<circle cx="270.00" cy="128.00" r="7.00" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/>
+<circle cx="165.00" cy="184.00" r="7.00" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/>
+<circle cx="375.00" cy="184.00" r="7.00" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/>
+<circle cx="112.50" cy="240.00" r="7.00" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/>
+<circle cx="217.50" cy="240.00" r="7.00" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/>
+<circle cx="322.50" cy="240.00" r="7.00" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/>
+<circle cx="427.50" cy="240.00" r="7.00" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/>
+<circle cx="86.25" cy="296.00" r="8.00" fill="#eb6834" stroke="#ffffff" stroke-width="2"/>
+<circle cx="138.75" cy="296.00" r="8.00" fill="#eb6834" stroke="#ffffff" stroke-width="2"/>
+<circle cx="191.25" cy="296.00" r="8.00" fill="#eb6834" stroke="#ffffff" stroke-width="2"/>
+<circle cx="243.75" cy="296.00" r="8.00" fill="#eb6834" stroke="#ffffff" stroke-width="2"/>
+<circle cx="296.25" cy="296.00" r="8.00" fill="#eb6834" stroke="#ffffff" stroke-width="2"/>
+<circle cx="348.75" cy="296.00" r="8.00" fill="#eb6834" stroke="#ffffff" stroke-width="2"/>
+<circle cx="401.25" cy="296.00" r="8.00" fill="#eb6834" stroke="#ffffff" stroke-width="2"/>
+<circle cx="453.75" cy="296.00" r="8.00" fill="#eb6834" stroke="#ffffff" stroke-width="2"/>
+<rect x="54.00" y="98.00" width="432.00" height="158.00" rx="6" fill="none" stroke="#2a78d6" stroke-width="1.6" stroke-dasharray="5 4"/>
+<text x="502.00" y="184.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="650" fill="#2a78d6" text-anchor="start">refined SERIALLY</text>
+<text x="502.00" y="202.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#2a78d6" text-anchor="start">to depth 3</text>
+<text x="502.00" y="300.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="650" fill="#eb6834" text-anchor="start">the FRONTIER</text>
+<text x="502.00" y="318.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#eb6834" text-anchor="start">up to 512 nodes</text>
+<line x1="86.25" y1="308.00" x2="86.25" y2="350.00" stroke="#898781" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="3 3"/>
+<rect x="64.25" y="350.00" width="44.00" height="60.00" rx="4" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.3"/>
+<text x="86.25" y="374.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#52514e" text-anchor="middle">sub</text>
+<text x="86.25" y="388.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#52514e" text-anchor="middle">tree</text>
+<text x="86.25" y="402.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#898781" text-anchor="middle">#0</text>
+<line x1="138.75" y1="308.00" x2="138.75" y2="350.00" stroke="#898781" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="3 3"/>
+<rect x="116.75" y="350.00" width="44.00" height="60.00" rx="4" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.3"/>
+<text x="138.75" y="374.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#52514e" text-anchor="middle">sub</text>
+<text x="138.75" y="388.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#52514e" text-anchor="middle">tree</text>
+<text x="138.75" y="402.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#898781" text-anchor="middle">#1</text>
+<line x1="191.25" y1="308.00" x2="191.25" y2="350.00" stroke="#898781" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="3 3"/>
+<rect x="169.25" y="350.00" width="44.00" height="60.00" rx="4" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.3"/>
+<text x="191.25" y="374.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#52514e" text-anchor="middle">sub</text>
+<text x="191.25" y="388.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#52514e" text-anchor="middle">tree</text>
+<text x="191.25" y="402.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#898781" text-anchor="middle">#2</text>
+<line x1="243.75" y1="308.00" x2="243.75" y2="350.00" stroke="#898781" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="3 3"/>
+<rect x="221.75" y="350.00" width="44.00" height="60.00" rx="4" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.3"/>
+<text x="243.75" y="374.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#52514e" text-anchor="middle">sub</text>
+<text x="243.75" y="388.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#52514e" text-anchor="middle">tree</text>
+<text x="243.75" y="402.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#898781" text-anchor="middle">#3</text>
+<line x1="296.25" y1="308.00" x2="296.25" y2="350.00" stroke="#898781" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="3 3"/>
+<rect x="274.25" y="350.00" width="44.00" height="60.00" rx="4" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.3"/>
+<text x="296.25" y="374.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#52514e" text-anchor="middle">sub</text>
+<text x="296.25" y="388.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#52514e" text-anchor="middle">tree</text>
+<text x="296.25" y="402.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#898781" text-anchor="middle">#4</text>
+<line x1="348.75" y1="308.00" x2="348.75" y2="350.00" stroke="#898781" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="3 3"/>
+<rect x="326.75" y="350.00" width="44.00" height="60.00" rx="4" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.3"/>
+<text x="348.75" y="374.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#52514e" text-anchor="middle">sub</text>
+<text x="348.75" y="388.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#52514e" text-anchor="middle">tree</text>
+<text x="348.75" y="402.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#898781" text-anchor="middle">#5</text>
+<line x1="401.25" y1="308.00" x2="401.25" y2="350.00" stroke="#898781" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="3 3"/>
+<rect x="379.25" y="350.00" width="44.00" height="60.00" rx="4" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.3"/>
+<text x="401.25" y="374.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#52514e" text-anchor="middle">sub</text>
+<text x="401.25" y="388.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#52514e" text-anchor="middle">tree</text>
+<text x="401.25" y="402.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#898781" text-anchor="middle">#6</text>
+<line x1="453.75" y1="308.00" x2="453.75" y2="350.00" stroke="#898781" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="3 3"/>
+<rect x="431.75" y="350.00" width="44.00" height="60.00" rx="4" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.3"/>
+<text x="453.75" y="374.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#52514e" text-anchor="middle">sub</text>
+<text x="453.75" y="388.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#52514e" text-anchor="middle">tree</text>
+<text x="453.75" y="402.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#898781" text-anchor="middle">#7</text>
+<text x="60.00" y="444.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">Each frontier node roots a DISJOINT subtree — no worker touches</text>
+<text x="60.00" y="463.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">another's memory, and no reduction means no floating-point</text>
+<text x="60.00" y="482.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">non-associativity.</text>
+<rect x="620.00" y="84.00" width="400.00" height="218.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<text x="632.00" y="104.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="650" fill="#52514e" text-anchor="start">Why the output is bit-identical</text>
+<circle cx="648.00" cy="122.00" r="10.00" fill="#cde2fb" stroke="#2a78d6" stroke-width="1.5"/>
+<text x="648.00" y="126.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="700" fill="#184f95" text-anchor="middle">1</text>
+<text x="666.00" y="126.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">each frontier node roots a DISJOINT subtree</text>
+<circle cx="648.00" cy="156.00" r="10.00" fill="#cde2fb" stroke="#2a78d6" stroke-width="1.5"/>
+<text x="648.00" y="160.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="700" fill="#184f95" text-anchor="middle">2</text>
+<text x="666.00" y="160.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">the frontier is built serially, so its ORDER is fixed</text>
+<circle cx="648.00" cy="190.00" r="10.00" fill="#cde2fb" stroke="#2a78d6" stroke-width="1.5"/>
+<text x="648.00" y="194.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="700" fill="#184f95" text-anchor="middle">3</text>
+<text x="666.00" y="194.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">every node's Hermite data is a pure function of its</text>
+<text x="666.00" y="210.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">own bounds and the field — no reduction</text>
+<circle cx="648.00" cy="240.00" r="10.00" fill="#cde2fb" stroke="#2a78d6" stroke-width="1.5"/>
+<text x="648.00" y="244.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" font-weight="700" fill="#184f95" text-anchor="middle">4</text>
+<text x="666.00" y="244.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">the contourer walks the tree STRUCTURALLY, not in</text>
+<text x="666.00" y="260.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">completion order</text>
+<text x="640.00" y="288.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="650" fill="#d03b3b" text-anchor="start">…and yet numThreads appears NOWHERE in tests/.</text>
+<rect x="620.00" y="316.00" width="400.00" height="106.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<text x="632.00" y="336.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="650" fill="#52514e" text-anchor="start">parallelFor — 51 lines, no dependency</text>
+<text x="640.00" y="356.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">Dynamic scheduling on one atomic counter, because</text>
+<text x="640.00" y="373.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">octree subtrees differ wildly in complexity. The calling</text>
+<text x="640.00" y="390.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">thread participates. memory_order_relaxed is correct:</text>
+<text x="640.00" y="407.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">join() supplies the ordering the writes need.</text>
+<rect x="620.00" y="436.00" width="400.00" height="100.00" rx="8" fill="#fbe9e9" stroke="#d03b3b" stroke-width="1.4"/>
+<text x="632.00" y="456.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="650" fill="#52514e" text-anchor="start">The hole</text>
+<text x="640.00" y="476.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">No exception handling at all. A throw in a worker calls</text>
+<text x="640.00" y="493.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">std::terminate; a throw in the main thread's own worker()</text>
+<text x="640.00" y="510.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">unwinds past the join loop and terminates too. About ten</text>
+<text x="640.00" y="527.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">lines of exception_ptr would fix it.</text>
+</svg>

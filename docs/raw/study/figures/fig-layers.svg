@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="660" viewBox="0 0 1060 660" role="img">
+<defs></defs>
+<rect width="1060" height="660" fill="#fcfcfb"/>
+<text x="28.00" y="34.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="15" font-weight="650" fill="#0b0b0b" text-anchor="start">The dependency layering: libdualc links exactly one thing</text>
+<text x="28.00" y="55.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">The rule is enforced by comments and discipline only — nothing in CMake prevents violating it. A CI assertion on LINK_LIBRARIES would make it structural.</text>
+<rect x="60.00" y="396.00" width="420.00" height="96.00" rx="8" fill="#eefaf5" stroke="#1baf7a" stroke-width="2.2"/>
+<text x="80.00" y="428.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#0d6b4c" text-anchor="start">libdualc</text>
+<text x="80.00" y="448.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">24 .cpp files, 2 of them vendored (Unlicense)</text>
+<text x="80.00" y="468.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">public API in include/dualc/, internals in src/internal/</text>
+<rect x="360.00" y="416.50" width="94.04" height="20.50" rx="4" fill="#1baf7a" stroke="none" stroke-width="1.5"/>
+<text x="367.00" y="428.50" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="600" fill="#ffffff" text-anchor="start">dualc::dualc</text>
+<rect x="60.00" y="528.00" width="420.00" height="68.00" rx="8" fill="#ffffff" stroke="#2a78d6" stroke-width="2"/>
+<text x="80.00" y="556.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#184f95" text-anchor="start">geometry-central</text>
+<text x="80.00" y="576.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">a SIBLING checkout, not vendored, not fetched</text>
+<line x1="270.00" y1="496.00" x2="270.00" y2="518.05" stroke="#898781" stroke-width="2" stroke-linecap="round"/>
+<polygon points="270.00,524.00 267.15,517.61 272.85,517.61" fill="#898781" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="286.00" y="516.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="11" font-weight="650" fill="#0b0b0b" text-anchor="start">the ENTIRE link line</text>
+<rect x="510.00" y="528.00" width="420.00" height="68.00" rx="8" fill="#f9f9f7" stroke="#e1e0d9" stroke-width="1.4"/>
+<text x="530.00" y="556.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">Eigen  ·  nanort  ·  nanoflann  ·  happly</text>
+<text x="530.00" y="576.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">inherited transitively — nanort in particular is an UNDECLARED dependency</text>
+<line x1="494.00" y1="562.00" x2="500.90" y2="562.00" stroke="#898781" stroke-width="1.8" stroke-linecap="round"/>
+<polygon points="506.00,562.00 500.52,564.45 500.52,559.55" fill="#898781" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="60.00" y="100.00" width="250.00" height="0.00" rx="0" fill="none" stroke="none" stroke-width="1.5"/>
+<rect x="322.00" y="100.00" width="0.00" height="0.00" rx="0" fill="none" stroke="none" stroke-width="1.5"/>
+<rect x="60.00" y="96.00" width="440.00" height="152.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<rect x="60.00" y="96.00" width="5.00" height="152.00" rx="2" fill="#2a78d6" stroke="none" stroke-width="1.5"/>
+<text x="80.00" y="124.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="700" fill="#0b0b0b" text-anchor="start">examples/ support libraries</text>
+<text x="80.00" y="148.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10" font-weight="400" fill="#52514e" text-anchor="start">dualc_examples_common  — CLI parsing + the central registries</text>
+<text x="80.00" y="167.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10" font-weight="400" fill="#52514e" text-anchor="start">dualc_examples_io  — miniz, for 3MF</text>
+<text x="80.00" y="186.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10" font-weight="400" fill="#52514e" text-anchor="start">dualc_examples_img  — stb, for PNG (its OWN lib, deliberately)</text>
+<text x="80.00" y="205.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10" font-weight="400" fill="#52514e" text-anchor="start">dualc_examples_fieldgraph  — JSON/--expr -&gt; FieldPtr</text>
+<text x="80.00" y="224.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10" font-weight="400" fill="#52514e" text-anchor="start">dualc_examples_fieldglsl  — field -&gt; GLSL, and NO GL dependency</text>
+<rect x="530.00" y="96.00" width="470.00" height="152.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<rect x="530.00" y="96.00" width="5.00" height="152.00" rx="2" fill="#eb6834" stroke="none" stroke-width="1.5"/>
+<text x="550.00" y="124.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="700" fill="#0b0b0b" text-anchor="start">9 always-on CLIs + 4 opt-in GL apps</text>
+<text x="550.00" y="148.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10" font-weight="400" fill="#52514e" text-anchor="start">dualc_demo, dualc_primitive, dualc_boolean, dualc_lift,</text>
+<text x="550.00" y="167.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10" font-weight="400" fill="#52514e" text-anchor="start">dualc_csg_demo, dualc_lattice, dualc_slice, dualc_gen_demo,</text>
+<text x="550.00" y="186.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10" font-weight="400" fill="#52514e" text-anchor="start">dualc_field</text>
+<text x="550.00" y="205.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10" font-weight="400" fill="#52514e" text-anchor="start">opt-in: dualc_view (Polyscope), dualc_raymarch,</text>
+<text x="550.00" y="224.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10" font-weight="400" fill="#52514e" text-anchor="start">dualc_field_view, dualc_glsl_parity</text>
+<rect x="60.00" y="268.00" width="440.00" height="108.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<rect x="60.00" y="268.00" width="5.00" height="108.00" rx="2" fill="#4a3aa7" stroke="none" stroke-width="1.5"/>
+<text x="80.00" y="296.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="700" fill="#0b0b0b" text-anchor="start">examples/third_party/  — host only</text>
+<text x="80.00" y="320.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">miniz (MIT) · stb (PD/MIT) · nlohmann/json (MIT)</text>
+<text x="80.00" y="340.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">meshoptimizer (MIT)</text>
+<text x="80.00" y="362.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#d03b3b" text-anchor="start">must NEVER link into libdualc — and they do not.</text>
+<rect x="530.00" y="268.00" width="470.00" height="108.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<rect x="530.00" y="268.00" width="5.00" height="108.00" rx="2" fill="#e87ba4" stroke="none" stroke-width="1.5"/>
+<text x="550.00" y="296.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="700" fill="#0b0b0b" text-anchor="start">capi/  — the C ABI, opt-in SHARED library</text>
+<text x="550.00" y="320.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="400" fill="#52514e" text-anchor="start">opaque handle + flat structs + 11 extern "C" entry points</text>
+<text x="550.00" y="342.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">Links the field-graph parser and the example common lib —</text>
+<text x="550.00" y="360.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">NOT part of libdualc, because it needs JSON and mesh I/O.</text>
+<line x1="270.00" y1="380.00" x2="270.00" y2="386.90" stroke="#898781" stroke-width="1.8" stroke-linecap="round"/>
+<polygon points="270.00,392.00 267.55,386.52 272.45,386.52" fill="#898781" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<line x1="760.00" y1="380.00" x2="760.00" y2="386.90" stroke="#898781" stroke-width="1.8" stroke-linecap="round"/>
+<polygon points="760.00,392.00 757.55,386.52 762.45,386.52" fill="#898781" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<line x1="760.00" y1="252.00" x2="760.00" y2="258.90" stroke="#898781" stroke-width="1.8" stroke-linecap="round"/>
+<polygon points="760.00,264.00 757.55,258.52 762.45,258.52" fill="#898781" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<line x1="270.00" y1="252.00" x2="270.00" y2="258.90" stroke="#898781" stroke-width="1.8" stroke-linecap="round"/>
+<polygon points="270.00,264.00 267.55,258.52 272.45,258.52" fill="#898781" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<line x1="690.00" y1="444.00" x2="490.00" y2="444.00" stroke="#898781" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="4 3"/>
+<line x1="690.00" y1="444.00" x2="491.10" y2="444.00" stroke="#898781" stroke-width="1.8" stroke-linecap="round"/>
+<polygon points="486.00,444.00 491.48,441.55 491.48,446.45" fill="#898781" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="510.00" y="396.00" width="490.00" height="108.00" rx="8" fill="#f9f9f7" stroke="#e1e0d9" stroke-width="1.4"/>
+<text x="522.00" y="416.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="650" fill="#52514e" text-anchor="start">The scope decision that shapes all of it</text>
+<text x="530.00" y="442.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">"The library takes meshes in one global frame. Mesh I/O and</text>
+<text x="530.00" y="460.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">spatial transforms are the HOST's job." That is what keeps the</text>
+<text x="530.00" y="478.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">kernel down to one dependency — and what leaves a model in site</text>
+<text x="530.00" y="496.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">coordinates exposed to the float BVH's precision floor (see B3).</text>
+</svg>

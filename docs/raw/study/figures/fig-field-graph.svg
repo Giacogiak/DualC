@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="560" viewBox="0 0 1060 560" role="img">
+<defs></defs>
+<rect width="1060" height="560" fill="#fcfcfb"/>
+<text x="28.00" y="34.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="15" font-weight="650" fill="#0b0b0b" text-anchor="start">The field graph: one immutable DAG, three back ends</text>
+<text x="28.00" y="55.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">difference(intersection(box(...), onion(normalize(gyroid(wavelength=1)), thickness=0.3)), sphere(radius=1))</text>
+<line x1="162.00" y1="290.00" x2="190.90" y2="290.00" stroke="#898781" stroke-width="1.8" stroke-linecap="round"/>
+<polygon points="196.00,290.00 190.52,292.45 190.52,287.55" fill="#898781" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<line x1="302.00" y1="290.00" x2="330.90" y2="290.00" stroke="#898781" stroke-width="1.8" stroke-linecap="round"/>
+<polygon points="336.00,290.00 330.52,292.45 330.52,287.55" fill="#898781" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<line x1="442.00" y1="290.00" x2="339.89" y2="376.70" stroke="#898781" stroke-width="1.8" stroke-linecap="round"/>
+<polygon points="336.00,380.00 338.59,374.59 341.76,378.32" fill="#898781" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<line x1="162.00" y1="380.00" x2="330.90" y2="380.00" stroke="#898781" stroke-width="1.8" stroke-linecap="round"/>
+<polygon points="336.00,380.00 330.52,382.45 330.52,377.55" fill="#898781" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<line x1="442.00" y1="380.00" x2="482.43" y2="421.35" stroke="#898781" stroke-width="1.8" stroke-linecap="round"/>
+<polygon points="486.00,425.00 480.42,422.79 483.92,419.37" fill="#898781" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<line x1="442.00" y1="470.00" x2="482.43" y2="428.65" stroke="#898781" stroke-width="1.8" stroke-linecap="round"/>
+<polygon points="486.00,425.00 483.92,430.63 480.42,427.21" fill="#898781" stroke="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="58.00" y="361.00" width="104.00" height="38.00" rx="6" fill="#ffffff" stroke="#2a78d6" stroke-width="1.8"/>
+<text x="110.00" y="379.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="650" fill="#0b0b0b" text-anchor="middle">box</text>
+<text x="110.00" y="393.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#898781" text-anchor="middle">primitive</text>
+<rect x="58.00" y="271.00" width="104.00" height="38.00" rx="6" fill="#ffffff" stroke="#eb6834" stroke-width="1.8"/>
+<text x="110.00" y="289.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="650" fill="#0b0b0b" text-anchor="middle">gyroid</text>
+<text x="110.00" y="303.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#898781" text-anchor="middle">TPMS</text>
+<rect x="198.00" y="271.00" width="104.00" height="38.00" rx="6" fill="#ffffff" stroke="#1baf7a" stroke-width="1.8"/>
+<text x="250.00" y="289.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="650" fill="#0b0b0b" text-anchor="middle">normalize</text>
+<text x="250.00" y="303.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#898781" text-anchor="middle">decorator</text>
+<rect x="338.00" y="271.00" width="104.00" height="38.00" rx="6" fill="#ffffff" stroke="#1baf7a" stroke-width="1.8"/>
+<text x="390.00" y="289.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="650" fill="#0b0b0b" text-anchor="middle">onion</text>
+<text x="390.00" y="303.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#898781" text-anchor="middle">decorator</text>
+<rect x="338.00" y="361.00" width="104.00" height="38.00" rx="6" fill="#ffffff" stroke="#4a3aa7" stroke-width="1.8"/>
+<text x="390.00" y="379.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="650" fill="#0b0b0b" text-anchor="middle">intersection</text>
+<text x="390.00" y="393.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#898781" text-anchor="middle">combinator</text>
+<rect x="338.00" y="451.00" width="104.00" height="38.00" rx="6" fill="#ffffff" stroke="#2a78d6" stroke-width="1.8"/>
+<text x="390.00" y="469.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="650" fill="#0b0b0b" text-anchor="middle">sphere</text>
+<text x="390.00" y="483.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#898781" text-anchor="middle">primitive</text>
+<rect x="488.00" y="406.00" width="104.00" height="38.00" rx="6" fill="#ffffff" stroke="#4a3aa7" stroke-width="1.8"/>
+<text x="540.00" y="424.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="650" fill="#0b0b0b" text-anchor="middle">difference</text>
+<text x="540.00" y="438.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="9.5" font-weight="400" fill="#898781" text-anchor="middle">combinator</text>
+<circle cx="602.00" cy="425.00" r="7.00" fill="#0b0b0b" stroke="none" stroke-width="1.5"/>
+<text x="616.00" y="429.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="650" fill="#0b0b0b" text-anchor="start">root</text>
+<text x="60.00" y="100.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">FieldPtr = std::shared_ptr&lt;ImplicitField&gt;. Children are captured at construction and</text>
+<text x="60.00" y="117.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">there is no setter — so cycles are structurally impossible and no weak_ptr is needed.</text>
+<rect x="690.00" y="96.00" width="336.00" height="126.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<rect x="690.00" y="96.00" width="5.00" height="126.00" rx="2" fill="#1baf7a" stroke="none" stroke-width="1.5"/>
+<text x="710.00" y="122.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="11.5" font-weight="700" fill="#0b0b0b" text-anchor="start">sampleFieldToHermiteOctree</text>
+<text x="710.00" y="146.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">walks the graph per query;</text>
+<text x="710.00" y="163.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">no memoisation, so a shared</text>
+<text x="710.00" y="180.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">subtree is re-evaluated once</text>
+<text x="710.00" y="197.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">per reference</text>
+<rect x="690.00" y="238.00" width="336.00" height="126.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<rect x="690.00" y="238.00" width="5.00" height="126.00" rx="2" fill="#eb6834" stroke="none" stroke-width="1.5"/>
+<text x="710.00" y="264.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="11.5" font-weight="700" fill="#0b0b0b" text-anchor="start">field_glsl codegen</text>
+<text x="710.00" y="288.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">emits one float fN(vec3 p)</text>
+<text x="710.00" y="305.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">per node, DAG-deduped by</text>
+<text x="710.00" y="322.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">STRUCTURAL EQUALITY — a</text>
+<text x="710.00" y="339.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">repeated subtree compiles once</text>
+<rect x="690.00" y="380.00" width="336.00" height="126.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<rect x="690.00" y="380.00" width="5.00" height="126.00" rx="2" fill="#2a78d6" stroke="none" stroke-width="1.5"/>
+<text x="710.00" y="406.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="11.5" font-weight="700" fill="#0b0b0b" text-anchor="start">bakeToGrid</text>
+<text x="710.00" y="430.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">collapses any subtree to a</text>
+<text x="710.00" y="447.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">trilinear lookup: one virtual</text>
+<text x="710.00" y="464.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">call total, whatever the</text>
+<text x="710.00" y="481.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">graph size</text>
+<rect x="60.00" y="508.00" width="960.00" height="40.00" rx="8" fill="#f9f9f7" stroke="#e1e0d9" stroke-width="1.4"/>
+<text x="80.00" y="534.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">The CPU path has no memoisation while the GPU path dedupes — a real, quotable inconsistency between two consumers of the same graph.</text>
+</svg>

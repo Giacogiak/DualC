@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="560" viewBox="0 0 1060 560" role="img">
+<defs></defs>
+<rect width="1060" height="560" fill="#fcfcfb"/>
+<text x="28.00" y="34.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="15" font-weight="650" fill="#0b0b0b" text-anchor="start">The five MeshBVH queries — one acceleration structure, five traversals</text>
+<text x="28.00" y="55.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">A nanort SAH BVH over packed float buffers. Three of the five reach past nanort's public API into its node array.</text>
+<rect x="40.00" y="92.00" width="600.00" height="90.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<rect x="40.00" y="92.00" width="5.00" height="90.00" rx="2" fill="#2a78d6" stroke="none" stroke-width="1.5"/>
+<text x="60.00" y="118.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="12.5" font-weight="700" fill="#0b0b0b" text-anchor="start">segmentFirstHit</text>
+<text x="400.00" y="118.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="650" fill="#2a78d6" text-anchor="start">O(log T)</text>
+<text x="520.00" y="118.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">one traversal</text>
+<text x="60.00" y="140.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">The exact analytic ray/triangle hit. This is</text>
+<text x="60.00" y="157.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">why the mesh path needs no root-finding at all.</text>
+<rect x="40.00" y="194.00" width="600.00" height="90.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<rect x="40.00" y="194.00" width="5.00" height="90.00" rx="2" fill="#eb6834" stroke="none" stroke-width="1.5"/>
+<text x="60.00" y="220.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="12.5" font-weight="700" fill="#0b0b0b" text-anchor="start">countRayHits</text>
+<text x="400.00" y="220.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="650" fill="#eb6834" text-anchor="start">O(k log T)</text>
+<text x="520.00" y="220.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">k+1 traversals</text>
+<text x="60.00" y="242.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">Repeated first-hit with an advancing min_t —</text>
+<text x="60.00" y="259.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">not a proper any-hit traversal. Feeds ray parity.</text>
+<rect x="40.00" y="296.00" width="600.00" height="107.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<rect x="40.00" y="296.00" width="5.00" height="107.00" rx="2" fill="#1baf7a" stroke="none" stroke-width="1.5"/>
+<text x="60.00" y="322.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="12.5" font-weight="700" fill="#0b0b0b" text-anchor="start">cellOverlapsAABB</text>
+<text x="400.00" y="322.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="650" fill="#1baf7a" text-anchor="start">O(log T), early out</text>
+<text x="520.00" y="322.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">slab test, first hit wins</text>
+<text x="60.00" y="344.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">Returns true at the FIRST overlapping BVH leaf.</text>
+<text x="60.00" y="361.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">Conservative to leaf granularity — correct for a</text>
+<text x="60.00" y="378.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">refinement predicate, and it skips per-triangle work.</text>
+<rect x="40.00" y="415.00" width="600.00" height="124.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<rect x="40.00" y="415.00" width="5.00" height="124.00" rx="2" fill="#4a3aa7" stroke="none" stroke-width="1.5"/>
+<text x="60.00" y="441.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="12.5" font-weight="700" fill="#0b0b0b" text-anchor="start">findClosest</text>
+<text x="400.00" y="441.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="650" fill="#4a3aa7" text-anchor="start">O(log T) average</text>
+<text x="520.00" y="441.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">branch and bound</text>
+<text x="60.00" y="463.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">LIFO DFS with a bestD2 prune at pop time, and</text>
+<text x="60.00" y="480.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">Ericson's Voronoi-region point/triangle kernel.</text>
+<text x="60.00" y="497.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">Children are NOT distance-ordered: two lines</text>
+<text x="60.00" y="514.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">would buy 1.5-3x.</text>
+<rect x="40.00" y="551.00" width="600.00" height="90.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<rect x="40.00" y="551.00" width="5.00" height="90.00" rx="2" fill="#e87ba4" stroke="none" stroke-width="1.5"/>
+<text x="60.00" y="577.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="12.5" font-weight="700" fill="#0b0b0b" text-anchor="start">windingNumberFast</text>
+<text x="400.00" y="577.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="650" fill="#e87ba4" text-anchor="start">O(log T)</text>
+<text x="520.00" y="577.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">first-order multipole</text>
+<text x="60.00" y="599.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">Per-node dipole aggregate with the correct</text>
+<text x="60.00" y="616.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">translation operator; far-field test at beta = 2.</text>
+<rect x="668.00" y="92.00" width="352.00" height="208.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<text x="680.00" y="112.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="650" fill="#52514e" text-anchor="start">Buffer layout</text>
+<text x="686.00" y="138.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="650" fill="#184f95" text-anchor="start">positions</text>
+<text x="836.00" y="138.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10" font-weight="400" fill="#52514e" text-anchor="start">float x3</text>
+<text x="1004.00" y="138.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10" font-weight="400" fill="#898781" text-anchor="end">12 B / vertex</text>
+<text x="686.00" y="160.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="650" fill="#184f95" text-anchor="start">indices</text>
+<text x="836.00" y="160.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10" font-weight="400" fill="#52514e" text-anchor="start">uint x3</text>
+<text x="1004.00" y="160.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10" font-weight="400" fill="#898781" text-anchor="end">12 B / triangle</text>
+<text x="686.00" y="182.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="650" fill="#184f95" text-anchor="start">vertexNormals</text>
+<text x="836.00" y="182.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10" font-weight="400" fill="#52514e" text-anchor="start">float x3</text>
+<text x="1004.00" y="182.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10" font-weight="400" fill="#898781" text-anchor="end">12 B / vertex</text>
+<text x="686.00" y="204.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="650" fill="#184f95" text-anchor="start">vertexPseudoNormal</text>
+<text x="836.00" y="204.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10" font-weight="400" fill="#52514e" text-anchor="start">double x3</text>
+<text x="1004.00" y="204.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10" font-weight="400" fill="#898781" text-anchor="end">24 B / vertex</text>
+<text x="686.00" y="226.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="650" fill="#184f95" text-anchor="start">edgePseudoNormal</text>
+<text x="836.00" y="226.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10" font-weight="400" fill="#52514e" text-anchor="start">double x3</text>
+<text x="1004.00" y="226.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10" font-weight="400" fill="#898781" text-anchor="end">24 B / edge</text>
+<text x="686.00" y="248.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10.5" font-weight="650" fill="#184f95" text-anchor="start">gwnNodes</text>
+<text x="836.00" y="248.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10" font-weight="400" fill="#52514e" text-anchor="start">aggregate</text>
+<text x="1004.00" y="248.00" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="10" font-weight="400" fill="#898781" text-anchor="end">128 B / BVH node</text>
+<text x="686.00" y="282.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#898781" text-anchor="start">No alignas anywhere — and that is correct:</text>
+<rect x="668.00" y="312.00" width="352.00" height="108.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<text x="680.00" y="332.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="650" fill="#52514e" text-anchor="start">Why no 16-byte alignment</text>
+<text x="686.00" y="350.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">nanort's intersector is scalar, so padding</text>
+<text x="686.00" y="368.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">vertices to float4 would waste a third of the</text>
+<text x="686.00" y="386.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">hottest buffer and gain nothing. The stride is</text>
+<text x="686.00" y="404.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#52514e" text-anchor="start">handed to nanort explicitly as sizeof(float)*3.</text>
+<rect x="668.00" y="432.00" width="352.00" height="108.00" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.4"/>
+<text x="680.00" y="452.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="650" fill="#52514e" text-anchor="start">Two criticisms worth volunteering</text>
+<text x="686.00" y="470.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#d03b3b" text-anchor="start">1. Every traversal does stack.reserve(64) —</text>
+<text x="686.00" y="488.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">one malloc/free per query, 10^7 of them in a bake.</text>
+<text x="686.00" y="510.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#d03b3b" text-anchor="start">2. Reaching into nanort's node layout couples</text>
+<text x="686.00" y="528.00" font-family="system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="start">four methods to its internals across versions.</text>
+</svg>
