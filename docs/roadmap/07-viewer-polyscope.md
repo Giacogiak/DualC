@@ -135,6 +135,15 @@ Pages moved with it: `README.md` § Dependencies and § Build, `AGENTS.md`, `STR
 (recipe G4), 10 and 12, `design/09` and the glossary's *Sibling checkout*, D-48, and the status
 snapshot.
 
+**Verification, completed (2026-10-05).** With the X11 development headers installed
+(`libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev`) the owed window-level
+run went through on the same `build-gl` tree, reconfigured with `-DGLFW_BUILD_X11=ON`: GLFW's
+X11 backend found, the three targets rebuilt (60 steps); `dualc_field_view gyroid_box.json
+--snapshot` rendered a frame (GL renderer `NV92`, a 66 KB PNG of the gyroid-perforated box);
+`dualc_raymarch cube.obj --type gyroid` baked its mesh SDF and opened an 1100×800 window
+(seen in the X11 window tree, killed after 25 s); `check.py --gpu --build-dir build-gl`
+**73/73** parity cases passed. Nothing in #50 is pending.
+
 ---
 
 ← Back to the [Roadmap index](README.md).
