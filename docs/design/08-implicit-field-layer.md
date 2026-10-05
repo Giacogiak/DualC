@@ -27,8 +27,10 @@ class ImplicitField {
 ```
 
 Only `valueAt` / `gradientAt` / `bounds` are mandatory. Fields compose through `FieldPtr`
-(`std::shared_ptr<ImplicitField>`) into an immutable expression tree — immutable by
-convention (no setters, no `mutable`, no caching), not by the type system. Every method is
+(`std::shared_ptr<const ImplicitField>`) into an immutable expression tree — the `const`
+in the alias is the type system enforcing it (every evaluation method is `const`; a
+`shared_ptr<Derived>` from `make_shared` converts implicitly), and the class adds no
+setters, no `mutable` and no caching on top. Every method is
 called concurrently by the sampler, so `const` must mean genuinely immutable; the header's
 `THREAD SAFETY` block names the `mutable` memoisation cache as the trap and `bakeToGrid` /
 `GridField` as the supported way to amortise an expensive field

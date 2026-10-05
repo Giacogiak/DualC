@@ -131,10 +131,11 @@ void packMesh(geometrycentral::surface::SurfaceMesh& mesh,
     }
   }
 
-  // Area-weighted vertex normals from the input topology. Geometry-central's
-  // SimplePolygonMesh discards the OBJ `vn` block, so explicit input normals
-  // are not available -- area-weighted is a close-enough approximation for
-  // smooth shading on typical triangulated inputs.
+  // Recomputed vertex normals from the input topology (geometry-central's
+  // corner-angle weighting of the unit face normals). Its SimplePolygonMesh
+  // discards the OBJ `vn` block, so explicit input normals are not available;
+  // the recomputed ones are a close-enough approximation for smooth shading
+  // on typical triangulated inputs.
   geometry.requireVertexNormals();
   outVertexNormals.clear();
   outVertexNormals.reserve(mesh.nVertices() * 3);

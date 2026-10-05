@@ -70,12 +70,13 @@ const auto body = [&](std::size_t i) {
   buildNode(*n, n->depth, params.minDepth, params.maxDepth, field, cancel);
 };
 if (progress) {            // polled: the caller reports, the workers build
-  progress->report(Stage::Sample, 0, frontier.size());
-  internal::parallelForPolled(frontier.size(), params.numThreads, body,
+  const std::size_t n = frontier.size();
+  progress->report(Stage::Sample, 0, n);
+  internal::parallelForPolled(n, params.numThreads, body,
                               [&](std::size_t done, std::size_t total) {
                                 progress->report(Stage::Sample, done, total);
                               });
-  progress->report(Stage::Sample, frontier.size(), frontier.size());
+  progress->report(Stage::Sample, n, n);
 } else {
   internal::parallelFor(frontier.size(), params.numThreads, body);
 }
@@ -118,8 +119,10 @@ Two optional hooks ride this build ([10 § Hooks](10-invariants-and-tolerances.m
 most the 8 leaves under one `maxDepth − 1` node are built between polls — and throws
 `Cancelled`, which `parallelFor`'s exception path carries out after joining; and when a
 `ProgressSink` is passed the frontier loop runs through `internal::parallelForPolled`
-instead, whose calling thread claims no index and reports `(done, n)` at most every
-100 ms, so the sink is never invoked from a worker. Neither changes the octree.
+instead: with two or more resolved threads its calling thread claims no index and reports
+`(done, n)` at most every 100 ms; with one thread (or a one-node frontier) the caller runs
+the loop itself and polls every `max(1, n/64)` items. Either way the sink is never invoked
+from a worker. Neither changes the octree.
 
 ## 3.3 Refinement and edge-crossing capture
 
@@ -164,7 +167,7 @@ dependent on the arbitrary edge orientation in `kEdgeEndpoints`.
   `tStar = va / (va - vb)`, then runs at most `kEdgeHitRefineSteps = 6` corrective steps,
   halving the value stored at a bracket end that has been retained twice in a row (the
   Illinois trick, which breaks false position's one-sided stall). It exits early on
-  `|f| <= 1e-9` or a bracket narrower than `1e-6`, and reports the **bracket midpoint**, not
+  `|f| <= 1e-9` or a bracket no wider than `1e-6`, and reports the **bracket midpoint**, not
   the last false-position estimate. The normal comes from `gradientAt(outP)`. Cost: 2 + up to
   6 `valueAt` calls plus one `gradientAt`. The design point is that along a short cube edge a
   near-SDF is near-linear, so a linear seed plus six corrections beats 50 blind bisections;

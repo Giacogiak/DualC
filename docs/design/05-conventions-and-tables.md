@@ -15,10 +15,11 @@ DualC builds on geometry-central without re-exporting its types:
 - Input meshes come in as `geometrycentral::surface::SurfaceMesh&` +
   `VertexPositionGeometry&`, and are consumed by `MeshSource` → `internal::MeshBVH`.
   `packMesh` iterates `mesh.vertices()` / `mesh.faces()`, reads
-  `geometry.inputVertexPositions[v]`, and computes area-weighted per-vertex normals via
-  `requireVertexNormals()` / `unrequireVertexNormals()`, packing all three into aligned float
-  buffers for nanort. Note this means "interpolated normals" always means *recomputed
-  area-weighted* normals — an authored crease in an input file cannot round-trip.
+  `geometry.inputVertexPositions[v]`, and computes per-vertex normals via
+  `requireVertexNormals()` / `unrequireVertexNormals()` — geometry-central's corner-angle
+  weighting of the unit face normals, not area weighting — packing all three into aligned
+  float buffers for nanort. Note this means "interpolated normals" always means *recomputed*
+  normals — an authored crease in an input file cannot round-trip.
 - Output meshes are constructed via `makeSurfaceMeshAndGeometry(polygons, positions)`; the
   per-vertex normals are returned alongside as a plain `std::vector<Vector3>`.
 

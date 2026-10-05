@@ -61,8 +61,9 @@ public:
 
   // Find the surface crossing on segment [a, b]. On success returns true and
   // fills outP (crossing point) and outN (unit outward normal). The default
-  // brackets by endpoint sign and bisects on valueAt; it reports a crossing
-  // only when the endpoints straddle the surface.
+  // brackets by endpoint sign and refines on valueAt with a few Illinois
+  // regula-falsi steps; it reports a crossing only when the endpoints straddle
+  // the surface.
   virtual bool edgeHit(const Vector3& a, const Vector3& b,
                        Vector3& outP, Vector3& outN) const;
 

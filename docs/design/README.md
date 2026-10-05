@@ -68,7 +68,9 @@ return simplifyAndContour(octree, contourerParams, diag, cancel, progress);
 `dualContourMesh` shares that same tail but builds its octree through
 `sampleMeshToHermiteOctree`, which is the library's **single** `MeshSource` construction site.
 That is what guarantees `SamplerParams::signMethod` reaches the mesh path;
-`tests/test_pipeline.cpp` asserts the two entry points agree for every `SignMethod`. The
+`tests/test_pipeline.cpp` asserts that `dualContourMesh` and the explicit
+`sampleMeshToHermiteOctree` + `contourHermiteOctree` chain agree, by element counts, for
+every `SignMethod`. The
 defect that made the single site a rule is
 [01 § 4.9](../roadmap/01-core-dual-contouring/02-bug-catalogue.md#49-code-screening-batch).
 

@@ -56,8 +56,8 @@ directly; geometry-central v1.1.0 made its own nanort private and updated it to 
 API, so DualC owns the header it was written against. Bumping nanort is a port of `mesh_bvh.cpp`,
 not a header swap. Everything else under `src/internal/` is DualC-original.
 
-`svd.cpp` is not a general SVD: it is a one-sided cyclic Jacobi eigensolver for a symmetric
-3×3 matrix. Because the input is `AᵀA` (symmetric PSD), the "singular values" it produces are
+`svd.cpp` is not a general SVD: it is a cyclic Jacobi eigensolver for a symmetric 3×3 matrix
+(two-sided symmetric rotations on `AᵀA`, accumulating the eigenvectors). Because the input is `AᵀA` (symmetric PSD), the "singular values" it produces are
 the *eigenvalues* of `AᵀA`, i.e. the squared singular values of `A`. That matters when
 reasoning about `qefRegularization`: a tolerance of 0.1 on eigenvalues corresponds to ≈0.316
 on singular values of `A`.

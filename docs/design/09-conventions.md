@@ -39,8 +39,9 @@ and diagnostic assumes it.
 The output format is chosen **by the `-o` extension, lower-cased, and by nothing else**:
 `.obj`, `.stl` or `.3mf`, read by `lowerExt` in `examples/example_common.cpp` and dispatched
 after a single contour pass — in `dispatchWrite` on the plain path, in `writeField`'s
-decimation branch, and as a guard in each tiled writer; any other extension is an error
-naming the three. There is no format flag because the extension is the one thing the user
+decimation branch, and as a guard in each tiled writer; any other extension is an error —
+the plain and decimation paths name the three, each tiled guard names the one format it
+streams. There is no format flag because the extension is the one thing the user
 types anyway, and a format is never inferred from content or from a tool's default. What
 each format carries follows from what its consumer needs, not from the engine:
 

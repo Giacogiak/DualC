@@ -102,7 +102,8 @@ int writeField(const dualc::ImplicitField& field,
 // contour, so a request lands within one tile's contour time. Same `.part`
 // guarantee as writeField: on every non-zero rc nothing is left at `path`.
 // `progress` sees Stage::Tile only: (0, T) before the loop, (i, T) as tile
-// i starts, (T, T) after the rename.
+// i starts, (T, T) after the rename -- except on the single-pass fallback
+// (tileDepth >= depth), whose one contour forwards the sink instead.
 int writeFieldTiledStl(const dualc::ImplicitField& field,
                        const std::string& path,
                        const dualc::SamplerParams& sp,

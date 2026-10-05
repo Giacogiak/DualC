@@ -50,9 +50,10 @@ of these links here rather than restating the number.
 
 ## Hooks: cancellation and progress
 
-Every driver — the two samplers, the collapse pass, the contourer, both `dualContour*`
-wrappers and the three `dce::write*` functions — takes two trailing optional pointers after
-`Diagnostics*` (`include/dualc/progress.h`):
+Every driver takes the hooks as trailing optional pointers (`include/dualc/progress.h`):
+the two samplers, the contourer, both `dualContour*` wrappers and `dce::writeField` take
+`cancel, progress` after `Diagnostics*`; the two tiled writers take the same pair with no
+`Diagnostics*` before it; the collapse pass takes `cancel` only:
 
 - **`const CancelToken*`** — a host-set `std::atomic<bool>`, sticky, one per job,
   `request()` legal from any thread. The pipeline polls it with a relaxed load at every
@@ -70,7 +71,10 @@ wrappers and the three `dce::write*` functions — takes two trailing optional p
   `done` is monotonic, `total` constant and the last report is `(total, total)`;
   `Sample` and `Contour` come from the engine (Contour's total is twice the leaf count:
   QEF solves, then leaves first touched by the traversal), `Write` and `Tile` from the
-  writers — a monolithic export reports the first three, a tiled export `Tile` only.
+  writers — a monolithic export reports the first three; a tiled export reports `Tile` only
+  (its per-tile contours do not forward the sink), except on its single-pass fallback
+  (`tileDepth >= depth`), where the one whole-box contour forwards it and `Sample` /
+  `Contour` are what the host sees.
 - **Neither hook changes the output.** An unrequested token and a recording sink yield a
   mesh and a file bit-identical to a call without them at every thread count
   (`tests/test_cancel_progress.cpp`). A sink must not throw — `noexcept` is what keeps
@@ -175,7 +179,7 @@ condition is `D ≥ depth + 1`; the text is imprecise, the behaviour is as above
 | Collapse threshold | `simplificationError` (default 0, off), in length² | whether eight siblings merge; scales with the sample count, so it is depth-specific | [§ 4.6](04-qef-manifold-collapse.md#46-adaptive-cell-collapse) |
 | Seam weld key | position quantised to `cs · 1e-6` per axis (`cs` = cell side) | which across-tile vertices `--weld` identifies | `examples/example_common.cpp`; [11/04](../roadmap/11-dense-lattice-deliverable/04-streaming-3mf-record.md) |
 | GPU parity, analytic tier | abs `A = 2e-3`, rel `R = 2e-3` | pass/fail for closed-form nodes (CPU `double` vs GPU `float`, libm vs GPU trig) | `examples/dualc_glsl_parity.cpp` |
-| GPU parity, finite-difference tier | abs `FA = 3e-2`, rel `FR = 3e-2` | pass/fail for `normalize` / `twist` / `bend`, which the GLSL differentiates with the same `1e-4` step in `float` | `examples/dualc_glsl_parity.cpp`; [12/02](../roadmap/12-field-graph-and-app/02-glsl-codegen.md) |
+| GPU parity, finite-difference tier | abs `FA = 3e-2`, rel `FR = 3e-2` | pass/fail for `normalize` / `twist` / `bend` / `graded-onion` over TPMS: nodes whose C++ side differentiates with the `1e-4` step in `double`, where the GLSL takes a feature-relative `float` step for `normalize` (`min(diag·0.002, feat·0.003)`) and a pure point warp with no finite difference for `twist` / `bend` | `examples/dualc_glsl_parity.cpp`; [12/02](../roadmap/12-field-graph-and-app/02-glsl-codegen.md) |
 | `mix` band guard | `\|hi − lo\| < 1e-9` → a signed `1e-9` | a zero-width band is a hard step, not a division by zero | `MixField::weightAt` |
 
 A constant that appears in a test with a different value is the test's private tolerance,
