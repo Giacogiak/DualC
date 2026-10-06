@@ -11,6 +11,13 @@ FetchContent_Declare(
   GIT_TAG        b5373dadca40b7edc8570cf9470b9b1cb1934d40 # v3.5.4
 )
 FetchContent_MakeAvailable(Catch2)
+# Catch2 detects its C++17 support (std::uncaught_exceptions, the string_view
+# and byte StringMakers) per translation unit, so the library and the test TUs
+# should agree on the standard. It used to get C++17 from the global
+# CMAKE_CXX_STANDARD that leaked into every fetch; it gets it by name now
+# (roadmap 17 #33), which keeps its build what the suite was proven on.
+set_target_properties(Catch2 Catch2WithMain PROPERTIES
+  CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
 
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 

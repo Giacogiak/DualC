@@ -109,11 +109,11 @@ jobs:
   # ASan + UBSan over the build tier (roadmap 17 #33): DualC's own targets are
   # instrumented, every ctest case runs under them, and a finding fails the
   # case (UBSan does not recover). RelWithDebInfo so a report names the line.
-  # Born allowed-to-fail (D-49) until its first two complete runs are green.
+  # Born allowed-to-fail (D-49); required since its first two complete runs
+  # came back green (2026-10-06, roadmap 17 #33).
   sanitize:
     runs-on: ubuntu-24.04
     timeout-minutes: 90
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
