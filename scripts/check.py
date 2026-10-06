@@ -1408,7 +1408,19 @@ def check_configure(ctx):
     if rc == 127:
         return Result(SKIP, "cmake not on PATH")
     if rc != 0:
-        tail = [l for l in out.splitlines() if l.strip()][-15:]
+        lines = [l for l in out.splitlines() if l.strip()]
+        # The `CMake Error` blocks first: stderr follows stdout here, and the
+        # warnings of the fetched projects would otherwise push the error out
+        # of the first ten lines CI's annotations keep (roadmap 17 #33).
+        errs, inside = [], False
+        for l in lines:
+            if l.startswith("CMake Error"):
+                inside = True
+            elif not l[:1].isspace():
+                inside = False       # a block's body is indented
+            if inside:
+                errs.append(l)
+        tail = errs[:10] + [l for l in lines[-15:] if l not in errs]
         note = ("a clean configure fetches geometry-central and Catch2 from GitHub "
                 "by pinned SHA (and Eigen via geometry-central) -- pass "
                 "-DDUALC_GC_DIR and set FETCHCONTENT_SOURCE_DIR_CATCH2 to work offline")
