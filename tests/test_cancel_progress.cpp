@@ -220,14 +220,17 @@ TEST_CASE("a request during the collapse pass unwinds from it", "[cancel]") {
   cp.simplificationError = 1e-4;
   CancelToken token;
   // The last Sample report is (n, n), after the build and before the
-  // collapse pass runs; the collapse checkpoint is the next one.
+  // collapse pass runs; the collapse checkpoint is the next one. One sampler
+  // thread: the threaded path polls on a timer, so its report count differs
+  // between the probe and the real run, and under load the real run fell
+  // short of nSample and never cancelled (CI's sanitize job, roadmap 17 #33).
   RecordingSink probe;
-  contour(*field, samplerAt(6), cp, nullptr, &probe);
+  contour(*field, samplerAt(6, 1), cp, nullptr, &probe);
   const std::size_t nSample = probe.count(Stage::Sample);
   REQUIRE(nSample >= 2);
   CancelAtStage sink(&token, Stage::Sample, nSample);
   try {
-    dualContourField(*field, samplerAt(6), cp, nullptr, &token, &sink);
+    dualContourField(*field, samplerAt(6, 1), cp, nullptr, &token, &sink);
     FAIL("expected Cancelled");
   } catch (const Cancelled& e) {
     REQUIRE(std::string(e.what()) == "cancelled (collapsing)");
