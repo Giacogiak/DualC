@@ -35,6 +35,8 @@ their place — the README was the only file in the pack ever edited (`015353b`,
 `30725a0`); the A/B/T documents, the explorer and the figures are byte-identical to `f03ef3d`,
 the commit that landed them.
 
+*Link retargeting (2026-10-06, roadmap 20 #51, decided by the owner at the P01 approve gate):* when block 20 became a folder, the two links in `2026-10-05-hosted-ci-plan.md` that pointed at `20-public-delivery.md` were retargeted to its children — link targets only, no word changed — because the gate's `links` check reads this folder too; the same reason as the 2026-09-17 pseudo-link wrapping. The plan's text remains the 2026-10-05 draft.
+
 *Reading the screenings and the plan today:* their line numbers are pinned to commit `3d73220`,
 and four things they name have moved since — roadmap 16 is a tombstone for
 [12/07](../roadmap/12-field-graph-and-app/07-mesh-preview-sweep.md), 18 for
