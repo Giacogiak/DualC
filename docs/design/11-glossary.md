@@ -74,7 +74,7 @@ only. The second half is the **ID vocabulary** — what `#N`, "Tier 1 item N", "
 | **Vendored** | Copied into the tree: the public-domain QEF/SVD pair in `src/internal/`, the MIT nanort header in `src/internal/third_party/` and the writers' helpers under `examples/third_party/` ([§ 8](06-parameters-and-vendoring.md#8-vendored-third-party-code)). |
 | **ULP** | Unit in the last place: the gap between adjacent representable floats at a magnitude. The unit of the ray-parity duplicate-hit merge. |
 | **Bit-identical / byte-identical** | The same bytes out, not merely the same geometry; the standard the thread-count and tiled-export invariants are held to. |
-| **Gate** | `scripts/check.py`, the one command that stands in for CI ([17/09](../roadmap/17-code-audit-and-hardening/09-local-checks-gate/README.md)). |
+| **Gate** | `scripts/check.py`, the one command that defines green, run locally and by hosted CI (`.github/workflows/gate.yml`) ([17/09](../roadmap/17-code-audit-and-hardening/09-local-checks-gate/README.md), [20 #51](../roadmap/20-public-delivery/03-hosted-ci.md#51-hosted-ci--the-gate-as-a-github-actions-job)). |
 
 ## The ID vocabulary
 

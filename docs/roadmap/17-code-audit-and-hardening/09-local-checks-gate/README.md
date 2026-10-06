@@ -18,7 +18,7 @@ deserved separating from the hosting question.
   locally. A git hook is an **honest substitute for the fast checks, not an
   equivalent** — so the build tier has no automatic trigger at all. It stays *"run the one command"*.
   *2026-10-06: half (b) exists — `.github/workflows/gate.yml` runs `check.py` unattended on
-  every push and pull request, Ubuntu and Windows required ([20 #51](../../20-public-delivery/03-hosted-ci.md#51-hosted-ci--the-gate-as-a-github-actions-job)).*
+  every push and pull request on Ubuntu, Windows and macOS ([20 #51](../../20-public-delivery/03-hosted-ci.md#51-hosted-ci--the-gate-as-a-github-actions-job)).*
 
 Self-hosted Jenkins, a local bare mirror with a `post-receive` hook and a Task
 Scheduler job were all considered and rejected: real options, all ceremony for a

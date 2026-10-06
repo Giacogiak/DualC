@@ -23,8 +23,8 @@ the gate command itself and nothing else ([D-49](../../decisions/01-settled.md))
 | `docs` | `ubuntu-latest` | `check.py --docs --strict` — the session-end mode, report-only lists fatal | yes |
 | `build (ubuntu-24.04)` | Ubuntu 24.04, GCC from the image, Ninja from apt | `check.py --build-dir build` — the full default gate: docs tier, configure, build, warnings scan, serial `ctest` | yes |
 | `build (windows-2022)` | Windows Server 2022, Visual Studio 17 2022 | the same command; the generator the gate was born on | yes |
-| `build (macos-14)` | macOS 14 arm64, AppleClang, Ninja from brew | the same command; never built there before | no — `continue-on-error` |
-| `gpu` | Ubuntu 24.04, the X11 headers, Xvfb, Mesa (`LIBGL_ALWAYS_SOFTWARE=1`) | configure with `-DDUALC_BUILD_GLSL_PARITY=ON`, build the harness, generate `data/`, `xvfb-run -a check.py --gpu` | no — the plan's Phase 2 experiment (#31) |
+| `build (macos-14)` | macOS 14 arm64, AppleClang, Ninja from brew | the same command; never built there before #51 | yes — allowed to fail until its first complete run came back green |
+| `gpu` | Ubuntu 24.04, the X11 headers, Xvfb, Mesa (`LIBGL_ALWAYS_SOFTWARE=1`) | configure with `-DDUALC_BUILD_GLSL_PARITY=ON`, build the harness, generate `data/`, `xvfb-run -a check.py --gpu --strict` | no — the plan's Phase 2 experiment (#31) |
 
 **The matrix choice.** Ubuntu with the image's GCC is a second compiler next to the owner's
 GCC 15, not a copy; Windows keeps the Visual Studio path the gate was written on; macOS adds
@@ -51,10 +51,13 @@ and `*-subbuild` restored, the configure failed in Eigen's update step, because
 geometry-central downloads Eigen into its own build tree. With all three restored, the
 configure took 3 s instead of 60 s (GCC 15, CMake 4.4.3, this host).
 
-**Failures are readable without a login.** A job's log needs authentication; a check run's
-annotations do not. `.github/workflows/annotate.py` re-prints the gate's `[FAIL]` lines and
-their detail lines as error annotations when a gate step fails, so the public API names the
-failing check.
+**Results are readable without a login.** A job's log needs authentication; a check run's
+annotations do not. After every gate step, `.github/workflows/annotate.py` re-prints the
+gate's report as annotations: an error for each `[FAIL]` line and its detail lines, and a
+notice for each build- or gpu-tier result plus the closing count. The notices exist because
+a green job proves little by itself: the gate passes on SKIP, and `--gpu` with no harness
+binary is one SKIP and a PASS (reproduced locally). For the same reason the `gpu` job runs
+`--strict`, which turns a SKIP into a failure. The plan's command had no `--strict`.
 
 **What the first run found.** The docs tier was not clean-clone-true. Two checks passed on
 the owner's machine only because of files outside git:
@@ -69,6 +72,39 @@ The `gpu` job's first attempt stopped before the harness: a clean clone has no `
 `std::runtime_error`, exit 134) instead of creating it. The job creates `data/` first. The
 CLI's behaviour is left as it is: AGENTS.md's `dualc_gen_demo all --dir data` recipe fails
 the same way on a fresh clone.
+
+**Verification.** Run 3, on `f064ea8`:
+<https://github.com/Giacogiak/DualC/actions/runs/37446307563>. It is the first run with every
+job green, and the first with the notices. Conclusion `success`, 8 min 44 s wall.
+
+| Job | Duration | Gate report (the notices) |
+| --- | --- | --- |
+| `docs` | 6 s | 27 checks, 26 passed, 0 failed, 0 skipped |
+| `build (ubuntu-24.04)` | 1 min 24 s | configure 3.9 s, build 9.4 s, 254 TUs and 0 DualC-origin warnings, `ctest` 270/270 in 49.6 s; 31 checks, 0 failed, 0 skipped |
+| `build (windows-2022)` | 8 min 2 s | configure 40.7 s, build 365.9 s, 254 TUs and 0 DualC-origin warnings, `ctest` 270/270 in 57.6 s; 31 checks, 0 failed, 0 skipped |
+| `build (macos-14)` | 1 min 42 s | configure 9.6 s, build 9.7 s, 254 TUs and 0 DualC-origin warnings, `ctest` 270/270 in 61.8 s; 31 checks, 0 failed, 0 skipped |
+| `gpu` | 2 min 58 s | parity **73/73** in 7.5 s under Xvfb + llvmpipe |
+
+How to read the times. The Ubuntu and macOS builds are ccache-warm: run 2 had filled the
+cache. Their cold runs (run 2, `961e92e`, same commands but no notices yet) took 4 min 41 s and
+5 min 20 s for the whole job. Windows has no compiler cache, and its FetchContent cache was
+still empty in run 3, so its 8 min is a cold build. Each job's duration is wall time, setup
+steps included. Every job was read through the public run and job pages, because the API's
+unauthenticated limit (60 requests an hour) ran out during the session.
+
+**The macOS and gpu first results.** `macos-14` built and passed the whole gate on its first
+complete run (run 2) and again in run 3, whose notice shows zero DualC-origin warnings under
+AppleClang.
+As the plan says for that outcome, it is now a required job. The `gpu` job's first attempt
+(run 1) failed on the missing `data/`. Its first complete run (run 2) passed without
+`--strict`, which cannot rule out a SKIP. Run 3 ran under `--strict`, and its notice shows
+**73/73** cases, so the harness really ran. This is the trigger of [#31](../../decisions/README.md) and the input of the plan's
+Phase 2. The job stays allowed to fail until that phase binds it.
+
+**Runs on the branch.** Run 1 (`f4e6319`): `docs` and `gpu` red as described above, `macos-14`
+red after 2 min 43 s with the log unread. That job runs the docs tier first, so it was probably
+the same two clean-clone failures. The run was cancelled by the next push. Run 2 (`961e92e`):
+all green except `windows-2022`, which was cancelled by run 3's push.
 
 **Out of scope, named.** Branch protection (the owner, in the GitHub UI); a release or
 artifact job (it would fire [#8](../../decisions/README.md)'s "CI artifact" trigger); any new

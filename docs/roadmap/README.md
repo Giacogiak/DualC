@@ -42,7 +42,7 @@ the block records the table links ([D-43](../decisions/01-settled.md)).
 
 | Date | What landed | Record |
 | --- | --- | --- |
-| 2026-10-06 | **#51** — hosted CI: a GitHub Actions workflow runs `scripts/check.py` and nothing else — the docs tier, the full gate on Ubuntu and Windows (required) and macOS, the parity harness under Xvfb (allowed to fail, D-49). | [20](20-public-delivery/03-hosted-ci.md#51-hosted-ci--the-gate-as-a-github-actions-job) |
+| 2026-10-06 | **#51** — hosted CI: a GitHub Actions workflow runs `scripts/check.py` and nothing else — the docs tier, the full gate on Ubuntu, Windows and macOS (required), the parity harness under Xvfb (allowed to fail, D-49). | [20](20-public-delivery/03-hosted-ci.md#51-hosted-ci--the-gate-as-a-github-actions-job) |
 | 2026-10-03 | **#50** — `dualc_view` and Polyscope retired; the GL targets build on a vendored glad and a GLFW fetched at its pinned release (or `-DDUALC_GLFW_DIR`), the sibling-checkout mechanism gone. | [07 #50](07-viewer-polyscope.md#50-retire-dualc_view-and-the-polyscope-dependency-own-glfw--glad) |
 | 2026-10-03 | **#49** — Linux is a build host: C enabled for the vendored `miniz.c`, the gate picks its generator per OS and reads CTest 4; full gate green with GCC 15 + Ninja. | [20](20-public-delivery/02-linux-build-host.md#49-linux-as-a-build-host) |
 | 2026-09-22 | **#48** — a host-owned cancel token and a calling-thread progress callback through sampler, contourer and writers; ABI 0.5.0's `*_with_progress` twins; every export writes `.part` and renames (D-46). | [14/05](14-c-abi/05-progress-and-cancel.md) |
