@@ -17,7 +17,8 @@ DualC/
 ├── .github/
 │   └── workflows/
 │       ├── gate.yml           Hosted CI (roadmap 20 #51): runs `scripts/check.py` and nothing else — `docs` (--docs --strict),
-│       │                        `build` matrix (Ubuntu, Windows, macOS; all required), `gpu` parity under Xvfb (required)
+│       │                        `build` matrix (Ubuntu, Windows, macOS; all required; -D DUALC_WERROR=ON), `sanitize`
+│       │                        (ASan+UBSan ctest, RelWithDebInfo; 17 #33), `gpu` parity under Xvfb (required)
 │       └── annotate.py        Re-prints the gate's FAIL lines as error annotations (readable without auth; a job log is not)
 │
 ├── AGENTS.md                  Agent entry file: build/test/gate commands, the five docs principles, the reading order
@@ -161,7 +162,7 @@ DualC/
 │   └── test_cancel_progress.cpp  CancelToken unwinds every driver; hooks are inert; report shape; the writers' rc 3 + `.part` guarantee (roadmap 14 #48)
 │
 ├── cmake/
-│   └── DualCWarnings.cmake    Warning-config module (warnings currently set inline in root CMakeLists.txt)
+│   └── DualCWarnings.cmake    dualc_target_options(): C++17 dialect, warning level, DUALC_WERROR, DUALC_SANITIZE — per DualC target, never global (17 #33)
 │
 ├── scripts/
 │   ├── check.py               THE GATE — every check in one command; hosted CI (.github/workflows/gate.yml) runs exactly this.

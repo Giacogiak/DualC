@@ -57,7 +57,11 @@ tests on Windows (Visual Studio 2022) and Linux (GCC 15, CMake 4, Ninja; on Ubun
 (miniz), so they need a C compiler next to the C++ one. The GL
 tools and the C ABI are opt-in (`-DDUALC_BUILD_RAYMARCH_VIEWER`, `_FIELD_VIEW`,
 `_GLSL_PARITY`, `_C_ABI`, all `OFF` by default); none of them adds a dependency
-to `libdualc`. The build prelude and every flag are in the
+to `libdualc`. Two diagnostics options are `OFF` / empty by default too:
+`-DDUALC_WERROR=ON` makes a warning in DualC's own code an error (`-Werror` / `/WX`; CI's
+build jobs turn it on), and `-DDUALC_SANITIZE=address,undefined` instruments DualC's own
+targets with ASan and UBSan (GCC/Clang only; CI runs `ctest` under it in `RelWithDebInfo`).
+The build prelude and every flag are in the
 [command reference](docs/command_reference/README.md). Before committing, run the gate
 `python scripts/check.py` — hosted CI ([`gate.yml`](.github/workflows/gate.yml)) runs that
 same command on every push and pull request; locally it is still the one command.

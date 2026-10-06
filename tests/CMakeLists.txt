@@ -59,6 +59,7 @@ add_executable(dualc_tests
 
 target_link_libraries(dualc_tests PRIVATE dualc::dualc Catch2::Catch2WithMain)
 target_compile_features(dualc_tests PRIVATE cxx_std_17)
+dualc_target_options(dualc_tests)
 
 # Tests need access to the internal headers under src/ for white-box checks,
 # and to examples/ (incl. third_party/) for the demo-mesh generators, the

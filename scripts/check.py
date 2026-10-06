@@ -1393,11 +1393,17 @@ def check_configure(ctx):
     bd = build_dir(ctx)
     # geometry-central needs no probe: CMakeLists.txt fetches the pinned upstream
     # commit unless -DDUALC_GC_DIR names a local tree (roadmap 20 #47).
+    # -D KEY=VALUE (roadmap 17 #33) is how CI turns on DUALC_WERROR and
+    # DUALC_SANITIZE: an existing build dir is re-configured in place with them
+    # rather than skipped, so a define is never silently dropped.
+    defines = ["-D" + d for d in ctx.args.define]
     cache = os.path.join(ctx.root, bd, "CMakeCache.txt")
-    if os.path.exists(cache) and not ctx.args.clean:
+    if os.path.exists(cache) and not ctx.args.clean and not defines:
         return Result(SKIP, "%s already configured (use --clean to redo)" % bd)
-    cmd = (["cmake", "-S", ".", "-B", bd] + generator_args(ctx.args.config) +
-           ["-DDUALC_BUILD_TESTS=ON", "-DDUALC_BUILD_EXAMPLES=ON"])
+    gen = ([] if os.path.exists(cache) and not ctx.args.clean
+           else generator_args(ctx.args.config))
+    cmd = (["cmake", "-S", ".", "-B", bd] + gen +
+           ["-DDUALC_BUILD_TESTS=ON", "-DDUALC_BUILD_EXAMPLES=ON"] + defines)
     rc, out = run(cmd, cwd=ctx.root)
     if rc == 127:
         return Result(SKIP, "cmake not on PATH")
@@ -1407,7 +1413,7 @@ def check_configure(ctx):
                 "by pinned SHA (and Eigen via geometry-central) -- pass "
                 "-DDUALC_GC_DIR and set FETCHCONTENT_SOURCE_DIR_CATCH2 to work offline")
         return Result(FAIL, "cmake configure failed", tail + [note])
-    return Result(OK, "configured %s" % bd)
+    return Result(OK, "configured %s%s" % (bd, " " + " ".join(defines) if defines else ""))
 
 
 @check("build", "build", "cmake --build --config Release")
@@ -1452,14 +1458,15 @@ TU_RE = re.compile(r"^\s{2}\S+\.(?:cpp|cc|cxx|c)\s*$"
 def check_warnings(ctx):
     """Mechanises the "no warnings from our own code" claim that was checked by eye.
 
-    Deliberately a log filter rather than /WX: a hard gate would break on a
-    compiler bump or a geometry-central header change, and this reproduces
-    exactly the check that was being done manually.
+    Deliberately a log filter rather than /WX locally: a hard gate would break
+    on a compiler bump or a geometry-central header change, and this reproduces
+    exactly the check that was being done manually. CI's build matrix adds the
+    hard gate on top with `-D DUALC_WERROR=ON` (roadmap 17 #33).
 
-    Scope caveat worth knowing: `/W4 /permissive-` (MSVC) or `-Wall -Wextra
-    -Wpedantic` (GCC/Clang) is target_compile_options on `dualc` PRIVATE, so it
-    covers the CORE LIBRARY only -- tests and examples build at the compiler
-    default. Raising them is roadmap 17 #33 work.
+    Scope: `/W4 /permissive-` (MSVC) or `-Wall -Wextra -Wpedantic` (GCC/Clang)
+    is applied by dualc_target_options() (cmake/DualCWarnings.cmake) to every
+    DualC target -- the library, tests, examples and the C ABI -- and to no
+    vendored or fetched code (roadmap 17 #33, 2026-10-06).
     """
     log = getattr(ctx, "build_log", None)
     if log is None:
@@ -1723,6 +1730,9 @@ def main(argv):
                     help="re-configure from scratch (needs network for Catch2)")
     ap.add_argument("--build-dir", default="build")
     ap.add_argument("--config", default="Release")
+    ap.add_argument("-D", "--define", action="append", default=[], metavar="KEY=VALUE",
+                    help="extra CMake cache entry for the configure step, repeatable "
+                         "(CI: -D DUALC_WERROR=ON, -D DUALC_SANITIZE=address,undefined)")
     ap.add_argument("--only", default="", help="comma-separated check ids")
     ap.add_argument("--skip", default="", help="comma-separated check ids")
     ap.add_argument("--metrics", action="store_true",

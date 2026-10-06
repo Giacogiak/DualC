@@ -2,6 +2,7 @@
 add_executable(dualc_demo dualc_demo.cpp)
 target_link_libraries(dualc_demo PRIVATE dualc::dualc)
 target_compile_features(dualc_demo PRIVATE cxx_std_17)
+dualc_target_options(dualc_demo)
 
 # --- v2 implicit-field CLI tools ----------------------------------------
 
@@ -20,11 +21,13 @@ add_library(dualc_examples_io STATIC third_party/miniz.c)
 target_include_directories(dualc_examples_io
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/third_party)
 target_compile_features(dualc_examples_io PUBLIC cxx_std_17)
+dualc_target_options(dualc_examples_io VENDORED)
 
 add_library(dualc_examples_img STATIC third_party/stb_impl.cpp)
 target_include_directories(dualc_examples_img
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/third_party)
 target_compile_features(dualc_examples_img PUBLIC cxx_std_17)
+dualc_target_options(dualc_examples_img VENDORED)
 
 # meshoptimizer (MIT) -- QEM mesh decimation for dualc_field --decimate/--simplify
 # (a post-contour, pre-export mesh pass in example_common's writeField). A minimal
@@ -37,6 +40,7 @@ add_library(dualc_examples_decimate STATIC
 target_include_directories(dualc_examples_decimate
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/third_party/meshoptimizer)
 target_compile_features(dualc_examples_decimate PUBLIC cxx_std_17)
+dualc_target_options(dualc_examples_decimate VENDORED)
 
 # These are large third-party amalgamations; silence their warnings and the
 # MSVC CRT-secure noise so they don't drown the project's own diagnostics.
@@ -62,6 +66,7 @@ add_library(dualc_examples_common STATIC example_common.cpp)
 target_link_libraries(dualc_examples_common
   PUBLIC dualc::dualc dualc_examples_io dualc_examples_decimate)
 target_compile_features(dualc_examples_common PUBLIC cxx_std_17)
+dualc_target_options(dualc_examples_common)
 target_include_directories(dualc_examples_common
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -69,6 +74,7 @@ foreach(tool dualc_primitive dualc_boolean dualc_lift dualc_csg_demo dualc_latti
   add_executable(${tool} ${tool}.cpp)
   target_link_libraries(${tool} PRIVATE dualc::dualc dualc_examples_common)
   target_compile_features(${tool} PRIVATE cxx_std_17)
+  dualc_target_options(${tool})
 endforeach()
 
 # dualc_slice is the only example that writes PNG -> give it the stb impl.
@@ -81,10 +87,12 @@ target_link_libraries(dualc_slice PRIVATE dualc_examples_img)
 # side-car, and an eventual C ABI share ONE parser. It vendors nlohmann/json
 # (host-only, MIT) under third_party/ -- like miniz/stb, never linked into
 # libdualc. The header's warnings are pragma-suppressed at its single include
-# site in field_graph.cpp (it builds /W4 /permissive-).
+# site in field_graph.cpp, which builds at the project warning level like every
+# DualC target (dualc_target_options, cmake/DualCWarnings.cmake).
 add_library(dualc_examples_fieldgraph STATIC field_graph.cpp)
 target_link_libraries(dualc_examples_fieldgraph PUBLIC dualc::dualc dualc_examples_common)
 target_compile_features(dualc_examples_fieldgraph PUBLIC cxx_std_17)
+dualc_target_options(dualc_examples_fieldgraph)
 if(MSVC)
   target_compile_definitions(dualc_examples_fieldgraph PRIVATE _CRT_SECURE_NO_WARNINGS)
 endif()
@@ -92,6 +100,7 @@ endif()
 add_executable(dualc_field dualc_field.cpp)
 target_link_libraries(dualc_field PRIVATE dualc::dualc dualc_examples_fieldgraph)
 target_compile_features(dualc_field PRIVATE cxx_std_17)
+dualc_target_options(dualc_field)
 
 # --- Field-graph -> GLSL codegen (host-side; NO GL dependency) -----------
 # field_glsl.{h,cpp} compiles a GraphNode tree to a generated sceneSDF() + a
@@ -102,6 +111,7 @@ target_compile_features(dualc_field PRIVATE cxx_std_17)
 add_library(dualc_examples_fieldglsl STATIC field_glsl.cpp)
 target_link_libraries(dualc_examples_fieldglsl PUBLIC dualc::dualc dualc_examples_fieldgraph)
 target_compile_features(dualc_examples_fieldglsl PUBLIC cxx_std_17)
+dualc_target_options(dualc_examples_fieldglsl)
 
 # Copy the sample field-graphs next to dualc_field so the smoke tests (and a
 # curious user) can run them by bare filename.
@@ -120,11 +130,13 @@ endforeach()
 add_library(dualc_demo_meshes STATIC demo_meshes.cpp)
 target_link_libraries(dualc_demo_meshes PUBLIC dualc::dualc)
 target_compile_features(dualc_demo_meshes PUBLIC cxx_std_17)
+dualc_target_options(dualc_demo_meshes)
 target_include_directories(dualc_demo_meshes PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(dualc_gen_demo dualc_gen_demo.cpp)
 target_link_libraries(dualc_gen_demo PRIVATE dualc::dualc dualc_demo_meshes)
 target_compile_features(dualc_gen_demo PRIVATE cxx_std_17)
+dualc_target_options(dualc_gen_demo)
 
 # --- GL targets (opt-in) -------------------------------------------------
 # The three GL targets below (dualc_raymarch, dualc_field_view, dualc_glsl_parity)
@@ -139,6 +151,7 @@ target_compile_features(dualc_gen_demo PRIVATE cxx_std_17)
 # the parity harness's hidden window are the scripted paths.
 if(DUALC_BUILD_RAYMARCH_VIEWER OR DUALC_BUILD_FIELD_VIEW OR DUALC_BUILD_GLSL_PARITY)
   add_library(dualc_examples_glad STATIC third_party/glad/src/glad.c)
+  dualc_target_options(dualc_examples_glad VENDORED)
   target_include_directories(dualc_examples_glad
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glad/include)
   if(UNIX AND NOT APPLE)
@@ -158,6 +171,7 @@ if(DUALC_BUILD_RAYMARCH_VIEWER OR DUALC_BUILD_FIELD_VIEW OR DUALC_BUILD_GLSL_PAR
   target_link_libraries(dualc_examples_gl
     PUBLIC dualc::dualc dualc_examples_img glfw dualc_examples_glad)
   target_compile_features(dualc_examples_gl PUBLIC cxx_std_17)
+  dualc_target_options(dualc_examples_gl)
   target_include_directories(dualc_examples_gl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
 
@@ -167,6 +181,7 @@ if(DUALC_BUILD_RAYMARCH_VIEWER)
   add_executable(dualc_raymarch dualc_raymarch.cpp)
   target_link_libraries(dualc_raymarch PRIVATE dualc::dualc dualc_examples_common dualc_examples_gl)
   target_compile_features(dualc_raymarch PRIVATE cxx_std_17)
+  dualc_target_options(dualc_raymarch)
 endif()
 
 # dualc_field_view generalises the raymarcher to ANY field-graph: it compiles the
@@ -178,6 +193,7 @@ if(DUALC_BUILD_FIELD_VIEW)
   target_link_libraries(dualc_field_view PRIVATE dualc::dualc dualc_examples_common
     dualc_examples_fieldgraph dualc_examples_fieldglsl dualc_examples_gl)
   target_compile_features(dualc_field_view PRIVATE cxx_std_17)
+  dualc_target_options(dualc_field_view)
 endif()
 
 # dualc_glsl_parity is the field->GLSL acceptance gate: per slice node it renders
@@ -190,6 +206,7 @@ if(DUALC_BUILD_GLSL_PARITY)
   target_link_libraries(dualc_glsl_parity PRIVATE dualc::dualc
     dualc_examples_fieldgraph dualc_examples_fieldglsl dualc_examples_gl)
   target_compile_features(dualc_glsl_parity PRIVATE cxx_std_17)
+  dualc_target_options(dualc_glsl_parity)
 endif()
 
 # Demo meshes are generated, not checked in: `*.obj` is gitignored and

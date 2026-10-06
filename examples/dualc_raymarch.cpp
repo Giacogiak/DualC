@@ -275,8 +275,6 @@ dualc::BBox padBBox(const dualc::BBox& b, double frac) {
   return dualc::BBox{b.min - e, b.max + e};
 }
 
-double comp(const Vector3& v, int a) { return a == 0 ? v.x : (a == 1 ? v.y : v.z); }
-
 int tpmsIndex(const std::string& name) {
   const auto& kinds = dce::tpmsKinds();
   for (std::size_t i = 0; i < kinds.size(); ++i)

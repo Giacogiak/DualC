@@ -28,6 +28,13 @@ option(DUALC_BUILD_GLSL_PARITY
 option(DUALC_BUILD_C_ABI
        "Build the C ABI shared library (dualc_capi) + C demo: a flat C boundary over the field-graph proxy+export path. Requires DUALC_BUILD_EXAMPLES (it links the host-side field-graph + export libs)."
        OFF)
+option(DUALC_WERROR
+       "Treat warnings in DualC's own targets as errors (-Werror / /WX). OFF locally, where scripts/check.py filters the build log instead; ON in CI's build matrix."
+       OFF)
+# DUALC_SANITIZE (a cache string, e.g. address,undefined) is declared with the
+# helper that applies it, in cmake/DualCWarnings.cmake.
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+include(DualCWarnings)
 
 # The library is C++ only; examples/ and tests/ also compile the vendored
 # miniz.c. The Visual Studio generator compiles a .c file without C being
@@ -38,9 +45,18 @@ if(DUALC_BUILD_EXAMPLES OR DUALC_BUILD_TESTS)
   enable_language(C)
 endif()
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+# No CMAKE_CXX_STANDARD here: a global set before the fetches below leaked
+# -std=c++17 into geometry-central and Catch2 (roadmap 17 #33). The dialect is
+# a property of each DualC target, set by dualc_target_options(). This guard
+# fails a configure that reintroduces the global as a normal variable; a
+# -DCMAKE_CXX_STANDARD on the command line is a cache entry and passes.
+if(DUALC_IS_TOP_LEVEL AND DEFINED CMAKE_CXX_STANDARD
+   AND NOT DEFINED CACHE{CMAKE_CXX_STANDARD})
+  message(FATAL_ERROR
+    "CMAKE_CXX_STANDARD is set as a normal variable before the third-party "
+    "fetches, so it would leak into geometry-central and Catch2. Set the dialect "
+    "per target with dualc_target_options() (cmake/DualCWarnings.cmake).")
+endif()
 
 # Emit compile_commands.json for clangd / clang-tidy. Only when top-level: a
 # parent project owns this setting when DualC is one of its subdirectories.
@@ -62,8 +78,10 @@ endif()
 set(DUALC_GC_DIR "" CACHE PATH
     "Path to a local geometry-central source tree; empty = fetch the pinned upstream commit")
 set(DUALC_GC_GIT_TAG 1e8e43d2d50b18c98ea0b4a53ffaf5848dbaaa26)  # v1.1.0
+set(dualc_gc_from_parent OFF)
 if(TARGET geometry-central)
   message(STATUS "DualC: using the geometry-central target defined by the enclosing project")
+  set(dualc_gc_from_parent ON)
 elseif(DUALC_GC_DIR)
   if(NOT EXISTS "${DUALC_GC_DIR}/CMakeLists.txt")
     message(FATAL_ERROR
@@ -80,6 +98,27 @@ else()
     GIT_REPOSITORY https://github.com/nmwsharp/geometry-central.git
     GIT_TAG        ${DUALC_GC_GIT_TAG})
   FetchContent_MakeAvailable(geometry-central)
+endif()
+# geometry-central's headers (and happly's) trip -Wunused-parameter and friends
+# in every DualC TU that includes them -- 16 warnings per TU on GCC 15. When
+# DualC added the tree itself, their include directories reach DualC's targets
+# as SYSTEM, like the vendored nanort below, so DUALC_WERROR and the warnings
+# scan judge DualC's code only. (Its Eigen is SYSTEM already.) A target owned
+# by an enclosing project is left as that project declared it.
+if(NOT dualc_gc_from_parent)
+  foreach(dep geometry-central happly)
+    if(TARGET ${dep})
+      get_target_property(dep_includes ${dep} INTERFACE_INCLUDE_DIRECTORIES)
+      if(dep_includes)
+        set_target_properties(${dep} PROPERTIES
+          INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${dep_includes}")
+      endif()
+    endif()
+  endforeach()
+  # Instrumented alongside DualC under DUALC_SANITIZE, or Eigen's allocator
+  # differs across the two (see dualc_target_sanitize). An enclosing project
+  # that owns the target and sets DUALC_SANITIZE must instrument it itself.
+  dualc_target_sanitize(geometry-central)
 endif()
 
 # GLFW, for the opt-in GL targets only (dualc_raymarch, dualc_field_view,
@@ -173,12 +212,7 @@ target_include_directories(dualc SYSTEM PRIVATE
 # THIRD_PARTY.md), so nothing here depends on what geometry-central bundles.
 target_link_libraries(dualc PUBLIC geometry-central)
 target_compile_features(dualc PUBLIC cxx_std_17)
-
-if(MSVC)
-  target_compile_options(dualc PRIVATE /W4 /permissive-)
-else()
-  target_compile_options(dualc PRIVATE -Wall -Wextra -Wpedantic)
-endif()
+dualc_target_options(dualc)
 
 # Vendored Unlicense code uses style choices that trip strict warnings; quiet
 # them on a per-source basis so /W4 stays useful for our own code.
@@ -219,3 +253,23 @@ if(DUALC_BUILD_C_ABI)
   endif()
   add_subdirectory(capi)
 endif()
+
+# The layering rule THIRD_PARTY.md states (host-only dependencies never link
+# into libdualc), checked rather than trusted: after every add_subdirectory,
+# dualc may link geometry-central and the threads library, nothing else.
+foreach(prop LINK_LIBRARIES INTERFACE_LINK_LIBRARIES)
+  get_target_property(dualc_links dualc ${prop})
+  if(NOT dualc_links)
+    continue()
+  endif()
+  foreach(lib IN LISTS dualc_links)
+    # A static library lists its PRIVATE deps as $<LINK_ONLY:...> here.
+    string(REGEX REPLACE "^\\$<LINK_ONLY:(.*)>$" "\\1" lib "${lib}")
+    if(NOT lib MATCHES "^(geometry-central|Threads::Threads)$")
+      message(FATAL_ERROR
+        "libdualc's ${prop} names '${lib}': only geometry-central and "
+        "Threads::Threads may link into the library (THIRD_PARTY.md, the "
+        "layering rule). Link host-only dependencies into examples/ targets.")
+    endif()
+  endforeach()
+endforeach()

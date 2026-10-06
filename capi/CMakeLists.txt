@@ -18,6 +18,7 @@ target_include_directories(dualc_capi
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
 target_compile_features(dualc_capi PRIVATE cxx_std_17)
+dualc_target_options(dualc_capi)
 
 # DUALC_CAPI_BUILD switches the export macro to dllexport while building the
 # DLL; only the extern "C" entry points are exported. PIC is a no-op on MSVC
@@ -34,6 +35,7 @@ endif()
 # C harness -- compiled by the C compiler, the real proof the header is C-clean.
 add_executable(dualc_c_demo dualc_c_demo.c)
 target_link_libraries(dualc_c_demo PRIVATE dualc_capi)
+dualc_target_options(dualc_c_demo)
 if(MSVC)
   target_compile_definitions(dualc_c_demo PRIVATE _CRT_SECURE_NO_WARNINGS)
 endif()

@@ -94,13 +94,63 @@ jobs:
             build/_deps/*-subbuild
             build/_deps/geometry-central-build/deps/eigen-src
           key: fetchcontent-${{ matrix.os }}-${{ hashFiles('**/CMakeLists.txt') }}
+      # -D DUALC_WERROR=ON: a warning in DualC's own code fails the build here,
+      # on top of the warnings scan; the local gate keeps the scan alone
+      # (roadmap 17 #33, 17/09/02).
       - name: Gate
-        run: python scripts/check.py --build-dir build | tee gate.log
+        run: python scripts/check.py --build-dir build -D DUALC_WERROR=ON | tee gate.log
       - name: Annotate the report
         if: always()
         run: python .github/workflows/annotate.py gate.log ${{ job.status }}
       - name: ccache statistics
         if: always() && runner.os != 'Windows'
+        run: ccache -s
+
+  # ASan + UBSan over the build tier (roadmap 17 #33): DualC's own targets are
+  # instrumented, every ctest case runs under them, and a finding fails the
+  # case (UBSan does not recover). RelWithDebInfo so a report names the line.
+  # Born allowed-to-fail (D-49) until its first two complete runs are green.
+  sanitize:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+      - name: Install Ninja and ccache
+        run: sudo apt-get update && sudo apt-get install -y ninja-build ccache
+      - name: Route the compilers through ccache
+        run: |
+          echo "CMAKE_C_COMPILER_LAUNCHER=ccache" >> "$GITHUB_ENV"
+          echo "CMAKE_CXX_COMPILER_LAUNCHER=ccache" >> "$GITHUB_ENV"
+          echo "CCACHE_DIR=${{ runner.temp }}/ccache" >> "$GITHUB_ENV"
+          echo "CCACHE_MAXSIZE=500M" >> "$GITHUB_ENV"
+      - name: Restore ccache
+        uses: actions/cache@v5
+        with:
+          path: ${{ runner.temp }}/ccache
+          key: ccache-sanitize-${{ github.run_id }}
+          restore-keys: ccache-sanitize-
+      # The same FetchContent sources as the Ubuntu build job, under its key.
+      - name: Restore FetchContent sources
+        uses: actions/cache@v5
+        with:
+          path: |
+            build/_deps/*-src
+            build/_deps/*-subbuild
+            build/_deps/geometry-central-build/deps/eigen-src
+          key: fetchcontent-ubuntu-24.04-${{ hashFiles('**/CMakeLists.txt') }}
+      - name: Gate (build tier, sanitized)
+        run: >
+          python3 scripts/check.py --build --build-dir build --config RelWithDebInfo
+          -D DUALC_SANITIZE=address,undefined | tee gate.log
+      - name: Annotate the report
+        if: always()
+        run: python3 .github/workflows/annotate.py gate.log ${{ job.status }}
+      - name: ccache statistics
+        if: always()
         run: ccache -s
 
   # The CPU/GPU parity gate (#31), required since 2026-10-06: the harness under

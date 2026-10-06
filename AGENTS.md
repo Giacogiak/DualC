@@ -19,11 +19,11 @@ cmake --build build --config Release -j
 ctest --test-dir build -C Release --output-on-failure
 ```
 
-Opt-in targets, all `OFF` by default and none of them a dependency of `libdualc`:
-`-DDUALC_BUILD_RAYMARCH_VIEWER=ON`, `-DDUALC_BUILD_FIELD_VIEW=ON`, `-DDUALC_BUILD_GLSL_PARITY=ON`
-(each needs a GL window, so no CTest), `-DDUALC_BUILD_C_ABI=ON` (needs `DUALC_BUILD_EXAMPLES`). CLIs land in `build/examples/`
-(`…/Release/` with Visual Studio); demo meshes are gitignored and generated into `build/data/`
-(`dualc_gen_demo all --dir data` populates the repo's `data/` for root-run recipes).
+Opt-in, all `OFF`/empty by default, none a `libdualc` dependency: `-DDUALC_BUILD_RAYMARCH_VIEWER`,
+`_FIELD_VIEW`, `_GLSL_PARITY` (GL window, no CTest), `-DDUALC_BUILD_C_ABI` (needs `_EXAMPLES`),
+`-DDUALC_WERROR=ON` (own-target warnings are errors; CI's build jobs) and
+`-DDUALC_SANITIZE=address,undefined` (GCC/Clang; CI's `sanitize` job). CLIs land in `build/examples/`
+(`…/Release/` with VS); demo meshes are generated into `build/data/` (`dualc_gen_demo all --dir data` fills `data/`).
 
 The remote is <https://github.com/Giacogiak/DualC> (fresh root commit, why: roadmap 20).
 **The gate is what CI runs**: `.github/workflows/gate.yml` runs `scripts/check.py`, nothing
