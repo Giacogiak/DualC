@@ -95,6 +95,10 @@ plan's Phase 3. #32: matrix jobs run on separate machines and never collide; C43
 `ctest -j` within one tree, so the serial `ctest` stands. #31: the `gpu` job (Xvfb + llvmpipe,
 allowed to fail) holds the first headless-GL result — the trigger's state is its decisions row.*
 *2026-10-06: #31 DONE — `--gpu` runs in CI's required `gpu` job, the count assertion unchanged and the one runner (no CTest entry) — [13](../13-parity-gate-binding.md).*
+*2026-10-06: #33 DONE — the `warnings` scan now reads tests, examples and the C ABI too (one
+helper, `cmake/DualCWarnings.cmake`, sets the level per DualC target, so the `examples/CMakeLists.txt`
+claim is true); the local gate keeps the log filter, CI's build jobs add `-D DUALC_WERROR=ON` via
+the new `check.py -D` — [14](../14-build-hardening-ci.md).*
 *2026-09-21: no sibling probe; whole-line warning filter — [20 #47](../../20-public-delivery/01-pin-geometry-central.md).*
 
 ---

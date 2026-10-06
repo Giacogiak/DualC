@@ -44,8 +44,8 @@ is a regression gate, not a bug fix.
 
 ## #33 — build hardening, three batches
 
-**PARTIAL: DONE (2026-08-31, 2026-09-01, 2026-09-10); the rest DEFERRED** — the open list
-and the trigger are on the [04 entry](04-engineering-quality.md#33-build--tooling-hardening).
+**DONE (2026-08-31, 2026-09-01, 2026-09-10; the rest 2026-10-06 in [14](14-build-hardening-ci.md))** —
+the scope and what was not taken are on the [04 entry](04-engineering-quality.md#33-build--tooling-hardening).
 
 **Delivered (2026-08-31).** Four one-liners, all verified by a clean configure + full build:
 - the sibling probes resolve against `CMAKE_CURRENT_SOURCE_DIR`, not `CMAKE_SOURCE_DIR`
@@ -78,6 +78,9 @@ source dir is exactly the intent. Verified by a clean configure + full build + `
 `python scripts/check.py` is the one command; a `pre-commit` hook runs its fast tier. This
 item's trigger was "CI being set up"; for everything not needing a GPU it now is.
 **No sub-item below closes** — the gate is where they will run.
+
+**The rest (2026-10-06): CI jobs** — [14](14-build-hardening-ci.md). `DUALC_WERROR`,
+`DUALC_SANITIZE`, the layering assertion and the per-target dialect; #33 is DONE.
 
 **Follow-up (2026-09-21): two sub-items close from block 20.** The undeclared nanort became a
 compile failure against upstream geometry-central v1.1.0 and is now a vendored header; the

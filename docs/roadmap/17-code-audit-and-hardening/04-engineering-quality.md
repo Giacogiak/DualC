@@ -104,8 +104,9 @@ checks (the `RepeatField` fix corrected 678 vertices it had passed); left in pla
 decision and folded into this item — the evidence is in [07](07-repeat-tiling-fix.md).
 
 ## #33 Build & tooling hardening
-**PARTIAL: DONE (2026-08-31); the rest DEFERRED.** Four of the cheap items landed --
-see *Delivered* below the scope. What follows is the full original scope.
+**DONE (2026-10-06).** The last four sub-items landed as CMake options and CI jobs
+([14](14-build-hardening-ci.md)); `clang-tidy` is left out and coverage moves to #32 — see
+*Still open* below. What follows is the full original scope.
 Global C++ dialect flags are set before the third-party `add_subdirectory`
 calls and leak into geometry-central and polyscope. The sibling probes use
 `CMAKE_SOURCE_DIR`, so DualC cannot be `add_subdirectory`'d into a larger tree without
@@ -134,7 +135,12 @@ Still open in this item: the dialect-flag leak into third-party subtrees, saniti
 `-Werror` / `clang-tidy` options, and the `LINK_LIBRARIES` layering assertion. *2026-09-21:*
 the undeclared transitive dependency (nanort, now vendored) and the clean-clone bootstrap (the
 build generates the demo meshes) closed in [20 #47](../20-public-delivery/01-pin-geometry-central.md#47-pin-geometry-central-to-upstream-own-nanort-self-bootstrapping-clone).
-*Trigger:* the first external consumer that is not this repo.
+*2026-10-06:* the rest closed — `DUALC_WERROR` (ON in CI's build matrix), `DUALC_SANITIZE`
+(CI's `sanitize` job), the layering assertion and the per-target dialect, each proven red in
+CI ([14](14-build-hardening-ci.md)). Not taken: `clang-tidy` (no check set exists and a first
+run is a findings batch of its own, not trivially cheap; `compile_commands.json` is exported for
+an ad-hoc run) and coverage, which is #32's (the plan's Phase 4 hosts its ledger counts).
+*Trigger (was):* the first external consumer that is not this repo — superseded by hosted CI.
 *Source:* `docs/raw/study/B5-build-dependencies-licensing.md` §§ 2-10,
 `docs/raw/study/T-unit-testing.md:462-463`.
 

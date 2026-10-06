@@ -24,6 +24,7 @@ the gate command itself and nothing else ([D-49](../../decisions/01-settled.md))
 | `build (ubuntu-24.04)` | Ubuntu 24.04, GCC from the image, Ninja from apt | `check.py --build-dir build` — the full default gate: docs tier, configure, build, warnings scan, serial `ctest` | yes |
 | `build (windows-2022)` | Windows Server 2022, Visual Studio 17 2022 | the same command; the generator the gate was born on | yes |
 | `build (macos-14)` | macOS 14 arm64, AppleClang, Ninja from brew | the same command; never built there before #51 | yes — allowed to fail until its first complete run came back green |
+| `sanitize` | Ubuntu 24.04, GCC from the image, Ninja from apt | `check.py --build --config RelWithDebInfo -D DUALC_SANITIZE=address,undefined` — ASan + UBSan over every `ctest` case (added 2026-10-06, [17/14](../17-code-audit-and-hardening/14-build-hardening-ci.md)) | yes — allowed to fail until its first two runs came back green (2026-10-06) |
 | `gpu` | Ubuntu 24.04, the X11 headers, Xvfb, Mesa (`LIBGL_ALWAYS_SOFTWARE=1`) | configure with `-DDUALC_BUILD_GLSL_PARITY=ON`, build the harness, generate `data/`, `xvfb-run -a check.py --gpu --strict` | no — the plan's Phase 2 experiment (#31); **yes** since 2026-10-06 ([17/13](../17-code-audit-and-hardening/13-parity-gate-binding.md)) |
 
 **The matrix choice.** Ubuntu with the image's GCC is a second compiler next to the owner's
@@ -39,6 +40,8 @@ Because every CI build is clean, the warnings scan always reads a full log; loca
 incremental build makes it SKIP. It does **not** assert the GL targets (only the `gpu` job
 builds one), the C ABI (`DUALC_BUILD_C_ABI` stays off, as in the local gate), `-Werror`, the
 sanitizers or a warnings level on tests and examples — #33's rest, the plan's Phase 3.
+*2026-10-06: the three `build` jobs pass `-D DUALC_WERROR=ON`, the warnings level covers
+tests and examples, and the `sanitize` job runs ASan + UBSan — [17/14](../17-code-audit-and-hardening/14-build-hardening-ci.md).*
 
 **Caching.** `ccache` on Ubuntu and macOS through `CMAKE_C_COMPILER_LAUNCHER` /
 `CMAKE_CXX_COMPILER_LAUNCHER`; it replays the compiler's stderr on a hit, so a cached object

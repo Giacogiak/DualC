@@ -83,7 +83,9 @@ is a port of `mesh_bvh.cpp`, not a header swap.
 These are vendored libraries used **only** by the example binaries (for image
 and 3MF/ZIP file output, and post-contour mesh decimation). They are **never**
 linked into `dualc` itself, so the library proper stays dependency-free
-(mesh/file I/O and mesh post-processing are host-side concerns). Permissive
+(mesh/file I/O and mesh post-processing are host-side concerns). The root
+`CMakeLists.txt` asserts it at configure: `dualc` may link geometry-central and
+`Threads::Threads`, nothing else. Permissive
 licenses, consistent with the project posture. They are compiled into small
 helper libraries:
 

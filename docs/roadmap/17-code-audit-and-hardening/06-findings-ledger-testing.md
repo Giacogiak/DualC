@@ -33,7 +33,7 @@ re-litigates it · `MINOR-OPEN` real but below the tracking bar. The two coverag
 | C48 | Four of five `ContourerParams` knobs are never varied; only `manifoldDC` is toggled. | `T:458,538,583`, `A3:§8-9` | → **#32** |
 | C49 | `interpolateNormals`' sharp/smooth claim is never unit-tested — only touched by a CLI exit-code smoke test. | `T:459` | → **#32** |
 | C50 | Output normals are never checked for content: `test_pipeline.cpp:32` checks array size only, not unit length or alignment with the surface. | `T:460` | → **#32** |
-| C51 | No sanitizers and no coverage measurement. | `T:462-463` | → **#33** |
+| C51 | No sanitizers and no coverage measurement. | `T:462-463` | → **#33** — sanitizers **DONE 2026-10-06** ([14](14-build-hardening-ci.md)); coverage → **#32** |
 | C52 | CLI smoke tests assert exit code only — none check output existence, non-emptiness or parseability, so `cli_slice` writing a corrupt PNG would pass. | `T:464` | → **#32** |
 | C53 | No performance-regression guard; the tiling RAM claim's underlying `chooseTileDepthForBudget` estimate is never validated against measured RSS. | `T:465` | → already tracked as [10 #11](../10-infrastructure-and-integration.md) (benchmark + perf-regression suite) |
 | C54 | `makeUnitCube` / `makeBox` are reimplemented in eight test files, while `test_main.cpp` sits empty, reserved for exactly this shared fixture. | `T:448` | MINOR-OPEN |

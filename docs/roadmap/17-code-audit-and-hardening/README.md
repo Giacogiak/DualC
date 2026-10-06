@@ -30,6 +30,9 @@ status and trigger, and links to both.
 - [`13-parity-gate-binding.md`](13-parity-gate-binding.md) — the delivery record of **#31**:
   the `gpu` CI job made required, the llvmpipe evidence, the CTest-half decision and the
   deliberate `opXor` break that turned the job red.
+- [`14-build-hardening-ci.md`](14-build-hardening-ci.md) — the delivery record of **#33**'s
+  rest: `DUALC_WERROR`, `DUALC_SANITIZE`, the layering assertion and the per-target dialect,
+  the first warnings and sanitizer findings, and the CI runs that proved each one red.
 - [`07-repeat-tiling-fix.md`](07-repeat-tiling-fix.md) — the full record for #34's first
   item: `repeat` read only the folded tile, which put wrong geometry in shipped strut
   lattices; the conditional fix, its measured 2.3× cost, and the oracle test it showed to
@@ -116,7 +119,8 @@ full entries, with evidence and triggers, live in two files:
 `ctest` **270** (2026-10-06, the full gate on Linux and in CI's three `build` jobs;
 256 on 2026-09-17, [19/01](../19-docs-layers/01-record-phases-0-2.md)); `dualc_glsl_parity` **73/73**
 (2026-10-06, asserted by `check.py --gpu` against `parity_expected_cases` in CI's required
-`gpu` job — [13](13-parity-gate-binding.md)).
+`gpu` job — [13](13-parity-gate-binding.md)); the same 270 pass under ASan + UBSan in CI's
+`sanitize` job (2026-10-06, [14](14-build-hardening-ci.md)).
 
 | Item | Title | Status |
 | --- | --- | --- |
@@ -131,7 +135,7 @@ full entries, with evidence and triggers, live in two files:
 | [#30](04-engineering-quality.md#30-threading-determinism-test) | Threading-determinism test | **DONE** 2026-08-31 |
 | [#31](04-engineering-quality.md#31-make-the-cpugpu-parity-gate-binding) | Make the CPU/GPU parity gate binding | **DONE** 2026-10-06 ([13](13-parity-gate-binding.md)) |
 | [#32](04-engineering-quality.md#32-test-coverage-ledger) | Test-coverage ledger | PLANNED |
-| [#33](04-engineering-quality.md#33-build--tooling-hardening) | Build & tooling hardening | **PARTIAL** — batches 2026-08-31, 09-01, 09-10; nanort + clean-clone closed 2026-09-21 by [20 #47](../20-public-delivery/01-pin-geometry-central.md) |
+| [#33](04-engineering-quality.md#33-build--tooling-hardening) | Build & tooling hardening | **DONE** 2026-10-06 ([14](14-build-hardening-ci.md)); batches 2026-08-31, 09-01, 09-10; nanort + clean-clone 2026-09-21 by [20 #47](../20-public-delivery/01-pin-geometry-central.md) |
 | [#34](04-engineering-quality.md#34-api-hygiene-batch) | API hygiene batch | **PARTIAL** — batches 2026-09-10 (×2), 09-11 (unknown keys, [10](10-docs-system-screening.md)) |
 | [#35](04-engineering-quality.md#35-repeatfield-neighbour-set-optimisation) | `RepeatField` neighbour-set optimisation | PLANNED — born from #34's fix on 2026-09-10, no ledger finding behind it |
 | [#46](03-correctness-and-robustness/02-precision-and-celloverlaps.md#46-offsetfield-does-not-forward-celloverlaps) | `OffsetField` does not forward `cellOverlaps` | **DONE** 2026-09-21 — opened 2026-09-20 from the first semantic lint ([19/08/01](../19-docs-layers/08-semantic-lint/01-2026-09-20-first-run.md)), no ledger finding behind it |

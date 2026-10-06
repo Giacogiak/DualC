@@ -26,7 +26,7 @@ ledgers — they are recorded in
 | ID | Finding | Source | Disposition |
 | --- | --- | --- | --- |
 | C1 | `types.h:9` is `using geometrycentral::Vector3;`, so `dualc::Vector3` *is* geometry-central's type — the library is unusable without geometry-central headers even for a pure-analytic field graph. | `B1:77-87,160-162` | ACCEPTED — geometry-central is a declared hard dependency ([README](../../../README.md) dependency layout); the audit concedes the attack "lands" but the coupling is deliberate |
-| C2 | The third-party layering rule (host-only deps never link into `libdualc`) is enforced by comments only — nothing stops `target_link_libraries(dualc PRIVATE dualc_examples_io)`. | `B1:99-106`, `B5:190` | → **#33** (a CI assertion on `LINK_LIBRARIES`) |
+| C2 | The third-party layering rule (host-only deps never link into `libdualc`) is enforced by comments only — nothing stops `target_link_libraries(dualc PRIVATE dualc_examples_io)`. | `B1:99-106`, `B5:190` | → **#33** — **DONE 2026-10-06**: a configure-time assertion on `LINK_LIBRARIES` ([14](14-build-hardening-ci.md)) |
 | C3 | Internal-organisation smells: `implicit.h` does four jobs in 329 lines; `primitives.h` publishes 36 classes' private layouts across 555 lines (ABI-fragile) while combinators and decorators hide behind factories; math helpers (`clampd`, `sgn`, `vabs`, `vmax0`, `len2max0`, `boxMinMax`) are duplicated across five files. | `B1:121-129` | MINOR-OPEN — called the easiest concrete improvement in the codebase |
 | C4 | `ContourerParams::weldEdges` and `SamplerParams::seed` are declared, documented and referenced nowhere. | `A4:364-367` | → **#28** — **DONE 2026-09-01** (both deleted; source-compatibility break, no behaviour change) |
 
@@ -76,16 +76,16 @@ ledgers — they are recorded in
 
 | ID | Finding | Source | Disposition |
 | --- | --- | --- | --- |
-| C32 | Global C++ dialect flags are set before the third-party `add_subdirectory` calls, leaking DualC's dialect choice into geometry-central and polyscope. | `B5:25-27,188` | → **#33** |
+| C32 | Global C++ dialect flags are set before the third-party `add_subdirectory` calls, leaking DualC's dialect choice into geometry-central and polyscope. | `B5:25-27,188` | → **#33** — **DONE 2026-10-06**, per-target dialect ([14](14-build-hardening-ci.md)) |
 | C33 | `DUALC_GC_DIR` / `DUALC_POLYSCOPE_DIR` resolve against `CMAKE_SOURCE_DIR`, not `CMAKE_CURRENT_SOURCE_DIR`, so DualC cannot be `add_subdirectory`'d into a larger project without overriding cache variables — despite that being the only supported consumption mode. | `B5:82,224,228,254` | → **#33** — **DONE** (probes 2026-08-31; the 22 subdirectory uses 2026-09-01) |
 | C34 | No `find_package` fallback for geometry-central, and transitive dependencies (Eigen, nanort, nanoflann, happly) are inherited by a comment at `CMakeLists.txt:92-94`; nanort is structurally load-bearing for the BVH but undeclared. | `B5:84,86,228` | → **#33** |
-| C35 | No compiler-hardening infrastructure: no `-Werror`/`/WX`, no sanitizer option, no `clang-tidy`, no IPO/LTO, no `CMAKE_EXPORT_COMPILE_COMMANDS`. ASan/UBSan flagged as high-value and near-free given the raw-pointer octree, hand-written BVH and vendored float SVD. | `B5:110,246-248,255,261` | → **#33** — `CMAKE_EXPORT_COMPILE_COMMANDS` **DONE 2026-08-31**; sanitizers / `-Werror` / `clang-tidy` still open |
+| C35 | No compiler-hardening infrastructure: no `-Werror`/`/WX`, no sanitizer option, no `clang-tidy`, no IPO/LTO, no `CMAKE_EXPORT_COMPILE_COMMANDS`. ASan/UBSan flagged as high-value and near-free given the raw-pointer octree, hand-written BVH and vendored float SVD. | `B5:110,246-248,255,261` | → **#33** — `CMAKE_EXPORT_COMPILE_COMMANDS` **DONE 2026-08-31**; sanitizers / `-Werror` **DONE 2026-10-06** ([14](14-build-hardening-ci.md)); `clang-tidy`, IPO/LTO not taken |
 | C36 | Catch2 is pinned by mutable git tag (`GIT_TAG v3.5.4`), with no `GIT_SHALLOW` and no offline or system fallback, so configure requires network access and is not strictly reproducible. | `B5:137,228,257,566` | → **#33** — **DONE 2026-08-31** (SHA pin; `GIT_SHALLOW` deliberately not enabled) |
 | C37 | `DUALC_BUILD_TESTS` / `DUALC_BUILD_EXAMPLES` default ON, so any subproject consumer triggers Catch2's network fetch and builds 21 test translation units unasked. | `B5:138,186,257` | → **#33** — **DONE 2026-08-31**, with a CMake-3.14-compatible fallback |
 | C38 | Every SDF formula is hand-written twice (double C++, float GLSL) and `dualc_glsl_parity` is the only guard — opt-in, outside CTest, needs a GL context. Editing a shared formula yields a green build and a green `ctest` with a silently diverged previewer. | `B5:172-181,218,238-240,260` | → **#31** — named the most substantive architectural criticism available against the project |
 | C39 | No `install()` rules, export set or `dualcConfig.cmake`; `$<INSTALL_INTERFACE:include>` is a dead generator expression and the library is consumable only via `add_subdirectory`. | `B5:184,224,244,261` | → already tracked as [10 #8](../10-infrastructure-and-integration.md); blocked in part on geometry-central shipping no Config package |
 | C40 | A clean clone does not build: the demo `.obj` meshes are gitignored, the `copy_if_different` POST_BUILD step fails against a missing source, and the generator that would produce them is itself one of the targets being built. | `B5:185,244,261` | → **#33** |
-| C41 | The third-party layering rule is enforced by comments only. | `B5:190,261` | → **#33** — same defect as C2 |
+| C41 | The third-party layering rule is enforced by comments only. | `B5:190,261` | → **#33** — same defect as C2, **DONE 2026-10-06** |
 
 ---
 
