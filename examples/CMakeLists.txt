@@ -182,7 +182,9 @@ endif()
 
 # dualc_glsl_parity is the field->GLSL acceptance gate: per slice node it renders
 # sceneSDF over a lattice on the GPU and compares to the C++ field. Needs a GL
-# context (a hidden window), so -- like the viewers -- no CTest; run manually.
+# context (a hidden window). No CTest: `check.py --gpu` is its one runner (CI's
+# required gpu job), because it asserts the announced case count and a ctest
+# exit code cannot -- cases whose demo mesh is missing skip and still exit 0.
 if(DUALC_BUILD_GLSL_PARITY)
   add_executable(dualc_glsl_parity dualc_glsl_parity.cpp)
   target_link_libraries(dualc_glsl_parity PRIVATE dualc::dualc

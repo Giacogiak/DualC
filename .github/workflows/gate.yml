@@ -103,11 +103,12 @@ jobs:
         if: always() && runner.os != 'Windows'
         run: ccache -s
 
-  # P02's experiment (#31): the parity harness under Xvfb + Mesa llvmpipe.
+  # The CPU/GPU parity gate (#31), required since 2026-10-06: the harness under
+  # Xvfb + Mesa llvmpipe (GL 4.5 core, R32F colour-renderable). check.py asserts
+  # the announced case count, so a short run is red, not a pass.
   gpu:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
-    continue-on-error: true
     env:
       LIBGL_ALWAYS_SOFTWARE: '1'
     steps:

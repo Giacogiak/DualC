@@ -1530,7 +1530,7 @@ def check_ctest(ctx):
 
 
 # --------------------------------------------------------------------------
-# GPU tier -- opt-in, cannot run unattended
+# GPU tier -- opt-in locally, required in CI (the `gpu` job)
 # --------------------------------------------------------------------------
 
 @check("parity", "gpu", "dualc_glsl_parity: GPU GLSL vs C++ field values")
@@ -1542,8 +1542,8 @@ def check_parity(ctx):
     0. Trusting the exit code would silently accept a 69-case run as a pass. So
     the announced case count is asserted against the expected number.
 
-    This does not make #31 any less deferred: it still needs a GL context with
-    an R32F-renderable FBO, which no unattended local runner provides.
+    It needs a GL context with an R32F-renderable FBO; CI's required `gpu` job
+    provides one under Xvfb + Mesa llvmpipe, which is what made #31 binding.
     """
     bd = build_dir(ctx)
     # Multi-config (VS) puts it under examples/<config>/, single-config
