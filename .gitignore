@@ -22,3 +22,6 @@ compile_commands.json
 # parity harness run output
 parity*.txt
 __pycache__/
+
+# plan-run driver state
+.plan-run/

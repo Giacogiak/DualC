@@ -179,7 +179,8 @@
     "docs/raw/": "one line; indexed by docs/raw/README.md",
     "docs/design/": "one line; indexed by docs/design/README.md",
     "docs/decisions/": "one line; indexed by docs/decisions/README.md",
-    "scripts/check_fixtures/": "one line; miniature pass/fail trees for `check.py --selftest`, one pair per docs check"
+    "scripts/check_fixtures/": "one line; miniature pass/fail trees for `check.py --selftest`, one pair per docs check",
+    "plan/": "one line; the plan-run split of docs/raw/2026-10-05-hosted-ci-plan.md, its manifest, its check script and the per-unit handoffs under plan/handoffs/ (decided 2026-10-06)"
   },
 
   "structure_ignore": [
