@@ -3,7 +3,9 @@
 
 Reads the current branch and HEAD, asks the public Actions API (no token: the repo is
 public) for the newest run of that branch, waits while it is queued or in progress, and
-exits 0 only when a run for exactly this HEAD completed with conclusion `success`. Jobs
+exits 0 only when a run for exactly this HEAD completed with conclusion `success`.
+Polls every REMOTE_RUN_POLL_SECONDS (default 180: the unauthenticated API allows 60
+requests an hour, shared with the session's own reads). Jobs
 marked `continue-on-error` do not affect a run's conclusion, so an allowed-to-fail
 experiment never turns this check red; a required job failing does.
 
@@ -20,7 +22,7 @@ import urllib.request
 
 REPO = os.environ.get("REMOTE_RUN_REPO", "Giacogiak/DualC")
 WAIT_MINUTES = int(os.environ.get("REMOTE_RUN_WAIT_MINUTES", "45"))
-POLL_SECONDS = 60
+POLL_SECONDS = int(os.environ.get("REMOTE_RUN_POLL_SECONDS", "180"))
 
 
 def git(*args):

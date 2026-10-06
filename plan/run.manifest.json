@@ -15,7 +15,9 @@
 		"timeoutMinutes": 180,
 		"addDirs": [],
 		"ciCommand": "python3 scripts/check.py",
-		"env": {},
+		"env": {
+			"REMOTE_RUN_POLL_SECONDS": "180"
+		},
 		"checks": [
 			{
 				"name": "remote-run",
