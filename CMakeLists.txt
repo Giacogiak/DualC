@@ -210,7 +210,7 @@ target_include_directories(dualc SYSTEM PRIVATE
 # nanoflann are PRIVATE to it since v1.1.0). The nanort DualC's BVH is written
 # against is its own vendored copy under src/internal/third_party (see
 # THIRD_PARTY.md), so nothing here depends on what geometry-central bundles.
-target_link_libraries(dualc PUBLIC geometry-central)
+target_link_libraries(dualc PUBLIC geometry-central glfw)  # DELIBERATE BREAK (#33)
 target_compile_features(dualc PUBLIC cxx_std_17)
 dualc_target_options(dualc)
 
