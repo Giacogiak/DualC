@@ -58,8 +58,9 @@ tests on Windows (Visual Studio 2022) and Linux (GCC 15, CMake 4, Ninja; on Ubun
 tools and the C ABI are opt-in (`-DDUALC_BUILD_RAYMARCH_VIEWER`, `_FIELD_VIEW`,
 `_GLSL_PARITY`, `_C_ABI`, all `OFF` by default); none of them adds a dependency
 to `libdualc`. The build prelude and every flag are in the
-[command reference](docs/command_reference/README.md). Before committing, run the local gate
-`python scripts/check.py` — there is no CI; that command is it.
+[command reference](docs/command_reference/README.md). Before committing, run the gate
+`python scripts/check.py` — hosted CI ([`gate.yml`](.github/workflows/gate.yml)) runs that
+same command on every push and pull request; locally it is still the one command.
 
 ## Consume DualC from another CMake project
 

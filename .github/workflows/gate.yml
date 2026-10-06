@@ -1,0 +1,123 @@
+# The gate as a hosted job (roadmap 20 #51). CI runs `scripts/check.py` and
+# nothing else: a red job is a red gate, and no check lives here that the local
+# command does not run too. Jobs marked continue-on-error are experiments whose
+# result is recorded, never part of the definition of green (decisions D-49).
+name: gate
+
+on:
+  push:
+    branches: ['**']   # every branch: a feature branch with no PR still runs
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: gate-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # The docs tier with the report-only lists made fatal -- the session-end mode.
+  docs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0   # index-staleness and doc-lag read the git log
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+      - run: python3 scripts/check.py --docs --strict
+
+  # The full default gate: docs tier, configure, build, warnings scan, serial ctest.
+  build:
+    name: build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2022]
+        experimental: [false]
+        include:
+          - os: macos-14     # never built here before #51: allowed to fail
+            experimental: true
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+      - name: Install Ninja and ccache (Ubuntu)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ninja-build ccache
+      - name: Install Ninja and ccache (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ninja ccache
+      # ccache replays the compiler's stderr on a hit, so the warnings scan
+      # still sees every warning; object files themselves are never cached.
+      - name: Route the compilers through ccache
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          echo "CMAKE_C_COMPILER_LAUNCHER=ccache" >> "$GITHUB_ENV"
+          echo "CMAKE_CXX_COMPILER_LAUNCHER=ccache" >> "$GITHUB_ENV"
+          echo "CCACHE_DIR=${{ runner.temp }}/ccache" >> "$GITHUB_ENV"
+          echo "CCACHE_MAXSIZE=500M" >> "$GITHUB_ENV"
+      - name: Restore ccache
+        if: runner.os != 'Windows'
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/ccache
+          key: ccache-${{ matrix.os }}-${{ github.run_id }}
+          restore-keys: ccache-${{ matrix.os }}-
+      # FetchContent sources only. *-src alone is not enough: the git clone
+      # step wipes and re-clones a source dir whose *-subbuild stamps are
+      # missing, and geometry-central downloads Eigen into its own build tree.
+      - name: Restore FetchContent sources
+        uses: actions/cache@v4
+        with:
+          path: |
+            build/_deps/*-src
+            build/_deps/*-subbuild
+            build/_deps/geometry-central-build/deps/eigen-src
+          key: fetchcontent-${{ matrix.os }}-${{ hashFiles('**/CMakeLists.txt') }}
+      - name: Gate
+        run: python scripts/check.py --build-dir build
+      - name: ccache statistics
+        if: always() && runner.os != 'Windows'
+        run: ccache -s
+
+  # P02's experiment (#31): the parity harness under Xvfb + Mesa llvmpipe.
+  gpu:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    continue-on-error: true
+    env:
+      LIBGL_ALWAYS_SOFTWARE: '1'
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+      - name: Install the X11 headers, Xvfb, Mesa and Ninja
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libx11-dev libxrandr-dev \
+            libxinerama-dev libxcursor-dev libxi-dev xvfb libgl1-mesa-dri
+      - name: Configure with the parity harness
+        run: >
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          -DDUALC_BUILD_TESTS=OFF -DDUALC_BUILD_EXAMPLES=ON
+          -DDUALC_BUILD_GLSL_PARITY=ON
+      - name: Build the harness
+        run: cmake --build build --target dualc_glsl_parity dualc_gen_demo
+      # check.py runs the harness from the repo root, which probes data/.
+      - name: Generate the demo meshes into data/
+        run: build/examples/dualc_gen_demo all --dir data
+      - name: Parity
+        run: xvfb-run -a python3 scripts/check.py --gpu --build-dir build

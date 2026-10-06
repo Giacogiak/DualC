@@ -1709,7 +1709,8 @@ def hook_main(argv, args):
 
 def main(argv):
     ap = argparse.ArgumentParser(
-        description="DualC local checks gate (there is no CI; this is it).")
+        description="DualC checks gate: the one command, locally and in hosted CI "
+                    "(.github/workflows/gate.yml runs exactly this).")
     ap.add_argument("--fast", action="store_true",
                     help="docs + repo hygiene only, no build (~1s)")
     ap.add_argument("--docs", action="store_true", help="alias for --fast")

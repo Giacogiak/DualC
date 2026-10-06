@@ -20,15 +20,15 @@ ctest --test-dir build -C Release --output-on-failure
 ```
 
 Opt-in targets, all `OFF` by default and none of them a dependency of `libdualc`:
-`-DDUALC_BUILD_RAYMARCH_VIEWER=ON`, `-DDUALC_BUILD_FIELD_VIEW=ON`,
-`-DDUALC_BUILD_GLSL_PARITY=ON` (each needs a GL window, so no
-CTest), `-DDUALC_BUILD_C_ABI=ON` (needs `DUALC_BUILD_EXAMPLES`). CLIs land in `build/examples/`
+`-DDUALC_BUILD_RAYMARCH_VIEWER=ON`, `-DDUALC_BUILD_FIELD_VIEW=ON`, `-DDUALC_BUILD_GLSL_PARITY=ON`
+(each needs a GL window, so no CTest), `-DDUALC_BUILD_C_ABI=ON` (needs `DUALC_BUILD_EXAMPLES`). CLIs land in `build/examples/`
 (`…/Release/` with Visual Studio); demo meshes are gitignored and generated into `build/data/`
 (`dualc_gen_demo all --dir data` populates the repo's `data/` for root-run recipes).
 
-There is no CI; the remote is <https://github.com/Giacogiak/DualC>, its history a fresh root
-commit (why: `docs/roadmap/20-public-delivery.md`). **The gate is the one command that stands
-in for CI**; run it before every commit (the pre-commit hook runs the fast tier once enabled):
+The remote is <https://github.com/Giacogiak/DualC> (fresh root commit, why: roadmap 20).
+**The gate is what CI runs**: `.github/workflows/gate.yml` runs `scripts/check.py`, nothing
+else, on every push and PR; locally it is still the one command — run it before every commit
+(the pre-commit hook runs the fast tier once enabled):
 
 ```bash
 python scripts/check.py          # docs contract + configure/build/warnings/ctest

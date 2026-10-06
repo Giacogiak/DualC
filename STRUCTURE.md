@@ -14,6 +14,10 @@ DualC/
 ├── THIRD_PARTY.md             Vendoring & attribution (qef/svd Unlicense; nanort MIT; miniz/stb/json/meshoptimizer; the geometry-central pin + its transitive deps)
 ├── .gitignore                 Ignores build/, *.obj demo meshes, etc.
 ├── .gitattributes             Pins scripts/hooks/* to LF (core.autocrlf would break the shebang)
+├── .github/
+│   └── workflows/
+│       └── gate.yml           Hosted CI (roadmap 20 #51): runs `scripts/check.py` and nothing else — `docs` (--docs --strict),
+│                                `build` matrix (Ubuntu, Windows required; macOS allowed to fail), `gpu` parity under Xvfb (allowed to fail)
 │
 ├── AGENTS.md                  Agent entry file: build/test/gate commands, the five docs principles, the reading order
 ├── CLAUDE.md                  `@AGENTS.md` — Claude Code's import of the entry file, nothing else
@@ -159,7 +163,7 @@ DualC/
 │   └── DualCWarnings.cmake    Warning-config module (warnings currently set inline in root CMakeLists.txt)
 │
 ├── scripts/
-│   ├── check.py               THE LOCAL GATE — every check in one command (there is no CI; this is it).
+│   ├── check.py               THE GATE — every check in one command; hosted CI (.github/workflows/gate.yml) runs exactly this.
 │   │                            `--fast` = docs/hygiene, ~1s; default adds configure+build+ctest; `--gpu` opt-in
 │   ├── check_data.json        Its declared exceptions: size baseline, index roots, forbidden patterns, summarized prefixes
 │   ├── check_fixtures/        `check.py --selftest` trees: one pass/ and one fail/ miniature repo per docs check
