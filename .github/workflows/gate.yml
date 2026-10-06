@@ -38,9 +38,9 @@ jobs:
           python-version: '3.x'
       - name: Gate (docs tier, strict)
         run: python3 scripts/check.py --docs --strict | tee gate.log
-      - name: Annotate the failures
-        if: failure()
-        run: python3 .github/workflows/annotate.py gate.log
+      - name: Annotate the report
+        if: always()
+        run: python3 .github/workflows/annotate.py gate.log ${{ job.status }}
 
   # The full default gate: docs tier, configure, build, warnings scan, serial ctest.
   build:
@@ -99,9 +99,9 @@ jobs:
           key: fetchcontent-${{ matrix.os }}-${{ hashFiles('**/CMakeLists.txt') }}
       - name: Gate
         run: python scripts/check.py --build-dir build | tee gate.log
-      - name: Annotate the failures
-        if: failure()
-        run: python .github/workflows/annotate.py gate.log
+      - name: Annotate the report
+        if: always()
+        run: python .github/workflows/annotate.py gate.log ${{ job.status }}
       - name: ccache statistics
         if: always() && runner.os != 'Windows'
         run: ccache -s
@@ -135,7 +135,8 @@ jobs:
       - name: Generate the demo meshes into data/
         run: mkdir -p data && build/examples/dualc_gen_demo all --dir data
       - name: Parity
-        run: xvfb-run -a python3 scripts/check.py --gpu --build-dir build | tee gate.log
-      - name: Annotate the failures
-        if: failure()
-        run: python3 .github/workflows/annotate.py gate.log
+        # --strict: a SKIP (harness not found) must not read as a pass.
+        run: xvfb-run -a python3 scripts/check.py --gpu --strict --build-dir build | tee gate.log
+      - name: Annotate the report
+        if: always()
+        run: python3 .github/workflows/annotate.py gate.log ${{ job.status }}

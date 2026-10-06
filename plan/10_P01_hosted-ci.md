@@ -23,7 +23,9 @@ to `main` is Giacomo's, at the approve gate after this unit.
    - `macos-14` — `brew install ninja`, AppleClang; **`continue-on-error: true`** on the
      first run (never built there); keep it required if green, fix in-unit when the cause is
      ours, or leave it allowed-to-fail with the log quoted in the record.
-   Cache the FetchContent sources (`build/_deps/*-src`, keyed on the `CMakeLists.txt` hashes)
+   Cache the FetchContent sources (`build/_deps/*-src`, keyed on the `CMakeLists.txt` hashes;
+   *corrected by P01.1: `*-src` alone is re-cloned — the `*-subbuild` stamps and
+   `geometry-central-build/deps/eigen-src` must be cached with it, see 20/03*)
    and `ccache` on Ubuntu/macOS through the `CMAKE_CXX_COMPILER_LAUNCHER` environment
    variable. **Do not cache object files**: the warnings scan is only meaningful on a clean build.
 4. **Job `gpu`** — `ubuntu-24.04`, `libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev
