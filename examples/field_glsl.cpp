@@ -404,7 +404,7 @@ float sdNeovius(vec3 p, vec3 c, float wl) {
 float opUnion(float a, float b) { return min(a, b); }
 float opInter(float a, float b) { return max(a, b); }
 float opDiff(float a, float b)  { return max(a, -b); }
-float opXor(float a, float b)   { return max(min(a, b), max(a, b)); }
+float opXor(float a, float b)   { return max(min(a, b), -max(a, b)); }
 float opSmoothUnion(float a, float b, float k) {
   float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
   return mix(b, a, h) - k * h * (1.0 - h);
