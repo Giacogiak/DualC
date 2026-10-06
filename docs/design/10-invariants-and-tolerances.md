@@ -37,7 +37,8 @@ of these links here rather than restating the number.
   (`examples/field_graph.{h,cpp}`) and the GPU renders the GLSL the codegen emits from that
   same tree, so the field on screen is the field that is contoured — no mesh round-trip. The
   GLSL prelude is held to the C++ formulas by `dualc_glsl_parity` at the tolerances in the
-  table below; the harness needs a GL context, so it is opt-in and outside CTest.
+  table below; the harness needs a GL context, so it is opt-in and outside CTest, and
+  `check.py --gpu` runs it — in CI's required `gpu` job too, under Xvfb + Mesa llvmpipe.
 - **Fallbacks are reported, never silent when asked.** An invalid root box and an empty
   contour each degrade to a defined placeholder and set a `Diagnostics` flag
   ([§ 9](07-limitations.md#behavioural-notes-worth-knowing)).

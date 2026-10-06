@@ -24,7 +24,7 @@ the gate command itself and nothing else ([D-49](../../decisions/01-settled.md))
 | `build (ubuntu-24.04)` | Ubuntu 24.04, GCC from the image, Ninja from apt | `check.py --build-dir build` — the full default gate: docs tier, configure, build, warnings scan, serial `ctest` | yes |
 | `build (windows-2022)` | Windows Server 2022, Visual Studio 17 2022 | the same command; the generator the gate was born on | yes |
 | `build (macos-14)` | macOS 14 arm64, AppleClang, Ninja from brew | the same command; never built there before #51 | yes — allowed to fail until its first complete run came back green |
-| `gpu` | Ubuntu 24.04, the X11 headers, Xvfb, Mesa (`LIBGL_ALWAYS_SOFTWARE=1`) | configure with `-DDUALC_BUILD_GLSL_PARITY=ON`, build the harness, generate `data/`, `xvfb-run -a check.py --gpu --strict` | no — the plan's Phase 2 experiment (#31) |
+| `gpu` | Ubuntu 24.04, the X11 headers, Xvfb, Mesa (`LIBGL_ALWAYS_SOFTWARE=1`) | configure with `-DDUALC_BUILD_GLSL_PARITY=ON`, build the harness, generate `data/`, `xvfb-run -a check.py --gpu --strict` | no — the plan's Phase 2 experiment (#31); **yes** since 2026-10-06 ([17/13](../17-code-audit-and-hardening/13-parity-gate-binding.md)) |
 
 **The matrix choice.** Ubuntu with the image's GCC is a second compiler next to the owner's
 GCC 15, not a copy; Windows keeps the Visual Studio path the gate was written on; macOS adds
@@ -100,6 +100,7 @@ As the plan says for that outcome, it is now a required job. The `gpu` job's fir
 `--strict`, which cannot rule out a SKIP. Run 3 ran under `--strict`, and its notice shows
 **73/73** cases, so the harness really ran. This is the trigger of [#31](../../decisions/README.md) and the input of the plan's
 Phase 2. The job stays allowed to fail until that phase binds it.
+*2026-10-06: bound — the `gpu` job is required ([17/13](../17-code-audit-and-hardening/13-parity-gate-binding.md)).*
 
 **Runs on the branch.** Run 1 (`f4e6319`): `docs` and `gpu` red as described above, `macos-14`
 red after 2 min 43 s with the log unread. That job runs the docs tier first, so it was probably

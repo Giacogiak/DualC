@@ -90,8 +90,9 @@ the resolution model.
 
 The previewed field and the exported mesh are built from the **same** parsed
 graph, so they agree by construction, and the GLSL prelude is held to the C++
-formulas by the `dualc_glsl_parity` harness (`-DDUALC_BUILD_GLSL_PARITY=ON`, run by
-hand — it needs a GL context; `python scripts/check.py --gpu` runs it) — the
+formulas by the `dualc_glsl_parity` harness (`-DDUALC_BUILD_GLSL_PARITY=ON`; it needs a
+GL context; `python scripts/check.py --gpu` runs it, locally and in CI's required `gpu`
+job) — the
 invariant is [design/10](../../design/10-invariants-and-tolerances.md#output-invariants). To cross-check a specific graph,
 contour it and compare:
 

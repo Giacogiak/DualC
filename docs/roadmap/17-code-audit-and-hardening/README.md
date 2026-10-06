@@ -27,6 +27,9 @@ status and trigger, and links to both.
 - [`12-engineering-quality-records.md`](12-engineering-quality-records.md) — the delivery
   records of #28, #30 and #33 (the dead parameters, the determinism test, the three build
   batches), moved out of `04` on 2026-09-18.
+- [`13-parity-gate-binding.md`](13-parity-gate-binding.md) — the delivery record of **#31**:
+  the `gpu` CI job made required, the llvmpipe evidence, the CTest-half decision and the
+  deliberate `opXor` break that turned the job red.
 - [`07-repeat-tiling-fix.md`](07-repeat-tiling-fix.md) — the full record for #34's first
   item: `repeat` read only the folded tile, which put wrong geometry in shipped strut
   lattices; the conditional fix, its measured 2.3× cost, and the oracle test it showed to
@@ -110,9 +113,10 @@ full entries, with evidence and triggers, live in two files:
 [`04-engineering-quality.md`](04-engineering-quality.md) (#27–#35).
 
 **Latest verification** (the one home of the counts; every other page links here):
-`ctest` **256** — 255 at the 2026-09-11 screening plus `check_selftest` since 2026-09-17
-([19/01](../19-docs-layers/01-record-phases-0-2.md)); `dualc_glsl_parity` **73/73**
-(2026-08-25, asserted by `check.py --gpu` against `parity_expected_cases`).
+`ctest` **270** (2026-10-06, the full gate on Linux and in CI's three `build` jobs;
+256 on 2026-09-17, [19/01](../19-docs-layers/01-record-phases-0-2.md)); `dualc_glsl_parity` **73/73**
+(2026-10-06, asserted by `check.py --gpu` against `parity_expected_cases` in CI's required
+`gpu` job — [13](13-parity-gate-binding.md)).
 
 | Item | Title | Status |
 | --- | --- | --- |
@@ -125,7 +129,7 @@ full entries, with evidence and triggers, live in two files:
 | [#28](04-engineering-quality.md#28-delete-the-two-dead-public-parameters) | Delete the two dead public parameters | **DONE** 2026-09-01 |
 | [#29](04-engineering-quality.md#29-thread-safety-contract-for-user-derived-implicitfield) | Thread-safety contract for user-derived `ImplicitField` | **DONE** 2026-08-31 |
 | [#30](04-engineering-quality.md#30-threading-determinism-test) | Threading-determinism test | **DONE** 2026-08-31 |
-| [#31](04-engineering-quality.md#31-make-the-cpugpu-parity-gate-binding) | Make the CPU/GPU parity gate binding | DEFERRED |
+| [#31](04-engineering-quality.md#31-make-the-cpugpu-parity-gate-binding) | Make the CPU/GPU parity gate binding | **DONE** 2026-10-06 ([13](13-parity-gate-binding.md)) |
 | [#32](04-engineering-quality.md#32-test-coverage-ledger) | Test-coverage ledger | PLANNED |
 | [#33](04-engineering-quality.md#33-build--tooling-hardening) | Build & tooling hardening | **PARTIAL** — batches 2026-08-31, 09-01, 09-10; nanort + clean-clone closed 2026-09-21 by [20 #47](../20-public-delivery/01-pin-geometry-central.md) |
 | [#34](04-engineering-quality.md#34-api-hygiene-batch) | API hygiene batch | **PARTIAL** — batches 2026-09-10 (×2), 09-11 (unknown keys, [10](10-docs-system-screening.md)) |

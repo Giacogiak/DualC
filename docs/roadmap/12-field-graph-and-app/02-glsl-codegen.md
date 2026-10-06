@@ -34,7 +34,9 @@ bounds}. The walk mirrors `FieldGraph::build` op-for-op; the fixed prelude +
 trace/value frameworks are embedded strings, authored to the WebGL2 subset with a
 per-target version header (desktop `330 core` / `--es` `300 es` — the body is
 identical). **Acceptance gate** `examples/dualc_glsl_parity.cpp` (opt-in
-`-DDUALC_BUILD_GLSL_PARITY=ON`, no CTest — needs a GL context): 28 cases render
+`-DDUALC_BUILD_GLSL_PARITY=ON`, no CTest — needs a GL context; *2026-10-06: run by CI's
+required `gpu` job,
+[17/13](../17-code-audit-and-hardening/13-parity-gate-binding.md)*): 28 cases render
 `sceneSDF` over a 16³ lattice to an R32F FBO and compare to C++ `valueAt` —
 **all pass**, analytic nodes to ~1e-7 (float32 ε), TPMS ~1e-4 (GPU trig), the FD
 nodes (`normalize`/`twist`/`bend`) to ~1e-3 on a looser tier. **v1 slice** (per the

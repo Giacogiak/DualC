@@ -64,7 +64,8 @@ gate, not a bug fix. Record: [12 § #30](12-engineering-quality-records.md#30--t
 *Source:* `docs/raw/study/B4-concurrency.md:106`, `docs/raw/study/T-unit-testing.md`.
 
 ## #31 Make the CPU/GPU parity gate binding
-**DEFERRED.** Every SDF formula exists twice — `double` in C++, `float` in GLSL — and
+**DONE (2026-10-06).** CI's `gpu` job runs `check.py --gpu` under Xvfb + llvmpipe and is
+required; record, runs and the proven-to-fail break: [13](13-parity-gate-binding.md). Every SDF formula exists twice — `double` in C++, `float` in GLSL — and
 `dualc_glsl_parity` (73/73,
 [12/07 § H](../12-field-graph-and-app/07-mesh-preview-sweep.md#h-mesh-preview-correctness-sweep)) is the
 only thing keeping them honest. It defaults OFF, needs a GL context and has no CTest entry,
@@ -75,7 +76,7 @@ CPU reference evaluator for the emitted AST — half of which is already done, s
 codegen library is deliberately GL-free.
 *2026-09-10:* `check.py --gpu` ([09](09-local-checks-gate/README.md)) asserts **73/73** from a known
 cwd, closing the "exit 0 while silently skipping cases" hole. Still DEFERRED: needs a GL context.
-*Trigger:* a CPU/GPU divergence reaching a user, or headless-GL CI becoming available.
+*Trigger (fired 2026-10-06):* a CPU/GPU divergence reaching a user, or headless-GL CI becoming available.
 *Source:* `docs/raw/study/B5-build-dependencies-licensing.md:172-181`.
 *Verified 2026-08-31:* no `add_test` for `dualc_glsl_parity` in `examples/CMakeLists.txt`.
 

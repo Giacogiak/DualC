@@ -17,7 +17,7 @@ DualC/
 ├── .github/
 │   └── workflows/
 │       ├── gate.yml           Hosted CI (roadmap 20 #51): runs `scripts/check.py` and nothing else — `docs` (--docs --strict),
-│       │                        `build` matrix (Ubuntu, Windows, macOS; all required), `gpu` parity under Xvfb (allowed to fail)
+│       │                        `build` matrix (Ubuntu, Windows, macOS; all required), `gpu` parity under Xvfb (required)
 │       └── annotate.py        Re-prints the gate's FAIL lines as error annotations (readable without auth; a job log is not)
 │
 ├── AGENTS.md                  Agent entry file: build/test/gate commands, the five docs principles, the reading order

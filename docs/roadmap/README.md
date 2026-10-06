@@ -26,9 +26,9 @@ re-sequencing ([12](12-field-graph-and-app/README.md)) — *value from the comma
 then wrap it* — is **finished**, so what remains in DualC is the engine itself, drawn from the
 2026-08-19 audit's ledger ([17](17-code-audit-and-hardening/README.md)) as a standing queue,
 now worked through the [hosted-CI plan](../raw/2026-10-05-hosted-ci-plan.md): **#51** — the gate
-as a GitHub Actions job — is DONE (2026-10-06, [20 #51](20-public-delivery/03-hosted-ci.md#51-hosted-ci--the-gate-as-a-github-actions-job)); **NEXT** is its
-Phase 2, **#31** (the parity gate binding through headless GL), then #33, #32, and the rest of
-**#34** resumes. **Public delivery**
+as a GitHub Actions job — is DONE (2026-10-06, [20 #51](20-public-delivery/03-hosted-ci.md#51-hosted-ci--the-gate-as-a-github-actions-job)), and so is its
+Phase 2, **#31** (the parity gate binding through headless GL, [17/13](17-code-audit-and-hardening/13-parity-gate-binding.md)); **NEXT** is
+Phase 3, **#33** (build hardening as CI jobs), then #32, and the rest of **#34** resumes. **Public delivery**
 ([20](20-public-delivery/README.md)) opened 2026-09-21: the build no longer depends on a local
 geometry-central fork, and since 2026-10-03 it builds and passes the gate on Linux too (**#49**); the same day **#50**
 retired `dualc_view` and the Polyscope sibling checkout, so the GL targets own their dependencies
@@ -42,11 +42,11 @@ the block records the table links ([D-43](../decisions/01-settled.md)).
 
 | Date | What landed | Record |
 | --- | --- | --- |
+| 2026-10-06 | **#31** — the CPU/GPU parity gate is binding: CI's `gpu` job (Xvfb + llvmpipe, `check.py --gpu --strict`, the case count asserted) is required, proven red on a deliberate `opXor` break. | [17/13](17-code-audit-and-hardening/13-parity-gate-binding.md) |
 | 2026-10-06 | **#51** — hosted CI: a GitHub Actions workflow runs `scripts/check.py` and nothing else — the docs tier, the full gate on Ubuntu, Windows and macOS (required), the parity harness under Xvfb (allowed to fail, D-49). | [20](20-public-delivery/03-hosted-ci.md#51-hosted-ci--the-gate-as-a-github-actions-job) |
 | 2026-10-03 | **#50** — `dualc_view` and Polyscope retired; the GL targets build on a vendored glad and a GLFW fetched at its pinned release (or `-DDUALC_GLFW_DIR`), the sibling-checkout mechanism gone. | [07 #50](07-viewer-polyscope.md#50-retire-dualc_view-and-the-polyscope-dependency-own-glfw--glad) |
 | 2026-10-03 | **#49** — Linux is a build host: C enabled for the vendored `miniz.c`, the gate picks its generator per OS and reads CTest 4; full gate green with GCC 15 + Ninja. | [20](20-public-delivery/02-linux-build-host.md#49-linux-as-a-build-host) |
 | 2026-09-22 | **#48** — a host-owned cancel token and a calling-thread progress callback through sampler, contourer and writers; ABI 0.5.0's `*_with_progress` twins; every export writes `.part` and renames (D-46). | [14/05](14-c-abi/05-progress-and-cancel.md) |
-| 2026-09-21 | **Cap relief** — the status snapshot trimmed by its own rule (D-43); the gate's record 17/09 split into a folder. | [19/10](19-docs-layers/10-cap-relief.md) |
 
 **The shipped keystone (2026-06-14 … 2026-07-06)** — builds #1–#3, the C ABI (#19) and
 the client layer's move to Boletus, each DONE with its evidence in
