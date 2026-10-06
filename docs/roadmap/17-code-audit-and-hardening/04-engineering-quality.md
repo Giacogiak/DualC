@@ -132,7 +132,7 @@ sub-item — record: [12 § #33](12-engineering-quality-records.md#33--build-har
 Still open in this item: the dialect-flag leak into third-party subtrees, sanitizer /
 `-Werror` / `clang-tidy` options, and the `LINK_LIBRARIES` layering assertion. *2026-09-21:*
 the undeclared transitive dependency (nanort, now vendored) and the clean-clone bootstrap (the
-build generates the demo meshes) closed in [20 #47](../20-public-delivery.md#47-pin-geometry-central-to-upstream-own-nanort-self-bootstrapping-clone).
+build generates the demo meshes) closed in [20 #47](../20-public-delivery/01-pin-geometry-central.md#47-pin-geometry-central-to-upstream-own-nanort-self-bootstrapping-clone).
 *Trigger:* the first external consumer that is not this repo.
 *Source:* `docs/raw/study/B5-build-dependencies-licensing.md` §§ 2-10,
 `docs/raw/study/T-unit-testing.md:462-463`.

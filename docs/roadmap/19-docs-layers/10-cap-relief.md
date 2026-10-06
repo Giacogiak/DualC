@@ -49,7 +49,7 @@ declined — the trim stops where the page's own rule stops, 1.8 KB under the ca
 after Boletus's docs restructuring. The other four children that were newer than the page
 — [10](../10-infrastructure-and-integration.md) (`33732c9`),
 [12](../12-field-graph-and-app/README.md) (`c6d0c7a`), [19](README.md) (`c41a6a7`),
-[20](../20-public-delivery.md) (`33732c9`, `b53f3f3`, `98d41ab`) — were re-read against
+[20](../20-public-delivery/README.md) (`33732c9`, `b53f3f3`, `98d41ab`) — were re-read against
 those commits: dated pointers and verification lines only, no status cell to change.
 
 ## The gate's record

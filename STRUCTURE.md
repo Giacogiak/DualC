@@ -16,8 +16,9 @@ DualC/
 ├── .gitattributes             Pins scripts/hooks/* to LF (core.autocrlf would break the shebang)
 ├── .github/
 │   └── workflows/
-│       └── gate.yml           Hosted CI (roadmap 20 #51): runs `scripts/check.py` and nothing else — `docs` (--docs --strict),
-│                                `build` matrix (Ubuntu, Windows required; macOS allowed to fail), `gpu` parity under Xvfb (allowed to fail)
+│       ├── gate.yml           Hosted CI (roadmap 20 #51): runs `scripts/check.py` and nothing else — `docs` (--docs --strict),
+│       │                        `build` matrix (Ubuntu, Windows required; macOS allowed to fail), `gpu` parity under Xvfb (allowed to fail)
+│       └── annotate.py        Re-prints the gate's FAIL lines as error annotations (readable without auth; a job log is not)
 │
 ├── AGENTS.md                  Agent entry file: build/test/gate commands, the five docs principles, the reading order
 ├── CLAUDE.md                  `@AGENTS.md` — Claude Code's import of the entry file, nothing else

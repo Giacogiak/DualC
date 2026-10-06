@@ -100,7 +100,7 @@ Polyscope, Dear ImGui and glm; the three GL targets (`dualc_raymarch`, `dualc_fi
 `dualc_glsl_parity`) borrowed only GLFW and a generated glad loader from that checkout, so those
 two are now DualC's own: glad vendored byte-identical (`examples/third_party/glad/`, its own lib
 `dualc_examples_glad`, attributed in `THIRD_PARTY.md`), GLFW resolved as geometry-central is
-([20 #47](20-public-delivery.md#47-pin-geometry-central-to-upstream-own-nanort-self-bootstrapping-clone):
+([20 #47](20-public-delivery/01-pin-geometry-central.md#47-pin-geometry-central-to-upstream-own-nanort-self-bootstrapping-clone):
 an existing `glfw` target, a local tree via `-DDUALC_GLFW_DIR`, else `FetchContent` pinned to
 the 3.4 release commit, docs/tests/examples/install off). On Linux only GLFW's X11 backend is
 built unless `-DGLFW_BUILD_WAYLAND=ON`: X11 runs under XWayland, Wayland would add three dev

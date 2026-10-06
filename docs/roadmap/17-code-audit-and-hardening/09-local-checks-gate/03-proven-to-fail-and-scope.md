@@ -65,7 +65,7 @@ content the gate never saw — accepted for a single-developer repo, and the
 index-based file list is what makes a staged new file visible to `structure`. And
 the gate assumes an **already-bootstrapped checkout**: a fresh clone additionally
 needs the Catch2 fetch and `dualc_gen_demo all --dir data`, which remains open
-#33 work *(closed 2026-09-21: the build runs the generator itself, [20 #47](../../20-public-delivery.md))*.
+#33 work *(closed 2026-09-21: the build runs the generator itself, [20 #47](../../20-public-delivery/01-pin-geometry-central.md))*.
 
 ## What this does and does not move
 
@@ -89,7 +89,12 @@ needs the Catch2 fetch and `dualc_gen_demo all --dir data`, which remains open
   emitted AST — is delivered.
 
 *2026-09-20 (19 Phase 8): rows split on unescaped `|` only (`table_cells`); `decisions-index` keeps every row per anchor; `status-vocab` reads the decisions tables (`status_vocab_only`) — [19/07](../../19-docs-layers/07-record-phase-8.md).*
-*2026-09-21: no sibling probe; whole-line warning filter — [20 #47](../../20-public-delivery.md).*
+*2026-10-06: hosted CI runs this gate ([20 #51](../../20-public-delivery/03-hosted-ci.md#51-hosted-ci--the-gate-as-a-github-actions-job)). #33: its "CI being set up" premise is
+true — the rest (`-Werror`, sanitizers, layering assertion, dialect leak) becomes CI jobs in the
+plan's Phase 3. #32: matrix jobs run on separate machines and never collide; C43 is about
+`ctest -j` within one tree, so the serial `ctest` stands. #31: the `gpu` job (Xvfb + llvmpipe,
+allowed to fail) holds the first headless-GL result — the trigger's state is its decisions row.*
+*2026-09-21: no sibling probe; whole-line warning filter — [20 #47](../../20-public-delivery/01-pin-geometry-central.md).*
 
 ---
 

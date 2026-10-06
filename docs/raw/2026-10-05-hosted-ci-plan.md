@@ -1,7 +1,7 @@
 # DualC hosted-CI plan — #51 and the three items it unblocks
 
 **Drafted 2026-10-05**, the session after the repo was published (2026-10-03,
-[20 § Update — published](../roadmap/20-public-delivery.md)). An input, not a record: status
+[20 § Update — published](../roadmap/20-public-delivery/01-pin-geometry-central.md)). An input, not a record: status
 lives in the roadmap blocks each phase names, never here. Each phase is **one fresh session**,
 opened and closed with `/repo-docs-lifecycle`; a phase that does not fit a session is closed
 partial, with what was verified and what remains written into its record page.
@@ -43,7 +43,7 @@ All verified on the drafting day, 2026-10-05, against `main` at `6da2e6c`.
   `parity_expected_cases` (73) — it **SKIPs** when the binary is not built; `--build-dir`
   (default `build`), `--config` (default `Release`), `--clean` re-configures. Exit code is
   non-zero on any failure. The build tier picks its generator per OS
-  ([20 #49](../roadmap/20-public-delivery.md#49-linux-as-a-build-host)): Visual Studio 17 2022
+  ([20 #49](../roadmap/20-public-delivery/02-linux-build-host.md#49-linux-as-a-build-host)): Visual Studio 17 2022
   / x64 on Windows, Ninja when on `PATH` elsewhere, else CMake's default, with
   `CMAKE_BUILD_TYPE`.
 - **`ctest` is serial, never `-j`** — the gate encodes finding C43 (shared cwd, fixed temp

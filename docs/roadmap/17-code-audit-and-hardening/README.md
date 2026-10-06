@@ -127,7 +127,7 @@ full entries, with evidence and triggers, live in two files:
 | [#30](04-engineering-quality.md#30-threading-determinism-test) | Threading-determinism test | **DONE** 2026-08-31 |
 | [#31](04-engineering-quality.md#31-make-the-cpugpu-parity-gate-binding) | Make the CPU/GPU parity gate binding | DEFERRED |
 | [#32](04-engineering-quality.md#32-test-coverage-ledger) | Test-coverage ledger | PLANNED |
-| [#33](04-engineering-quality.md#33-build--tooling-hardening) | Build & tooling hardening | **PARTIAL** — batches 2026-08-31, 09-01, 09-10; nanort + clean-clone closed 2026-09-21 by [20 #47](../20-public-delivery.md) |
+| [#33](04-engineering-quality.md#33-build--tooling-hardening) | Build & tooling hardening | **PARTIAL** — batches 2026-08-31, 09-01, 09-10; nanort + clean-clone closed 2026-09-21 by [20 #47](../20-public-delivery/01-pin-geometry-central.md) |
 | [#34](04-engineering-quality.md#34-api-hygiene-batch) | API hygiene batch | **PARTIAL** — batches 2026-09-10 (×2), 09-11 (unknown keys, [10](10-docs-system-screening.md)) |
 | [#35](04-engineering-quality.md#35-repeatfield-neighbour-set-optimisation) | `RepeatField` neighbour-set optimisation | PLANNED — born from #34's fix on 2026-09-10, no ledger finding behind it |
 | [#46](03-correctness-and-robustness/02-precision-and-celloverlaps.md#46-offsetfield-does-not-forward-celloverlaps) | `OffsetField` does not forward `cellOverlaps` | **DONE** 2026-09-21 — opened 2026-09-20 from the first semantic lint ([19/08/01](../19-docs-layers/08-semantic-lint/01-2026-09-20-first-run.md)), no ledger finding behind it |

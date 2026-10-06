@@ -78,7 +78,7 @@ matches the file writers face-for-face.
     mesh(path="cube.obj"))` → exercises the `FileMeshResolver` and a clean destroy
     (70 032 v / 120 612 t). `cube.obj` is copied next to the demo by a POST_BUILD
     step (the `*.obj` are gitignored — regenerate with `dualc_gen_demo all --dir data`;
-    since 2026-09-21 the build generates them itself, [20 #47](../20-public-delivery.md)).
+    since 2026-09-21 the build generates them itself, [20 #47](../20-public-delivery/01-pin-geometry-central.md)).
   - `cli_c_abi_mesh_inmem` (v0.3.0) — the diskless gate: loads cube.obj into float/
     uint buffers, builds `intersection(onion(gyroid…),mesh(id="cube"))` via
     `dualc_field_create_from_expr_with_meshes`, and asserts it contours

@@ -81,7 +81,7 @@ item's trigger was "CI being set up"; for everything not needing a GPU it now is
 
 **Follow-up (2026-09-21): two sub-items close from block 20.** The undeclared nanort became a
 compile failure against upstream geometry-central v1.1.0 and is now a vendored header; the
-clean-clone bootstrap is a build-time `dualc_gen_demo` run. Record: [20 #47](../20-public-delivery.md#47-pin-geometry-central-to-upstream-own-nanort-self-bootstrapping-clone).
+clean-clone bootstrap is a build-time `dualc_gen_demo` run. Record: [20 #47](../20-public-delivery/01-pin-geometry-central.md#47-pin-geometry-central-to-upstream-own-nanort-self-bootstrapping-clone).
 
 ---
 

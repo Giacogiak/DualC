@@ -6,7 +6,7 @@ now, the repo facts verified on the drafting day, and the four phases. This fold
 **working split** the `plan-run` driver executes — one file per phase, one fresh session per
 task, with a handoff file per unit under `handoffs/`. These files may be corrected by a session
 when the code proves a step wrong; the raw plan never is. Status lives in the roadmap blocks
-each phase names ([20](../docs/roadmap/20-public-delivery.md),
+each phase names ([20](../docs/roadmap/20-public-delivery/README.md),
 [17](../docs/roadmap/17-code-audit-and-hardening/README.md)) and in the handoffs, never here.
 
 | File | Phase | Advances |

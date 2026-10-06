@@ -150,6 +150,7 @@
     "docs/roadmap/19-docs-layers/08-semantic-lint",
     "docs/roadmap/17-code-audit-and-hardening/03-correctness-and-robustness",
     "docs/roadmap/17-code-audit-and-hardening/09-local-checks-gate",
+    "docs/roadmap/20-public-delivery",
     "docs/raw/study",
     "docs/raw",
     "docs/design",
@@ -169,7 +170,7 @@
 
   "out_of_repo_links": {
     "_comment": "Relative links that deliberately leave the repo. They resolve only where the sibling project is checked out, so they are reported as informational, never as broken.",
-    "prefixes": ["../../../Boletus/", "../../Boletus/"]
+    "prefixes": ["../../../../../Boletus/", "../../../Boletus/", "../../Boletus/"]
   },
 
   "structure_summarized_prefixes": {

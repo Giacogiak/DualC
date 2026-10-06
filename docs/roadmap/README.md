@@ -24,9 +24,12 @@ audit — [19/09](19-docs-layers/09-pre-merge-loss-audit.md)); it leaves the mon
 `/docs-semantic-lint` to ordinary sessions. The engine track resumes: the 2026-06-12
 re-sequencing ([12](12-field-graph-and-app/README.md)) — *value from the command line first,
 then wrap it* — is **finished**, so what remains in DualC is the engine itself, drawn from the
-2026-08-19 audit's ledger ([17](17-code-audit-and-hardening/README.md)) as a standing queue.
-**NEXT** on that track: the rest of **#34**, then **#32**. **Public delivery**
-([20](20-public-delivery.md)) opened 2026-09-21: the build no longer depends on a local
+2026-08-19 audit's ledger ([17](17-code-audit-and-hardening/README.md)) as a standing queue,
+now worked through the [hosted-CI plan](../raw/2026-10-05-hosted-ci-plan.md): **#51** — the gate
+as a GitHub Actions job — is DONE (2026-10-06, [20 #51](20-public-delivery/03-hosted-ci.md#51-hosted-ci--the-gate-as-a-github-actions-job)); **NEXT** is its
+Phase 2, **#31** (the parity gate binding through headless GL), then #33, #32, and the rest of
+**#34** resumes. **Public delivery**
+([20](20-public-delivery/README.md)) opened 2026-09-21: the build no longer depends on a local
 geometry-central fork, and since 2026-10-03 it builds and passes the gate on Linux too (**#49**); the same day **#50**
 retired `dualc_view` and the Polyscope sibling checkout, so the GL targets own their dependencies
 ([07 #50](07-viewer-polyscope.md#50-retire-dualc_view-and-the-polyscope-dependency-own-glfw--glad)). **#48** — cooperative cancellation and progress through the
@@ -39,11 +42,11 @@ the block records the table links ([D-43](../decisions/01-settled.md)).
 
 | Date | What landed | Record |
 | --- | --- | --- |
+| 2026-10-06 | **#51** — hosted CI: a GitHub Actions workflow runs `scripts/check.py` and nothing else — the docs tier, the full gate on Ubuntu and Windows (required) and macOS, the parity harness under Xvfb (allowed to fail, D-49). | [20](20-public-delivery/03-hosted-ci.md#51-hosted-ci--the-gate-as-a-github-actions-job) |
 | 2026-10-03 | **#50** — `dualc_view` and Polyscope retired; the GL targets build on a vendored glad and a GLFW fetched at its pinned release (or `-DDUALC_GLFW_DIR`), the sibling-checkout mechanism gone. | [07 #50](07-viewer-polyscope.md#50-retire-dualc_view-and-the-polyscope-dependency-own-glfw--glad) |
-| 2026-10-03 | **#49** — Linux is a build host: C enabled for the vendored `miniz.c`, the gate picks its generator per OS and reads CTest 4; full gate green with GCC 15 + Ninja. | [20](20-public-delivery.md#49-linux-as-a-build-host) |
+| 2026-10-03 | **#49** — Linux is a build host: C enabled for the vendored `miniz.c`, the gate picks its generator per OS and reads CTest 4; full gate green with GCC 15 + Ninja. | [20](20-public-delivery/02-linux-build-host.md#49-linux-as-a-build-host) |
 | 2026-09-22 | **#48** — a host-owned cancel token and a calling-thread progress callback through sampler, contourer and writers; ABI 0.5.0's `*_with_progress` twins; every export writes `.part` and renames (D-46). | [14/05](14-c-abi/05-progress-and-cancel.md) |
 | 2026-09-21 | **Cap relief** — the status snapshot trimmed by its own rule (D-43); the gate's record 17/09 split into a folder. | [19/10](19-docs-layers/10-cap-relief.md) |
-| 2026-09-21 | **#47** — geometry-central pinned to upstream and fetched at configure; nanort vendored; a clean clone builds with no manual step. | [20](20-public-delivery.md#47-pin-geometry-central-to-upstream-own-nanort-self-bootstrapping-clone) |
 
 **The shipped keystone (2026-06-14 … 2026-07-06)** — builds #1–#3, the C ABI (#19) and
 the client layer's move to Boletus, each DONE with its evidence in
@@ -139,7 +142,7 @@ workflow, graded-onion; GLSL codegen completeness DONE 2026-06-24 —
 | 17 | [Code audit & engine hardening](17-code-audit-and-hardening/README.md) | The tracked ledger of the 2026-08-19 code audit ([`docs/raw/study/`](../raw/study/README.md)): every finding with a disposition, the tracked items, the record pages, the 2026-09-11 docs-system screening. | **PARTIAL** — a standing ledger; per-item status in [17 § Tracked items](17-code-audit-and-hardening/README.md#tracked-items--status-at-a-glance) |
 | 18 | [C ABI — continued](18-c-abi-continued.md) | Retired 2026-09-18: its two entries are [14/04](14-c-abi/04-abi-0-4-0.md); the number is never reused. | tombstone — DONE |
 | 19 | [Docs layers](19-docs-layers/README.md) | The 2026-09-17 docs restructuring: the plan (immutable, `docs/raw/`), items #36–#45, the phase table, per-phase evidence, the semantic-lint runs. | Phases 0–8 **DONE** (2026-09-20); the lint runs keep landing in [19/08](19-docs-layers/08-semantic-lint/README.md) |
-| 20 | [Public delivery](20-public-delivery.md) | The repo as others build it: geometry-central pinned and fetched (options weighed), nanort vendored, the self-bootstrapping clean clone (#47); Linux as a build host (#49). | **#47 DONE** (2026-09-21) · **#49 DONE** (2026-10-03) |
+| 20 | [Public delivery](20-public-delivery/README.md) | The repo as others build it: geometry-central pinned and fetched (options weighed), nanort vendored, the self-bootstrapping clean clone (#47); Linux as a build host (#49); hosted CI running the gate (#51). | **#47 DONE** (2026-09-21) · **#49 DONE** (2026-10-03) · **#51 DONE** (2026-10-06) |
 
 ## How the blocks relate
 

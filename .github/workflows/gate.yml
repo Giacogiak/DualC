@@ -17,6 +17,13 @@ concurrency:
 permissions:
   contents: read
 
+defaults:
+  run:
+    shell: bash   # -eo pipefail: `check.py | tee` keeps the gate's exit code
+
+env:
+  PYTHONUTF8: '1'   # the report holds non-ASCII; a Windows pipe is cp1252 otherwise
+
 jobs:
   # The docs tier with the report-only lists made fatal -- the session-end mode.
   docs:
@@ -29,7 +36,11 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.x'
-      - run: python3 scripts/check.py --docs --strict
+      - name: Gate (docs tier, strict)
+        run: python3 scripts/check.py --docs --strict | tee gate.log
+      - name: Annotate the failures
+        if: failure()
+        run: python3 .github/workflows/annotate.py gate.log
 
   # The full default gate: docs tier, configure, build, warnings scan, serial ctest.
   build:
@@ -70,7 +81,7 @@ jobs:
           echo "CCACHE_MAXSIZE=500M" >> "$GITHUB_ENV"
       - name: Restore ccache
         if: runner.os != 'Windows'
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ runner.temp }}/ccache
           key: ccache-${{ matrix.os }}-${{ github.run_id }}
@@ -79,7 +90,7 @@ jobs:
       # step wipes and re-clones a source dir whose *-subbuild stamps are
       # missing, and geometry-central downloads Eigen into its own build tree.
       - name: Restore FetchContent sources
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             build/_deps/*-src
@@ -87,7 +98,10 @@ jobs:
             build/_deps/geometry-central-build/deps/eigen-src
           key: fetchcontent-${{ matrix.os }}-${{ hashFiles('**/CMakeLists.txt') }}
       - name: Gate
-        run: python scripts/check.py --build-dir build
+        run: python scripts/check.py --build-dir build | tee gate.log
+      - name: Annotate the failures
+        if: failure()
+        run: python .github/workflows/annotate.py gate.log
       - name: ccache statistics
         if: always() && runner.os != 'Windows'
         run: ccache -s
@@ -116,8 +130,12 @@ jobs:
           -DDUALC_BUILD_GLSL_PARITY=ON
       - name: Build the harness
         run: cmake --build build --target dualc_glsl_parity dualc_gen_demo
-      # check.py runs the harness from the repo root, which probes data/.
+      # check.py runs the harness from the repo root, which probes data/;
+      # a clean clone has no data/, and dualc_gen_demo does not create it.
       - name: Generate the demo meshes into data/
-        run: build/examples/dualc_gen_demo all --dir data
+        run: mkdir -p data && build/examples/dualc_gen_demo all --dir data
       - name: Parity
-        run: xvfb-run -a python3 scripts/check.py --gpu --build-dir build
+        run: xvfb-run -a python3 scripts/check.py --gpu --build-dir build | tee gate.log
+      - name: Annotate the failures
+        if: failure()
+        run: python3 .github/workflows/annotate.py gate.log

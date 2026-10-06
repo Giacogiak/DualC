@@ -32,7 +32,7 @@ same day, [10](../10-docs-system-screening.md).)*
 
 Build tier: `configure` → `build` → `warnings` → `ctest`. Opt-in `--gpu` tier:
 `parity`. *(2026-10-03: the build tier picks its generator per OS and parses GCC/Ninja and
-CTest 4 output — [20 #49](../../20-public-delivery.md#49-linux-as-a-build-host).)*
+CTest 4 output — [20 #49](../../20-public-delivery/02-linux-build-host.md#49-linux-as-a-build-host).)*
 
 ### The semantic half
 
