@@ -45,7 +45,6 @@ if(DUALC_BUILD_EXAMPLES OR DUALC_BUILD_TESTS)
   enable_language(C)
 endif()
 
-set(CMAKE_CXX_STANDARD 17)  # DELIBERATE BREAK (#33)
 # No CMAKE_CXX_STANDARD here: a global set before the fetches below leaked
 # -std=c++17 into geometry-central and Catch2 (roadmap 17 #33). The dialect is
 # a property of each DualC target, set by dualc_target_options(). This guard
