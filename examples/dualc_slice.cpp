@@ -275,7 +275,9 @@ std::vector<Seg2> marchingSquaresZero(const std::vector<float>& values, int res,
 
       const int count = (hA ? 1 : 0) + (hB ? 1 : 0) + (hC ? 1 : 0) + (hD ? 1 : 0);
       if (count == 2) {
-        double px[2], py[2];
+        // count == 2 fills both slots; the zero-init is for GCC 13's
+        // -Wmaybe-uninitialized, which cannot see that (roadmap 17 #33).
+        double px[2] = {0.0, 0.0}, py[2] = {0.0, 0.0};
         int n = 0;
         if (hA) { px[n] = ax; py[n] = ay; ++n; }
         if (hB) { px[n] = bx; py[n] = by; ++n; }

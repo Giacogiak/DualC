@@ -1120,7 +1120,7 @@ int write3mf(const TriMesh& m, const std::string& path) {
   }
   auto add = [&](const char* name, const std::string& data) {
     return mz_zip_writer_add_mem(&zip, name, data.data(), data.size(),
-                                 MZ_DEFAULT_COMPRESSION) != MZ_FALSE;
+                                 MZ_DEFAULT_LEVEL) != MZ_FALSE;
   };
   bool ok = add("[Content_Types].xml", kContentTypes) &&
             add("_rels/.rels", kRels) && add("3D/3dmodel.model", model);
@@ -1327,12 +1327,12 @@ class Tiled3mfSink {
     bool ok =
         mz_zip_writer_add_mem(&zip, "[Content_Types].xml", kContentTypes3mf,
                               std::strlen(kContentTypes3mf),
-                              MZ_DEFAULT_COMPRESSION) != MZ_FALSE &&
+                              MZ_DEFAULT_LEVEL) != MZ_FALSE &&
         mz_zip_writer_add_mem(&zip, "_rels/.rels", kRels3mf,
                               std::strlen(kRels3mf),
-                              MZ_DEFAULT_COMPRESSION) != MZ_FALSE &&
+                              MZ_DEFAULT_LEVEL) != MZ_FALSE &&
         mz_zip_writer_add_file(&zip, "3D/3dmodel.model", tmpPath_.c_str(),
-                               nullptr, 0, MZ_DEFAULT_COMPRESSION) != MZ_FALSE;
+                               nullptr, 0, MZ_DEFAULT_LEVEL) != MZ_FALSE;
     if (ok) ok = mz_zip_writer_finalize_archive(&zip) != MZ_FALSE;
     mz_zip_writer_end(&zip);
     std::remove(tmpPath_.c_str());
@@ -1471,12 +1471,12 @@ class Welded3mfSink {
     }
     ok = mz_zip_writer_add_mem(&zip, "[Content_Types].xml", kContentTypes3mf,
                                std::strlen(kContentTypes3mf),
-                               MZ_DEFAULT_COMPRESSION) != MZ_FALSE &&
+                               MZ_DEFAULT_LEVEL) != MZ_FALSE &&
          mz_zip_writer_add_mem(&zip, "_rels/.rels", kRels3mf,
                                std::strlen(kRels3mf),
-                               MZ_DEFAULT_COMPRESSION) != MZ_FALSE &&
+                               MZ_DEFAULT_LEVEL) != MZ_FALSE &&
          mz_zip_writer_add_file(&zip, "3D/3dmodel.model", mpath.c_str(),
-                                nullptr, 0, MZ_DEFAULT_COMPRESSION) != MZ_FALSE;
+                                nullptr, 0, MZ_DEFAULT_LEVEL) != MZ_FALSE;
     if (ok) ok = mz_zip_writer_finalize_archive(&zip) != MZ_FALSE;
     mz_zip_writer_end(&zip);
     std::remove(mpath.c_str());
