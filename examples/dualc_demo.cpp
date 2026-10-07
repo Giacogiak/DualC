@@ -113,7 +113,7 @@ void printUsage() {
     "  - Triangle and polygon faces are both accepted (polygons are\n"
     "    fan-triangulated internally).\n"
     "  - Per-vertex normals from the input's `vn` lines are NOT used directly\n"
-    "    (geometry-central's loader discards them); area-weighted vertex\n"
+    "    (geometry-central's loader discards them); angle-weighted vertex\n"
     "    normals are computed from positions+topology and used for smooth\n"
     "    Hermite-edge sampling.\n"
     "\n"

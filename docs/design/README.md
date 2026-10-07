@@ -158,11 +158,11 @@ for you, in one place (§ 1).
 | [02-sign-oracles.md](02-sign-oracles.md) | § 3.4 | the three `SignMethod` oracles, their cost and failure modes |
 | [03-contourer-recursion.md](03-contourer-recursion.md) | § 4, § 4.1–4.3 | `cellProc`/`faceProc`/`edgeProc`, the two mixed-depth devices, emission and winding |
 | [04-qef-manifold-collapse.md](04-qef-manifold-collapse.md) | § 4.4–4.6 | the per-cell QEF, manifold DC, the collapse pass and its gates |
-| [05-conventions-and-tables.md](05-conventions-and-tables.md) | § 5, § 6 | geometry-central integration; corner/edge/child indexing, the descent tables, the four-cell order |
+| [05-conventions-and-tables.md](05-conventions-and-tables.md) | § 5, § 6 | geometry-central integration and the build rules that hold the library boundary; corner/edge/child indexing, the descent tables, the four-cell order |
 | [06-parameters-and-vendoring.md](06-parameters-and-vendoring.md) | § 7, § 8 | `SamplerParams` / `ContourerParams` field by field; the vendored QEF/SVD and its one local change |
 | [07-limitations.md](07-limitations.md) | § 9 | the standing limitations, each with its fix and its roadmap item |
 | [08-implicit-field-layer.md](08-implicit-field-layer.md) | § 10, § 10.1, 10.3–10.5 | `ImplicitField`, sharp features, the shape of the field library, unbounded fields |
-| [09-conventions.md](09-conventions.md) | — | project-wide conventions: units and frames, export-format dispatch and the `.part` temp-then-rename, PowerShell quoting, keyboard-layout independence, primitive parameter forms |
+| [09-conventions.md](09-conventions.md) | — | project-wide conventions: units and frames, export-format dispatch and the `.part` temp-then-rename, PowerShell quoting, keyboard-layout independence, primitive parameter forms, testing conventions |
 | [10-invariants-and-tolerances.md](10-invariants-and-tolerances.md) | — | the output invariants, the ≥ 2–3 cells rule, `mix`, the `BBox` sentinels, `--tile-depth`'s range, the cancellation and progress hooks, every numeric constant |
 | [11-glossary.md](11-glossary.md) | — | one line per term, and the ID vocabulary (`#N`, Tier 1 item, § A–G, build / pillar) |
 

@@ -32,6 +32,10 @@ Library surface ~15-25 LOC, no `src/` IO code; any `vn`-respecting OBJ helper fo
 `dualc_demo` lives in `examples/`. **Trigger to revisit.** A real input mesh whose
 smoothing groups visibly degrade in DualC's output AND a host application that already
 has those normals at hand.
+*(2026-10-07: "area-weighted" above is wrong, and was wrong on the day it was written.
+geometry-central weights the unit face normals by corner angle; the argument stands as made.
+Found by semantic-lint run [06](19-docs-layers/08-semantic-lint/06-2026-10-07-after-ci-plan.md); the mechanism is
+[`design/05` § 5](../design/05-conventions-and-tables.md#5-geometry-central-integration).)*
 
 ## Step 2. STL + 3MF-mesh writer — printable immediately, universal, what Rhino expects. [DONE — 2026-06-02]
 

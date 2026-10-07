@@ -52,7 +52,7 @@ int edgeOf(TriRegion r) {
 struct MeshBVH::Impl {
   std::vector<float>        positions;       // 3 floats per vertex
   std::vector<unsigned int> indices;         // 3 indices per triangle
-  std::vector<float>        vertexNormals;   // 3 floats per vertex (area-weighted)
+  std::vector<float>        vertexNormals;   // 3 floats per vertex (corner-angle weighted)
   std::unique_ptr<NanortMesh>  nanortMesh;
   std::unique_ptr<NanortPred>  sahPred;
   NanortBVH                    bvh;
