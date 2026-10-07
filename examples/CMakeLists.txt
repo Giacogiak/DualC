@@ -282,10 +282,12 @@ if(DUALC_BUILD_GLSL_PARITY)
   dualc_copy_demo_meshes(dualc_glsl_parity)
 endif()
 
-# --- CLI smoke tests (exit-code only) -----------------------------------
+# --- CLI smoke tests ------------------------------------------------------
 # Registered with ctest so the example binaries are exercised alongside the
 # unit tests. They cover one invocation per tool, including the post-op
 # chain, the infinite-bounds path, a mesh boolean, a 2D lift and a recipe.
+# Each test checks the exit code; the `<test>_content` tests registered after
+# them check what was written (check_cli_output.cmake, roadmap 17 #32).
 if(DUALC_BUILD_TESTS)
   # Exercises the post-op chain (onion decorator + twist domain op). Notes:
   #  - the onion wall (0.35) is kept comfortably thicker than the depth-6 cell
@@ -320,7 +322,8 @@ if(DUALC_BUILD_TESTS)
             --offset 0.1 --depth 5 -o cli_lattice.obj
     WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_lattice>)
   # Same lattice, exported through the extension-dispatched writer to the two
-  # manufacturing-facing formats (binary STL and 3MF-mesh). Exit-code only.
+  # manufacturing-facing formats (binary STL and 3MF-mesh). Their content
+  # checks hold both to cli_lattice.obj's face count.
   add_test(NAME cli_lattice_stl
     COMMAND dualc_lattice cube.obj --type gyroid --wavelength 0.5
             --offset 0.1 --depth 5 -o cli_lattice.stl
@@ -339,7 +342,7 @@ if(DUALC_BUILD_TESTS)
   # box-bounded gyroid shell) to OBJ, the same to binary STL (exercises the -o
   # extension dispatch), and a graph with a mesh source (cube.obj) clipped by a
   # gyroid shell -- the field-level lattice-in-volume that replaces the mesh
-  # boolean round-trip. Exit-code only.
+  # boolean round-trip.
   add_test(NAME cli_field
     COMMAND dualc_field gyroid_box.json --depth 5 -o cli_field.obj
     WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
@@ -347,15 +350,15 @@ if(DUALC_BUILD_TESTS)
     COMMAND dualc_field gyroid_box.json --depth 5 -o cli_field.stl
     WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
   # Tiled / streaming STL export (--tile-depth): bounded-memory contour of the
-  # same gyroid box. Exit-code only; the tiled==monolithic correctness bar is
-  # the unit test test_streaming_export.cpp.
+  # same gyroid box. The tiled==monolithic correctness bar is the unit test
+  # test_streaming_export.cpp; the content check here is the STL's structure.
   add_test(NAME cli_field_tiled_stl
     COMMAND dualc_field gyroid_box.json --depth 6 --tile-depth 4 -o cli_field_tiled.stl
     WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
   add_test(NAME cli_field_mesh
     COMMAND dualc_field mesh_lattice.json --depth 5 -o cli_field_mesh.obj
     WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
-  # Text shorthand (--expr) end-to-end to OBJ, and --dump-json (exit-code only).
+  # Text shorthand (--expr) end-to-end to OBJ, and --dump-json.
   add_test(NAME cli_field_expr
     COMMAND dualc_field --expr "difference(intersection(box(min=[-2,-2,-2],max=[2,2,2]),onion(normalize(gyroid(wavelength=1)),thickness=0.3)),sphere(radius=1))" --depth 5 -o cli_field_expr.obj
     WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
@@ -364,8 +367,8 @@ if(DUALC_BUILD_TESTS)
     WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
   # Strut-lattice source: an octet-truss wireframe clipped to the sample cube
   # (mesh-fill), exercising the sc/bcc/fcc/octet crystal factory end-to-end
-  # through the field-graph. Exit-code only; the tiled==explicit-union
-  # correctness bar is the unit test test_strut_lattice.cpp.
+  # through the field-graph. The tiled==explicit-union correctness bar is the
+  # unit test test_strut_lattice.cpp.
   add_test(NAME cli_field_strut
     COMMAND dualc_field --expr "intersection(mesh(path=\"cube.obj\"),octet(wavelength=0.5,radius=0.05))" --depth 5 -o cli_field_strut.obj
     WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
@@ -388,4 +391,58 @@ if(DUALC_BUILD_TESTS)
   add_test(NAME cli_demo_bracket_sharp
     COMMAND dualc_demo --sharp bracket.obj cli_bracket.obj --depth 6
     WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_demo>)
+
+  # Content checks: a corrupt PNG or a truncated STL used to pass on its exit
+  # code (audit C52). Each check reads one output of the test(s) it NEEDS,
+  # which become its CTest fixtures: `ctest -R <check>` reruns them first, and
+  # under `ctest -j` the check waits for them.
+  function(dualc_cli_content name file kind)
+    cmake_parse_arguments(C "" "" "NEEDS;OPTIONS" ${ARGN})
+    add_test(NAME ${name}
+      COMMAND ${CMAKE_COMMAND} -DFILE=${file} -DKIND=${kind} ${C_OPTIONS}
+              -P ${CMAKE_CURRENT_SOURCE_DIR}/check_cli_output.cmake
+      WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
+    foreach(producer IN LISTS C_NEEDS)
+      set_tests_properties(${producer} PROPERTIES FIXTURES_SETUP ${producer})
+    endforeach()
+    if(C_NEEDS)
+      set_tests_properties(${name} PROPERTIES FIXTURES_REQUIRED "${C_NEEDS}")
+    endif()
+  endfunction()
+
+  foreach(pair
+      cli_primitive=cli_primitive.obj cli_primitive_infinite=cli_plane.obj
+      cli_boolean=cli_boolean.obj cli_lift=cli_lift.obj
+      cli_csg_demo=cli_csg.obj cli_lattice=cli_lattice.obj
+      cli_field=cli_field.obj cli_field_mesh=cli_field_mesh.obj
+      cli_field_expr=cli_field_expr.obj cli_field_strut=cli_field_strut.obj
+      cli_demo_sphere=cli_sphere.obj cli_demo_torus=cli_torus.obj
+      cli_demo_bracket_sharp=cli_bracket.obj)
+    string(REPLACE "=" ";" pair "${pair}")
+    list(GET pair 0 producer)
+    list(GET pair 1 out)
+    dualc_cli_content(${producer}_content ${out} obj NEEDS ${producer})
+  endforeach()
+  # The same mesh in three formats: STL and 3MF must carry exactly the OBJ's
+  # triangle count.
+  dualc_cli_content(cli_lattice_stl_content cli_lattice.stl stl
+    NEEDS cli_lattice_stl cli_lattice OPTIONS -DSAME_AS_OBJ=cli_lattice.obj)
+  dualc_cli_content(cli_lattice_3mf_content cli_lattice.3mf 3mf
+    NEEDS cli_lattice_3mf cli_lattice OPTIONS -DSAME_AS_OBJ=cli_lattice.obj)
+  dualc_cli_content(cli_field_stl_content cli_field.stl stl
+    NEEDS cli_field_stl cli_field OPTIONS -DSAME_AS_OBJ=cli_field.obj)
+  dualc_cli_content(cli_field_tiled_stl_content cli_field_tiled.stl stl
+    NEEDS cli_field_tiled_stl)
+  dualc_cli_content(cli_slice_content cli_slice.png png
+    NEEDS cli_slice OPTIONS -DWIDTH=128 -DHEIGHT=128)
+  dualc_cli_content(cli_slice_svg_content cli_slice.svg svg
+    NEEDS cli_slice OPTIONS "-DCONTAINS=<line ")
+  # --dump-json prints the graph: the check runs the tool itself.
+  dualc_cli_content(cli_field_dump_json_content cli_field_dump.json json
+    OPTIONS -DJSON_ROOT_OP=difference
+            "-DRUN=$<TARGET_FILE:dualc_field>|gyroid_box.json|--dump-json")
+  # The generated cube is exact: 8 corners, 12 triangles.
+  dualc_cli_content(cli_gen_demo_content
+    ${CMAKE_CURRENT_BINARY_DIR}/cli_gen_demo_out/cube.obj obj
+    NEEDS cli_gen_demo OPTIONS -DEXACT_VERTICES=8 -DEXACT_FACES=12)
 endif()

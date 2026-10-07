@@ -25,10 +25,9 @@ namespace {
 // Ground-truth (oracle) value of a strut lattice at `p`: the true infinite
 // union of capsules, evaluated by tiling the unit-cell segments MANUALLY over a
 // wide neighbour range and taking the exact min. This is deliberately
-// independent of makeStrutLattice's `repeated` tiling (which only evaluates the
-// single nearest tile) -- if that single-tile fold drops a strut that crosses a
-// cell boundary (the fcc/octet failure mode), the oracle min is strictly
-// smaller here and the comparison below catches it.
+// independent of makeStrutLattice's `repeated` tiling: a tiling that drops a
+// strut makes the oracle min strictly smaller here, and the comparisons below
+// catch it where they sample (see seamPoints()).
 double oracleValue(const std::string& kind, double wavelength, double radius,
                    const Vector3& p) {
   const auto segs = dce::strutCellSegments(kind, wavelength);
@@ -53,8 +52,9 @@ double oracleValue(const std::string& kind, double wavelength, double radius,
 // Tapered variant of the oracle: the same independent wide-neighbour tiling, but
 // each segment is the union of TWO round cones split at its midpoint (fat
 // nodeRadius at the end-nodes, thin radius mid-span) -- mirroring the tapered
-// makeStrutLattice cell without reusing its `repeated` fold. Certifies that the
-// single round-fold stays exact once struts carry the larger node caps.
+// makeStrutLattice cell without reusing its `repeated` fold. The fat node caps
+// overhang the seams further than plain capsules, so the tiling must stay
+// exact there too.
 double oracleValueTapered(const std::string& kind, double wavelength,
                           double radius, double nodeRadius, const Vector3& p) {
   const auto segs = dce::strutCellSegments(kind, wavelength);
@@ -78,18 +78,64 @@ double oracleValueTapered(const std::string& kind, double wavelength,
   return best;
 }
 
-// Deterministic pseudo-random points in [-1.1, 1.1]^3 (a small LCG so the test
-// is reproducible without <random> plumbing).
+// A small LCG so the test is reproducible without <random> plumbing.
+struct Lcg {
+  std::uint64_t state = 0x9e3779b97f4a7c15ULL;
+  double next() {  // [0, 1)
+    state = state * 6364136223846793005ULL + 1442695040888963407ULL;
+    return static_cast<double>((state >> 11) & 0x1FFFFF) / 2097152.0;
+  }
+};
+
+// Deterministic pseudo-random points in [-1.1, 1.1]^3.
 std::vector<Vector3> samplePoints(int n) {
   std::vector<Vector3> pts;
-  std::uint64_t state = 0x9e3779b97f4a7c15ULL;
-  auto next = [&]() {
-    state = state * 6364136223846793005ULL + 1442695040888963407ULL;
-    return static_cast<double>((state >> 11) & 0x1FFFFF) / 2097152.0;  // [0,1)
-  };
+  Lcg rng;
   for (int i = 0; i < n; ++i)
-    pts.push_back(Vector3{2.2 * next() - 1.1, 2.2 * next() - 1.1,
-                          2.2 * next() - 1.1});
+    pts.push_back(Vector3{2.2 * rng.next() - 1.1, 2.2 * rng.next() - 1.1,
+                          2.2 * rng.next() - 1.1});
+  return pts;
+}
+
+// Seam-targeted points. A tiling goes wrong, if anywhere, within a cap's
+// reach of a seam -- the planes at half-integer multiples of the period -- and
+// the strut nodes sit on the seams: the cell corners on three at once, the
+// face centres on one. Uniform points rarely land in those slivers. For every node of the cell, in the tile at the
+// origin and in the one at (+1, -1, +1), `perNode` points within `reach` of
+// it (in a ball), plus `perFace` points on each seam plane of the origin tile,
+// within `reach` across it.
+std::vector<Vector3> seamPoints(double wavelength, double reach, int perNode,
+                                int perFace) {
+  const double h = 0.5 * wavelength;
+  std::vector<Vector3> nodes = {{0, 0, 0}};
+  for (int c = 0; c < 8; ++c)
+    nodes.push_back({(c & 1) ? h : -h, (c & 2) ? h : -h, (c & 4) ? h : -h});
+  for (int a = 0; a < 3; ++a)
+    for (double sgn : {-1.0, 1.0}) {
+      Vector3 f{0, 0, 0};
+      f[a] = sgn * h;
+      nodes.push_back(f);
+    }
+  std::vector<Vector3> pts;
+  Lcg rng;
+  auto inBall = [&]() {
+    for (;;) {
+      const Vector3 d{2 * rng.next() - 1, 2 * rng.next() - 1, 2 * rng.next() - 1};
+      if (d.norm2() <= 1.0) return d * reach;
+    }
+  };
+  for (const Vector3& tile : {Vector3{0, 0, 0},
+                              Vector3{wavelength, -wavelength, wavelength}})
+    for (const Vector3& n : nodes)
+      for (int i = 0; i < perNode; ++i) pts.push_back(tile + n + inBall());
+  for (int a = 0; a < 3; ++a)
+    for (double sgn : {-1.0, 1.0})
+      for (int i = 0; i < perFace; ++i) {
+        Vector3 p{(2 * rng.next() - 1) * h, (2 * rng.next() - 1) * h,
+                  (2 * rng.next() - 1) * h};
+        p[a] = sgn * h + (2 * rng.next() - 1) * reach;
+        pts.push_back(p);
+      }
   return pts;
 }
 
@@ -134,16 +180,29 @@ TEST_CASE("makeStrutLattice returns null for an unknown crystal", "[strut]") {
           nullptr);
 }
 
-// THE correctness gate: the tiled field must equal the true infinite union at
-// every sampled point, for every crystal. A dropped boundary strut (the fcc /
-// octet failure mode of single round-fold) makes the oracle strictly smaller
-// somewhere and fails this REQUIRE. The manifold end-to-end test below CANNOT
-// catch that (each capsule is independently closed, so a sparser lattice is
-// still watertight), which is exactly why this value-level oracle exists.
+// Uniform points plus the seam-targeted ones, `reach` being how far a cap
+// overhangs a seam.
+std::vector<Vector3> gatePoints(double wavelength, double reach) {
+  std::vector<Vector3> pts = samplePoints(400);
+  const auto seam = seamPoints(wavelength, reach, 12, 40);
+  pts.insert(pts.end(), seam.begin(), seam.end());
+  return pts;
+}
+
+// The tiling gate: the tiled field must equal the true infinite union at every
+// sampled point, for every crystal -- 1,000 points, 600 of them within a cap's
+// reach of a seam or a node. What it does NOT certify (roadmap 17, record 15):
+// these four cells are mirror-symmetric about their own faces, which makes
+// even a single-tile fold exact in value -- with RepeatField forced back to
+// one, this gate still passes, and so it should. The 2026-09-10 RepeatField
+// defect (an off-centre child reaching across a seam) is pinned by
+// test_domain_ops.cpp, not here. The manifold end-to-end test below CANNOT
+// catch a dropped strut (each capsule is independently closed, so a sparser
+// lattice is still watertight), which is why this value-level oracle exists.
 TEST_CASE("Tiled strut lattice equals the explicit infinite union", "[strut]") {
   const double wavelength = 0.5;
   const double radius = 0.06;
-  const auto pts = samplePoints(400);
+  const auto pts = gatePoints(wavelength, 2.0 * radius);
 
   for (const auto& kind : dce::strutKinds()) {
     FieldPtr lattice =
@@ -161,13 +220,13 @@ TEST_CASE("Tiled strut lattice equals the explicit infinite union", "[strut]") {
 }
 
 // The tapered counterpart of the tiling gate: the two-round-cone split must tile
-// exactly under the single round-fold too. A dropped tapered boundary strut makes
-// the independent oracle strictly smaller somewhere and fails this REQUIRE.
+// exactly too. A dropped tapered boundary strut makes the independent oracle
+// strictly smaller near a seam and fails this REQUIRE.
 TEST_CASE("Tapered strut lattice equals the explicit two-cone union", "[strut]") {
   const double wavelength = 0.5;
   const double radius = 0.04;
   const double nodeRadius = 0.10;
-  const auto pts = samplePoints(400);
+  const auto pts = gatePoints(wavelength, 2.0 * nodeRadius);
 
   for (const auto& kind : dce::strutKinds()) {
     FieldPtr lattice = dce::makeStrutLattice(kind.name, Vector3{0, 0, 0},
@@ -248,3 +307,4 @@ TEST_CASE("Strut radius controls thickness; wavelength sets the period",
   REQUIRE(f->valueAt(p + Vector3{0.5, 0, 0}) ==
           Approx(f->valueAt(p)).margin(1e-10));
 }
+

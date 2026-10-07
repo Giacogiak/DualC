@@ -28,6 +28,7 @@ add_executable(dualc_tests
   test_qef.cpp
   test_dc_tables.cpp
   test_cube_components.cpp
+  test_accuracy.cpp
   test_sampler.cpp
   test_contourer.cpp
   test_pipeline.cpp

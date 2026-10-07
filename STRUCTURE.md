@@ -105,6 +105,8 @@ DualC/
 │   ├── dualc_field_view.cpp   OPT-IN GPU viewer for ANY field-graph: compile to GLSL (field_glsl) → sphere-trace; live edit
 │   ├── dualc_glsl_parity.cpp  OPT-IN field→GLSL acceptance gate: GPU sceneSDF vs C++ valueAt, per node + the baked
 │   │                            mesh/winding sources (sign parity + texture plumbing) (no CTest, needs GL)
+│   ├── check_cli_output.cmake `cmake -P` content check behind the `*_content` CTest cases: PNG header, STL/3MF
+│   │                            structure + triangle count, OBJ/SVG/JSON (roadmap 17 #32)
 │   ├── samples/              Ready-to-run field-graphs (gyroid_box.json, mesh_lattice.json) copied next to dualc_field
 │   └── third_party/          Host-only I/O deps (never linked into libdualc)
 │       ├── miniz.{c,h}          ZIP/deflate for 3MF export (MIT)
@@ -139,9 +141,10 @@ DualC/
 │   ├── test_octree.cpp        Hermite octree structure
 │   ├── test_qef.cpp           QEF solver
 │   ├── test_dc_tables.cpp     DC table correctness
-│   ├── test_cube_components.cpp  Cube vertex / component labeling
+│   ├── test_cube_components.cpp  Cube vertex / component labeling; all 256 sign configurations vs a region-count oracle
+│   ├── test_accuracy.cpp      Vertex error vs analytic SDFs falls with depth; collapse trade-off; normal content; sharp/smooth normals (17 #32)
 │   ├── test_sampler.cpp       Mesh sampling
-│   ├── test_contourer.cpp     Octree contouring
+│   ├── test_contourer.cpp     Octree contouring; the per-leaf ContourerParams knobs
 │   ├── test_pipeline.cpp      Full dualContourMesh pipeline
 │   ├── test_implicit.cpp      v2 field module
 │   ├── test_grid_field.cpp    Voxel grid field

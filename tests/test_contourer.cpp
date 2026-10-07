@@ -314,3 +314,130 @@ TEST_CASE("Collapse refuses on a saddle face", "[contourer][collapse]") {
   CHECK_FALSE(octree.root()->isLeaf);
   CHECK(octree.leafCount() == 8);
 }
+
+// ===========================================================================
+// The three per-leaf ContourerParams knobs (roadmap 17 #32, audit C48)
+// ===========================================================================
+//
+// Only manifoldDC was ever varied. One fabricated leaf exercises the other
+// three per-leaf knobs (simplificationError, the fourth, is measured end to
+// end in test_accuracy.cpp). Corner 0 of BBox::unit() is inside; its three
+// crossings sit 0.2 in from the corner, on the planes x = -0.3, y = -0.3 and a
+// third plane through (-0.5, -0.5, -0.3) with normal (cos t, 0, sin t),
+// sin t = 0.3 -- leaning 72.5 degrees off z. The three planes meet at
+// z = -0.3 - 0.2 cos t / sin t = -0.936 -- 0.436 cell widths below the cell --
+// and the third plane makes A^T A's smallest eigenvalue about 0.046: under the
+// default 0.1 pseudo-inverse threshold, above 1e-3.
+
+namespace {
+
+constexpr double kTiltSin = 0.3;
+
+double tiltCos() { return std::sqrt(1.0 - kTiltSin * kTiltSin); }
+
+// z where the three planes meet (x = y = -0.3).
+double tiltedCornerZ() { return -0.3 - 0.2 * tiltCos() / kTiltSin; }
+
+HermiteNode makeTiltedCornerLeaf() {
+  auto leaf = std::make_unique<HermiteLeafData>();
+  leaf->cornerInside.fill(false);
+  leaf->cornerInside[0] = true;
+  auto setEdge = [&](int e, Vector3 pos, Vector3 nrm) {
+    leaf->edges[static_cast<std::size_t>(e)].position    = pos;
+    leaf->edges[static_cast<std::size_t>(e)].normal      = nrm;
+    leaf->edges[static_cast<std::size_t>(e)].hasCrossing = true;
+  };
+  setEdge(0, Vector3{-0.3, -0.5, -0.5}, Vector3{1.0, 0.0, 0.0});
+  setEdge(4, Vector3{-0.5, -0.3, -0.5}, Vector3{0.0, 1.0, 0.0});
+  setEdge(8, Vector3{-0.5, -0.5, -0.3}, Vector3{tiltCos(), 0.0, kTiltSin});
+  return makeUnitLeafNode(std::move(leaf));
+}
+
+// Distance from v to the tilted third plane.
+double tiltedPlaneResidual(const Vector3& v) {
+  return std::abs(tiltCos() * (v.x + 0.5) + kTiltSin * (v.z + 0.3));
+}
+
+Vector3 solveTilted(const ContourerParams& params) {
+  const HermiteNode node = makeTiltedCornerLeaf();
+  const auto mls = internal::solveLeaf(node, params);
+  REQUIRE(mls.parts.numComponents == 1);
+  REQUIRE(mls.perComponent[0].hasVertex);
+  return mls.perComponent[0].vertex;
+}
+
+// The QEF's mass point: the mean of the three crossings.
+const Vector3 kTiltedMassPoint{-1.3 / 3.0, -1.3 / 3.0, -1.3 / 3.0};
+
+} // namespace
+
+TEST_CASE("qefRegularization decides whether a weak direction is solved",
+          "[contourer][params]") {
+  ContourerParams params;
+  params.clampVertexToCell = false;  // look at the raw solve
+
+  params.qefRegularization = 1e-3;  // below the 0.046 eigenvalue: kept
+  const Vector3 exact = solveTilted(params);
+  CAPTURE(exact.x, exact.y, exact.z);
+  CHECK(near(exact.x, -0.3, 1e-3));
+  CHECK(near(exact.y, -0.3, 1e-3));
+  CHECK(near(exact.z, tiltedCornerZ(), 1e-3));
+  CHECK(tiltedPlaneResidual(exact) < 1e-3);
+
+  params.qefRegularization = 0.1;  // the default, above it: truncated
+  const Vector3 truncated = solveTilted(params);
+  CAPTURE(truncated.x, truncated.y, truncated.z);
+  // The strong directions are still solved (y = -0.3 exactly), the weak one
+  // falls back towards the mass point, so the third plane is no longer met.
+  CHECK(near(truncated.y, -0.3, 1e-3));
+  CHECK(tiltedPlaneResidual(truncated) > 0.05);
+  CHECK((truncated - kTiltedMassPoint).norm() <
+        (exact - kTiltedMassPoint).norm());
+
+  // Pinned as found: 0 is not "no regularisation", it selects the default.
+  params.qefRegularization = 0.0;
+  const Vector3 zero = solveTilted(params);
+  CHECK((zero - truncated).norm() < 1e-9);
+}
+
+TEST_CASE("clampVertexToCell keeps a drifting QEF vertex inside its cell",
+          "[contourer][params]") {
+  ContourerParams params;
+  params.qefRegularization = 1e-3;  // solve all three planes: z = -0.936
+
+  params.clampVertexToCell = false;
+  const Vector3 raw = solveTilted(params);
+  CAPTURE(raw.x, raw.y, raw.z);
+  CHECK(raw.z < -0.9);  // 0.4 cell widths below the cell
+
+  params.clampVertexToCell = true;  // tolerance 1 cell: projected onto the box
+  const Vector3 clamped = solveTilted(params);
+  CAPTURE(clamped.x, clamped.y, clamped.z);
+  CHECK(near(clamped.x, raw.x));
+  CHECK(near(clamped.y, raw.y));
+  CHECK(near(clamped.z, -0.5));
+}
+
+TEST_CASE("clampToleranceCells chooses projection or the mass point",
+          "[contourer][params]") {
+  ContourerParams params;
+  params.qefRegularization = 1e-3;
+  params.clampVertexToCell = true;
+
+  // The drift is 0.436 cell widths. Within the tolerance, the vertex is
+  // projected onto the cell; beyond it, it falls back to the mass point.
+  for (double tol : {1.0, 0.5}) {
+    params.clampToleranceCells = tol;
+    const Vector3 v = solveTilted(params);
+    CAPTURE(tol, v.x, v.y, v.z);
+    CHECK(near(v.x, -0.3, 1e-3));
+    CHECK(near(v.y, -0.3, 1e-3));
+    CHECK(near(v.z, -0.5));
+  }
+  for (double tol : {0.4, 0.0}) {
+    params.clampToleranceCells = tol;
+    const Vector3 v = solveTilted(params);
+    CAPTURE(tol, v.x, v.y, v.z);
+    CHECK((v - kTiltedMassPoint).norm() < 1e-5);
+  }
+}
