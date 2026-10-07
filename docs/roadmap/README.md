@@ -66,7 +66,7 @@ row (cited by ID).
 1. **Engine hardening — the audit's open findings**
    ([17](17-code-audit-and-hardening/README.md)) — a standing ledger, not a phase; the
    one status table is [17 § Tracked items](17-code-audit-and-hardening/README.md#tracked-items--status-at-a-glance).
-   **NEXT:** #32 Batch B (the CI plan's Phase 4), then the rest of #34.
+   **NEXT:** the rest of #34, then #35 on its trigger.
 2. **TPMS / lattice capability** ([05](05-tpms-lattices/README.md)) — **#17 strut
    lattices** and their Phases 3–5 DONE; **#18 tight Lipschitz `cellOverlaps`**
    DEFERRED ([#18](../decisions/README.md)).
