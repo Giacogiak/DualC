@@ -172,6 +172,9 @@ class SpawnAtFirstTile : public dualc::ProgressSink {
 
 }  // namespace
 
+// The tiled writer holds its `.part` open for the whole contour, so a holder
+// polling every millisecond always catches it; the monolithic writer's file
+// exists for about a millisecond and a poll can miss it (it did, on CI).
 TEST_CASE("Windows: a short hold on the .part is retried through, a long one fails with the OS text",
           "[writers][io][windows]") {
   SphereCase c;
@@ -180,7 +183,7 @@ TEST_CASE("Windows: a short hold on the .part is retried through, a long one fai
     const std::string path = tempName("hold_short", ".stl");
     {
       Holder hold(path + ".part", 300);
-      REQUIRE(dce::writeField(*c.field, path, c.sp, c.cp) == 0);
+      REQUIRE(dce::writeFieldTiledStl(*c.field, path, c.sp, c.cp, 3) == 0);
       REQUIRE(hold.acquired());
     }
     REQUIRE(fs::exists(path));
@@ -194,7 +197,7 @@ TEST_CASE("Windows: a short hold on the .part is retried through, a long one fai
     {
       Holder hold(path + ".part", 3000);
       const auto t0 = std::chrono::steady_clock::now();
-      REQUIRE(dce::writeField(*c.field, path, c.sp, c.cp) == 2);
+      REQUIRE(dce::writeFieldTiledStl(*c.field, path, c.sp, c.cp, 3) == 2);
       const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
                           std::chrono::steady_clock::now() - t0).count();
       REQUIRE(hold.acquired());
