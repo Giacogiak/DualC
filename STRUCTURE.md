@@ -19,6 +19,8 @@ DualC/
 │       ├── gate.yml           Hosted CI (roadmap 20 #51): runs `scripts/check.py` and nothing else — `docs` (--docs --strict),
 │       │                        `build` matrix (Ubuntu, Windows, macOS; all required; -D DUALC_WERROR=ON), `sanitize`
 │       │                        (ASan+UBSan ctest, RelWithDebInfo; 17 #33), `gpu` parity under Xvfb (required)
+│       ├── io-stress.yml      EXPERIMENT (17 #52), on the exp/io-stress* branches only, never merged: `check.py --io-stress`
+│       │                        on windows-2022 (scanner on / off / sequential / --force-hold) + a Linux control, all continue-on-error
 │       └── annotate.py        Re-prints the gate's FAIL lines as error annotations (readable without auth; a job log is not)
 │
 ├── AGENTS.md                  Agent entry file: build/test/gate commands, the five docs principles, the reading order
@@ -105,6 +107,9 @@ DualC/
 │   ├── dualc_field_view.cpp   OPT-IN GPU viewer for ANY field-graph: compile to GLSL (field_glsl) → sphere-trace; live edit
 │   ├── dualc_glsl_parity.cpp  OPT-IN field→GLSL acceptance gate: GPU sceneSDF vs C++ valueAt, per node + the baked
 │   │                            mesh/winding sources (sign parity + texture plumbing) (no CTest, needs GL)
+│   ├── dualc_io_stress.cpp    OPT-IN concurrent-export I/O harness (17 #52): N exports at once to the temp dir, every
+│   │                            `.part` rename must land; keeps each `[dualc] error` line, probes the rename again,
+│   │                            `--force-hold` (Windows) pins the sharing-violation case (no CTest; `check.py --io-stress`)
 │   ├── samples/              Ready-to-run field-graphs (gyroid_box.json, mesh_lattice.json) copied next to dualc_field
 │   └── third_party/          Host-only I/O deps (never linked into libdualc)
 │       ├── miniz.{c,h}          ZIP/deflate for 3MF export (MIT)

@@ -209,6 +209,18 @@ if(DUALC_BUILD_GLSL_PARITY)
   dualc_target_options(dualc_glsl_parity)
 endif()
 
+# dualc_io_stress is the concurrent-export I/O harness (roadmap 17 #52): N
+# exports at once to the temp directory, every `.part` rename must land, the
+# `[dualc] error` line of any failure kept and the rename probed again. Opt-in
+# and nondeterministic by design, so no CTest: `check.py --io-stress` is its
+# one runner (an experiment job on Windows, never part of the gate's green).
+if(DUALC_BUILD_IO_STRESS)
+  add_executable(dualc_io_stress dualc_io_stress.cpp)
+  target_link_libraries(dualc_io_stress PRIVATE dualc::dualc dualc_examples_fieldgraph)
+  target_compile_features(dualc_io_stress PRIVATE cxx_std_17)
+  dualc_target_options(dualc_io_stress)
+endif()
+
 # Demo meshes are generated, not checked in: `*.obj` is gitignored and
 # dualc_gen_demo (built right here) is the version-controlled source. One
 # custom command runs it once per build into <build>/data, and every

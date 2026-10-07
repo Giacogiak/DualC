@@ -33,6 +33,9 @@ same day, [10](../10-docs-system-screening.md).)*
 Build tier: `configure` → `build` → `warnings` → `ctest`. Opt-in `--gpu` tier:
 `parity`. *(2026-10-03: the build tier picks its generator per OS and parses GCC/Ninja and
 CTest 4 output — [20 #49](../../20-public-delivery/02-linux-build-host.md#49-linux-as-a-build-host).)*
+*(2026-10-07: a second opt-in tier, `--io-stress` → `io-stress`, runs the concurrent-export
+harness and passes `--io-stress-args` through; an experiment measuring a flake, never in the
+default gate or `--all` — [15 #52](../15-windows-rename-race.md#52-windows-export-io-flake--the-part-rename-under-an-on-access-scanner).)*
 
 ### The semantic half
 

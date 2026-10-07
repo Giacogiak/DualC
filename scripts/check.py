@@ -15,6 +15,7 @@ Usage:
     python scripts/check.py            # fast + build
     python scripts/check.py --fast     # docs/hygiene only, ~1s, no build
     python scripts/check.py --gpu      # opt-in: dualc_glsl_parity, needs GL
+    python scripts/check.py --io-stress  # opt-in: dualc_io_stress, an experiment (17 #52)
     python scripts/check.py --list     # what each check does
 
 Exit codes: 0 all selected checks passed, 1 a check failed, 2 the gate itself
@@ -1596,6 +1597,52 @@ def check_parity(ctx):
     return Result(OK, "%d/%d passed" % (passed, total))
 
 
+# I/O stress tier -- opt-in everywhere; an experiment job, never part of green
+# --------------------------------------------------------------------------
+
+@check("io-stress", "io-stress",
+       "dualc_io_stress: concurrent exports to the temp dir, every rename must land")
+def check_io_stress(ctx):
+    """The concurrent-export harness (roadmap 17 #52), wrapped like `parity`.
+
+    What it observes: N exports at once (Boletus's scenario: tiled and
+    monolithic STL of the same field to fresh files), every non-zero rc with
+    the `[dualc] error` line it printed, the site that failed (open / finish
+    / commit), whether a retried rename would have landed the file, and
+    whether deleting the finished file needed retries. Nondeterministic by
+    design -- it is how a flake is *measured* -- so it is never in the
+    default gate; `--io-stress-args` passes extra flags through verbatim
+    (`--force-hold through`, `--concurrency 1`, `--small`).
+    """
+    bd = build_dir(ctx)
+    name = "dualc_io_stress" + (".exe" if os.name == "nt" else "")
+    exe = next((p for p in (os.path.join(ctx.root, bd, "examples", ctx.args.config, name),
+                            os.path.join(ctx.root, bd, "examples", name))
+                if os.path.exists(p)), None)
+    if exe is None:
+        return Result(SKIP, "dualc_io_stress not built "
+                            "(configure with -DDUALC_BUILD_IO_STRESS=ON)")
+    cfg = ctx.data.get("io_stress", {})
+    cmd = [exe, "--concurrency", str(cfg.get("concurrency", 6)),
+           "--iterations", str(cfg.get("iterations", 30))]
+    cmd += [a for a in (ctx.args.io_stress_args or "").split() if a]
+    rc, out = run(cmd, cwd=ctx.root)
+    lines = out.splitlines()
+    if any("not supported on this platform" in l for l in lines):
+        return Result(SKIP, "--force-hold is Windows-only", lines[-3:])
+    tally = next((l for l in lines if re.match(r"dualc_io_stress:\s*\d+ exports,", l)), None)
+    if tally is None:
+        return Result(FAIL, "could not parse dualc_io_stress output (rc %d)" % rc,
+                      lines[-15:])
+    summary = tally.split(":", 1)[1].strip()
+    details = [l for l in lines if l.startswith(("FAIL #", "DELETE-FAIL", "DELETE-RETRIED",
+                                                 "dualc_io_stress: baseline",
+                                                 "dualc_io_stress: field="))]
+    if rc != 0:
+        return Result(FAIL, summary, details[:40])
+    return Result(OK, summary, details[:40])
+
+
 # --------------------------------------------------------------------------
 # Report-only metrics (never affect the exit code)
 # --------------------------------------------------------------------------
@@ -1737,6 +1784,12 @@ def main(argv):
                     help="configure + build + warning scan + ctest")
     ap.add_argument("--gpu", action="store_true",
                     help="opt-in: dualc_glsl_parity (needs a GL context)")
+    ap.add_argument("--io-stress", action="store_true",
+                    help="opt-in: dualc_io_stress, concurrent exports to the temp dir "
+                         "(an experiment, never part of the gate; roadmap 17 #52)")
+    ap.add_argument("--io-stress-args", default="", metavar="ARGS",
+                    help="extra flags passed verbatim to dualc_io_stress "
+                         "(e.g. \"--force-hold through\", \"--concurrency 1\")")
     ap.add_argument("--all", action="store_true", help="--fast --build --gpu")
     ap.add_argument("--clean", action="store_true",
                     help="re-configure from scratch (needs network for Catch2)")
@@ -1780,6 +1833,8 @@ def main(argv):
             tiers.add("build")
         if args.gpu:
             tiers.add("gpu")
+        if args.io_stress:
+            tiers.add("io-stress")
         if not tiers:
             tiers = {"fast", "build"}      # the default gate
 

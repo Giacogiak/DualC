@@ -28,6 +28,9 @@ option(DUALC_BUILD_GLSL_PARITY
 option(DUALC_BUILD_C_ABI
        "Build the C ABI shared library (dualc_capi) + C demo: a flat C boundary over the field-graph proxy+export path. Requires DUALC_BUILD_EXAMPLES (it links the host-side field-graph + export libs)."
        OFF)
+option(DUALC_BUILD_IO_STRESS
+       "Build the concurrent-export I/O stress harness (dualc_io_stress): N exports at once to the temp dir, every rename must land. Opt-in, run by scripts/check.py --io-stress, never a CTest case (roadmap 17 #52)."
+       OFF)
 option(DUALC_WERROR
        "Treat warnings in DualC's own targets as errors (-Werror / /WX). OFF locally, where scripts/check.py filters the build log instead; ON in CI's build matrix."
        OFF)
