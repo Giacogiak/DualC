@@ -121,12 +121,14 @@ jobs:
         if: always()
         shell: bash
         run: |
-          grep -E '^(dualc_io_stress:|FAIL #|DELETE-)' gate.log | head -10 | sed 's/%/%25/g' | while IFS= read -r l; do echo "::notice title=io-stress::$l"; done
+          # check.py indents its detail lines and folds the tally into its
+          # own [OK]/[FAIL] line, so match anywhere; no match is not an error.
+          { grep -E 'io-stress|dualc_io_stress:|FAIL #|DELETE-' gate.log || true; } | sed 's/^ *//; s/%/%25/g' | head -10 | while IFS= read -r l; do echo "::notice title=io-stress::$l"; done
       - name: Environment as annotations
         if: always() && runner.os == 'Windows'
         shell: bash
         run: |
-          grep -E 'TEMP=|CPUs=|RealTimeProtectionEnabled|IsTamperProtected|DisableRealtimeMonitoring|ExclusionPath|Status|toggle|AntivirusSignatureVersion' env.log | sed 's/^ *//' | grep -v '^$' | head -10 | while IFS= read -r l; do echo "::notice title=env::$l"; done
+          { grep -E 'TEMP=|CPUs=|RealTimeProtectionEnabled|IsTamperProtected|DisableRealtimeMonitoring|ExclusionPath|Status|toggle|AntivirusSignatureVersion' env.log || true; } | sed 's/^ *//; s/%/%25/g' | grep -v '^$' | head -10 | while IFS= read -r l; do echo "::notice title=env::$l"; done || true
       - name: Report to the step summary
         if: always()
         shell: bash
