@@ -60,8 +60,13 @@ Confirmed — DualC's, at the rename, with a different holder than inferred. Shi
    for the three miniz ZIPs. The extension takes **no ownership** (so says `<fstream>`:
    "extension, no ownership taking"): the first cut of this fix leaked every `FILE`, and the
    `force` job's own sequential baseline then failed its rename after 11 retries — the
-   process holding its own `.part` — which is how the owner came to exist (sample 6 in the
-   second raw file). The non-decimated
+   process holding its own `.part`; the second cut closed the `FILE` twice (an explicit
+   `filebuf::close()` fcloses unconditionally; only the destructor honours the flag) and
+   every close reported failure. Samples 6–8 are in
+   [`2026-10-07-io-stress-windows-runs-after-fix.md`](../../../raw/2026-10-07-io-stress-windows-runs-after-fix.md):
+   on the third cut `child-inherit` reads 60 exports, 0 failed (30 failed before), every
+   wild job is zero, and `force` stays red by design with `after 11 attempts over 539 ms`
+   in its line. The non-decimated
    OBJ path writes through geometry-central's own stream and is the one output this does not
    cover (its `.part` is open for milliseconds, the monolithic case the measurements never
    caught).
@@ -96,7 +101,7 @@ the evidence (no delete ever failed in 1,890 exports).
 
 ## The experiment itself, kept
 
-`.github/workflows/io-stress.yml` is retired with the branch; its text is in the raw file.
+`.github/workflows/io-stress.yml` is retired with the branch; its text is in the second raw file.
 What stays: the harness, the `--io-stress` tier (`--io-stress-args`, `--io-stress-repeat`),
 and the convention that a flake is *measured* with it before it is explained.
 
