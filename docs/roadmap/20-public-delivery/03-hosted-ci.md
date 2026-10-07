@@ -122,7 +122,11 @@ commit had edited `examples/CMakeLists.txt`, and the cache key hashed every
 `CMakeLists.txt`, so all three OSes missed the cache. The Windows fetch is read as a
 transient download failure; its log needs a login. To make cold fetches rare, the
 FetchContent cache key (build matrix and `sanitize`) now hashes only the two files that
-declare fetches, the root `CMakeLists.txt` and `tests/CMakeLists.txt`.
+declare fetches, the root `CMakeLists.txt` and `tests/CMakeLists.txt`. The next run,
+[37638160763](https://github.com/Giacogiak/DualC/actions/runs/37638160763) on `515effa`, was
+cold on every OS under the new keys and passed every job, ctest 304 with
+[10 #54](../10-infrastructure-and-integration.md)'s cases on all three OSes: `docs` 8 s, ubuntu 3 min 33 s,
+macOS 1 min 47 s, windows 7 min 17 s, `sanitize` 9 min 40 s, `gpu` 4 min 36 s.
 
 ---
 
