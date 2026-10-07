@@ -189,6 +189,31 @@ immutable, so the 2026-09-18 precedent was followed instead: #33's dated history
 verbatim to its record page, [12](12-engineering-quality-records.md#33--build-hardening-three-batches),
 and the close fits under the cap.
 
+### Harvested from the handoffs
+
+*2026-10-07:* the numbers below were only in the P04 handoffs. A loss audit run before
+`plan/` was retired found them missing here
+([20/04](../20-public-delivery/04-hosted-ci-plan-run.md)). Local runs are Linux, GCC 15,
+Ninja, Release, 8 cores.
+
+- **Convergence, max vertex error at depth 4 → 7.** Sphere: 4.0e-3, 1.1e-3, 2.9e-4,
+  7.2e-5. Torus: 8.9e-3, 1.9e-3, 5.2e-4, 1.4e-4.
+- **Collapse at depth 7 (sphere).** 127,740 faces at 7.2e-5 become 112,926 at 2.2e-4 with
+  `simplificationError` 1e-6. The face count saturates at 111,900.
+- **Running times.** The `[accuracy]` cases take 2.8 s for 43 assertions. The two strut
+  cases take 0.6 s and 1.4 s. `ctest -R _content -j 8`, fixtures included, passes 40/40 in
+  12.7 s.
+- **CI job wall times.**
+  - Run 37584887029 (Batch A): `gpu` 148 s and `docs` 6 s, next to the times above.
+  - Run 37591221067 (Batch B): `build` ubuntu-24.04 128 s, macos-14 149 s, windows-2022
+    484 s; `sanitize` 298 s; `gpu` 169 s; `docs` 5 s.
+- **The coverage tree.** It was a separate tree, and `ctest` ran 300/300 in 110 s at `-j 6`.
+  The tree took about 45 minutes, mostly geometry-central under `--coverage`. The gate ran
+  after it had finished, so the timing-sensitive tests were not run under that load.
+- **CMake list escaping in `examples/CMakeLists.txt`.** Two forms failed at configure: a
+  `"a\;b"` pair inside a `foreach`, and a `;` inside an `add_test` `-D` argument. So the
+  content checks use `producer=file` pairs and a `|`-separated `RUN`.
+
 ---
 
 ← Back to the [audit ledger](README.md) · the [Roadmap index](../README.md).

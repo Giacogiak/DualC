@@ -95,6 +95,25 @@ tree, recoverable from history at `177b875` ([D-51](../../decisions/01-settled.m
 driver's state directory `.plan-run/` stays gitignored for the next run, which writes its own
 `plan/`.
 
+*2026-10-07, the loss audit.* The retirement above was committed (`8d7926c`) before
+`scripts/docs_loss_audit.py` had been run, and the owner asked. It was run afterwards, with
+base `177b875`, head `8d7926c`, scope `docs/` and `plan/`, and `plan/` as the annex. It
+used a scratch triage file with an empty audit; none was committed, so
+`scripts/docs_loss_audit.json` is unchanged.
+
+- **The annex.** Of `plan/`'s units, 509 of 519 sentences, 182 of 356 evidence units, 49 of
+  51 headings and 29 of 590 identifiers came back residual. The sentences were expected: the
+  handoffs were paraphrased, not copied.
+- **What triage left as lost.** The rest were link-tier pointers, commit hashes (git keeps
+  them) and the deleted paths themselves. Lost were the measurements listed in
+  [17/15 § Harvested](../17-code-audit-and-hardening/15-test-coverage-batches.md#harvested-from-the-handoffs)
+  and the dialect rationale in [17/14](../17-code-audit-and-hardening/14-build-hardening-ci.md).
+  Both are now routed there, in the commit after `8d7926c`.
+- **The `docs/` side.** Its one real residual is the trimmed Current-focus sentence on the
+  roadmap README. The cut words survive in that page's milestones table. The audit's other
+  `docs/` rows are the short-line noise of unchanged pages, which the 3d73220 audit absorbed
+  with bulk rules.
+
 ---
 
 ← Back to [20 — public delivery](README.md) · the [Roadmap index](../README.md).

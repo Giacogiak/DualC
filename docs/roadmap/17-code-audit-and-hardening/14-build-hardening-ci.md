@@ -96,6 +96,14 @@ first, and so were the layering and dialect configure failures (GCC 15, CMake 4)
 - **Coverage.** It belongs to #32: the plan's Phase 4 (`gcov` / `llvm-cov`) hosts its ledger
   counts there.
 
+*2026-10-07, harvested from the P03.1 handoff before `plan/` was retired
+([20/04](../20-public-delivery/04-hosted-ci-plan-run.md)):* the plan named
+`target_compile_features(dualc PUBLIC cxx_std_17)` as the dialect fix, but that line was
+already in `CMakeLists.txt`, and it cannot replace the globals alone. With no
+`CXX_STANDARD`, GCC compiles at its default `gnu++17`, which has extensions on, so
+`CXX_STANDARD 17` / `CXX_EXTENSIONS OFF` are set as target properties and the configure guard
+keeps a global from coming back.
+
 ---
 
 ← Back to the [topic README](README.md) · the [Roadmap index](../README.md).
