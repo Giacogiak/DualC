@@ -51,6 +51,13 @@ struct DecimateOpts {
   double value = 0.0;
 };
 
+// The text of the last `[dualc] error:` line the writer path printed on THIS
+// thread, without the prefix -- empty after a successful writeField* call, or
+// one that failed before reaching the writers. A caller with no console (the
+// C ABI, a host plugin) reads it back here; every writeField* clears it on
+// entry. Per thread, because several exports may run at once in one process.
+const std::string& lastError();
+
 // Sample `field`, contour it once, and write `path` in the format chosen by
 // its extension: `.obj` (per-vertex normals), `.stl` (binary), or `.3mf`
 // (3MF-mesh, 1 world unit = 1 mm). When `dec.mode != None`, a global QEM

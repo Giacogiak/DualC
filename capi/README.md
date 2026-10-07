@@ -85,7 +85,9 @@ loaded via `mesh(path=…)` (see `cli_c_abi_mesh_inmem`). `path=` still works.
 ## Contract
 
 - **Return codes** (`int`): `DUALC_OK` (0), `DUALC_ERR_BOUNDS` (1, unbounded field
-  — set `hasBounds` + `boundsMin/Max`), `DUALC_ERR_IO` (2), `DUALC_ERR_GRAPH` (3,
+  — set `hasBounds` + `boundsMin/Max`), `DUALC_ERR_IO` (2 — since 0.5.1 `err` carries
+  the writer's own line, e.g. `export failed: cannot open '<p>.part' for writing: <OS text>`
+  or `tiled STL export failed: cannot move '<p>.part' to '<p>': <OS text>`), `DUALC_ERR_GRAPH` (3,
   parse/build — `err` carries the message + a JSON-pointer / char-offset locator),
   `DUALC_ERR_USAGE` (4), `DUALC_ERR_UNKNOWN` (5), `DUALC_CANCELLED` (6, the
   token was requested — nothing written, `*out` zeroed). **No C++ exception ever
@@ -111,6 +113,14 @@ loaded via `mesh(path=…)` (see `cli_c_abi_mesh_inmem`). `path=` still works.
   renames it over `path` only on success; on any non-`OK` return `path` is either
   absent or the file that was already there. A host process killed mid-export
   leaves a stray `.part` to delete, never a truncated `path`.
+- **Output handles never leave the process (0.5.1).** Every file the export opens
+  is non-inheritable, so a child the host starts with handle inheritance while an
+  export runs — .NET's `Process.Start` with any stream redirected does — cannot
+  hold the `.part` and make the rename fail (the cause of Boletus's flaky Windows
+  gate, [roadmap 17 #52](../docs/roadmap/17-code-audit-and-hardening/15-windows-rename-race/README.md)).
+  On Windows a short foreign hold on the `.part` is retried for up to ~0.5 s; a
+  longer one returns `DUALC_ERR_IO` with the OS text in `err`, and the `.part`
+  may be left behind for the holder's lifetime.
 
 ## Cancellation & progress (0.5.0)
 

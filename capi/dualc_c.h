@@ -37,7 +37,13 @@
  *     leaving no file behind -- and a DualcProgressFn invoked on the calling
  *     thread only. Same additive pattern: every older call is a forwarder.
  *   - Export writes `path + ".part"` and renames it over `path` only on
- *     success, so `path` is either the complete file or untouched.
+ *     success, so `path` is either the complete file or untouched. Output
+ *     handles are opened non-inheritable (0.5.1): a child process the host
+ *     starts with handle inheritance mid-export -- .NET's Process.Start with a
+ *     redirected stream -- no longer holds the `.part` and blocks the rename.
+ *     On Windows a short foreign hold on the `.part` (an on-access scanner)
+ *     is retried for up to ~0.5 s; a longer one fails with DUALC_ERR_IO and
+ *     `err` names it: "... cannot move '<p>.part' to '<p>': <OS text>".
  *
  * In-memory mesh sources: a host with geometry already in RAM (Rhino/Grasshopper)
  * can skip the disk round-trip by passing buffers to the *_with_meshes create
@@ -73,7 +79,8 @@ extern "C" {
 /* Status codes. */
 #define DUALC_OK           0  /* success                                        */
 #define DUALC_ERR_BOUNDS   1  /* unbounded field: pass bounds (hasBounds + min/max) */
-#define DUALC_ERR_IO       2  /* unknown extension or a writer/file failure     */
+#define DUALC_ERR_IO       2  /* unknown extension or a writer/file failure;
+                                 since 0.5.1 `err` carries the writer's own line */
 #define DUALC_ERR_GRAPH    3  /* field-graph parse/build error (see err + locator) */
 #define DUALC_ERR_USAGE    4  /* bad argument to an ABI call (e.g. NULL handle)  */
 #define DUALC_ERR_UNKNOWN  5  /* any other failure                              */
@@ -185,7 +192,7 @@ typedef struct {
   int      anyIssue;                /* any degradation above fired          */
 } DualcDiagnostics;
 
-/* Library / ABI version string, e.g. "dualc 0.5.0". Never NULL. */
+/* Library / ABI version string, e.g. "dualc 0.5.1". Never NULL. */
 DUALC_CAPI_EXPORT const char* dualc_version(void);
 
 /* Fill `out` with the library default sampling/contour settings (maxDepth 7,

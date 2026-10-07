@@ -370,7 +370,11 @@ int dualc_field_export_with_progress(DualcField* field, const char* path,
       return DUALC_CANCELLED;
     }
     if (rc != 0) {
-      setErr(err, errlen, "export failed (unknown extension or writer error)");
+      // The writer's own line (OS error text included) when it left one.
+      const std::string& why = dce::lastError();
+      setErr(err, errlen, why.empty()
+                              ? std::string("export failed (unknown extension or writer error)")
+                              : "export failed: " + why);
       return DUALC_ERR_IO;
     }
     clearErr(err, errlen);
@@ -420,7 +424,10 @@ int dualc_field_export_tiled_stl_with_progress(
       return DUALC_CANCELLED;
     }
     if (rc != 0) {
-      setErr(err, errlen, "tiled STL export failed (writer or validation error)");
+      const std::string& why = dce::lastError();
+      setErr(err, errlen, why.empty()
+                              ? std::string("tiled STL export failed (writer or validation error)")
+                              : "tiled STL export failed: " + why);
       return DUALC_ERR_IO;
     }
     clearErr(err, errlen);

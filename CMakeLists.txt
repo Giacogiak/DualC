@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(dualc VERSION 0.5.0 LANGUAGES CXX)
+project(dualc VERSION 0.5.1 LANGUAGES CXX)
 
 # Is DualC the top-level project, or is it being add_subdirectory'd into one?
 # PROJECT_IS_TOP_LEVEL would say so directly but needs CMake 3.21; this project
@@ -34,6 +34,15 @@ option(DUALC_BUILD_IO_STRESS
 option(DUALC_WERROR
        "Treat warnings in DualC's own targets as errors (-Werror / /WX). OFF locally, where scripts/check.py filters the build log instead; ON in CI's build matrix."
        OFF)
+# The C ABI is a shared library built from the static example libraries, the
+# engine and geometry-central: on Linux those must be position-independent
+# (a thread_local in the host layer otherwise links as local-exec TLS, which
+# ld refuses in a shared object), so the option flips PIC on for the whole
+# tree. No effect on the libraries' behaviour, a few percent on their speed.
+if(DUALC_BUILD_C_ABI)
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif()
+
 # DUALC_SANITIZE (a cache string, e.g. address,undefined) is declared with the
 # helper that applies it, in cmake/DualCWarnings.cmake.
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)

@@ -164,7 +164,10 @@ DualC/
 │   ├── test_streaming_export.cpp  Tiled/streamed STL + 3MF vs the monolithic mesh
 │   ├── test_diagnostics.cpp   Diagnostics channel: every reported degradation shown firing (roadmap 17 #26)
 │   ├── test_validation.cpp    Argument validation + the BBox::empty sentinel (roadmap 17 #34)
-│   └── test_cancel_progress.cpp  CancelToken unwinds every driver; hooks are inert; report shape; the writers' rc 3 + `.part` guarantee (roadmap 14 #48)
+│   ├── test_cancel_progress.cpp  CancelToken unwinds every driver; hooks are inert; report shape; the writers' rc 3 + `.part` guarantee (roadmap 14 #48)
+│   └── test_writers_io.cpp    The writers' failure surface (17 #52): a failed open names the OS error through dce::lastError(); on
+│                                Windows a held `.part` is renamed after retries, a long hold fails with the text, a child started
+│                                with handle inheritance mid-export inherits nothing (output handles are non-inheritable)
 │
 ├── cmake/
 │   └── DualCWarnings.cmake    dualc_target_options(): C++17 dialect, warning level, DUALC_WERROR, DUALC_SANITIZE — per DualC target, never global (17 #33)

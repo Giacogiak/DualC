@@ -1,20 +1,10 @@
-# #52 — the Windows export I/O flake Boletus reported
+# #52 — desk analysis, written before the runs
 
-The record of a robustness question raised from outside the audit: Boletus's Windows CI
-loses one file-writing test in about half its runs and has asked DualC for a bounded
-retry of the `.part` → `<path>` rename in `AtomicOutput::commit()`. This page holds the
-desk analysis written *before* the harness ran, the evidence as it comes in, and the
-verdict. Headings are frozen at ID + title; status, date and trigger live on the body
-lines. Opened 2026-10-07 on branch `exp/io-stress-windows`.
+Part of [#52](README.md#52-windows-export-io-flake--the-part-rename-under-an-on-access-scanner):
+what was known and predicted on 2026-10-07 before `dualc_io_stress` ran once. Nothing here
+was edited after the runs; the evidence and the verdict are on [02](02-evidence-and-verdict.md).
 
-## #52 Windows export I/O flake — the `.part` rename under an on-access scanner
-**PLANNED (2026-10-07).** The question: does `AtomicOutput::commit()`
-(`examples/example_common.cpp`, one `std::filesystem::rename` with no retry) fail on
-Windows while an on-access scanner still holds the file it just saw closed — and is that
-what Boletus's CI is hitting? The verdict is owed with evidence, not inference; the fix
-(a bounded retry, the OS error text into the ABI `err` buffer) is conditional on it.
-
-### What Boletus actually observed
+## What Boletus actually observed
 
 Boletus's record is `docs/roadmap/10-public-delivery/03-ci.md` § "The flaky Windows gate"
 and the ask is its `07-upstream-coordination/README.md` § 10 (both 2026-10-06, Boletus
@@ -37,7 +27,7 @@ pinned at DualC `2fcd19f`; `git diff 2fcd19f main` touches none of the writer or
 - "A sharing violation on the rename" is Boletus's inference. Defender real-time
   protection is on by default on GitHub's Windows runners.
 
-### The rc 2 sites, ranked before the runs
+## The rc 2 sites, ranked before the runs
 
 The ABI collapses every writer rc other than 0 / 1 / 3 to `DUALC_ERR_IO` with a fixed
 message (`capi/dualc_c.cpp`, the two export twins); the text that names the cause goes to
@@ -54,7 +44,7 @@ Boletus's arguments, and an exception would surface as `DUALC_ERR_UNKNOWN`, not 
 A secondary consequence of site 1, a defect of its own: after a failed `commit()` the
 destructor's `std::remove(tmp_)` also needs DELETE access, its result is ignored, and a
 stray `<path>.part` is left behind — which contradicts the `.part` contract on
-[command_reference/00](../../command_reference/00-shared-behaviour.md#the-output-file-appears-only-complete-part)
+[command_reference/00](../../../command_reference/00-shared-behaviour.md#the-output-file-appears-only-complete-part)
 ("a run that fails … removes its `.part`"). The harness checks for this explicitly.
 
 Facts the harness must **verify, not assume**: that MSVC maps 32 and 5 to
@@ -63,7 +53,7 @@ Facts the harness must **verify, not assume**: that MSVC maps 32 and 5 to
 failure it meets is printed as the full tuple — `value`, `category`, the default
 condition, `message()`.
 
-### The alternative hypotheses and what separates them
+## The alternative hypotheses and what separates them
 
 | | Hypothesis | Discriminator |
 | --- | --- | --- |
@@ -74,7 +64,7 @@ condition, `message()`.
 | H5 | **An engine race under MSVC** (wrong mesh). | Boletus: no facet count ever differed; the harness compares every output to a sequential baseline. |
 | H6 | **Environment** (`%TEMP%` volume, exclusions, tamper protection, the search indexer). | Printed by the workflow and copied into the raw file. |
 
-### The instrument
+## The instrument
 
 `examples/dualc_io_stress.cpp` (opt-in, `-DDUALC_BUILD_IO_STRESS`, never a CTest case),
 run by the gate's opt-in `--io-stress` tier (`--io-stress-args` passes flags through), in
@@ -99,7 +89,7 @@ P ≈ 0.03 at that rate; the rule is **three pushes (540 exports) before a zero 
 anything** (≈ 2 × 10⁻⁵ at p = 0.02, ≈ 0.07 at a pessimistic p = 0.005). One positive with
 its line is conclusive on its own.
 
-### The decision criteria, fixed before the runs
+## The decision criteria, fixed before the runs
 
 | Verdict | Evidence | Then |
 | --- | --- | --- |
@@ -115,10 +105,6 @@ the ABI regardless (this investigation was crippled by its absence) and the retr
 hardening with the forcing test; the alternative is the error text only, the retry
 DEFERRED with the trigger "a Boletus red whose captured line reads `cannot move`".
 
-### Evidence
-
-*(appended as the runs come in; the raw reports are in `docs/raw/`.)*
-
 ---
 
-← Back to the [block README](README.md) · the [Roadmap index](../README.md).
+← Back to the [item README](README.md) · the [block README](../README.md).

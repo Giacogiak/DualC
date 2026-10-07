@@ -62,7 +62,17 @@ only after the writer's `finish()` succeeded, and removes the temp on any other 
 tiled sinks keep their own scratch beside it (`<path>.part.model.tmp`, and for the welded
 3MF `<path>.part.verts.tmp` / `.tris.tmp`); each has an `abort()` that closes its streams
 and removes them, run by the driver before the `.part` is removed, because Windows will not
-unlink a file that is still open. So a user only ever sees a complete `<path>` or a stray
+unlink a file that is still open. Every one of those files is opened **non-inheritable**
+(`_O_NOINHERIT` on Windows, `O_CLOEXEC` elsewhere, through one `openOutput` helper and a
+caller-owned `FILE*` for the miniz ZIP): a child process the host starts with handle
+inheritance mid-export would otherwise hold the `.part` — without `FILE_SHARE_DELETE` —
+for its whole lifetime and make the rename fail. On Windows the rename is retried for up to
+about half a second on a sharing violation or access denial (a scanner's momentary hold),
+and the destructor's removal of the `.part` likewise for a shorter budget; a hold that
+outlives the budget fails the export with the OS text. Every `[dualc] error:` line the
+writer path prints is also kept per thread, readable through `dce::lastError()` and
+cleared on entry to each `writeField*` — how the C ABI fills its `err` buffer. So a user
+only ever sees a complete `<path>` or a stray
 `<path>.part` — never a truncated output — which is the invariant
 [10 § Output invariants](10-invariants-and-tolerances.md#output-invariants) states; the
 `dispatchWrite` dispatch above receives the temp as its target and the extension check

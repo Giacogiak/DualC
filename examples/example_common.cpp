@@ -23,13 +23,103 @@
 #include <memory>
 #include <sstream>
 #include <stdexcept>
+#include <system_error>
+#include <thread>
 #include <tuple>
 #include <unordered_map>
 #include <utility>
 
+#ifdef _WIN32
+#include <share.h>   // _SH_DENYNO for _fsopen
+#endif
+
 namespace dce {
 
 namespace {
+
+// --- The writers' error line and the output handles (roadmap 17 #52) -------
+//
+// Every `[dualc] error:` the writer path prints is also kept, per thread, so a
+// caller with no console (the C ABI, a host plugin) can read it back through
+// dce::lastError(); writeField* clear it on entry. Per thread because several
+// exports may run at once in one process.
+thread_local std::string g_lastError;
+
+void reportError(const std::string& text) {
+  g_lastError = text;
+  std::cerr << "[dualc] error: " << text << "\n";
+}
+
+std::string errnoText() {
+  return std::generic_category().message(errno);
+}
+
+// Output files are opened NON-INHERITABLE. The MSVC CRT opens files inheritable
+// by default, so a child process the host starts with handle inheritance (what
+// .NET's Process.Start does whenever a standard stream is redirected) while a
+// `.part` is open holds a duplicate of that handle -- same share mode, no
+// FILE_SHARE_DELETE -- for as long as it lives, and the rename over `<path>`
+// fails with ERROR_SHARING_VIOLATION. Measured on windows-2022: every tiled
+// export open while such a child started failed at the rename; no bounded
+// retry would have helped (the hold lasts the child's lifetime). The flag `N`
+// (`_O_NOINHERIT`) closes that door; on POSIX `e` (O_CLOEXEC) is the same
+// hygiene, though a rename there is never blocked by an open handle.
+FILE* openOutputFile(const std::string& path, bool binary) {
+#ifdef _WIN32
+  return _fsopen(path.c_str(), binary ? "wbN" : "wN", _SH_DENYNO);
+#else
+  return std::fopen(path.c_str(), binary ? "wbe" : "we");
+#endif
+}
+
+// std::ofstream has no portable way to set the inherit flag, so on Windows the
+// stream is built over the FILE* from openOutputFile (the MSVC filebuf(FILE*)
+// extension; the stream owns and closes it). Returns false with errno set.
+bool openOutput(std::ofstream& os, const std::string& path, bool binary = true) {
+#ifdef _WIN32
+  FILE* f = openOutputFile(path, binary);
+  if (!f) return false;
+  os = std::ofstream(f);
+  return static_cast<bool>(os);
+#else
+  os.open(path, binary ? (std::ios::out | std::ios::binary) : std::ios::out);
+  return static_cast<bool>(os);
+#endif
+}
+
+// A failed rename or remove that another handle caused is transient when that
+// handle is short-lived (an on-access scanner on a user's machine); permanent
+// when it is not (an inherited handle). Retry a bounded time, then give up.
+// Error 32 (sharing violation) and 5 (access denied) both map to
+// permission_denied under MSVC, measured; on POSIX EACCES/EPERM never clear
+// by themselves, so there is no loop.
+bool transientFileError(const std::error_code& ec) {
+#ifdef _WIN32
+  return ec == std::errc::permission_denied || ec.value() == 32 || ec.value() == 5 ||
+         ec.value() == 33;
+#else
+  (void)ec;
+  return false;
+#endif
+}
+
+// Up to `budgetMs` of retries with a short back-off: 1, 2, 4, ... capped at
+// 100 ms. Returns the ms spent; `attempts` counts the failed ones.
+template <class Op>
+bool retryFileOp(Op op, int budgetMs, std::error_code& ec, int& attempts, long long& spentMs) {
+  const auto t0 = std::chrono::steady_clock::now();
+  int delay = 1;
+  attempts = 0;
+  for (;;) {
+    ec.clear();
+    if (op(ec)) { spentMs = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - t0).count(); return true; }
+    ++attempts;
+    spentMs = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - t0).count();
+    if (!transientFileError(ec) || spentMs >= budgetMs) return false;
+    std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+    delay = std::min(delay * 2, 100);
+  }
+}
 
 std::vector<std::string> splitComma(const std::string& s) {
   std::vector<std::string> out;
@@ -816,9 +906,9 @@ TriMesh decimate(const TriMesh& in, const DecimateOpts& dec, float& outError) {
 // positions, recomputed angle-weighted per-vertex normals, and `v//vn` faces.
 // Angle weighting stays stable on the irregular triangles a QEM pass produces.
 int writeObjFromTriMesh(const TriMesh& m, const std::string& path) {
-  std::ofstream os(path);
-  if (!os) {
-    std::cerr << "[dualc] error: cannot open '" << path << "' for writing\n";
+  std::ofstream os;
+  if (!openOutput(os, path, /*binary=*/false)) {
+    reportError("cannot open '" + path + "' for writing: " + errnoText());
     return 2;
   }
   auto sub = [](const dualc::Vector3& a, const dualc::Vector3& b) {
@@ -870,7 +960,7 @@ int writeObjFromTriMesh(const TriMesh& m, const std::string& path) {
        << "//" << (tri[1] + 1) << ' ' << (tri[2] + 1) << "//" << (tri[2] + 1)
        << '\n';
   if (!os) {
-    std::cerr << "[dualc] error: failed writing OBJ '" << path << "'\n";
+    reportError("failed writing OBJ '" + path + "'");
     return 2;
   }
   return 0;
@@ -891,19 +981,40 @@ class AtomicOutput {
   AtomicOutput(const AtomicOutput&) = delete;
   AtomicOutput& operator=(const AtomicOutput&) = delete;
   ~AtomicOutput() {
-    if (!committed_) std::remove(tmp_.c_str());
+    if (committed_) return;
+    // Bounded like commit() but shorter: a destructor must not block long,
+    // and a stray `.part` is the lesser evil next to a hang.
+    std::error_code ec;
+    int attempts = 0;
+    long long spent = 0;
+    retryFileOp([&](std::error_code& e) {
+      std::filesystem::remove(tmp_, e);
+      return !e;
+    }, 150, ec, attempts, spent);
   }
   const std::string& tmp() const { return tmp_; }
   // Rename the temp over the destination. std::filesystem::rename replaces an
-  // existing file on every platform (std::rename does not on Windows).
+  // existing file on every platform (std::rename does not on Windows). On
+  // Windows a sharing violation is retried for up to ~0.5 s (a scanner's
+  // hold); a longer hold -- another process holding the handle -- fails.
   bool commit() {
     std::error_code ec;
-    std::filesystem::rename(tmp_, path_, ec);
-    if (ec) {
-      std::cerr << "[dualc] error: cannot move '" << tmp_ << "' to '" << path_
-                << "': " << ec.message() << "\n";
+    int attempts = 0;
+    long long spent = 0;
+    const bool ok = retryFileOp([&](std::error_code& e) {
+      std::filesystem::rename(tmp_, path_, e);
+      return !e;
+    }, 500, ec, attempts, spent);
+    if (!ok) {
+      std::ostringstream os;
+      os << "cannot move '" << tmp_ << "' to '" << path_ << "': " << ec.message();
+      if (attempts > 1) os << " (after " << attempts << " attempts over " << spent << " ms)";
+      reportError(os.str());
       return false;
     }
+    if (attempts > 0)
+      std::cerr << "[dualc] warning: moved '" << tmp_ << "' to '" << path_ << "' after "
+                << attempts << " retries (" << spent << " ms): " << ec.message() << "\n";
     committed_ = true;
     return true;
   }
@@ -953,9 +1064,9 @@ void packStlTriangle(const dualc::Vector3& a, const dualc::Vector3& b,
 // Binary STL: 80-byte header + uint32 facet count + 50 bytes/triangle. We
 // target little-endian (win32/x64).
 int writeStl(const TriMesh& m, const std::string& path) {
-  std::ofstream os(path, std::ios::binary);
-  if (!os) {
-    std::cerr << "[dualc] error: cannot open '" << path << "' for writing\n";
+  std::ofstream os;
+  if (!openOutput(os, path)) {
+    reportError("cannot open '" + path + "' for writing: " + errnoText());
     return 2;
   }
   char header[80] = {0};  // must NOT begin with "solid" (would read as ASCII)
@@ -969,7 +1080,7 @@ int writeStl(const TriMesh& m, const std::string& path) {
     os.write(rec, 50);
   }
   if (!os) {
-    std::cerr << "[dualc] error: failed writing STL '" << path << "'\n";
+    reportError("failed writing STL '" + path + "'");
     return 2;
   }
   return 0;
@@ -982,8 +1093,7 @@ int writeStl(const TriMesh& m, const std::string& path) {
 class StreamingStl {
  public:
   bool open(const std::string& path) {
-    os_.open(path, std::ios::binary);
-    if (!os_) return false;
+    if (!openOutput(os_, path)) return false;
     char header[80] = {0};  // must NOT begin with "solid"
     os_.write(header, sizeof header);
     const std::uint32_t placeholder = 0;
@@ -1112,10 +1222,18 @@ int write3mf(const TriMesh& m, const std::string& path) {
       "    </triangles>\n   </mesh>\n  </object>\n </resources>\n"
       " <build>\n  <item objectid=\"1\"/>\n </build>\n</model>\n";
 
+  // The ZIP goes through a FILE* we open (non-inheritable) and close; miniz's
+  // cfile init never closes a caller's FILE.
+  FILE* zf = openOutputFile(path, true);
+  if (!zf) {
+    reportError("cannot open '" + path + "' for writing: " + errnoText());
+    return 2;
+  }
   mz_zip_archive zip;
   std::memset(&zip, 0, sizeof zip);
-  if (!mz_zip_writer_init_file(&zip, path.c_str(), 0)) {
-    std::cerr << "[dualc] error: cannot open '" << path << "' for writing\n";
+  if (!mz_zip_writer_init_cfile(&zip, zf, 0)) {
+    std::fclose(zf);
+    reportError("cannot open '" + path + "' for writing (zip init)");
     return 2;
   }
   auto add = [&](const char* name, const std::string& data) {
@@ -1126,8 +1244,9 @@ int write3mf(const TriMesh& m, const std::string& path) {
             add("_rels/.rels", kRels) && add("3D/3dmodel.model", model);
   if (ok) ok = mz_zip_writer_finalize_archive(&zip) != MZ_FALSE;
   mz_zip_writer_end(&zip);
+  if (std::fclose(zf) != 0) ok = false;
   if (!ok) {
-    std::cerr << "[dualc] error: failed writing 3MF '" << path << "'\n";
+    reportError("failed writing 3MF '" + path + "'");
     return 2;
   }
   return 0;
@@ -1168,8 +1287,7 @@ int dispatchWrite(const Contoured& c, const std::string& path,
   if (ext == ".obj") return writeObj(c, target);
   if (ext == ".stl") return writeStl(toTriMesh(c), target);
   if (ext == ".3mf") return write3mf(toTriMesh(c), target);
-  std::cerr << "[dualc] error: unknown output extension '" << ext
-            << "' (use .obj, .stl or .3mf)\n";
+  reportError("unknown output extension '" + ext + "' (use .obj, .stl or .3mf)");
   return 2;
 }
 
@@ -1246,8 +1364,7 @@ class Tiled3mfSink {
   bool open(const std::string& path) {
     path_ = path;
     tmpPath_ = path + ".model.tmp";
-    model_.open(tmpPath_, std::ios::binary);
-    if (!model_) return false;
+    if (!openOutput(model_, tmpPath_)) return false;
     model_ << kModelHeader3mf << " <resources>\n";
     return static_cast<bool>(model_);
   }
@@ -1318,9 +1435,15 @@ class Tiled3mfSink {
 
     // Pack the ZIP: the two tiny fixed parts in memory, the model streamed from
     // the temp file (miniz deflates incrementally -> one-tile peak RAM holds).
+    FILE* zf = openOutputFile(path_, true);
+    if (!zf) {
+      std::remove(tmpPath_.c_str());
+      return false;
+    }
     mz_zip_archive zip;
     std::memset(&zip, 0, sizeof zip);
-    if (!mz_zip_writer_init_file(&zip, path_.c_str(), 0)) {
+    if (!mz_zip_writer_init_cfile(&zip, zf, 0)) {
+      std::fclose(zf);
       std::remove(tmpPath_.c_str());
       return false;
     }
@@ -1335,6 +1458,7 @@ class Tiled3mfSink {
                                nullptr, 0, MZ_DEFAULT_LEVEL) != MZ_FALSE;
     if (ok) ok = mz_zip_writer_finalize_archive(&zip) != MZ_FALSE;
     mz_zip_writer_end(&zip);
+    if (std::fclose(zf) != 0) ok = false;
     std::remove(tmpPath_.c_str());
     return ok;
   }
@@ -1391,9 +1515,7 @@ class Welded3mfSink {
     path_ = path;
     vpath_ = path + ".verts.tmp";
     tpath_ = path + ".tris.tmp";
-    verts_.open(vpath_, std::ios::binary);
-    tris_.open(tpath_, std::ios::binary);
-    return static_cast<bool>(verts_) && static_cast<bool>(tris_);
+    return openOutput(verts_, vpath_) && openOutput(tris_, tpath_);
   }
 
   template <class KeepFn>
@@ -1447,8 +1569,8 @@ class Welded3mfSink {
 
     // Assemble the single-object model part = header + verts + tris + footer.
     const std::string mpath = path_ + ".model.tmp";
-    std::ofstream m(mpath, std::ios::binary);
-    if (!m) { cleanup(); return false; }
+    std::ofstream m;
+    if (!openOutput(m, mpath)) { cleanup(); return false; }
     m << kModelHeader3mf
       << " <resources>\n  <object id=\"1\" type=\"model\">\n   <mesh>\n"
          "    <vertices>\n";
@@ -1462,9 +1584,16 @@ class Welded3mfSink {
     m.close();
     if (!ok) { std::remove(mpath.c_str()); cleanup(); return false; }
 
+    FILE* zf = openOutputFile(path_, true);
+    if (!zf) {
+      std::remove(mpath.c_str());
+      cleanup();
+      return false;
+    }
     mz_zip_archive zip;
     std::memset(&zip, 0, sizeof zip);
-    if (!mz_zip_writer_init_file(&zip, path_.c_str(), 0)) {
+    if (!mz_zip_writer_init_cfile(&zip, zf, 0)) {
+      std::fclose(zf);
       std::remove(mpath.c_str());
       cleanup();
       return false;
@@ -1479,6 +1608,7 @@ class Welded3mfSink {
                                 nullptr, 0, MZ_DEFAULT_LEVEL) != MZ_FALSE;
     if (ok) ok = mz_zip_writer_finalize_archive(&zip) != MZ_FALSE;
     mz_zip_writer_end(&zip);
+    if (std::fclose(zf) != 0) ok = false;
     std::remove(mpath.c_str());
     cleanup();
     return ok;
@@ -1619,7 +1749,7 @@ int forEachOwnedTileImpl(const dualc::ImplicitField& field,
                          const dualc::CancelToken* cancel,
                          dualc::ProgressSink* progress) {
   if (tileDepth < 2) {
-    std::cerr << "[dualc] error: --tile-depth must be >= 2\n";
+    reportError("--tile-depth must be >= 2");
     return 2;
   }
   if (cancel) cancel->throwIfRequested("tiling");
@@ -1640,8 +1770,7 @@ int forEachOwnedTileImpl(const dualc::ImplicitField& field,
 
   AtomicOutput out(path);
   if (!sink.open(out.tmp())) {
-    std::cerr << "[dualc] error: cannot open '" << out.tmp()
-              << "' for writing\n";
+    reportError("cannot open '" + out.tmp() + "' for writing: " + errnoText());
     return 2;
   }
   // Declared AFTER `out` so it is destroyed FIRST: on any exit that is not a
@@ -1672,8 +1801,7 @@ int forEachOwnedTileImpl(const dualc::ImplicitField& field,
     if (!isEmptyPlaceholder(c))
       sink.onTile(c, [](const dualc::Vector3&) { return true; });
     if (!sink.finish()) {
-      std::cerr << "[dualc] error: failed finalizing " << label << " '" << path
-                << "'\n";
+      reportError(std::string("failed finalizing ") + label + " '" + path + "'");
       return 2;
     }
     if (!out.commit()) return 2;
@@ -1765,8 +1893,7 @@ int forEachOwnedTileImpl(const dualc::ImplicitField& field,
       }
 
   if (!sink.finish()) {
-    std::cerr << "[dualc] error: failed finalizing " << label << " '" << path
-              << "'\n";
+    reportError(std::string("failed finalizing ") + label + " '" + path + "'");
     return 2;
   }
   if (!out.commit()) return 2;
@@ -1991,8 +2118,7 @@ int writeFieldImpl(const dualc::ImplicitField& field, const std::string& path,
   } else if (ext == ".3mf") {
     rc = write3mf(m, out.tmp());
   } else {
-    std::cerr << "[dualc] error: unknown output extension '" << ext
-              << "' (use .obj, .stl or .3mf)\n";
+    reportError("unknown output extension '" + ext + "' (use .obj, .stl or .3mf)");
     return 2;
   }
   if (rc != 0) return rc;
@@ -2006,11 +2132,14 @@ int writeFieldImpl(const dualc::ImplicitField& field, const std::string& path,
 
 } // namespace
 
+const std::string& lastError() { return g_lastError; }
+
 int writeField(const dualc::ImplicitField& field, const std::string& path,
                const dualc::SamplerParams& sp, const dualc::ContourerParams& cp,
                const DecimateOpts& dec, dualc::Diagnostics* diag,
                const dualc::CancelToken* cancel,
                dualc::ProgressSink* progress) {
+  g_lastError.clear();
   try {
     return writeFieldImpl(field, path, sp, cp, dec, diag, cancel, progress);
   } catch (const dualc::Cancelled& e) {
@@ -2025,9 +2154,10 @@ int writeFieldTiledStl(const dualc::ImplicitField& field, const std::string& pat
                        const dualc::ContourerParams& cp, int tileDepth,
                        const dualc::CancelToken* cancel,
                        dualc::ProgressSink* progress) {
+  g_lastError.clear();
   if (lowerExt(path) != ".stl") {
-    std::cerr << "[dualc] error: tiled/streaming STL export supports only .stl "
-                 "output (got '" << lowerExt(path) << "')\n";
+    reportError("tiled/streaming STL export supports only .stl output (got '" +
+                lowerExt(path) + "')");
     return 2;
   }
   TiledStlSink sink;
@@ -2040,9 +2170,10 @@ int writeFieldTiled3mf(const dualc::ImplicitField& field, const std::string& pat
                        const dualc::ContourerParams& cp, int tileDepth,
                        bool weld, const dualc::CancelToken* cancel,
                        dualc::ProgressSink* progress) {
+  g_lastError.clear();
   if (lowerExt(path) != ".3mf") {
-    std::cerr << "[dualc] error: tiled/streaming 3MF export supports only .3mf "
-                 "output (got '" << lowerExt(path) << "')\n";
+    reportError("tiled/streaming 3MF export supports only .3mf output (got '" +
+                lowerExt(path) + "')");
     return 2;
   }
   if (weld) {

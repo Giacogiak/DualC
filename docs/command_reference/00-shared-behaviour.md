@@ -72,6 +72,14 @@ a truncated file:
   destination and no `<path>` yet (a previous `<path>` stays as it was);
 - a run that fails (an unbounded field, a writer error, an unknown extension)
   removes its `.part` and exits non-zero with the message; `<path>` is untouched;
+- on Windows, when another process holds the finished `.part` at the moment of the
+  rename (an on-access scanner, typically), the rename is retried for up to about
+  half a second — `[dualc] warning: moved '<path>.part' to '<path>' after N retries
+  (K ms): <OS text>` — and a hold that outlives that fails the run with
+  `[dualc] error: cannot move '<path>.part' to '<path>': <OS text> (after N attempts
+  over K ms)`, leaving the `.part` behind for as long as the holder lives (the tools'
+  own output handles are never inherited by a child process, so such a holder is
+  always foreign);
 - a run **killed from outside** (Ctrl+C, Task Manager) cannot clean up: it leaves
   `<path>.part` — and, on the streaming 3MF paths, `<path>.part.model.tmp` or
   `<path>.part.verts.tmp` / `.tris.tmp` — behind, and `<path>` untouched. Delete the
