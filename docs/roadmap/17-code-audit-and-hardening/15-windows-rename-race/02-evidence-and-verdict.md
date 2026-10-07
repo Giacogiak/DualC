@@ -99,6 +99,16 @@ most a `[dualc] warning: moved … after N retries` line on a machine where a sc
 files. Nothing else to change; a `File.Delete` retry on the Boletus side is not needed by
 the evidence (no delete ever failed in 1,890 exports).
 
+## Verification
+
+- **2026-10-07, commit `6a8454f`** — the full gate green on all six CI jobs (run 37620129271):
+  Ubuntu and macOS 272 cases, Windows 274 (the two Windows-only hold cases and the
+  child-inheritance case included), `sanitize`, `gpu`, `docs`. Sample 9 of `io-stress.yml`
+  (run 37620129376) repeated sample 8: `child-inherit` 60 exports, 0 failed; every wild job
+  zero; `force` red by design. The one Windows red between samples 8 and 9 was the hold test
+  itself using the monolithic writer, whose `.part` exists for a millisecond and the holder's
+  poll missed; it uses the tiled writer now.
+
 ## The experiment itself, kept
 
 `.github/workflows/io-stress.yml` is retired with the branch; its text is in the second raw file.

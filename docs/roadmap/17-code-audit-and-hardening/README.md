@@ -123,8 +123,9 @@ full entries, with evidence and triggers, live in two files:
 audit, is on its own page, [`15`](15-windows-rename-race/README.md).
 
 **Latest verification** (the one home of the counts; every other page links here):
-`ctest` **270** (2026-10-06, the full gate on Linux and in CI's three `build` jobs;
-256 on 2026-09-17, [19/01](../19-docs-layers/01-record-phases-0-2.md)); `dualc_glsl_parity` **73/73**
+`ctest` **274** on Windows and **272** on Linux and macOS (2026-10-07, CI's three `build` jobs on
+`6a8454f` — two writer cases run everywhere, two more only on Windows, [15](15-windows-rename-race/README.md);
+270 on 2026-10-06; 256 on 2026-09-17, [19/01](../19-docs-layers/01-record-phases-0-2.md)); `dualc_glsl_parity` **73/73**
 (2026-10-06, asserted by `check.py --gpu` against `parity_expected_cases` in CI's required
 `gpu` job — [13](13-parity-gate-binding.md)); the same 270 pass under ASan + UBSan in CI's
 `sanitize` job (2026-10-06, [14](14-build-hardening-ci.md)).
