@@ -27,7 +27,7 @@ env:
 jobs:
   # The docs tier with the report-only lists made fatal -- the session-end mode.
   docs:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04   # pinned like every other job; ubuntu-latest moves to 26 on 2026-10-19
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
@@ -179,9 +179,9 @@ jobs:
       - name: Build the harness
         run: cmake --build build --target dualc_glsl_parity dualc_gen_demo
       # check.py runs the harness from the repo root, which probes data/;
-      # a clean clone has no data/, and dualc_gen_demo does not create it.
+      # a clean clone has no data/, and `all --dir` creates it (roadmap 10 #54).
       - name: Generate the demo meshes into data/
-        run: mkdir -p data && build/examples/dualc_gen_demo all --dir data
+        run: build/examples/dualc_gen_demo all --dir data
       - name: Parity
         # --strict: a SKIP (harness not found) must not read as a pass.
         run: xvfb-run -a python3 scripts/check.py --gpu --strict --build-dir build | tee gate.log

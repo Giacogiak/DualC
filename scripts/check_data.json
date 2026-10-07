@@ -170,7 +170,7 @@
 
   "out_of_repo_links": {
     "_comment": "Relative links that deliberately leave the repo. They resolve only where the sibling project is checked out, so they are reported as informational, never as broken.",
-    "prefixes": ["../../../../../Boletus/", "../../../Boletus/", "../../Boletus/"]
+    "prefixes": ["../../../../../Boletus/", "../../../../Boletus/", "../../../Boletus/", "../../Boletus/"]
   },
 
   "structure_summarized_prefixes": {

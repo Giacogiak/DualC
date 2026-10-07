@@ -445,4 +445,26 @@ if(DUALC_BUILD_TESTS)
   dualc_cli_content(cli_gen_demo_content
     ${CMAKE_CURRENT_BINARY_DIR}/cli_gen_demo_out/cube.obj obj
     NEEDS cli_gen_demo OPTIONS -DEXACT_VERTICES=8 -DEXACT_FACES=12)
+  # `all --dir` creates a missing directory, parents included; it used to
+  # abort on an uncaught exception, so `--dir data` failed on a fresh clone
+  # (roadmap 10 #54). The setup test removes the tree so every run starts
+  # without it.
+  set(gen_demo_new_dir ${CMAKE_CURRENT_BINARY_DIR}/cli_gen_demo_new/a/b)
+  add_test(NAME cli_gen_demo_dir_reset
+    COMMAND ${CMAKE_COMMAND} -E rm -rf ${CMAKE_CURRENT_BINARY_DIR}/cli_gen_demo_new)
+  set_tests_properties(cli_gen_demo_dir_reset PROPERTIES
+    FIXTURES_SETUP cli_gen_demo_dir_reset)
+  add_test(NAME cli_gen_demo_dir
+    COMMAND dualc_gen_demo all --dir ${gen_demo_new_dir})
+  set_tests_properties(cli_gen_demo_dir PROPERTIES
+    FIXTURES_REQUIRED cli_gen_demo_dir_reset)
+  dualc_cli_content(cli_gen_demo_dir_content ${gen_demo_new_dir}/cube.obj obj
+    NEEDS cli_gen_demo_dir OPTIONS -DEXACT_VERTICES=8 -DEXACT_FACES=12)
+  # A write that cannot happen is a message and exit 1, not an abort: an
+  # uncaught exception never prints the tool's own error line.
+  add_test(NAME cli_gen_demo_bad_out
+    COMMAND dualc_gen_demo cube
+            -o ${CMAKE_CURRENT_BINARY_DIR}/cli_gen_demo_missing/x/cube.obj)
+  set_tests_properties(cli_gen_demo_bad_out PROPERTIES
+    PASS_REGULAR_EXPRESSION "\\[dualc_gen_demo\\] error: ")
 endif()
