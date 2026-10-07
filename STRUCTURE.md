@@ -19,8 +19,6 @@ DualC/
 │       ├── gate.yml           Hosted CI (roadmap 20 #51): runs `scripts/check.py` and nothing else — `docs` (--docs --strict),
 │       │                        `build` matrix (Ubuntu, Windows, macOS; all required; -D DUALC_WERROR=ON), `sanitize`
 │       │                        (ASan+UBSan ctest, RelWithDebInfo; 17 #33), `gpu` parity under Xvfb (required)
-│       ├── io-stress.yml      EXPERIMENT (17 #52), on the exp/io-stress* branches only, never merged: `check.py --io-stress`
-│       │                        on windows-2022 (scanner on / off / sequential / --force-hold) + a Linux control, all continue-on-error
 │       └── annotate.py        Re-prints the gate's FAIL lines as error annotations (readable without auth; a job log is not)
 │
 ├── AGENTS.md                  Agent entry file: build/test/gate commands, the five docs principles, the reading order
