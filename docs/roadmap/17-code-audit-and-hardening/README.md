@@ -35,11 +35,13 @@ status and trigger, and links to both.
   the first warnings and sanitizer findings, and the CI runs that proved each one red.
 - [`15-test-coverage-batches.md`](15-test-coverage-batches.md) — the delivery record of
   **#32**: Batch A (the corrected counts, the 38 `Approx(0.0)` margins and their gate check,
-  a working directory per test case, the serial-`ctest` decision) and Batch B (the missing tests).
+  a working directory per test case, the serial-`ctest` decision) and Batch B (the missing
+  tests, the CLI content checks, coverage measured once, the strut-oracle correction).
 - [`07-repeat-tiling-fix.md`](07-repeat-tiling-fix.md) — the full record for #34's first
   item: `repeat` read only the folded tile, which put wrong geometry in shipped strut
   lattices; the conditional fix, its measured 2.3× cost, and the oracle test it showed to
-  be certifying less than it claims.
+  be certifying less than it claims. Both strut-lattice claims are corrected by measurement in
+  [15](15-test-coverage-batches.md#the-strut-lattice-oracle-certified-what-it-claimed).
 - [`08-argument-validation.md`](08-argument-validation.md) — #34's second batch: fail-fast
   argument validation across the field layer, the `BBox{}` sentinel that was invisible to
   `isValid()`, and the negative-`scaled()` complement bug the guards exposed.
@@ -119,8 +121,8 @@ full entries, with evidence and triggers, live in two files:
 [`04-engineering-quality.md`](04-engineering-quality.md) (#27–#35).
 
 **Latest verification** (the one home of the counts; every other page links here):
-`ctest` **270** (2026-10-06, the full gate on Linux and in CI's three `build` jobs;
-256 on 2026-09-17, [19/01](../19-docs-layers/01-record-phases-0-2.md)); `dualc_glsl_parity` **73/73**
+`ctest` **300** (2026-10-07, the full gate on Linux, [15](15-test-coverage-batches.md); 270 on 2026-10-06 in
+CI's three `build` jobs; 256 on 2026-09-17, [19/01](../19-docs-layers/01-record-phases-0-2.md)); `dualc_glsl_parity` **73/73**
 (2026-10-06, asserted by `check.py --gpu` against `parity_expected_cases` in CI's required
 `gpu` job — [13](13-parity-gate-binding.md)); the same 270 pass under ASan + UBSan in CI's
 `sanitize` job (2026-10-06, [14](14-build-hardening-ci.md)); the same 270 pass under `ctest -j 8`,
@@ -138,7 +140,7 @@ three runs in a row (2026-10-07, Linux, [15](15-test-coverage-batches.md)).
 | [#29](04-engineering-quality.md#29-thread-safety-contract-for-user-derived-implicitfield) | Thread-safety contract for user-derived `ImplicitField` | **DONE** 2026-08-31 |
 | [#30](04-engineering-quality.md#30-threading-determinism-test) | Threading-determinism test | **DONE** 2026-08-31 |
 | [#31](04-engineering-quality.md#31-make-the-cpugpu-parity-gate-binding) | Make the CPU/GPU parity gate binding | **DONE** 2026-10-06 ([13](13-parity-gate-binding.md)) |
-| [#32](04-engineering-quality.md#32-test-coverage-ledger) | Test-coverage ledger | **PARTIAL** — Batch A 2026-10-07 ([15](15-test-coverage-batches.md)); Batch B, the missing tests, PLANNED |
+| [#32](04-engineering-quality.md#32-test-coverage-ledger) | Test-coverage ledger | **DONE** 2026-10-07 — Batch A and Batch B ([15](15-test-coverage-batches.md)) |
 | [#33](04-engineering-quality.md#33-build--tooling-hardening) | Build & tooling hardening | **DONE** 2026-10-06 ([14](14-build-hardening-ci.md)); batches 2026-08-31, 09-01, 09-10; nanort + clean-clone 2026-09-21 by [20 #47](../20-public-delivery/01-pin-geometry-central.md) |
 | [#34](04-engineering-quality.md#34-api-hygiene-batch) | API hygiene batch | **PARTIAL** — batches 2026-09-10 (×2), 09-11 (unknown keys, [10](10-docs-system-screening.md)) |
 | [#35](04-engineering-quality.md#35-repeatfield-neighbour-set-optimisation) | `RepeatField` neighbour-set optimisation | PLANNED — born from #34's fix on 2026-09-10, no ledger finding behind it |

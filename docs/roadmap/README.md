@@ -28,8 +28,8 @@ then wrap it* — is **finished**, so what remains in DualC is the engine itself
 now worked through the [hosted-CI plan](../raw/2026-10-05-hosted-ci-plan.md): **#51** — the gate
 as a GitHub Actions job — is DONE (2026-10-06, [20 #51](20-public-delivery/03-hosted-ci.md#51-hosted-ci--the-gate-as-a-github-actions-job)), and so is its
 Phase 2, **#31** (the parity gate binding through headless GL, [17/13](17-code-audit-and-hardening/13-parity-gate-binding.md)), and Phase 3,
-**#33** (`-Werror`, ASan + UBSan, the layering assertion as CI jobs, [17/14](17-code-audit-and-hardening/14-build-hardening-ci.md)); **NEXT** is
-Phase 4, **#32** (test coverage; Batch A DONE 2026-10-07), and the rest of **#34** resumes. **Public delivery**
+**#33** (`-Werror`, ASan + UBSan, the layering assertion as CI jobs, [17/14](17-code-audit-and-hardening/14-build-hardening-ci.md)), and Phase 4,
+**#32** (test coverage, [17/15](17-code-audit-and-hardening/15-test-coverage-batches.md)); **NEXT** is the rest of **#34**. **Public delivery**
 ([20](20-public-delivery/README.md)) opened 2026-09-21: the build no longer depends on a local
 geometry-central fork, and since 2026-10-03 it builds and passes the gate on Linux too (**#49**); the same day **#50**
 retired `dualc_view` and the Polyscope sibling checkout, so the GL targets own their dependencies
@@ -43,7 +43,7 @@ the block records the table links ([D-43](../decisions/01-settled.md)).
 
 | Date | What landed | Record |
 | --- | --- | --- |
-| 2026-10-07 | **#32 Batch A** — coverage counts corrected; every `Approx(0.0)` has a margin, gated at 0; each test case runs in its own directory. | [17/15](17-code-audit-and-hardening/15-test-coverage-batches.md) |
+| 2026-10-07 | **#32** — test coverage: 256 cube cases, depth convergence, all five contourer knobs, normals and CLI output content. | [17/15](17-code-audit-and-hardening/15-test-coverage-batches.md) |
 | 2026-10-06 | **#33** — build hardening as CI jobs: `DUALC_WERROR` in the build matrix, `DUALC_SANITIZE` (ASan + UBSan over all 270 cases) as the required `sanitize` job, the layering assertion and the per-target dialect, each proven red. | [17/14](17-code-audit-and-hardening/14-build-hardening-ci.md) |
 | 2026-10-06 | **#31** — the CPU/GPU parity gate is binding: CI's `gpu` job (Xvfb + llvmpipe, `check.py --gpu --strict`, the case count asserted) is required, proven red on a deliberate `opXor` break. | [17/13](17-code-audit-and-hardening/13-parity-gate-binding.md) |
 | 2026-10-06 | **#51** — hosted CI: a GitHub Actions workflow runs `scripts/check.py` and nothing else — the docs tier, the full gate on Ubuntu, Windows and macOS (required), the parity harness under Xvfb (allowed to fail, D-49). | [20](20-public-delivery/03-hosted-ci.md#51-hosted-ci--the-gate-as-a-github-actions-job) |
