@@ -73,19 +73,53 @@ FILE* openOutputFile(const std::string& path, bool binary) {
 }
 
 // std::ofstream has no portable way to set the inherit flag, so on Windows the
-// stream is built over the FILE* from openOutputFile (the MSVC filebuf(FILE*)
-// extension; the stream owns and closes it). Returns false with errno set.
-bool openOutput(std::ofstream& os, const std::string& path, bool binary = true) {
+// stream is built over the FILE* from openOutputFile through the MSVC
+// filebuf(FILE*) extension -- which takes NO ownership ("extension, no
+// ownership taking" in <fstream>): the stream's close() flushes but never
+// fcloses, so an OutputFile owns the FILE and closes it after the stream.
+// Declare the owner BEFORE its stream (destroyed after it). Measured the hard
+// way: without the owner the process held its own `.part` and the rename
+// failed with the very sharing violation this code exists to prevent.
+class OutputFile {
+ public:
+  OutputFile() = default;
+  OutputFile(const OutputFile&) = delete;
+  OutputFile& operator=(const OutputFile&) = delete;
+  ~OutputFile() {
+    if (f_) std::fclose(f_);
+  }
+  // Open `path` for writing, non-inheritable; false with errno set.
+  bool open(std::ofstream& os, const std::string& path, bool binary = true) {
 #ifdef _WIN32
-  FILE* f = openOutputFile(path, binary);
-  if (!f) return false;
-  os = std::ofstream(f);
-  return static_cast<bool>(os);
+    f_ = openOutputFile(path, binary);
+    if (!f_) return false;
+    os = std::ofstream(f_);
+    return static_cast<bool>(os);
 #else
-  os.open(path, binary ? (std::ios::out | std::ios::binary) : std::ios::out);
-  return static_cast<bool>(os);
+    os.open(path, binary ? (std::ios::out | std::ios::binary) : std::ios::out);
+    return static_cast<bool>(os);
 #endif
-}
+  }
+  // Flush and close the stream, then the FILE; false if either failed.
+  // Safe to call more than once.
+  bool close(std::ofstream& os) {
+    bool ok = true;
+    if (os.is_open()) {
+      os.flush();
+      ok = static_cast<bool>(os);
+      os.close();
+      ok = ok && static_cast<bool>(os);
+    }
+    if (f_) {
+      if (std::fclose(f_) != 0) ok = false;
+      f_ = nullptr;
+    }
+    return ok;
+  }
+
+ private:
+  FILE* f_ = nullptr;
+};
 
 // A failed rename or remove that another handle caused is transient when that
 // handle is short-lived (an on-access scanner on a user's machine); permanent
@@ -906,8 +940,9 @@ TriMesh decimate(const TriMesh& in, const DecimateOpts& dec, float& outError) {
 // positions, recomputed angle-weighted per-vertex normals, and `v//vn` faces.
 // Angle weighting stays stable on the irregular triangles a QEM pass produces.
 int writeObjFromTriMesh(const TriMesh& m, const std::string& path) {
+  OutputFile own;
   std::ofstream os;
-  if (!openOutput(os, path, /*binary=*/false)) {
+  if (!own.open(os, path, /*binary=*/false)) {
     reportError("cannot open '" + path + "' for writing: " + errnoText());
     return 2;
   }
@@ -959,7 +994,7 @@ int writeObjFromTriMesh(const TriMesh& m, const std::string& path) {
     os << "f " << (tri[0] + 1) << "//" << (tri[0] + 1) << ' ' << (tri[1] + 1)
        << "//" << (tri[1] + 1) << ' ' << (tri[2] + 1) << "//" << (tri[2] + 1)
        << '\n';
-  if (!os) {
+  if (!os || !own.close(os)) {
     reportError("failed writing OBJ '" + path + "'");
     return 2;
   }
@@ -1064,8 +1099,9 @@ void packStlTriangle(const dualc::Vector3& a, const dualc::Vector3& b,
 // Binary STL: 80-byte header + uint32 facet count + 50 bytes/triangle. We
 // target little-endian (win32/x64).
 int writeStl(const TriMesh& m, const std::string& path) {
+  OutputFile own;
   std::ofstream os;
-  if (!openOutput(os, path)) {
+  if (!own.open(os, path)) {
     reportError("cannot open '" + path + "' for writing: " + errnoText());
     return 2;
   }
@@ -1079,7 +1115,7 @@ int writeStl(const TriMesh& m, const std::string& path) {
     packStlTriangle(m.pos[tri[0]], m.pos[tri[1]], m.pos[tri[2]], rec);
     os.write(rec, 50);
   }
-  if (!os) {
+  if (!os || !own.close(os)) {
     reportError("failed writing STL '" + path + "'");
     return 2;
   }
@@ -1093,7 +1129,7 @@ int writeStl(const TriMesh& m, const std::string& path) {
 class StreamingStl {
  public:
   bool open(const std::string& path) {
-    if (!openOutput(os_, path)) return false;
+    if (!own_.open(os_, path)) return false;
     char header[80] = {0};  // must NOT begin with "solid"
     os_.write(header, sizeof header);
     const std::uint32_t placeholder = 0;
@@ -1111,19 +1147,18 @@ class StreamingStl {
   bool finish() {
     os_.seekp(80, std::ios::beg);
     os_.write(reinterpret_cast<const char*>(&count_), 4);
-    os_.flush();
     const bool ok = static_cast<bool>(os_);
-    os_.close();
-    return ok && static_cast<bool>(os_);
+    return own_.close(os_) && ok;
   }
   // Give up: close the stream so the driver can remove the file (Windows
   // cannot unlink an open file). Safe to call more than once.
   void abort() {
-    if (os_.is_open()) os_.close();
+    own_.close(os_);
   }
   std::uint32_t count() const { return count_; }
 
  private:
+  OutputFile own_;   // before os_: destroyed after it
   std::ofstream os_;
   std::uint32_t count_ = 0;
 };
@@ -1364,7 +1399,7 @@ class Tiled3mfSink {
   bool open(const std::string& path) {
     path_ = path;
     tmpPath_ = path + ".model.tmp";
-    if (!openOutput(model_, tmpPath_)) return false;
+    if (!own_.open(model_, tmpPath_)) return false;
     model_ << kModelHeader3mf << " <resources>\n";
     return static_cast<bool>(model_);
   }
@@ -1428,10 +1463,8 @@ class Tiled3mfSink {
     for (std::uint32_t id : buildIds_)
       model_ << "  <item objectid=\"" << id << "\"/>\n";
     model_ << " </build>\n</model>\n";
-    model_.flush();
     const bool wrote = static_cast<bool>(model_);
-    model_.close();
-    if (!wrote) { std::remove(tmpPath_.c_str()); return false; }
+    if (!own_.close(model_) || !wrote) { std::remove(tmpPath_.c_str()); return false; }
 
     // Pack the ZIP: the two tiny fixed parts in memory, the model streamed from
     // the temp file (miniz deflates incrementally -> one-tile peak RAM holds).
@@ -1464,7 +1497,7 @@ class Tiled3mfSink {
   }
 
   void abort() {
-    if (model_.is_open()) model_.close();
+    own_.close(model_);
     if (!tmpPath_.empty()) std::remove(tmpPath_.c_str());
   }
   ~Tiled3mfSink() { abort(); }
@@ -1474,6 +1507,7 @@ class Tiled3mfSink {
  private:
   std::string path_;
   std::string tmpPath_;
+  OutputFile own_;   // before model_: destroyed after it
   std::ofstream model_;
   std::uint32_t objId_ = 0;
   std::uint32_t triCount_ = 0;
@@ -1515,7 +1549,7 @@ class Welded3mfSink {
     path_ = path;
     vpath_ = path + ".verts.tmp";
     tpath_ = path + ".tris.tmp";
-    return openOutput(verts_, vpath_) && openOutput(tris_, tpath_);
+    return vown_.open(verts_, vpath_) && town_.open(tris_, tpath_);
   }
 
   template <class KeepFn>
@@ -1553,24 +1587,22 @@ class Welded3mfSink {
   }
 
   void abort() {
-    if (verts_.is_open()) verts_.close();
-    if (tris_.is_open()) tris_.close();
+    vown_.close(verts_);
+    town_.close(tris_);
     cleanup();
   }
   ~Welded3mfSink() { abort(); }
 
   bool finish() {
-    verts_.flush();
-    tris_.flush();
     const bool wrote = static_cast<bool>(verts_) && static_cast<bool>(tris_);
-    verts_.close();
-    tris_.close();
-    if (!wrote) { cleanup(); return false; }
+    const bool closed = vown_.close(verts_) && town_.close(tris_);
+    if (!wrote || !closed) { cleanup(); return false; }
 
     // Assemble the single-object model part = header + verts + tris + footer.
     const std::string mpath = path_ + ".model.tmp";
+    OutputFile mown;
     std::ofstream m;
-    if (!openOutput(m, mpath)) { cleanup(); return false; }
+    if (!mown.open(m, mpath)) { cleanup(); return false; }
     m << kModelHeader3mf
       << " <resources>\n  <object id=\"1\" type=\"model\">\n   <mesh>\n"
          "    <vertices>\n";
@@ -1579,9 +1611,8 @@ class Welded3mfSink {
     ok = appendFileTo(m, tpath_) && ok;
     m << "    </triangles>\n   </mesh>\n  </object>\n </resources>\n"
          " <build>\n  <item objectid=\"1\"/>\n </build>\n</model>\n";
-    m.flush();
     ok = ok && static_cast<bool>(m);
-    m.close();
+    ok = mown.close(m) && ok;
     if (!ok) { std::remove(mpath.c_str()); cleanup(); return false; }
 
     FILE* zf = openOutputFile(path_, true);
@@ -1696,6 +1727,7 @@ class Welded3mfSink {
 
   TileGrid g_;
   std::string path_, vpath_, tpath_;
+  OutputFile vown_, town_;   // before their streams: destroyed after them
   std::ofstream verts_, tris_;
   std::unordered_map<Key, long long, KeyHash> seam_;
   long long nextId_ = 0;

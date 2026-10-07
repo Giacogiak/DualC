@@ -53,10 +53,15 @@ Five pushes of `io-stress.yml`, 2026-10-07, every job on `windows-2022` unless n
 Confirmed — DualC's, at the rename, with a different holder than inferred. Shipped on
 `exp/io-stress-windows`, 2026-10-07:
 
-1. **Non-inheritable output handles** (`examples/example_common.cpp`): one `openOutput`
-   helper (`_fsopen(…, "wbN")` under the MSVC `filebuf(FILE*)` extension; `O_CLOEXEC` on
-   POSIX) for every `std::ofstream` the writers and the tiled sinks open, and a caller-owned
-   `FILE*` through `mz_zip_writer_init_cfile` for the three miniz ZIPs. The non-decimated
+1. **Non-inheritable output handles** (`examples/example_common.cpp`): an `OutputFile`
+   owner per stream (`_fsopen(…, "wbN")`, the stream built over the `FILE*` by the MSVC
+   `filebuf(FILE*)` extension; `O_CLOEXEC` on POSIX) for every `std::ofstream` the writers
+   and the tiled sinks open, and a caller-owned `FILE*` through `mz_zip_writer_init_cfile`
+   for the three miniz ZIPs. The extension takes **no ownership** (so says `<fstream>`:
+   "extension, no ownership taking"): the first cut of this fix leaked every `FILE`, and the
+   `force` job's own sequential baseline then failed its rename after 11 retries — the
+   process holding its own `.part` — which is how the owner came to exist (sample 6 in the
+   second raw file). The non-decimated
    OBJ path writes through geometry-central's own stream and is the one output this does not
    cover (its `.part` is open for milliseconds, the monolithic case the measurements never
    caught).

@@ -63,8 +63,10 @@ tiled sinks keep their own scratch beside it (`<path>.part.model.tmp`, and for t
 3MF `<path>.part.verts.tmp` / `.tris.tmp`); each has an `abort()` that closes its streams
 and removes them, run by the driver before the `.part` is removed, because Windows will not
 unlink a file that is still open. Every one of those files is opened **non-inheritable**
-(`_O_NOINHERIT` on Windows, `O_CLOEXEC` elsewhere, through one `openOutput` helper and a
-caller-owned `FILE*` for the miniz ZIP): a child process the host starts with handle
+(`_O_NOINHERIT` on Windows, `O_CLOEXEC` elsewhere, through one `OutputFile` owner per
+stream — on Windows the stream is built over a `FILE*` by the MSVC `filebuf(FILE*)`
+extension, which takes no ownership, so the owner closes the `FILE` after the stream — and
+a caller-owned `FILE*` for the miniz ZIP): a child process the host starts with handle
 inheritance mid-export would otherwise hold the `.part` — without `FILE_SHARE_DELETE` —
 for its whole lifetime and make the rename fail. On Windows the rename is retried for up to
 about half a second on a sharing violation or access denial (a scanner's momentary hold),
