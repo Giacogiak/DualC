@@ -71,6 +71,11 @@ followed, so it read **70** on `ab5ce1e`, and it could not see the split compari
 | `ctest` serial | — | 270/270, 86 s |
 | `dualc_tests` as one process (all 249 cases in turn) | — | all pass, 589,341 assertions, `dualc_test_work/` empty afterwards |
 
+CI run [37584887029](https://github.com/Giacogiak/DualC/actions/runs/37584887029) on `e637913`:
+every job green — `build` on Ubuntu (4 min 32 s), macOS (4 min 30 s) and Windows (10 min 49 s,
+the listener's `_getpid` path), `sanitize` (14 min 17 s, ASan + UBSan over the listener),
+`gpu`, `docs`.
+
 `ctest -j 8` was green **before** the fix too. The hazards were real but latent: no two
 concurrent cases shared a name on this run order, and `cli_gen_demo` writes the same bytes it
 replaces, so a reader only fails inside the short truncate-and-rewrite window. That is what
