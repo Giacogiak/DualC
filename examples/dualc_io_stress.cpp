@@ -107,6 +107,7 @@ struct Options {
   bool small = false;
   bool mix = false;
   bool verbose = false;
+  bool noBaseline = false;   // skip the sequential warm-up: the first files this process writes are the concurrent ones
   // force-hold: -1 = off, 0 = "through" (hold until the export returned), > 0 = ms
   long long forceHold = -1;
 };
@@ -127,6 +128,9 @@ void usage() {
       "  even workers writeFieldTiledStl, odd workers writeField. Every non-zero\n"
       "  rc is printed with the [dualc] error line it produced and a rename probe.\n"
       "  --small       a sphere at depth 5 (smoke runs)\n"
+      "  --no-baseline no sequential warm-up: the first files written are the\n"
+      "                concurrent ones (fresh-process runs); counts are compared\n"
+      "                to the first export of each mode instead\n"
       "  --mix         odd workers rotate .stl / .3mf / .obj\n"
       "  --force-hold  (Windows) hold each .part open without FILE_SHARE_DELETE\n"
       "                until the export returned (through) or for MS ms\n";
@@ -147,6 +151,7 @@ bool parse(int argc, char** argv, Options& o) {
     else if (a == "--small") { o.small = true; if (o.depth == 6) o.depth = 5; }
     else if (a == "--mix") o.mix = true;
     else if (a == "--verbose") o.verbose = true;
+    else if (a == "--no-baseline") o.noBaseline = true;
     else if (a == "--force-hold") {
       const char* v = next("--force-hold"); if (!v) return false;
       o.forceHold = (std::string(v) == "through") ? 0 : std::atoll(v);
@@ -401,7 +406,7 @@ int main(int argc, char** argv) {
   // checked against.
   std::uint32_t baseTiled = 0, baseMono = 0;
   long long baseMs = 0;
-  {
+  if (!o.noBaseline) {
     Options seq = o; seq.forceHold = -1;
     Outcome a; a.iter = -1; a.worker = 0; a.mode = "tiled"; a.path = nameFor(-1, 0);
     Outcome b; b.iter = -1; b.worker = 1; b.mode = "mono"; b.path = nameFor(-1, 1);
@@ -437,6 +442,16 @@ int main(int argc, char** argv) {
   std::cerr.rdbuf(oldErr);
   if (oldOut) std::cout.rdbuf(oldOut);
 
+  if (o.noBaseline) {
+    // The reference count is the first successful export of each mode.
+    for (const auto& r : all) {
+      if (r.rc != 0 || !r.countChecked) continue;
+      std::uint32_t& ref = (r.mode == "tiled") ? baseTiled : baseMono;
+      if (ref == 0) ref = r.facets;
+    }
+    out << "dualc_io_stress: no baseline; reference tiled=" << baseTiled << " mono=" << baseMono
+        << " facets (first successful export of each mode)\n";
+  }
   int failed = 0, nOpen = 0, nFinish = 0, nWrite = 0, nCommit = 0, nOther = 0, nDelete = 0, nStray = 0, nCount = 0;
   for (const auto& r : all) {
     bool bad = r.rc != 0;

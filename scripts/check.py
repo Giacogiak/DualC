@@ -1626,21 +1626,33 @@ def check_io_stress(ctx):
     cmd = [exe, "--concurrency", str(cfg.get("concurrency", 6)),
            "--iterations", str(cfg.get("iterations", 30))]
     cmd += [a for a in (ctx.args.io_stress_args or "").split() if a]
-    rc, out = run(cmd, cwd=ctx.root)
-    lines = out.splitlines()
-    if any("not supported on this platform" in l for l in lines):
-        return Result(SKIP, "--force-hold is Windows-only", lines[-3:])
-    tally = next((l for l in lines if re.match(r"dualc_io_stress:\s*\d+ exports,", l)), None)
-    if tally is None:
-        return Result(FAIL, "could not parse dualc_io_stress output (rc %d)" % rc,
-                      lines[-15:])
-    summary = tally.split(":", 1)[1].strip()
-    details = [l for l in lines if l.startswith(("FAIL #", "DELETE-FAIL", "DELETE-RETRIED",
-                                                 "dualc_io_stress: baseline",
-                                                 "dualc_io_stress: field="))]
-    if rc != 0:
-        return Result(FAIL, summary, details[:40])
-    return Result(OK, summary, details[:40])
+    # --io-stress-repeat N: N fresh processes (each one's first files are the
+    # ones under test -- a scanner meets a new writer every time), tallies summed.
+    repeat = max(1, int(ctx.args.io_stress_repeat or 1))
+    tally_re = re.compile(r"dualc_io_stress:\s*(\d+) exports, (\d+) failed \(open (\d+), finish (\d+), "
+                          r"write (\d+), commit (\d+), count (\d+), other (\d+)\), "
+                          r"(\d+) delete failures, (\d+) stray \.part")
+    totals, failed, details = [0] * 10, False, []
+    for i in range(repeat):
+        rc, out = run(cmd, cwd=ctx.root)
+        lines = out.splitlines()
+        if any("not supported on this platform" in l for l in lines):
+            return Result(SKIP, "--force-hold is Windows-only", lines[-3:])
+        m = next((tally_re.search(l) for l in lines if tally_re.search(l)), None)
+        if m is None:
+            return Result(FAIL, "could not parse dualc_io_stress output (rc %d, process %d)"
+                          % (rc, i + 1), lines[-15:])
+        totals = [a + int(b) for a, b in zip(totals, m.groups())]
+        failed = failed or rc != 0
+        tag = ("[%d/%d] " % (i + 1, repeat)) if repeat > 1 else ""
+        details += [tag + l for l in lines
+                    if l.startswith(("FAIL #", "DELETE-FAIL", "DELETE-RETRIED",
+                                     "dualc_io_stress: baseline", "dualc_io_stress: no baseline",
+                                     "dualc_io_stress: field="))]
+    summary = ("%d exports, %d failed (open %d, finish %d, write %d, commit %d, count %d, "
+               "other %d), %d delete failures, %d stray .part%s"
+               % (tuple(totals) + ((" over %d processes" % repeat) if repeat > 1 else "",)))
+    return Result(FAIL if failed else OK, summary, details[:40])
 
 
 # --------------------------------------------------------------------------
@@ -1790,6 +1802,8 @@ def main(argv):
     ap.add_argument("--io-stress-args", default="", metavar="ARGS",
                     help="extra flags passed verbatim to dualc_io_stress "
                          "(e.g. \"--force-hold through\", \"--concurrency 1\")")
+    ap.add_argument("--io-stress-repeat", default="1", metavar="N",
+                    help="run dualc_io_stress N times as fresh processes, tallies summed")
     ap.add_argument("--all", action="store_true", help="--fast --build --gpu")
     ap.add_argument("--clean", action="store_true",
                     help="re-configure from scratch (needs network for Catch2)")

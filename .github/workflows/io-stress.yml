@@ -42,6 +42,9 @@ jobs:
           # .part until the export returned. Expected to fail every time on
           # today's code; what it prints is the exact error_code MSVC gives.
           - { job: force,       os: windows-2022, scanner: 'on',  args: '--force-hold through --iterations 5' }
+          # H2, Boletus's shape more closely: a fresh process whose FIRST files
+          # are the six concurrent ones (no sequential warm-up), fifteen times.
+          - { job: fresh-process, os: windows-2022, scanner: 'on',  args: '--no-baseline --iterations 1', repeat: 15 }
           # The control: the harness itself must be clean where no scanner
           # can hold a file.
           - { job: linux-control, os: ubuntu-24.04, scanner: 'none', args: '' }
@@ -106,7 +109,7 @@ jobs:
         run: cmake --build build --target dualc_io_stress --config Release
       - name: Stress
         shell: bash
-        run: python scripts/check.py --io-stress --strict --build-dir build --io-stress-args "${{ matrix.args }}" | tee gate.log
+        run: python scripts/check.py --io-stress --strict --build-dir build --io-stress-args "${{ matrix.args }}" --io-stress-repeat "${{ matrix.repeat || 1 }}" | tee gate.log
       - name: Annotate the report
         if: always()
         shell: bash
