@@ -113,6 +113,8 @@ used a scratch triage file with an empty audit; none was committed, so
   roadmap README. The cut words survive in that page's milestones table. The audit's other
   `docs/` rows are the short-line noise of unchanged pages, which the 3d73220 audit absorbed
   with bulk rules.
+- **The dump is not kept.** The run's 18,069-line report is not in `docs/raw/`: nearly all
+  of it is that noise, and the counts above are what it established.
 
 ---
 
