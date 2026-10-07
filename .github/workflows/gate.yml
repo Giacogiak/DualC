@@ -86,6 +86,7 @@ jobs:
       # FetchContent sources only. *-src alone is not enough: the git clone
       # step wipes and re-clones a source dir whose *-subbuild stamps are
       # missing, and geometry-central downloads Eigen into its own build tree.
+      # Keyed on the two files that declare fetches, so a test edit stays warm.
       - name: Restore FetchContent sources
         uses: actions/cache@v5
         with:
@@ -93,7 +94,7 @@ jobs:
             build/_deps/*-src
             build/_deps/*-subbuild
             build/_deps/geometry-central-build/deps/eigen-src
-          key: fetchcontent-${{ matrix.os }}-${{ hashFiles('**/CMakeLists.txt') }}
+          key: fetchcontent-${{ matrix.os }}-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
       # -D DUALC_WERROR=ON: a warning in DualC's own code fails the build here,
       # on top of the warnings scan; the local gate keeps the scan alone
       # (roadmap 17 #33, 17/09/02).
@@ -141,7 +142,7 @@ jobs:
             build/_deps/*-src
             build/_deps/*-subbuild
             build/_deps/geometry-central-build/deps/eigen-src
-          key: fetchcontent-ubuntu-24.04-${{ hashFiles('**/CMakeLists.txt') }}
+          key: fetchcontent-ubuntu-24.04-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
       - name: Gate (build tier, sanitized)
         run: >
           python3 scripts/check.py --build --build-dir build --config RelWithDebInfo

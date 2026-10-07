@@ -114,6 +114,16 @@ all green except `windows-2022`, which was cancelled by run 3's push.
 artifact job (it would fire [#8](../../decisions/README.md)'s "CI artifact" trigger); any new
 check in `check.py`; making `gpu` or `macos-14` required.
 
+*2026-10-07:* run [37634791783](https://github.com/Giacogiak/DualC/actions/runs/37634791783)
+(`d62e3ea`, #54) failed on `build (windows-2022)` alone, at configure:
+`Build step for eigen failed: 1` in FetchContent, before any DualC code compiled. Every
+other job passed, including Ubuntu and macOS, which fetched Eigen cold in the same run. The
+commit had edited `examples/CMakeLists.txt`, and the cache key hashed every
+`CMakeLists.txt`, so all three OSes missed the cache. The Windows fetch is read as a
+transient download failure; its log needs a login. To make cold fetches rare, the
+FetchContent cache key (build matrix and `sanitize`) now hashes only the two files that
+declare fetches, the root `CMakeLists.txt` and `tests/CMakeLists.txt`.
+
 ---
 
 ← Back to [20 — public delivery](README.md) · the [Roadmap index](../README.md).
