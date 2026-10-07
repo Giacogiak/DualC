@@ -65,6 +65,11 @@ Add `gpu` to the required status checks of `main`'s branch protection, next to `
 three `build` jobs. The workflow can make a job count toward the run's conclusion, but only
 the GitHub UI can make a merge wait for it.
 
+*2026-10-07:* the `--snapshot` smoke of § What changed is [D-53](../../decisions/README.md),
+DEFERRED. Under D-49 it would be a new `check.py` check with its own red run, which is not
+worth building speculatively. Its trigger is a viewer regression the parity harness missed,
+or a change to the viewers' window or snapshot code.
+
 ---
 
 ← Back to the [topic README](README.md) · the [Roadmap index](../README.md).

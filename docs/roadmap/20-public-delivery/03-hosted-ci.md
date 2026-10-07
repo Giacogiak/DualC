@@ -20,7 +20,7 @@ the gate command itself and nothing else ([D-49](../../decisions/01-settled.md))
 
 | Job | Runner | Runs | Required |
 | --- | --- | --- | --- |
-| `docs` | `ubuntu-latest` | `check.py --docs --strict` — the session-end mode, report-only lists fatal | yes |
+| `docs` | `ubuntu-latest`; `ubuntu-24.04` since 2026-10-07, pinned like the other jobs before the label moved to Ubuntu 26 | `check.py --docs --strict` — the session-end mode, report-only lists fatal | yes |
 | `build (ubuntu-24.04)` | Ubuntu 24.04, GCC from the image, Ninja from apt | `check.py --build-dir build` — the full default gate: docs tier, configure, build, warnings scan, serial `ctest` | yes |
 | `build (windows-2022)` | Windows Server 2022, Visual Studio 17 2022 | the same command; the generator the gate was born on | yes |
 | `build (macos-14)` | macOS 14 arm64, AppleClang, Ninja from brew | the same command; never built there before #51 | yes — allowed to fail until its first complete run came back green |

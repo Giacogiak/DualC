@@ -104,6 +104,13 @@ already in `CMakeLists.txt`, and it cannot replace the globals alone. With no
 `CXX_STANDARD 17` / `CXX_EXTENSIONS OFF` are set as target properties and the configure guard
 keeps a global from coming back.
 
+*2026-10-07, the untracked findings given homes ([20/04](../20-public-delivery/04-hosted-ci-plan-run.md)):*
+finding 7, the Linux C ABI link failure, is tracked as
+[#53](../14-c-abi/06-linux-shared-library.md); finding 8, the macOS flake, is
+[D-52](../../decisions/README.md), DEFERRED until it fails a second time in CI. With a log
+readable only after login, one failure in 0.01 s gives nothing to debug, and 550 Linux runs
+did not reproduce it.
+
 ---
 
 ← Back to the [topic README](README.md) · the [Roadmap index](../README.md).

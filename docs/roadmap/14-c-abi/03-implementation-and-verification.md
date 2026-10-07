@@ -58,7 +58,8 @@ matches the file writers face-for-face.
   subdir).
 - **Target:** `add_library(dualc_capi SHARED …)` + `add_library(dualc::capi ALIAS …)`.
   Compiled with `DUALC_CAPI_BUILD` (switches the macro to `dllexport`),
-  `POSITION_INDEPENDENT_CODE ON` (no-op on MSVC; enables a future Linux `.so`),
+  `POSITION_INDEPENDENT_CODE ON` (no-op on MSVC; since 2026-10-07 the root build sets it for the
+  whole tree when the ABI is on, which is what makes the Linux `.so` link — [06 #53](06-linux-shared-library.md)),
   and `DUALC_C_VERSION_STR="${PROJECT_VERSION}"`. `_CRT_SECURE_NO_WARNINGS` on MSVC.
 - **Deployment is a single DLL.** `dualc_capi.dll` statically links `libdualc`,
   geometry-central, and the example libs, so its only runtime dependencies are

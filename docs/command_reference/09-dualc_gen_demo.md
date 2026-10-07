@@ -35,8 +35,17 @@ in place.
 | Option | Default | Meaning |
 | --- | --- | --- |
 | `-o PATH` | `<shape>.obj` | Output path for a single shape. |
-| `--dir DIR` | (cwd) | Output directory prefix for `all`. |
+| `--dir DIR` | (cwd) | Output directory for `all`; created if missing, parents included. |
 | `--depth N` | `7` | Octree depth for `genus2` only (it is contoured by DualC; the parametric shapes ignore it). |
+
+A write that cannot happen — `-o` into a directory that does not exist (`-o` creates none),
+or an unwritable path — prints one line and exits 1; a usage error (unknown argument or
+shape) exits 2:
+
+```
+$ dualc_gen_demo cube -o /nonexistent/x/cube.obj
+[dualc_gen_demo] error: couldn't open output file /nonexistent/x/cube.obj
+```
 
 ## Recipes
 

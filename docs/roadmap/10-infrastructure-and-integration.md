@@ -142,6 +142,36 @@ cube/sphere/molde at depths 5/7/9 and catch accidental slowdowns when changes la
 
 a sphere (validates curvature handling, Euler χ = 2), a torus (Euler χ = 0, validates non-zero genus), a hand or skull (non-trivial curvature), a CAD part with sharp edges (validates the sharp-feature toggle). **Cheap follow-up to #10**: with Polyscope wired up, each new demo mesh becomes immediately useful for visual QA (octree refinement, sign classification, contour quality side-by-side). Delivered a richer-than-asked palette of **procedural** demo meshes plus one downloaded organic scan. New generator CLI `examples/dualc_gen_demo` (subcommands `sphere|uvsphere|torus|knot|genus2|cylinder|bracket|hexbore|all`) backed by reusable builders in `examples/demo_meshes.{h,cpp}` (a `dualc_demo_meshes` static lib); both live in `examples/`, the library is untouched (mesh generation is host scope, like mesh I/O). geometry-central ships no primitive generators, so each shape builds positions+faces → `makeSurfaceMeshAndGeometry`; `genus2` is the union of two coplanar tori merged in one neck, contoured by DualC itself. The eight `.obj` are written to `data/` and copied next to every example binary by a `DEMO_MESHES` POST_BUILD loop. Note the repo gitignores `*.obj` (even `cube.obj`/`molde.obj` are working-tree-only), so the meshes are NOT version-controlled — the committed generator is the source of truth; run `dualc_gen_demo all --dir data` after checkout to populate them. *(2026-09-21: the build runs the generator itself into `build/data/` — [20 #47](20-public-delivery/01-pin-geometry-central.md).)* **Meshes + regimes:** icosphere & uv-sphere (χ=2; ico uniform, uv exposes pole slivers), torus (χ=0, genus 1), trefoil-knot tube (χ=0, genus 1, near-approaching strands — the licensing-clean stand-in for "hand/skull", chosen for varying curvature), genus-2 double torus (χ=−2), cylinder (χ=2, sharp rims), **L-bracket (χ=2, BOTH convex 90° and concave 270° sharp edges — the `--sharp` validator)**, hex prism + bore (χ=0, genus 1). Plus `data/bunny.obj` (Stanford bunny, an open scan — attribution in `THIRD_PARTY.md`; sealed via `--gwn-field`). **Tests:** `tests/test_demo_meshes.cpp` contours each procedural mesh and asserts 0 boundary edges + the exact Euler χ (2/0/−2) at a per-mesh depth pinned in comments; new `cli_gen_demo`, `cli_demo_sphere`, `cli_demo_torus`, `cli_demo_bracket_sharp` smoke tests. Full suite green (153 ctest cases). **One non-obvious fix landed:** the L-cap is a non-convex hexagon, and geometry-central fan-triangulates a polygon face from its first listed vertex — emitting the back cap in reversed order put the fan apex on a reflex-blocked vertex, so its triangles crossed the notch (boundary edges that *grew* with depth, the malformed-input signature). Caps are now triangulated explicitly from the origin corner, which sees the whole star-shaped L. **Why procedural (not licensing):** Giacomo confirmed that permissive-only is a preference, not a hard rule (and approved the downloaded bunny); procedural generation was kept for engineering reasons — clean topology, exact χ, regeneratable, tunable, no large binaries. **Known follow-up:** the genus-2 source is built by DualC's own contourer, so its committed mesh is a DC output (depth 6, ~22k verts) rather than a parametric grid; fine for a demo but not a hand-authored manifold. Full generator docs in [`../command_reference/09-dualc_gen_demo.md`](../command_reference/09-dualc_gen_demo.md); palette table in `README.md`. Tools count Part I bumped 7 → 8.
 
+## #54 `dualc_gen_demo` creates its `--dir`, and a failed write is an error, not an abort
+
+**DONE — 2026-10-07.** `dualc_gen_demo all --dir <missing>` aborted on an uncaught
+`std::runtime_error` (exit 134), so the `AGENTS.md` recipe `dualc_gen_demo all --dir data`
+failed on a fresh clone, which has no `data/`. It was found on 2026-10-06 by the first CI run
+([20/03](20-public-delivery/03-hosted-ci.md)), worked around twice (the `gpu` job's
+`mkdir -p data`, and `cli_gen_demo_out/` created at configure), and left untracked until
+[20/04](20-public-delivery/04-hosted-ci-plan-run.md) gave it this number.
+
+**The fix** (`examples/dualc_gen_demo.cpp`):
+
+- `all` creates `DIR`, parents included (`std::filesystem::create_directories`).
+- Any write that still fails is caught and reported as `[dualc_gen_demo] error: <what>`, with
+  exit 1. An example is `-o` into a missing directory, which `-o` does not create:
+  `[dualc_gen_demo] error: couldn't open output file /nonexistent_zz/x/cube.obj`.
+- Exit 2 stays for usage errors (an unknown argument or shape).
+
+**The tests** (`examples/CMakeLists.txt`):
+
+- `cli_gen_demo_dir` runs `all --dir <build>/examples/cli_gen_demo_new/a/b`. The setup
+  fixture `cli_gen_demo_dir_reset` removes that tree first, so every run starts without it.
+- `cli_gen_demo_dir_content` checks the generated cube there (8 vertices, 12 faces).
+- `cli_gen_demo_bad_out` passes only on the tool's own error line, which an abort never
+  prints.
+
+**Proven to fail.** On the previous source, `cli_gen_demo_dir` and `cli_gen_demo_bad_out`
+both ended in `Subprocess aborted`, and the content check did not run; on the fix all four
+pass. `ctest` goes from 300 to 304 cases. The `gpu` job's `mkdir -p data` is removed, so every CI
+run now creates `data/` through the fix, on a fresh clone.
+
 ---
 
 ← Back to the [Roadmap index](README.md).

@@ -2,6 +2,8 @@
 
 #include "geometrycentral/surface/meshio.h"
 
+#include <exception>
+#include <filesystem>
 #include <functional>
 #include <iostream>
 #include <map>
@@ -59,7 +61,8 @@ void printUsage() {
       "\n"
       "  --depth N   octree depth for the genus2 mesh (it is contoured by\n"
       "              DualC; ignored by the purely parametric shapes).\n"
-      "  --dir DIR   output directory prefix for `all` (default: current).\n"
+      "  --dir DIR   output directory for `all`, created if missing\n"
+      "              (default: current).\n"
       "  -o PATH     output path for a single shape (default: <shape>.obj).\n"
       "  --help,-h   this message.\n"
       "\n"
@@ -109,14 +112,22 @@ int main(int argc, char** argv) {
     }
   }
 
-  if (cmd == "all") {
-    for (const auto& sh : shapes()) writeMesh(sh, dir + sh.defaultOut, depth);
-    return 0;
-  }
+  // A failed write (an unwritable path, a missing directory under -o) is a
+  // message and exit 1, never an uncaught exception (roadmap 10 #54).
+  try {
+    if (cmd == "all") {
+      if (!dir.empty()) std::filesystem::create_directories(dir);
+      for (const auto& sh : shapes()) writeMesh(sh, dir + sh.defaultOut, depth);
+      return 0;
+    }
 
-  for (const auto& sh : shapes()) {
-    if (sh.name == cmd)
-      return writeMesh(sh, outPath.empty() ? sh.defaultOut : outPath, depth);
+    for (const auto& sh : shapes()) {
+      if (sh.name == cmd)
+        return writeMesh(sh, outPath.empty() ? sh.defaultOut : outPath, depth);
+    }
+  } catch (const std::exception& e) {
+    std::cerr << "[dualc_gen_demo] error: " << e.what() << "\n";
+    return 1;
   }
   std::cerr << "[dualc_gen_demo] unknown shape: " << cmd << "\n";
   printUsage();

@@ -205,7 +205,8 @@ lattices back on the single-fold fast path by construction rather than by optimi
 *Trigger:* a lattice contour where the 2.3× is felt — depth 8+, or the tiled export path.
 *2026-10-07:* for strut lattices the 2.3× buys nothing: their cells are mirror-symmetric, so
 the single fold was already exact ([15](15-test-coverage-batches.md#the-strut-lattice-oracle-certified-what-it-claimed)).
-A symmetry flag on the cell is a fourth lever.
+A symmetry flag on the cell is a fourth lever. Open: why the fix moves root-box vertices
+([20/04](../20-public-delivery/04-hosted-ci-plan-run.md)).
 
 ---
 

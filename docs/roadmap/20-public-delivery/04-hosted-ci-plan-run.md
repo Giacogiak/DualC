@@ -116,6 +116,24 @@ used a scratch triage file with an empty audit; none was committed, so
 - **The dump is not kept.** The run's 18,069-line report is not in `docs/raw/`: nearly all
   of it is that noise, and the counts above are what it established.
 
+*2026-10-07, the open items given homes.* At the owner's request, each row of *Open after the
+run* now has an ID or is done:
+
+- **`main` is pushed:** `origin/main` = `7fd9066`.
+- **Branch protection** is the owner's, in the GitHub UI.
+- **`dualc_gen_demo --dir`:** DONE as [10 #54](../10-infrastructure-and-integration.md). The
+  `gpu` job's `mkdir -p data` is gone.
+- **The Linux C ABI link:** tracked as [#53](../14-c-abi/06-linux-shared-library.md),
+  PLANNED. Boletus already works around it.
+- **The macOS flake:** [D-52](../../decisions/README.md), DEFERRED.
+- **The `--snapshot` smoke:** [D-53](../../decisions/README.md), DEFERRED.
+- **The `RepeatField` vertex movement:** an open line on
+  [#35](../17-code-audit-and-hardening/04-engineering-quality.md#35-repeatfield-neighbour-set-optimisation).
+- **`ubuntu-latest`:** the `docs` job is pinned to `ubuntu-24.04`.
+- **The release workflow:** still out of scope, waiting on #8's trigger.
+
+17/04 is now at 15,355 of 15,360 bytes, so its next entry needs the split first.
+
 ---
 
 ← Back to [20 — public delivery](README.md) · the [Roadmap index](../README.md).

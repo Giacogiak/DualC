@@ -27,6 +27,10 @@ dualc_target_options(dualc_capi)
 target_compile_definitions(dualc_capi PRIVATE
   DUALC_CAPI_BUILD
   "DUALC_C_VERSION_STR=\"${PROJECT_VERSION}\"")
+# The shared library itself; the static libraries it links are position-
+# independent too, by the root CMakeLists setting CMAKE_POSITION_INDEPENDENT_CODE
+# whenever DUALC_BUILD_C_ABI is on (roadmap 14 #53) -- without that the Linux
+# link fails on the host layer's thread_local (R_X86_64_TPOFF32 / __tls_guard).
 set_target_properties(dualc_capi PROPERTIES POSITION_INDEPENDENT_CODE ON)
 if(MSVC)
   target_compile_definitions(dualc_capi PRIVATE _CRT_SECURE_NO_WARNINGS)
