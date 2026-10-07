@@ -74,12 +74,16 @@ FILE* openOutputFile(const std::string& path, bool binary) {
 
 // std::ofstream has no portable way to set the inherit flag, so on Windows the
 // stream is built over the FILE* from openOutputFile through the MSVC
-// filebuf(FILE*) extension -- which takes NO ownership ("extension, no
-// ownership taking" in <fstream>): the stream's close() flushes but never
-// fcloses, so an OutputFile owns the FILE and closes it after the stream.
-// Declare the owner BEFORE its stream (destroyed after it). Measured the hard
-// way: without the owner the process held its own `.part` and the rename
-// failed with the very sharing violation this code exists to prevent.
+// filebuf(FILE*) extension. Its ownership rule, from the STL source: an
+// explicit close() always fcloses the FILE, but the DESTRUCTOR closes only a
+// FILE the filebuf opened itself ("extension, no ownership taking"). So every
+// close goes through OutputFile::close(), which closes the stream (and with it
+// the FILE), and the owner's destructor fcloses only a FILE the stream never
+// closed -- the error paths that drop the stream unclosed. Declare the owner
+// BEFORE its stream (destroyed after it). Measured the hard way: without the
+// owner the process held its own `.part` and the rename failed with the very
+// sharing violation this code exists to prevent; with a second fclose the
+// close itself reported failure.
 class OutputFile {
  public:
   OutputFile() = default;
@@ -100,17 +104,18 @@ class OutputFile {
     return static_cast<bool>(os);
 #endif
   }
-  // Flush and close the stream, then the FILE; false if either failed.
-  // Safe to call more than once.
+  // Flush and close the stream -- which closes the FILE -- or, when the
+  // stream is already gone, the FILE alone. False if either failed. Safe to
+  // call more than once.
   bool close(std::ofstream& os) {
     bool ok = true;
     if (os.is_open()) {
       os.flush();
       ok = static_cast<bool>(os);
-      os.close();
+      os.close();   // fcloses the FILE on every platform
       ok = ok && static_cast<bool>(os);
-    }
-    if (f_) {
+      f_ = nullptr;
+    } else if (f_) {
       if (std::fclose(f_) != 0) ok = false;
       f_ = nullptr;
     }
