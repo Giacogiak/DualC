@@ -33,6 +33,10 @@ status and trigger, and links to both.
 - [`14-build-hardening-ci.md`](14-build-hardening-ci.md) — the delivery record of **#33**'s
   rest: `DUALC_WERROR`, `DUALC_SANITIZE`, the layering assertion and the per-target dialect,
   the first warnings and sanitizer findings, and the CI runs that proved each one red.
+- [`15-windows-rename-race.md`](15-windows-rename-race.md) — the record of **#52**, the
+  Windows export I/O flake Boletus reported: the rc 2 sites ranked, the alternative
+  hypotheses, the `dualc_io_stress` instrument and its experiment workflow, the decision
+  criteria fixed before the runs, and the evidence as it lands.
 - [`07-repeat-tiling-fix.md`](07-repeat-tiling-fix.md) — the full record for #34's first
   item: `repeat` read only the folded tile, which put wrong geometry in shipped strut
   lattices; the conditional fix, its measured 2.3× cost, and the oracle test it showed to
@@ -113,7 +117,8 @@ the roadmap README's milestones; condensed to this list — [19 Phase 5](../19-d
 ledger for the tracked items (the roadmap README links it rather than restating it);
 full entries, with evidence and triggers, live in two files:
 [`03-correctness-and-robustness/`](03-correctness-and-robustness/README.md) (#22–#26, #46) and
-[`04-engineering-quality.md`](04-engineering-quality.md) (#27–#35).
+[`04-engineering-quality.md`](04-engineering-quality.md) (#27–#35); #52, raised from outside the
+audit, is on its own page, [`15`](15-windows-rename-race.md).
 
 **Latest verification** (the one home of the counts; every other page links here):
 `ctest` **270** (2026-10-06, the full gate on Linux and in CI's three `build` jobs;
@@ -139,6 +144,7 @@ full entries, with evidence and triggers, live in two files:
 | [#34](04-engineering-quality.md#34-api-hygiene-batch) | API hygiene batch | **PARTIAL** — batches 2026-09-10 (×2), 09-11 (unknown keys, [10](10-docs-system-screening.md)) |
 | [#35](04-engineering-quality.md#35-repeatfield-neighbour-set-optimisation) | `RepeatField` neighbour-set optimisation | PLANNED — born from #34's fix on 2026-09-10, no ledger finding behind it |
 | [#46](03-correctness-and-robustness/02-precision-and-celloverlaps.md#46-offsetfield-does-not-forward-celloverlaps) | `OffsetField` does not forward `cellOverlaps` | **DONE** 2026-09-21 — opened 2026-09-20 from the first semantic lint ([19/08/01](../19-docs-layers/08-semantic-lint/01-2026-09-20-first-run.md)), no ledger finding behind it |
+| [#52](15-windows-rename-race.md#52-windows-export-io-flake--the-part-rename-under-an-on-access-scanner) | Windows export I/O flake — the `.part` rename under an on-access scanner | PLANNED — opened 2026-10-07 from Boletus's ask, no ledger finding behind it; the verdict is owed with evidence |
 
 ---
 

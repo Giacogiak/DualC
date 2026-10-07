@@ -6,6 +6,9 @@ input vertex-normal handling. Export sits inside the dense-lattice deliverable
 export-format dispatch table is also in
 [../command_reference/README.md](../command_reference/README.md) (*Export formats*).
 
+*2026-10-07: the robustness of the export's `.part` rename on Windows is tracked as
+[17 #52](17-code-audit-and-hardening/15-windows-rename-race.md#52-windows-export-io-flake--the-part-rename-under-an-on-access-scanner).*
+
 ## 7. Read explicit input OBJ vn. [DEFERRED — 2026-05-26]
 
 Skipped after analysis showed the original framing is both low-value and architecturally

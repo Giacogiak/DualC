@@ -31,6 +31,10 @@ entries after the 2026-06-17 verification record are on the fourth page.
 | [ABI 0.4.0 and later](04-abi-0-4-0.md) | [the `*_with_diagnostics` twins (2026-09-09)](04-abi-0-4-0.md#diagnostics-twins-abi-040) · [unknown parameter keys rejected (2026-09-11)](04-abi-0-4-0.md#unknown-parameter-keys-are-rejected-behaviour-change-no-abi-break) · later ABI entries |
 | [Progress and cancellation (#48)](05-progress-and-cancel.md) | [#48 the item](05-progress-and-cancel.md#48-cooperative-cancellation--coarse-progress-engine-to-abi) · the decisions (D-44 … D-47), the checkpoints and the latency bound, the writers' `.part` convention, the ABI twins, the verification record |
 
+*2026-10-07: the `DUALC_ERR_IO` message is fixed text and the writer's OS error reaches
+`stderr` only — the gap behind Boletus's Windows ask, tracked as
+[17 #52](../17-code-audit-and-hardening/15-windows-rename-race.md#52-windows-export-io-flake--the-part-rename-under-an-on-access-scanner).*
+
 ## 9. Deferred (explicitly not in this version)
 *(Heading kept as the anchor; the first two bullets have since shipped or moved — their status is inline.)*
 
