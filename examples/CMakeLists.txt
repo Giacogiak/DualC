@@ -372,9 +372,13 @@ if(DUALC_BUILD_TESTS)
   # Demo-mesh generator + a few pipeline runs over the new meshes. The sphere
   # and torus exercise smooth/genus regimes; the bracket run exercises the
   # sharp-feature toggle on a part with a reentrant edge.
+  # cli_gen_demo writes into a directory of its own: run in the tools' shared
+  # output directory it rewrote cube.obj, sphere.obj, ... while the tests
+  # above and below read them, a race under `ctest -j` (roadmap 17 #32).
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cli_gen_demo_out)
   add_test(NAME cli_gen_demo
     COMMAND dualc_gen_demo all
-    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_gen_demo>)
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cli_gen_demo_out)
   add_test(NAME cli_demo_sphere
     COMMAND dualc_demo sphere.obj cli_sphere.obj --depth 6
     WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_demo>)

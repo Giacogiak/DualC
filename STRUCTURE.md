@@ -135,7 +135,7 @@ DualC/
 │
 ├── tests/                     Catch2 v3 unit + smoke tests (target: dualc_tests, CTest-registered)
 │   ├── CMakeLists.txt         Fetches Catch2 v3.5.4; defines dualc_tests
-│   ├── test_main.cpp          Catch2 entry point
+│   ├── test_main.cpp          Shared fixtures (main() is Catch2WithMain): a listener runs each case in its own working dir
 │   ├── test_octree.cpp        Hermite octree structure
 │   ├── test_qef.cpp           QEF solver
 │   ├── test_dc_tables.cpp     DC table correctness
@@ -168,7 +168,7 @@ DualC/
 │   ├── check.py               THE GATE — every check in one command; hosted CI (.github/workflows/gate.yml) runs exactly this.
 │   │                            `--fast` = docs/hygiene, ~1s; default adds configure+build+ctest; `--gpu` opt-in
 │   ├── check_data.json        Its declared exceptions: size baseline, index roots, forbidden patterns, summarized prefixes
-│   ├── check_fixtures/        `check.py --selftest` trees: one pass/ and one fail/ miniature repo per docs check
+│   ├── check_fixtures/        `check.py --selftest` trees: one pass/ and one fail/ miniature repo per fast check
 │   ├── hooks/
 │   │   └── pre-commit         sh wrapper running `check.py --fast`; enable with
 │   │                            `git config core.hooksPath scripts/hooks`

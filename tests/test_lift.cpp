@@ -25,7 +25,7 @@ TEST_CASE("Circle2D is a signed distance to a circle", "[lift]") {
 
   REQUIRE(circle.valueAt(Vector2{1.0, 2.0}) == Approx(-2.0));  // centre
   REQUIRE(circle.valueAt(Vector2{4.0, 2.0}) == Approx(1.0));   // outside
-  REQUIRE(circle.valueAt(Vector2{3.0, 2.0}) == Approx(0.0));   // on rim
+  REQUIRE(circle.valueAt(Vector2{3.0, 2.0}) == Approx(0.0).margin(1e-12));   // on rim
 
   const Vector2 g = circle.gradientAt(Vector2{5.0, 2.0});
   REQUIRE(g.norm() == Approx(1.0));
@@ -36,7 +36,7 @@ TEST_CASE("Box2D is a signed distance to a rectangle", "[lift]") {
   Box2D box(Vector2{0.0, 0.0}, Vector2{2.0, 1.0});
 
   REQUIRE(box.valueAt(Vector2{0.0, 0.0}) == Approx(-1.0));   // centre
-  REQUIRE(box.valueAt(Vector2{2.0, 0.0}) == Approx(0.0));    // on an edge
+  REQUIRE(box.valueAt(Vector2{2.0, 0.0}) == Approx(0.0).margin(1e-12));    // on an edge
   REQUIRE(box.valueAt(Vector2{4.0, 0.0}) == Approx(2.0));    // off an edge
   REQUIRE(box.valueAt(Vector2{5.0, 4.0}) ==
           Approx(std::hypot(3.0, 3.0)));                     // off a corner
@@ -46,7 +46,7 @@ TEST_CASE("Segment2D is a thick 2D segment", "[lift]") {
   Segment2D seg(Vector2{-2.0, 0.0}, Vector2{2.0, 0.0}, 0.5);
 
   REQUIRE(seg.valueAt(Vector2{0.0, 0.0}) == Approx(-0.5));   // on the spine
-  REQUIRE(seg.valueAt(Vector2{0.0, 0.5}) == Approx(0.0));    // on the edge
+  REQUIRE(seg.valueAt(Vector2{0.0, 0.5}) == Approx(0.0).margin(1e-12));    // on the edge
   REQUIRE(seg.valueAt(Vector2{3.0, 0.0}) == Approx(0.5));    // past the end
 }
 

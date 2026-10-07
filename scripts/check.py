@@ -965,6 +965,41 @@ def check_scripts(ctx):
                   "%d scripts, %d broken" % (n, len(bad)), bad)
 
 
+# A zero literal compared through Catch's `Approx`, with no `.margin(` after
+# it. Approx's default tolerance is relative (epsilon * |target|), so against
+# 0.0 it is exact equality (roadmap 17 #32, finding C42). `\s` spans lines, so
+# a comparison split across two lines is still seen.
+UNGUARDED_APPROX_ZERO = re.compile(
+    r"\bApprox\(\s*[-+]?(?:0+(?:\.0*)?|\.0+)(?:[eE][-+]?\d+)?[fFlL]?\s*\)(?!\s*\.\s*margin\s*\()")
+
+
+def unguarded_approx_zero(ctx):
+    """(rel, line) of every unguarded `Approx(0.0)` in tests/."""
+    hits = []
+    for rel in ctx.all_files:
+        if rel.startswith("tests/") and rel.endswith((".cpp", ".h", ".hpp")):
+            text = ctx.text(rel)
+            for m in UNGUARDED_APPROX_ZERO.finditer(text or ""):
+                hits.append((rel, text[:m.start()].count("\n") + 1))
+    return hits
+
+
+@check("approx-zero", "fast", "no `Approx(0.0)` in tests/ without a `.margin(`")
+def check_approx_zero(ctx):
+    """The ratchet #32 brought to 0 on 2026-10-07 (38 sites fixed).
+
+    Was a report-only metric that would not gate, so that a legitimate new
+    Approx(0.0) is not blocked. There is no legitimate one: against zero the
+    relative epsilon is exact equality, which `== 0.0` says more honestly, and
+    a tolerance is `.margin(...)`. Gating it is what keeps the 0.
+    """
+    hits = unguarded_approx_zero(ctx)
+    bad = ["%s:%d: `Approx(0)` without `.margin(...)` is exact equality" % h
+           for h in hits]
+    return Result(FAIL if bad else OK,
+                  "%d unguarded `Approx(0.0)` in tests/" % len(bad), bad)
+
+
 # --------------------------------------------------------------------------
 # Fast tier, second batch -- the checks of roadmap 19 Phase 2 (plan § 4).
 # Each turns one clause the 2026-09-17 screenings found violated into a line
@@ -1519,9 +1554,15 @@ def check_warnings(ctx):
 def check_ctest(ctx):
     """Serial on purpose.
 
-    Every Catch case shares one WORKING_DIRECTORY and tests/test_field_graph.cpp
-    writes a fixed temp filename (finding C43, roadmap 17 #32). `-j` here would
-    manufacture flakes and they would get blamed on the gate.
+    Until 2026-10-07 the reason was correctness: every Catch case shared one
+    WORKING_DIRECTORY and tests/test_field_graph.cpp wrote a fixed temp
+    filename (finding C43, roadmap 17 #32). Both are gone -- each case runs in
+    a directory of its own (tests/test_main.cpp) and `ctest -j 8` passes. The
+    reason now is cost against benefit: `-j 8` saves about a third (86 s ->
+    57 s on 8 cores), because the engine already parallelises inside each
+    case, and oversubscribing the cores is what exposes the timing-dependent
+    cancel/progress tests (17/14 findings 8 and 9). `ctest -j` is safe to run
+    by hand.
 
     The total is reported, never asserted: it legitimately grows as tests are
     added (231 on 2026-09-01, 253 today). Contrast the parity stage, where the
@@ -1601,29 +1642,30 @@ def check_parity(ctx):
 # --------------------------------------------------------------------------
 
 def print_metrics(ctx):
-    """Counters the #32 coverage ledger cites, made countable rather than enforced.
+    """Counters the #32 coverage ledger cites, made countable.
 
-    Not a ratchet: gating these would block someone adding a legitimate new
-    Approx(0.0), and the ask was to be able to read the number.
+    The `Approx(0.0)` count is also the `approx-zero` check, which gates it at
+    0 since 2026-10-07. Until then the needle matched `== Approx(0.0)` whether
+    or not a `.margin(` followed, so it read 70 while the unguarded count was
+    38: it also counted the guarded uses, and missed a comparison split across
+    two lines. It now counts what the check counts.
     """
-    approx = 0
-    for rel in ctx.all_files:
-        if rel.startswith("tests/") and rel.endswith(".cpp"):
-            text = ctx.text(rel)
-            if text:
-                approx += len(re.findall(r"==\s*Approx\(\s*0(?:\.0*)?\s*\)", text))
-    # C43's fixed temp filename is `temp_directory_path() / "dualc_fg_box.obj"`.
-    # The first version of this needle looked for "dualc_fieldgraph_test", a
-    # string that never existed in tests/, and reported "no" while the finding
-    # stayed true -- the docs screening of 2026-09-11 caught it. Match the
-    # construct, not a guessed name.
-    fixed_tmp = "yes" if re.search(
-        r'temp_directory_path\(\)\s*/\s*"[^"]+"',
-        ctx.text("tests/test_field_graph.cpp") or "") else "no"
+    approx = len(unguarded_approx_zero(ctx))
+    # C43's fixed temp filename was `temp_directory_path() / "dualc_fg_box.obj"`,
+    # shared by every build tree on the machine. The first version of this
+    # needle looked for "dualc_fieldgraph_test", a string that never existed
+    # in tests/, and reported "no" while the finding stayed true -- the docs
+    # screening of 2026-09-11 caught it. Match the construct, not a guessed
+    # name, in every test source.
+    fixed_tmp = [rel for rel in ctx.all_files
+                 if rel.startswith("tests/") and rel.endswith(".cpp")
+                 and re.search(r'temp_directory_path\(\)\s*/\s*"[^"]+"',
+                               ctx.text(rel) or "")]
     print("")
     print("metrics (roadmap 17 #32, report only):")
-    print("  unguarded `== Approx(0.0)` in tests/ : %d" % approx)
-    print("  fixed temp filename in test_field_graph.cpp : %s" % fixed_tmp)
+    print("  unguarded `Approx(0.0)` in tests/ : %d" % approx)
+    print("  fixed temp filename under temp_directory_path() : %s"
+          % (", ".join(fixed_tmp) if fixed_tmp else "none"))
 
 
 # --------------------------------------------------------------------------

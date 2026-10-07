@@ -118,8 +118,9 @@ TEST_CASE("mesh and winding source nodes build a solid field",
 
 TEST_CASE("FileMeshResolver caches by path", "[field_graph]") {
   auto box = makeBox(1.0);
-  const std::string path =
-      (std::filesystem::temp_directory_path() / "dualc_fg_box.obj").string();
+  // A bare name: the case runs in a working directory of its own
+  // (test_main.cpp), so no other case or build tree can meet this file.
+  const std::string path = "dualc_fg_box.obj";
   geometrycentral::surface::writeSurfaceMesh(*std::get<0>(box),
                                              *std::get<1>(box), path);
 
@@ -189,7 +190,7 @@ TEST_CASE("field-graph rejects parameter keys the op does not read",
     REQUIRE(f.field().valueAt(Vector3{2.0, 0.0, 0.0}) ==
             Catch::Approx(2.0));
     REQUIRE(f.field().valueAt(Vector3{0.0, 2.0, 0.0}) ==
-            Catch::Approx(0.0));
+            Catch::Approx(0.0).margin(1e-12));
   }
   // A key that belongs to a different op is rejected with the accepted list
   // and the node's locator (the gyroid, not the enclosing union).
