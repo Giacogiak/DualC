@@ -105,6 +105,8 @@ DualC/
 │   ├── dualc_field_view.cpp   OPT-IN GPU viewer for ANY field-graph: compile to GLSL (field_glsl) → sphere-trace; live edit
 │   ├── dualc_glsl_parity.cpp  OPT-IN field→GLSL acceptance gate: GPU sceneSDF vs C++ valueAt, per node + the baked
 │   │                            mesh/winding sources (sign parity + texture plumbing) (no CTest, needs GL)
+│   ├── check_cli_output.cmake `cmake -P` content check behind the `*_content` CTest cases: PNG header, STL/3MF
+│   │                            structure + triangle count, OBJ/SVG/JSON (roadmap 17 #32)
 │   ├── dualc_io_stress.cpp    OPT-IN concurrent-export I/O harness (17 #52): N exports at once to the temp dir, every
 │   │                            `.part` rename must land; keeps each `[dualc] error` line, probes the rename again,
 │   │                            `--force-hold` (Windows) pins the sharing-violation case (no CTest; `check.py --io-stress`)
@@ -138,13 +140,14 @@ DualC/
 │
 ├── tests/                     Catch2 v3 unit + smoke tests (target: dualc_tests, CTest-registered)
 │   ├── CMakeLists.txt         Fetches Catch2 v3.5.4; defines dualc_tests
-│   ├── test_main.cpp          Catch2 entry point
+│   ├── test_main.cpp          Shared fixtures (main() is Catch2WithMain): a listener runs each case in its own working dir
 │   ├── test_octree.cpp        Hermite octree structure
 │   ├── test_qef.cpp           QEF solver
 │   ├── test_dc_tables.cpp     DC table correctness
-│   ├── test_cube_components.cpp  Cube vertex / component labeling
+│   ├── test_cube_components.cpp  Cube vertex / component labeling; all 256 sign configurations vs a region-count oracle
+│   ├── test_accuracy.cpp      Vertex error vs analytic SDFs falls with depth; collapse trade-off; normal content; sharp/smooth normals (17 #32)
 │   ├── test_sampler.cpp       Mesh sampling
-│   ├── test_contourer.cpp     Octree contouring
+│   ├── test_contourer.cpp     Octree contouring; the per-leaf ContourerParams knobs
 │   ├── test_pipeline.cpp      Full dualContourMesh pipeline
 │   ├── test_implicit.cpp      v2 field module
 │   ├── test_grid_field.cpp    Voxel grid field
@@ -174,7 +177,7 @@ DualC/
 │   ├── check.py               THE GATE — every check in one command; hosted CI (.github/workflows/gate.yml) runs exactly this.
 │   │                            `--fast` = docs/hygiene, ~1s; default adds configure+build+ctest; `--gpu` opt-in
 │   ├── check_data.json        Its declared exceptions: size baseline, index roots, forbidden patterns, summarized prefixes
-│   ├── check_fixtures/        `check.py --selftest` trees: one pass/ and one fail/ miniature repo per docs check
+│   ├── check_fixtures/        `check.py --selftest` trees: one pass/ and one fail/ miniature repo per fast check
 │   ├── hooks/
 │   │   └── pre-commit         sh wrapper running `check.py --fast`; enable with
 │   │                            `git config core.hooksPath scripts/hooks`
@@ -183,7 +186,6 @@ DualC/
 │   ├── docs_loss_audit.json   Its triage: verdict per residual (record citation, restoring commit), rules, ratchet
 │   └── count_nm.py            Dev utility (non-manifold / count analysis)
 │
-├── plan/                      plan-run's split of docs/raw/2026-10-05-hosted-ci-plan.md: one file per phase, run.manifest.json, remote_run_check.py, handoffs/ (one per unit); the run state .plan-run/ is gitignored
 ├── data/                      Demo meshes for root-run recipes — *.obj are GITIGNORED; the build generates its own copies under build/data/; `dualc_gen_demo all --dir data` populates this one
 │                                (cube, sphere, uvsphere, torus, knot, genus2, cylinder, bracket, hexbore, bunny, molde, opA, opB)
 │

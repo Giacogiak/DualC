@@ -77,6 +77,13 @@ The mesh changing is the *point*: those 678 vertices were misplaced before, at t
 seams, by a third of a strut radius. Topology is unchanged, so nothing catastrophic was
 happening — but a lattice for a real part was not the lattice it claimed to be.
 
+*2026-10-07, corrected by measurement* ([15](15-test-coverage-batches.md#the-strut-lattice-oracle-certified-what-it-claimed)):
+the vertices that move are **not** at the tile seams. Re-run, 260 differ, all within two
+cells of the root box, and the fold's sit no further from the true surface. The strut cells
+are mirror-symmetric about their faces, so the single fold was already exact for them; the
+fix is still right for a child like the off-centre sphere above. This paragraph is left as
+written.
+
 Landing the cost as measured and optimising separately was a deliberate call rather than
 an oversight; the follow-up is
 [#35](04-engineering-quality.md#35-repeatfield-neighbour-set-optimisation).
@@ -94,7 +101,8 @@ sound; the sampling strategy is what fails, and seam-targeted points would have 
 
 Left in place by decision and folded into
 [#32](04-engineering-quality.md#32-test-coverage-ledger), so the comment currently
-overstates what is established. Same shape as the dead `nFaces() == 0` warning
+overstates what is established. *(2026-10-07: it did not — the fold had nothing to miss on
+these cells; the comment is restated and seam points added, [15](15-test-coverage-batches.md#the-strut-lattice-oracle-certified-what-it-claimed).)* Same shape as the dead `nFaces() == 0` warning
 [#26](03-correctness-and-robustness/03-diagnostics-item.md#26-a-diagnostics-channel-for-the-silent-failure-surface)
 found: an assurance that reads as coverage and is not.
 

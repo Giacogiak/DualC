@@ -33,7 +33,11 @@ status and trigger, and links to both.
 - [`14-build-hardening-ci.md`](14-build-hardening-ci.md) — the delivery record of **#33**'s
   rest: `DUALC_WERROR`, `DUALC_SANITIZE`, the layering assertion and the per-target dialect,
   the first warnings and sanitizer findings, and the CI runs that proved each one red.
-- [`15-windows-rename-race/README.md`](15-windows-rename-race/README.md) — the record of **#52**, the
+- [`15-test-coverage-batches.md`](15-test-coverage-batches.md) — the delivery record of
+  **#32**: Batch A (the corrected counts, the 38 `Approx(0.0)` margins and their gate check,
+  a working directory per test case, the serial-`ctest` decision) and Batch B (the missing
+  tests, the CLI content checks, coverage measured once, the strut-oracle correction).
+- [`16-windows-rename-race/README.md`](16-windows-rename-race/README.md) — the record of **#52**, the
   Windows export I/O flake Boletus reported: the rc 2 sites ranked, the alternative
   hypotheses, the `dualc_io_stress` instrument and its experiment workflow, the decision
   criteria fixed before the runs, the five samples' evidence, the verdict (an inherited
@@ -42,7 +46,8 @@ status and trigger, and links to both.
 - [`07-repeat-tiling-fix.md`](07-repeat-tiling-fix.md) — the full record for #34's first
   item: `repeat` read only the folded tile, which put wrong geometry in shipped strut
   lattices; the conditional fix, its measured 2.3× cost, and the oracle test it showed to
-  be certifying less than it claims.
+  be certifying less than it claims. Both strut-lattice claims are corrected by measurement in
+  [15](15-test-coverage-batches.md#the-strut-lattice-oracle-certified-what-it-claimed).
 - [`08-argument-validation.md`](08-argument-validation.md) — #34's second batch: fail-fast
   argument validation across the field layer, the `BBox{}` sentinel that was invisible to
   `isValid()`, and the negative-`scaled()` complement bug the guards exposed.
@@ -120,15 +125,16 @@ ledger for the tracked items (the roadmap README links it rather than restating 
 full entries, with evidence and triggers, live in two files:
 [`03-correctness-and-robustness/`](03-correctness-and-robustness/README.md) (#22–#26, #46) and
 [`04-engineering-quality.md`](04-engineering-quality.md) (#27–#35); #52, raised from outside the
-audit, is on its own page, [`15`](15-windows-rename-race/README.md).
+audit, is on its own page, [`15`](16-windows-rename-race/README.md).
 
 **Latest verification** (the one home of the counts; every other page links here):
-`ctest` **274** on Windows and **272** on Linux and macOS (2026-10-07, CI's three `build` jobs on
-`6a8454f` — two writer cases run everywhere, two more only on Windows, [15](15-windows-rename-race/README.md);
-270 on 2026-10-06; 256 on 2026-09-17, [19/01](../19-docs-layers/01-record-phases-0-2.md)); `dualc_glsl_parity` **73/73**
+`ctest` **302** on Linux and macOS and **304** on Windows (306 locally with the C ABI's four) (2026-10-07, CI's three `build` jobs on the
+merge of #52 over #32 — two writer cases run everywhere, two more only on Windows, [16](16-windows-rename-race/README.md);
+300 earlier that day, [15](15-test-coverage-batches.md); 270 on 2026-10-06; 256 on 2026-09-17, [19/01](../19-docs-layers/01-record-phases-0-2.md)); `dualc_glsl_parity` **73/73**
 (2026-10-06, asserted by `check.py --gpu` against `parity_expected_cases` in CI's required
 `gpu` job — [13](13-parity-gate-binding.md)); the same 270 pass under ASan + UBSan in CI's
-`sanitize` job (2026-10-06, [14](14-build-hardening-ci.md)).
+`sanitize` job (2026-10-06, [14](14-build-hardening-ci.md)); the same 270 pass under `ctest -j 8`,
+three runs in a row (2026-10-07, Linux, [15](15-test-coverage-batches.md)).
 
 | Item | Title | Status |
 | --- | --- | --- |
@@ -142,12 +148,12 @@ audit, is on its own page, [`15`](15-windows-rename-race/README.md).
 | [#29](04-engineering-quality.md#29-thread-safety-contract-for-user-derived-implicitfield) | Thread-safety contract for user-derived `ImplicitField` | **DONE** 2026-08-31 |
 | [#30](04-engineering-quality.md#30-threading-determinism-test) | Threading-determinism test | **DONE** 2026-08-31 |
 | [#31](04-engineering-quality.md#31-make-the-cpugpu-parity-gate-binding) | Make the CPU/GPU parity gate binding | **DONE** 2026-10-06 ([13](13-parity-gate-binding.md)) |
-| [#32](04-engineering-quality.md#32-test-coverage-ledger) | Test-coverage ledger | PLANNED |
+| [#32](04-engineering-quality.md#32-test-coverage-ledger) | Test-coverage ledger | **DONE** 2026-10-07 — Batch A and Batch B ([15](15-test-coverage-batches.md)) |
 | [#33](04-engineering-quality.md#33-build--tooling-hardening) | Build & tooling hardening | **DONE** 2026-10-06 ([14](14-build-hardening-ci.md)); batches 2026-08-31, 09-01, 09-10; nanort + clean-clone 2026-09-21 by [20 #47](../20-public-delivery/01-pin-geometry-central.md) |
 | [#34](04-engineering-quality.md#34-api-hygiene-batch) | API hygiene batch | **PARTIAL** — batches 2026-09-10 (×2), 09-11 (unknown keys, [10](10-docs-system-screening.md)) |
 | [#35](04-engineering-quality.md#35-repeatfield-neighbour-set-optimisation) | `RepeatField` neighbour-set optimisation | PLANNED — born from #34's fix on 2026-09-10, no ledger finding behind it |
 | [#46](03-correctness-and-robustness/02-precision-and-celloverlaps.md#46-offsetfield-does-not-forward-celloverlaps) | `OffsetField` does not forward `cellOverlaps` | **DONE** 2026-09-21 — opened 2026-09-20 from the first semantic lint ([19/08/01](../19-docs-layers/08-semantic-lint/01-2026-09-20-first-run.md)), no ledger finding behind it |
-| [#52](15-windows-rename-race/README.md#52-windows-export-io-flake--the-part-rename-under-an-on-access-scanner) | Windows export I/O flake — the `.part` rename under an on-access scanner | **DONE** 2026-10-07 — opened the same day from Boletus's ask, no ledger finding behind it; the holder was an inherited handle, not a scanner |
+| [#52](16-windows-rename-race/README.md#52-windows-export-io-flake--the-part-rename-under-an-on-access-scanner) | Windows export I/O flake — the `.part` rename under an on-access scanner | **DONE** 2026-10-07 — opened the same day from Boletus's ask, no ledger finding behind it; the holder was an inherited handle, not a scanner |
 
 ---
 

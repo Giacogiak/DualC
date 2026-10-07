@@ -33,7 +33,7 @@ entries after the 2026-06-17 verification record are on the fourth page.
 
 *2026-10-07: the `DUALC_ERR_IO` message is fixed text and the writer's OS error reaches
 `stderr` only — the gap behind Boletus's Windows ask, tracked as
-[17 #52](../17-code-audit-and-hardening/15-windows-rename-race/README.md#52-windows-export-io-flake--the-part-rename-under-an-on-access-scanner).*
+[17 #52](../17-code-audit-and-hardening/16-windows-rename-race/README.md#52-windows-export-io-flake--the-part-rename-under-an-on-access-scanner).*
 
 ## 9. Deferred (explicitly not in this version)
 *(Heading kept as the anchor; the first two bullets have since shipped or moved — their status is inline.)*

@@ -99,6 +99,7 @@ allowed to fail) holds the first headless-GL result — the trigger's state is i
 helper, `cmake/DualCWarnings.cmake`, sets the level per DualC target, so the `examples/CMakeLists.txt`
 claim is true); the local gate keeps the log filter, CI's build jobs add `-D DUALC_WERROR=ON` via
 the new `check.py -D` — [14](../14-build-hardening-ci.md).*
+*2026-10-07: #32 Batch A — the no-`-j` constraint lost its correctness reason (each case runs in its own directory) and is kept for cost; `approx-zero` gates the metric at 0 — [15](../15-test-coverage-batches.md).*
 *2026-09-21: no sibling probe; whole-line warning filter — [20 #47](../../20-public-delivery/01-pin-geometry-central.md).*
 
 ---

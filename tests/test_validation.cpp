@@ -193,5 +193,5 @@ TEST_CASE("BBox::empty is the sentinel BBox{} could never be", "[validation]") {
 
   const BBox withLegacy =
       unionOf(farSphere, std::make_shared<NoExtentField>(BBox{}))->bounds();
-  CHECK(withLegacy.min.x == Approx(0.0));  // the trap: the origin is dragged in
+  CHECK(withLegacy.min.x == Approx(0.0).margin(1e-12));  // the trap: the origin is dragged in
 }

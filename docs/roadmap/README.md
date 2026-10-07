@@ -25,11 +25,11 @@ audit — [19/09](19-docs-layers/09-pre-merge-loss-audit.md)); it leaves the mon
 re-sequencing ([12](12-field-graph-and-app/README.md)) — *value from the command line first,
 then wrap it* — is **finished**, so what remains in DualC is the engine itself, drawn from the
 2026-08-19 audit's ledger ([17](17-code-audit-and-hardening/README.md)) as a standing queue,
-now worked through the [hosted-CI plan](../raw/2026-10-05-hosted-ci-plan.md): **#51** — the gate
-as a GitHub Actions job — is DONE (2026-10-06, [20 #51](20-public-delivery/03-hosted-ci.md#51-hosted-ci--the-gate-as-a-github-actions-job)), and so is its
-Phase 2, **#31** (the parity gate binding through headless GL, [17/13](17-code-audit-and-hardening/13-parity-gate-binding.md)), and Phase 3,
-**#33** (`-Werror`, ASan + UBSan, the layering assertion as CI jobs, [17/14](17-code-audit-and-hardening/14-build-hardening-ci.md)); **NEXT** is
-Phase 4, **#32** (test coverage), and the rest of **#34** resumes. **Public delivery**
+worked through the [hosted-CI plan](../raw/2026-10-05-hosted-ci-plan.md) — run closed 2026-10-07, `main`
+unpushed ([20/04](20-public-delivery/04-hosted-ci-plan-run.md)): **#51**, hosted CI, is DONE ([20 #51](20-public-delivery/03-hosted-ci.md#51-hosted-ci--the-gate-as-a-github-actions-job)), so is
+Phase 2, **#31** (the parity gate binding, [17/13](17-code-audit-and-hardening/13-parity-gate-binding.md)), Phase 3,
+**#33** (`-Werror`, ASan + UBSan as CI jobs, [17/14](17-code-audit-and-hardening/14-build-hardening-ci.md)), Phase 4,
+**#32** (test coverage, [17/15](17-code-audit-and-hardening/15-test-coverage-batches.md)); **NEXT** is the rest of **#34**. **Public delivery**
 ([20](20-public-delivery/README.md)) opened 2026-09-21: the build no longer depends on a local
 geometry-central fork, and since 2026-10-03 it builds and passes the gate on Linux too (**#49**); the same day **#50**
 retired `dualc_view` and the Polyscope sibling checkout, so the GL targets own their dependencies
@@ -43,11 +43,11 @@ the block records the table links ([D-43](../decisions/01-settled.md)).
 
 | Date | What landed | Record |
 | --- | --- | --- |
-| 2026-10-07 | **#52** — Boletus's Windows flake: an inherited handle, not a scanner; non-inheritable handles; ABI 0.5.1. | [17/15](17-code-audit-and-hardening/15-windows-rename-race/README.md#52-windows-export-io-flake--the-part-rename-under-an-on-access-scanner) |
+| 2026-10-07 | **#52** — Boletus's Windows flake: an inherited handle, not a scanner; non-inheritable handles; ABI 0.5.1. | [17/16](17-code-audit-and-hardening/16-windows-rename-race/README.md#52-windows-export-io-flake--the-part-rename-under-an-on-access-scanner) |
+| 2026-10-07 | **#32** — test coverage: 256 cube cases, depth convergence, all five contourer knobs, normals and CLI output content. | [17/15](17-code-audit-and-hardening/15-test-coverage-batches.md) |
 | 2026-10-06 | **#33** — build hardening as CI jobs: `DUALC_WERROR` in the build matrix, `DUALC_SANITIZE` (ASan + UBSan over all 270 cases) as the required `sanitize` job, the layering assertion and the per-target dialect, each proven red. | [17/14](17-code-audit-and-hardening/14-build-hardening-ci.md) |
 | 2026-10-06 | **#31** — the CPU/GPU parity gate is binding: CI's `gpu` job (Xvfb + llvmpipe, `check.py --gpu --strict`, the case count asserted) is required, proven red on a deliberate `opXor` break. | [17/13](17-code-audit-and-hardening/13-parity-gate-binding.md) |
 | 2026-10-06 | **#51** — hosted CI: a GitHub Actions workflow runs `scripts/check.py` and nothing else — the docs tier, the full gate on Ubuntu, Windows and macOS (required), the parity harness under Xvfb (allowed to fail, D-49). | [20](20-public-delivery/03-hosted-ci.md#51-hosted-ci--the-gate-as-a-github-actions-job) |
-| 2026-10-03 | **#50** — `dualc_view` and Polyscope retired; the GL targets build on a vendored glad and a GLFW fetched at its pinned release (or `-DDUALC_GLFW_DIR`), the sibling-checkout mechanism gone. | [07 #50](07-viewer-polyscope.md#50-retire-dualc_view-and-the-polyscope-dependency-own-glfw--glad) |
 
 **The shipped keystone (2026-06-14 … 2026-07-06)** — builds #1–#3, the C ABI (#19) and
 the client layer's move to Boletus, each DONE with its evidence in
@@ -66,7 +66,7 @@ row (cited by ID).
 1. **Engine hardening — the audit's open findings**
    ([17](17-code-audit-and-hardening/README.md)) — a standing ledger, not a phase; the
    one status table is [17 § Tracked items](17-code-audit-and-hardening/README.md#tracked-items--status-at-a-glance).
-   **NEXT:** #32 (the CI plan's Phase 4), then the rest of #34.
+   **NEXT:** the rest of #34, then #35 on its trigger.
 2. **TPMS / lattice capability** ([05](05-tpms-lattices/README.md)) — **#17 strut
    lattices** and their Phases 3–5 DONE; **#18 tight Lipschitz `cellOverlaps`**
    DEFERRED ([#18](../decisions/README.md)).
@@ -143,7 +143,7 @@ workflow, graded-onion; GLSL codegen completeness DONE 2026-06-24 —
 | 17 | [Code audit & engine hardening](17-code-audit-and-hardening/README.md) | The tracked ledger of the 2026-08-19 code audit ([`docs/raw/study/`](../raw/study/README.md)): every finding with a disposition, the tracked items, the record pages, the 2026-09-11 docs-system screening. | **PARTIAL** — a standing ledger; per-item status in [17 § Tracked items](17-code-audit-and-hardening/README.md#tracked-items--status-at-a-glance) |
 | 18 | [C ABI — continued](18-c-abi-continued.md) | Retired 2026-09-18: its two entries are [14/04](14-c-abi/04-abi-0-4-0.md); the number is never reused. | tombstone — DONE |
 | 19 | [Docs layers](19-docs-layers/README.md) | The 2026-09-17 docs restructuring: the plan (immutable, `docs/raw/`), items #36–#45, the phase table, per-phase evidence, the semantic-lint runs. | Phases 0–8 **DONE** (2026-09-20); the lint runs keep landing in [19/08](19-docs-layers/08-semantic-lint/README.md) |
-| 20 | [Public delivery](20-public-delivery/README.md) | The repo as others build it: geometry-central pinned and fetched (options weighed), nanort vendored, the self-bootstrapping clean clone (#47); Linux as a build host (#49); hosted CI running the gate (#51). | **#47 DONE** (2026-09-21) · **#49 DONE** (2026-10-03) · **#51 DONE** (2026-10-06) |
+| 20 | [Public delivery](20-public-delivery/README.md) | The repo as others build it: geometry-central pinned and fetched (options weighed), nanort vendored, the self-bootstrapping clean clone (#47); Linux as a build host (#49); hosted CI running the gate (#51), the plan's run (04). | **#47 DONE** (2026-09-21) · **#49 DONE** (2026-10-03) · **#51 DONE** (2026-10-06) |
 
 ## How the blocks relate
 

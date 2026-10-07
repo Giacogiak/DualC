@@ -7,7 +7,7 @@ export-format dispatch table is also in
 [../command_reference/README.md](../command_reference/README.md) (*Export formats*).
 
 *2026-10-07: the robustness of the export's `.part` rename on Windows is tracked as
-[17 #52](17-code-audit-and-hardening/15-windows-rename-race/README.md#52-windows-export-io-flake--the-part-rename-under-an-on-access-scanner).*
+[17 #52](17-code-audit-and-hardening/16-windows-rename-race/README.md#52-windows-export-io-flake--the-part-rename-under-an-on-access-scanner).*
 
 ## 7. Read explicit input OBJ vn. [DEFERRED — 2026-05-26]
 
@@ -35,6 +35,10 @@ Library surface ~15-25 LOC, no `src/` IO code; any `vn`-respecting OBJ helper fo
 `dualc_demo` lives in `examples/`. **Trigger to revisit.** A real input mesh whose
 smoothing groups visibly degrade in DualC's output AND a host application that already
 has those normals at hand.
+*(2026-10-07: "area-weighted" above is wrong, and was wrong on the day it was written.
+geometry-central weights the unit face normals by corner angle; the argument stands as made.
+Found by semantic-lint run [06](19-docs-layers/08-semantic-lint/06-2026-10-07-after-ci-plan.md); the mechanism is
+[`design/05` § 5](../design/05-conventions-and-tables.md#5-geometry-central-integration).)*
 
 ## Step 2. STL + 3MF-mesh writer — printable immediately, universal, what Rhino expects. [DONE — 2026-06-02]
 

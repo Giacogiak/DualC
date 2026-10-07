@@ -20,6 +20,7 @@ each child holds one item, its section verbatim, the `#47-…` and `#49-…` hea
 | #47 Pin geometry-central to upstream, own nanort, self-bootstrapping clone — and the 2026-10-03 publication update | [01](01-pin-geometry-central.md#47-pin-geometry-central-to-upstream-own-nanort-self-bootstrapping-clone) | DONE 2026-09-21 |
 | #49 Linux as a build host | [02](02-linux-build-host.md#49-linux-as-a-build-host) | DONE 2026-10-03 |
 | #51 Hosted CI — the gate as a GitHub Actions job | [03](03-hosted-ci.md#51-hosted-ci--the-gate-as-a-github-actions-job) | DONE 2026-10-06 |
+| The hosted-CI plan's run (P01–P04): the handoffs harvested, `plan/` retired | [04](04-hosted-ci-plan-run.md#the-hosted-ci-plans-run--p01-to-p04-harvested) | DONE 2026-10-07 |
 
 ---
 

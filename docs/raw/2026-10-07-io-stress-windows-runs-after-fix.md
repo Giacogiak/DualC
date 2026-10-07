@@ -4,7 +4,7 @@ Raw observations, 2026-10-07, of the same workflow as
 [2026-10-07-io-stress-windows-runs.md](2026-10-07-io-stress-windows-runs.md) once the fix
 was on the branch: sample 6 on the first cut (`1a9a877`), sample 7 on the corrected one
 (`307c08f`). Every line is verbatim from the check-run annotations. The record that reads
-these is [17/15 § 02](../roadmap/17-code-audit-and-hardening/15-windows-rename-race/02-evidence-and-verdict.md).
+these is [17/16 § 02](../roadmap/17-code-audit-and-hardening/16-windows-rename-race/02-evidence-and-verdict.md).
 
 ## Sample 6 — run 37615682796, commit `1a9a877` (the first cut of the fix)
 

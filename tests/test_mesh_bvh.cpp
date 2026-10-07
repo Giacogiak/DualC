@@ -227,7 +227,7 @@ TEST_CASE("MeshBVH::windingNumberFast is zero without the winding tree",
           "[mesh_bvh][gwn]") {
   auto [mesh, geom] = makeUnitCube();
   MeshBVH bvh(*mesh, *geom);  // buildWindingTree defaults to false
-  REQUIRE(bvh.windingNumberFast(Vector3{0.0, 0.0, 0.0}) == Approx(0.0));
+  REQUIRE(bvh.windingNumberFast(Vector3{0.0, 0.0, 0.0}) == Approx(0.0).margin(1e-12));
 }
 
 // ---------------------------------------------------------------------------

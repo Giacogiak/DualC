@@ -41,9 +41,9 @@ TEST_CASE("childBounds partitions the parent into 8 octants", "[octree]") {
     const bool wantHighY = (i & 2) != 0;
     const bool wantHighZ = (i & 4) != 0;
 
-    REQUIRE(c.min.x == (wantHighX ? Approx(0.0) : Approx(-1.0)));
-    REQUIRE(c.min.y == (wantHighY ? Approx(0.0) : Approx(-1.0)));
-    REQUIRE(c.min.z == (wantHighZ ? Approx(0.0) : Approx(-1.0)));
+    REQUIRE(c.min.x == (wantHighX ? Approx(0.0).margin(1e-12) : Approx(-1.0)));
+    REQUIRE(c.min.y == (wantHighY ? Approx(0.0).margin(1e-12) : Approx(-1.0)));
+    REQUIRE(c.min.z == (wantHighZ ? Approx(0.0).margin(1e-12) : Approx(-1.0)));
   }
 }
 

@@ -140,6 +140,34 @@ the universal escape hatch, which is why it is never removed from an op that gai
 keys. Unknown keys and out-of-range values are rejected with the node's locator, not absorbed
 ([17/08](../roadmap/17-code-audit-and-hardening/08-argument-validation.md)).
 
+## Testing conventions
+
+`ctest` runs every case serially in the gate, and any case must also pass under `ctest -j`
+and under the `sanitize` job's ASan + UBSan. These rules keep that true:
+
+- **Each Catch case runs in a working directory of its own.** A listener in
+  `tests/test_main.cpp` moves each case into `dualc_test_work/<pid>-<n>` under the directory
+  `ctest` starts it in. The directory is removed when the case passes and kept when it fails.
+  So a case may write files by bare name and need not use the machine-wide temp directory.
+  The CLI smoke tests run as processes, not Catch cases. They share the CLI tools' output directory
+  and keep their output names distinct, and a producer that rewrites shared inputs gets a
+  directory of its own (`cli_gen_demo_out/`).
+- **`Approx` against zero takes a margin.** `Approx`'s default tolerance is relative, so
+  against `0.0` it is exact equality. `Approx(0.0)` is therefore always followed by
+  `.margin(…)`, and the gate's `approx-zero` check fails on one that is not.
+- **A CLI test checks content, not only the exit code.** `examples/check_cli_output.cmake`
+  checks a written file's structure. It runs as a `<test>_content` case declared a CTest
+  fixture of the test that writes the file (`FIXTURES_REQUIRED`), so `ctest -R` and
+  `ctest -j` run the producer first.
+- **A timed count is never reused across runs.** A progress or cancel test that cancels at
+  the *n*-th report counts reports on a path where the number is fixed: one thread, or a
+  stage that is not polled on a timer. Under load, the threaded sampler's timed polls differ
+  from run to run.
+
+The record of each rule is [17/15](../roadmap/17-code-audit-and-hardening/15-test-coverage-batches.md)
+for the first three and [17/14](../roadmap/17-code-audit-and-hardening/14-build-hardening-ci.md)
+finding 9 for the last.
+
 ## Where the other conventions live
 
 - Docs conventions — IDs never renumbered, a README at every level, the footer, the size cap —

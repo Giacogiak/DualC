@@ -3,8 +3,12 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <algorithm>
 #include <array>
+#include <map>
+#include <numeric>
 #include <set>
+#include <vector>
 
 namespace {
 
@@ -176,4 +180,149 @@ TEST_CASE("partitionCubeEdges: symmetry -- inverting all signs preserves partiti
 
   REQUIRE(pa.numComponents == pb.numComponents);
   REQUIRE(edgesInComponent(pa, 0) == edgesInComponent(pb, 0));
+}
+
+// ===========================================================================
+// All 256 sign configurations (roadmap 17 #32, audit C45)
+// ===========================================================================
+//
+// The function is pure, O(1) and allocation-free, so every input can be
+// checked. The hand-picked cases above stay: they name the expected edge sets.
+// This sweep checks, for every configuration, the invariants that make the
+// per-component vertices a manifold surface:
+//   1. an edge carries a component iff it crosses, and the ids are dense;
+//   2. on every face, each crossing has exactly one partner in its own
+//      component -- the face's other crossing, or on a saddle face the one
+//      sharing its inside corner -- so each component closes into one loop
+//      around the cube;
+//   3. the number of components agrees with an oracle that never pairs
+//      crossings at all: k disjoint loops on the cube's surface (a sphere)
+//      cut it into k + 1 regions, so k = inside regions + outside regions - 1.
+//      Inside corners join along cube edges; outside corners also join across
+//      a saddle face's diagonal, because the inside-pair rule cuts the inside
+//      corners off and leaves the outside ones connected.
+
+namespace {
+
+// The cube edge joining corners a and b, or -1 when they are not adjacent.
+int edgeBetween(int a, int b) {
+  for (int e = 0; e < 12; ++e) {
+    const auto& ep = dualc::tables::kEdgeEndpoints[static_cast<std::size_t>(e)];
+    if ((ep[0] == a && ep[1] == b) || (ep[0] == b && ep[1] == a)) return e;
+  }
+  return -1;
+}
+
+bool isSaddleFace(const std::array<bool, 8>& signs, int f) {
+  const auto& fc = dualc::tables::kFaceCorners[static_cast<std::size_t>(f)];
+  int changes = 0;
+  for (int i = 0; i < 4; ++i)
+    if (signs[fc[static_cast<std::size_t>(i)]] !=
+        signs[fc[static_cast<std::size_t>((i + 1) % 4)]])
+      ++changes;
+  return changes == 4;
+}
+
+// Connected components among the corners with `signs[c] == side`.
+int regionsOnSide(const std::array<bool, 8>& signs, bool side) {
+  std::array<int, 8> parent;
+  std::iota(parent.begin(), parent.end(), 0);
+  auto find = [&](int c) {
+    while (parent[static_cast<std::size_t>(c)] != c)
+      c = parent[static_cast<std::size_t>(c)];
+    return c;
+  };
+  auto join = [&](int a, int b) {
+    if (signs[static_cast<std::size_t>(a)] != side ||
+        signs[static_cast<std::size_t>(b)] != side)
+      return;
+    parent[static_cast<std::size_t>(find(a))] = find(b);
+  };
+  for (const auto& ep : dualc::tables::kEdgeEndpoints) join(ep[0], ep[1]);
+  if (!side) {  // outside corners also meet across a saddle face's diagonal
+    for (int f = 0; f < 6; ++f) {
+      if (!isSaddleFace(signs, f)) continue;
+      const auto& fc = dualc::tables::kFaceCorners[static_cast<std::size_t>(f)];
+      join(fc[0], fc[2]);
+      join(fc[1], fc[3]);
+    }
+  }
+  std::set<int> roots;
+  for (int c = 0; c < 8; ++c)
+    if (signs[static_cast<std::size_t>(c)] == side) roots.insert(find(c));
+  return static_cast<int>(roots.size());
+}
+
+} // namespace
+
+TEST_CASE("partitionCubeEdges: invariants hold on all 256 sign configurations",
+          "[cube_components]") {
+  std::map<int, int> byCount;  // numComponents -> configurations
+  for (int config = 0; config < 256; ++config) {
+    std::array<bool, 8> signs{};
+    for (int c = 0; c < 8; ++c)
+      signs[static_cast<std::size_t>(c)] = ((config >> c) & 1) != 0;
+    const auto crossing = crossingsFromCorners(signs);
+    const auto parts    = partitionCubeEdges(signs, crossing);
+    INFO("config = " << config);
+    ++byCount[parts.numComponents];
+
+    // 1. Crossing <=> labelled; labels dense in [0, numComponents).
+    REQUIRE(parts.numComponents >= 0);
+    REQUIRE(parts.numComponents <= 4);
+    std::vector<int> size(static_cast<std::size_t>(parts.numComponents), 0);
+    for (std::size_t e = 0; e < 12; ++e) {
+      const int id = parts.componentOfEdge[e];
+      REQUIRE((id >= 0) == crossing[e]);
+      REQUIRE(id < parts.numComponents);
+      if (id >= 0) ++size[static_cast<std::size_t>(id)];
+    }
+    for (int s : size) REQUIRE(s >= 3);  // a loop round a cube corner at least
+
+    // 2. Every face pairs its crossings within one component.
+    for (int f = 0; f < 6; ++f) {
+      const auto& fc = dualc::tables::kFaceCorners[static_cast<std::size_t>(f)];
+      std::vector<int> faceEdges;  // crossing edges, in cycle order
+      for (int i = 0; i < 4; ++i) {
+        const int e = edgeBetween(fc[static_cast<std::size_t>(i)],
+                                  fc[static_cast<std::size_t>((i + 1) % 4)]);
+        REQUIRE(e >= 0);
+        if (crossing[static_cast<std::size_t>(e)]) faceEdges.push_back(e);
+      }
+      REQUIRE(faceEdges.size() % 2 == 0);
+      auto id = [&](int e) {
+        return parts.componentOfEdge[static_cast<std::size_t>(e)];
+      };
+      if (faceEdges.size() == 2) {
+        CHECK(id(faceEdges[0]) == id(faceEdges[1]));
+      } else if (faceEdges.size() == 4) {
+        // Saddle: the two edges meeting at each inside corner pair up.
+        for (int i = 0; i < 4; ++i) {
+          const int corner = fc[static_cast<std::size_t>(i)];
+          if (!signs[static_cast<std::size_t>(corner)]) continue;
+          const int prev = fc[static_cast<std::size_t>((i + 3) % 4)];
+          const int next = fc[static_cast<std::size_t>((i + 1) % 4)];
+          CHECK(id(edgeBetween(prev, corner)) == id(edgeBetween(corner, next)));
+        }
+      }
+    }
+
+    // 3. The region-count oracle.
+    const bool anyCrossing =
+        std::find(crossing.begin(), crossing.end(), true) != crossing.end();
+    const int expected =
+        anyCrossing ? regionsOnSide(signs, true) + regionsOnSide(signs, false) - 1
+                    : 0;
+    CHECK(parts.numComponents == expected);
+  }
+  // The census, pinned as measured: 2 configurations with no surface (all
+  // in, all out), 162 with one component, 82 with two, 8 with three (three
+  // mutually non-adjacent inside corners; not their complements, which the
+  // inside-pair rule reads as two) and 2 with four (the two
+  // maximum independent corner sets, {0,3,5,6} and {1,2,4,7}).
+  CHECK(byCount[0] == 2);
+  CHECK(byCount[1] == 162);
+  CHECK(byCount[2] == 82);
+  CHECK(byCount[3] == 8);
+  CHECK(byCount[4] == 2);
 }

@@ -86,6 +86,17 @@ item's trigger was "CI being set up"; for everything not needing a GPU it now is
 compile failure against upstream geometry-central v1.1.0 and is now a vendored header; the
 clean-clone bootstrap is a build-time `dualc_gen_demo` run. Record: [20 #47](../20-public-delivery/01-pin-geometry-central.md#47-pin-geometry-central-to-upstream-own-nanort-self-bootstrapping-clone).
 
+*(Moved verbatim from 04 on 2026-10-07, when #32's close did not fit that page:)*
+
+Still open in this item: the dialect-flag leak into third-party subtrees, sanitizer /
+`-Werror` / `clang-tidy` options, and the `LINK_LIBRARIES` layering assertion. *2026-09-21:*
+the undeclared transitive dependency (nanort, now vendored) and the clean-clone bootstrap (the
+build generates the demo meshes) closed in [20 #47](../20-public-delivery/01-pin-geometry-central.md#47-pin-geometry-central-to-upstream-own-nanort-self-bootstrapping-clone).
+*2026-10-06:* the rest closed — `DUALC_WERROR` (ON in CI's build matrix), `DUALC_SANITIZE`
+(CI's `sanitize` job), the layering assertion and the per-target dialect, each proven red in
+CI ([14](14-build-hardening-ci.md)). Not taken: `clang-tidy` (no check set exists and a first
+run is a findings batch of its own, not trivially cheap; `compile_commands.json` is exported for
+an ad-hoc run) and coverage, which is #32's (the plan's Phase 4 hosts its ledger counts).
 ---
 
 ← Back to the [topic README](README.md) · the [Roadmap index](../README.md).

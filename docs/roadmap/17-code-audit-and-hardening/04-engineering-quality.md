@@ -81,7 +81,7 @@ cwd, closing the "exit 0 while silently skipping cases" hole. Still DEFERRED: ne
 *Verified 2026-08-31:* no `add_test` for `dualc_glsl_parity` in `examples/CMakeLists.txt`.
 
 ## #32 Test-coverage ledger
-**PLANNED.** The audit's honest ledger, minus the two gaps already closed. Legacy `Approx`
+**DONE (2026-10-07).** The audit's honest ledger, minus the two gaps already closed. Legacy `Approx`
 throughout with 36 unguarded `== Approx(0.0)` comparisons, whose default epsilon is relative
 and so degenerates to exact equality at zero (mechanical fix: `.margin(1e-12)`). No per-test
 working directory, so parallel safety is luck, plus a fixed temp filename in
@@ -97,11 +97,18 @@ only — a corrupt PNG would pass.
 *2026-09-10:* the [gate](09-local-checks-gate/README.md) **hosts** this item without advancing it: it
 runs `ctest` serial (encoding the shared-cwd constraint) and `--metrics` counts the
 `Approx(0.0)` uses. The tests are still unwritten.
+*2026-10-07:* the counts were wrong — **38** unguarded `Approx(0.0)`, not 36; **17**
+`REQUIRE_THROWS_AS` in five files, not one. Batch A and the corrections:
+[15](15-test-coverage-batches.md).
+*2026-10-07:* Batch B wrote the missing tests, one per finding, each broken on purpose once;
+C51's coverage half was measured once. Item closed: [15](15-test-coverage-batches.md#batch-b--the-missing-tests).
 
 **Added 2026-09-10 — a test that certifies less than it claims.**
 `tests/test_strut_lattice.cpp`'s oracle comment promises more than its sampling strategy
 checks (the `RepeatField` fix corrected 678 vertices it had passed); left in place by
 decision and folded into this item — the evidence is in [07](07-repeat-tiling-fix.md).
+*2026-10-07:* measured, it certified what it claimed: the single fold is exact for the four
+symmetric strut cells. Comment restated, seam points added ([15](15-test-coverage-batches.md#the-strut-lattice-oracle-certified-what-it-claimed)).
 
 ## #33 Build & tooling hardening
 **DONE (2026-10-06).** The last four sub-items landed as CMake options and CI jobs
@@ -131,15 +138,8 @@ already tracked as [10 #8](../10-infrastructure-and-integration.md); only the
 (2026-09-10, [09](09-local-checks-gate/README.md)), which hosts the rest without closing any
 sub-item — record: [12 § #33](12-engineering-quality-records.md#33--build-hardening-three-batches).
 
-Still open in this item: the dialect-flag leak into third-party subtrees, sanitizer /
-`-Werror` / `clang-tidy` options, and the `LINK_LIBRARIES` layering assertion. *2026-09-21:*
-the undeclared transitive dependency (nanort, now vendored) and the clean-clone bootstrap (the
-build generates the demo meshes) closed in [20 #47](../20-public-delivery/01-pin-geometry-central.md#47-pin-geometry-central-to-upstream-own-nanort-self-bootstrapping-clone).
-*2026-10-06:* the rest closed — `DUALC_WERROR` (ON in CI's build matrix), `DUALC_SANITIZE`
-(CI's `sanitize` job), the layering assertion and the per-target dialect, each proven red in
-CI ([14](14-build-hardening-ci.md)). Not taken: `clang-tidy` (no check set exists and a first
-run is a findings batch of its own, not trivially cheap; `compile_commands.json` is exported for
-an ad-hoc run) and coverage, which is #32's (the plan's Phase 4 hosts its ledger counts).
+How each sub-item closed, dated: [12 § #33](12-engineering-quality-records.md#33--build-hardening-three-batches)
+(moved there verbatim on 2026-10-07, when #32's close did not fit this page).
 *Trigger (was):* the first external consumer that is not this repo — superseded by hosted CI.
 *Source:* `docs/raw/study/B5-build-dependencies-licensing.md` §§ 2-10,
 `docs/raw/study/T-unit-testing.md:462-463`.
@@ -203,6 +203,9 @@ Two candidate levers, neither yet tried:
 A third, larger option is to make the *cells* fit their period, which would put strut
 lattices back on the single-fold fast path by construction rather than by optimisation.
 *Trigger:* a lattice contour where the 2.3× is felt — depth 8+, or the tiled export path.
+*2026-10-07:* for strut lattices the 2.3× buys nothing: their cells are mirror-symmetric, so
+the single fold was already exact ([15](15-test-coverage-batches.md#the-strut-lattice-oracle-certified-what-it-claimed)).
+A symmetry flag on the cell is a fourth lever.
 
 ---
 

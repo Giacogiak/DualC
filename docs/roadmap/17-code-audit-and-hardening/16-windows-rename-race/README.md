@@ -19,7 +19,7 @@ that failed. What shipped: every output handle non-inheritable (the fix), a boun
 rename retry (hardening, for a scanner's momentary hold on a user's machine — it would not
 have saved one of the measured failures), the writer's error line in the ABI `err` buffer
 (ABI 0.5.1), the regression tests, the harness as an opt-in gate tier. Decision
-[D-50](../../../decisions/01-settled.md). The desk analysis as it was written before the runs is
+[D-52](../../../decisions/01-settled.md). The desk analysis as it was written before the runs is
 [01](01-desk-analysis.md); the evidence, the verdict and what shipped, [02](02-evidence-and-verdict.md).
 
 **PLANNED (2026-10-07).** The question: does `AtomicOutput::commit()`

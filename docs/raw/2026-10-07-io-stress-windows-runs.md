@@ -5,7 +5,7 @@ copied from each job's check-run annotations the same day (the step summary of a
 run needs a login; annotations do not — every line below is verbatim from
 `api.github.com/repos/Giacogiak/DualC/check-runs/<job>/annotations`). The harness is
 `examples/dualc_io_stress.cpp`; the record that reads these is
-[17/15](../roadmap/17-code-audit-and-hardening/15-windows-rename-race/README.md). Every job:
+[17/16](../roadmap/17-code-audit-and-hardening/16-windows-rename-race/README.md). Every job:
 `python scripts/check.py --io-stress --strict --build-dir build --io-stress-args "<args>"`,
 Visual Studio 17 2022 x64 Release on Windows, Ninja Release on Ubuntu, the harness built
 from the commit named. Defaults from `scripts/check_data.json`: concurrency 6, iterations 30

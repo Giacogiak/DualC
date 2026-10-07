@@ -51,6 +51,13 @@ cases resolve `cube.obj` by bare filename and **skip themselves when it is
 absent, with the binary still exiting 0**. Trusting that exit code would accept a
 69-case run as a pass, so the announced case count is asserted against 73.
 
+*2026-10-07: the serial `ctest` is **kept**, its reason changed. C43 is closed — each Catch
+case runs in a working directory of its own and `ctest -j 8` passed three times in a row — so
+`-j` is no longer unsafe. It is not worth it: 86 s → 57 s on 8 cores, because the engine already
+parallelises inside each case, and oversubscribed cores are what expose the timing-dependent
+cancel/progress tests ([14](../14-build-hardening-ci.md) findings 8 and 9). `ctest -j` by hand is
+fine — [15](../15-test-coverage-batches.md).*
+
 ---
 
 ← Back to [09 — the local checks gate](README.md) · the [audit ledger](../README.md) · the [Roadmap index](../../README.md).

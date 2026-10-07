@@ -31,6 +31,27 @@ happly into scope transitively. nanort and nanoflann are private to geometry-cen
 pinned version; the BVH uses DualC's own vendored nanort header ([§ 8](06-parameters-and-vendoring.md#8-vendored-third-party-code)).
 Geometry-central is never vendored (`README.md`, `AGENTS.md`).
 
+Three build rules hold the boundary:
+- **What `libdualc` may link.** At the end of `CMakeLists.txt`, a configure-time assertion
+  allows `dualc`'s link libraries to name only `geometry-central` and `Threads::Threads`. Any
+  other dependency fails the configure: a host-only dependency links into an `examples/`
+  target, never into the library ([`THIRD_PARTY.md`](../../THIRD_PARTY.md)).
+- **Whose warnings are judged.** When DualC added the geometry-central tree itself, the
+  geometry-central and happly include directories reach DualC's targets as SYSTEM, like the
+  vendored nanort header. So the warning level, `DUALC_WERROR` and the gate's warnings scan
+  judge DualC's code only. A target an enclosing project owns is left as that project
+  declared it.
+- **Which targets are sanitized.** Under `DUALC_SANITIZE`, geometry-central is instrumented
+  along with DualC's own targets. Eigen chooses its aligned allocator by
+  `__SANITIZE_ADDRESS__`, so an uninstrumented geometry-central would free with a different
+  allocator than DualC allocated with.
+
+The C++17 dialect, the warning level and both options are target properties, set per target
+by `dualc_target_options` (`cmake/DualCWarnings.cmake`), never a global
+`CMAKE_CXX_STANDARD`. A global would leak into the fetched projects, so the configure rejects
+one set as a normal variable. Why these rules exist is recorded in
+[17/14](../roadmap/17-code-audit-and-hardening/14-build-hardening-ci.md).
+
 ## 6. Conventions
 
 ### Cube corner indexing

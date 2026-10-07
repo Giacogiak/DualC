@@ -117,7 +117,7 @@ loaded via `mesh(path=…)` (see `cli_c_abi_mesh_inmem`). `path=` still works.
   is non-inheritable, so a child the host starts with handle inheritance while an
   export runs — .NET's `Process.Start` with any stream redirected does — cannot
   hold the `.part` and make the rename fail (the cause of Boletus's flaky Windows
-  gate, [roadmap 17 #52](../docs/roadmap/17-code-audit-and-hardening/15-windows-rename-race/README.md)).
+  gate, [roadmap 17 #52](../docs/roadmap/17-code-audit-and-hardening/16-windows-rename-race/README.md)).
   On Windows a short foreign hold on the `.part` is retried for up to ~0.5 s; a
   longer one returns `DUALC_ERR_IO` with the OS text in `err`, and the `.part`
   may be left behind for the holder's lifetime.

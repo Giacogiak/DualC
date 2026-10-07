@@ -25,6 +25,7 @@ belongs in `design/`; **(d)** an orphan page no page links but its folder README
 | [03-2026-09-21-after-47.md](03-2026-09-21-after-47.md) | 2026-09-21 | delta run after the #47 session (vendored nanort, the CMake resolver + design 05/06): (a) 2 · (b) 0 · (c) 1 · (d) 0 · (e) 0 (#8's second trigger met, retired by the session) — 3 fixed |
 | [04-2026-09-22-after-48.md](04-2026-09-22-after-48.md) | 2026-09-22 | delta run after the #48 session (the hooks through sampler, contourer, writers, ABI + design 01/09/10/11): (a) 3 · (b) 3 · (c) 1 · (d) 0 · (e) 0 — 7 fixed, six of them quoted code that moved under a page |
 | [05-2026-10-05-after-50.md](05-2026-10-05-after-50.md) | 2026-10-05 | full run after the #50 session (Polyscope retired, GLFW + glad owned; design 09/11) and the first since the history rebase: (a) 11 · (b) 0 · (c) 0 · (d) 0 · (e) 0 — 11 fixed, two of them with the code comment they mirrored; D-40 within 6 % of its trigger |
+| [06-2026-10-07-after-ci-plan.md](06-2026-10-07-after-ci-plan.md) | 2026-10-07 | delta run after the hosted-CI plan (#51, #31, #33, #32: build, tests, `check.py`; design 10/11): (a) 1 · (b) 1 · (c) 1 · (d) 0 · (e) 0 — run 05's "area-weighted" survived in four more places; the #33 build rules and the test conventions had no `design/` home |
 
 ---
 

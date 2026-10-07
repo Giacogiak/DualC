@@ -35,7 +35,7 @@ Build tier: `configure` → `build` → `warnings` → `ctest`. Opt-in `--gpu` t
 CTest 4 output — [20 #49](../../20-public-delivery/02-linux-build-host.md#49-linux-as-a-build-host).)*
 *(2026-10-07: a second opt-in tier, `--io-stress` → `io-stress`, runs the concurrent-export
 harness and passes `--io-stress-args` through; an experiment measuring a flake, never in the
-default gate or `--all` — [15 #52](../15-windows-rename-race/README.md#52-windows-export-io-flake--the-part-rename-under-an-on-access-scanner).)*
+default gate or `--all` — [15 #52](../16-windows-rename-race/README.md#52-windows-export-io-flake--the-part-rename-under-an-on-access-scanner).)*
 
 ### The semantic half
 
@@ -80,6 +80,11 @@ pair — the folder is `semantic_lint_runs.folder` of `check_data.json`, its REA
 the folder an `index_roots` entry, every run `NN-<date>-<slug>.md` with its date on the
 first body line; `--selftest` 28 runs. The tables stay the dated 2026-09-11 reading, as
 their notes say — [19/07](../../19-docs-layers/07-record-phase-8.md).)*
+
+*(2026-10-07: the `approx-zero` check — no `Approx(<zero>)` in `tests/` without a `.margin(`,
+split lines included — turns #32's `Approx(0.0)` metric into a ratchet at 0, with its fixture
+pair; the `--metrics` needle had counted guarded uses too and read 70 while the unguarded count
+was 38 — [15](../15-test-coverage-batches.md).)*
 
 ---
 
