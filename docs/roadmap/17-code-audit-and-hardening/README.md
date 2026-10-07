@@ -121,8 +121,8 @@ full entries, with evidence and triggers, live in two files:
 [`04-engineering-quality.md`](04-engineering-quality.md) (#27–#35).
 
 **Latest verification** (the one home of the counts; every other page links here):
-`ctest` **300** (2026-10-07, the full gate on Linux, [15](15-test-coverage-batches.md); 270 on 2026-10-06 in
-CI's three `build` jobs; 256 on 2026-09-17, [19/01](../19-docs-layers/01-record-phases-0-2.md)); `dualc_glsl_parity` **73/73**
+`ctest` **300** (2026-10-07, the full gate on Linux and in CI's three `build` jobs and `sanitize`,
+[15](15-test-coverage-batches.md); 270 on 2026-10-06; 256 on 2026-09-17, [19/01](../19-docs-layers/01-record-phases-0-2.md)); `dualc_glsl_parity` **73/73**
 (2026-10-06, asserted by `check.py --gpu` against `parity_expected_cases` in CI's required
 `gpu` job — [13](13-parity-gate-binding.md)); the same 270 pass under ASan + UBSan in CI's
 `sanitize` job (2026-10-06, [14](14-build-hardening-ci.md)); the same 270 pass under `ctest -j 8`,

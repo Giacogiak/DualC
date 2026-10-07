@@ -124,6 +124,10 @@ Release, before its bar was written, and each new check was broken on purpose on
 | C52 | `examples/check_cli_output.cmake`, 21 `*_content` CTest cases | PNG signature and IHDR 128 × 128; binary STL size = 84 + 50 *n*; 3MF unpacks with its three parts; STL and 3MF triangle counts equal the same run's OBJ face count; OBJs all-triangle and non-empty; the SVG complete; `--dump-json` parses with root op `difference`; the generated cube exactly 8 / 12 |
 | 07's oracle | `test_strut_lattice.cpp` | 600 seam-targeted points join the 400 uniform ones; the comment now says what it certifies — see below |
 
+CI run [37591221067](https://github.com/Giacogiak/DualC/actions/runs/37591221067) on `2b3036b`:
+every job green — `build` on Ubuntu, macOS and Windows (the content checks' `cmake -P` and
+`ARCHIVE_EXTRACT` included), `sanitize` (all 300 under ASan + UBSan), `gpu`, `docs`.
+
 The content checks are CTest fixtures of the tests that write their files, so `ctest -R
 cli_slice_content` reruns `cli_slice` first and `ctest -j` orders them. One pass over a 10 MB
 OBJ costs about 1 s.
