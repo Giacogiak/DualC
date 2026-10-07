@@ -45,6 +45,13 @@ jobs:
           # H2, Boletus's shape more closely: a fresh process whose FIRST files
           # are the six concurrent ones (no sequential warm-up), fifteen times.
           - { job: fresh-process, os: windows-2022, scanner: 'on',  args: '--no-baseline --iterations 1', repeat: 15 }
+          # H8, the lead after sample 2 showed the scanner off on this image:
+          # a child process started with handle inheritance (what .NET's
+          # Process.Start does with a redirected stream, as Boletus's CLI
+          # parity test does in parallel with its exports) inherits any .part
+          # the CRT has open and holds it, without FILE_SHARE_DELETE, for as
+          # long as it lives.
+          - { job: child-inherit, os: windows-2022, scanner: 'on',  args: '--spawn-child --iterations 10' }
           # The control: the harness itself must be clean where no scanner
           # can hold a file.
           - { job: linux-control, os: ubuntu-24.04, scanner: 'none', args: '' }

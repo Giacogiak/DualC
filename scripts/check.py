@@ -1637,7 +1637,7 @@ def check_io_stress(ctx):
         rc, out = run(cmd, cwd=ctx.root)
         lines = out.splitlines()
         if any("not supported on this platform" in l for l in lines):
-            return Result(SKIP, "--force-hold is Windows-only", lines[-3:])
+            return Result(SKIP, "--force-hold / --spawn-child are Windows-only", lines[-3:])
         m = next((tally_re.search(l) for l in lines if tally_re.search(l)), None)
         if m is None:
             return Result(FAIL, "could not parse dualc_io_stress output (rc %d, process %d)"

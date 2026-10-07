@@ -108,6 +108,8 @@ struct Options {
   bool mix = false;
   bool verbose = false;
   bool noBaseline = false;   // skip the sequential warm-up: the first files this process writes are the concurrent ones
+  bool spawnChild = false;   // Windows: keep spawning a child process WITH handle inheritance during the rounds
+  long long childSleep = -1; // hidden: this process is the child; sleep and exit
   // force-hold: -1 = off, 0 = "through" (hold until the export returned), > 0 = ms
   long long forceHold = -1;
 };
@@ -133,7 +135,11 @@ void usage() {
       "                to the first export of each mode instead\n"
       "  --mix         odd workers rotate .stl / .3mf / .obj\n"
       "  --force-hold  (Windows) hold each .part open without FILE_SHARE_DELETE\n"
-      "                until the export returned (through) or for MS ms\n";
+      "                until the export returned (through) or for MS ms\n"
+      "  --spawn-child (Windows) during the rounds keep one child process alive\n"
+      "                (2.5 s each, CreateProcess with bInheritHandles=TRUE): a\n"
+      "                child inherits every inheritable handle open at that\n"
+      "                moment, a .part among them, as a host's Process.Start does\n";
 }
 
 bool parse(int argc, char** argv, Options& o) {
@@ -152,6 +158,8 @@ bool parse(int argc, char** argv, Options& o) {
     else if (a == "--mix") o.mix = true;
     else if (a == "--verbose") o.verbose = true;
     else if (a == "--no-baseline") o.noBaseline = true;
+    else if (a == "--spawn-child") o.spawnChild = true;
+    else if (a == "--child-sleep") { const char* v = next("--child-sleep"); if (!v) return false; o.childSleep = std::atoll(v); }
     else if (a == "--force-hold") {
       const char* v = next("--force-hold"); if (!v) return false;
       o.forceHold = (std::string(v) == "through") ? 0 : std::atoll(v);
@@ -279,6 +287,47 @@ class Holder {
   std::thread th_;
   std::string note_;
 };
+
+// Keep one child process alive at all times while `stop` is false, each
+// started with bInheritHandles = TRUE -- what .NET's Process.Start does when
+// a stream is redirected. The MSVC CRT opens files inheritable by default,
+// so a child started while a `.part` is open holds a duplicate of that
+// handle (same share mode, no FILE_SHARE_DELETE) for as long as it lives.
+class ChildSpawner {
+ public:
+  ChildSpawner(std::atomic<bool>& stop, long long childMs) : stop_(stop), childMs_(childMs) {
+    th_ = std::thread([this] { run(); });
+  }
+  ~ChildSpawner() { join(); }
+  void join() { if (th_.joinable()) th_.join(); }
+  int spawned() const { return spawned_; }
+  std::string note() const { return note_; }
+
+ private:
+  void run() {
+    wchar_t exe[MAX_PATH];
+    const DWORD n = GetModuleFileNameW(nullptr, exe, MAX_PATH);
+    if (n == 0 || n >= MAX_PATH) { note_ = "GetModuleFileNameW failed"; return; }
+    while (!stop_.load()) {
+      std::wstring cmd = L"\"" + std::wstring(exe) + L"\" --child-sleep " + std::to_wstring(childMs_);
+      STARTUPINFOW si{}; si.cb = sizeof si;
+      PROCESS_INFORMATION pi{};
+      if (!CreateProcessW(nullptr, &cmd[0], nullptr, nullptr, TRUE /* inherit handles */,
+                          CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi)) {
+        note_ = "CreateProcessW failed: " + std::to_string(GetLastError());
+        return;
+      }
+      ++spawned_;
+      WaitForSingleObject(pi.hProcess, INFINITE);
+      CloseHandle(pi.hThread); CloseHandle(pi.hProcess);
+    }
+  }
+  std::atomic<bool>& stop_;
+  long long childMs_;
+  std::thread th_;
+  int spawned_ = 0;
+  std::string note_;
+};
 #endif
 
 // --- one export, start to finish -----------------------------------------------
@@ -348,9 +397,13 @@ void runOne(const dualc::ImplicitField& field, const Options& o, Outcome& r) {
 int main(int argc, char** argv) {
   Options o;
   if (!parse(argc, argv, o)) return 2;
+  if (o.childSleep >= 0) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(o.childSleep));
+    return 0;
+  }
 #ifndef _WIN32
-  if (o.forceHold >= 0) {
-    std::cout << "dualc_io_stress: --force-hold is not supported on this platform\n";
+  if (o.forceHold >= 0 || o.spawnChild) {
+    std::cout << "dualc_io_stress: --force-hold and --spawn-child are not supported on this platform\n";
     return 0;
   }
 #endif
@@ -391,6 +444,7 @@ int main(int argc, char** argv) {
       << " concurrency=" << o.concurrency << " iterations=" << o.iterations
       << " dir=" << dir.string() << " hw_threads=" << std::thread::hardware_concurrency()
       << " force_hold=" << (o.forceHold < 0 ? std::string("off") : o.forceHold == 0 ? std::string("through") : std::to_string(o.forceHold) + "ms")
+      << " spawn_child=" << (o.spawnChild ? "on" : "off")
       << "\n";
 
   auto nameFor = [&](int iter, int w) {
@@ -425,6 +479,11 @@ int main(int argc, char** argv) {
           << baseMs << "ms); the hold may end before finish()\n";
   }
 
+  std::atomic<bool> stopSpawner{false};
+#ifdef _WIN32
+  std::unique_ptr<ChildSpawner> spawner;
+  if (o.spawnChild) spawner.reset(new ChildSpawner(stopSpawner, 2500));
+#endif
   std::vector<Outcome> all;
   all.reserve(static_cast<std::size_t>(o.concurrency) * o.iterations);
   for (int iter = 0; iter < o.iterations; ++iter) {
@@ -439,8 +498,19 @@ int main(int argc, char** argv) {
     for (auto& r : round) all.push_back(std::move(r));
   }
 
+  stopSpawner.store(true);
+  std::string spawnNote;
+#ifdef _WIN32
+  if (spawner) {
+    spawner->join();   // the last child is waited for
+    spawnNote = "children spawned with handle inheritance: " + std::to_string(spawner->spawned())
+                + (spawner->note().empty() ? "" : " (" + spawner->note() + ")");
+    spawner.reset();
+  }
+#endif
   std::cerr.rdbuf(oldErr);
   if (oldOut) std::cout.rdbuf(oldOut);
+  if (!spawnNote.empty()) out << "dualc_io_stress: " << spawnNote << "\n";
 
   if (o.noBaseline) {
     // The reference count is the first successful export of each mode.
