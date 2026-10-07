@@ -111,6 +111,19 @@ jobs:
         if: always()
         shell: bash
         run: python .github/workflows/annotate.py gate.log ${{ job.status }}
+      # The step summary needs a login to read in practice (the public run
+      # page loads it client-side); check-run annotations do not, so the lines
+      # that carry the result are re-printed as notices too (ten per step).
+      - name: Key lines as annotations
+        if: always()
+        shell: bash
+        run: |
+          grep -E '^(dualc_io_stress:|FAIL #|DELETE-)' gate.log | head -10 | sed 's/%/%25/g' | while IFS= read -r l; do echo "::notice title=io-stress::$l"; done
+      - name: Environment as annotations
+        if: always() && runner.os == 'Windows'
+        shell: bash
+        run: |
+          grep -E 'TEMP=|CPUs=|RealTimeProtectionEnabled|IsTamperProtected|DisableRealtimeMonitoring|ExclusionPath|Status|toggle|AntivirusSignatureVersion' env.log | sed 's/^ *//' | grep -v '^$' | head -10 | while IFS= read -r l; do echo "::notice title=env::$l"; done
       - name: Report to the step summary
         if: always()
         shell: bash

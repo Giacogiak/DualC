@@ -255,8 +255,11 @@ class Holder {
     }
     const long long acquired = msSince(t0);
     if (holdMs_ == 0) {
+      // Keep holding for a while after the export returned, so the harness's
+      // own rename probe meets the held file at least once and prints the
+      // error_code it gets -- the tuple the fix's predicate is built from.
       while (!done_.load()) std::this_thread::sleep_for(std::chrono::milliseconds(1));
-      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+      std::this_thread::sleep_for(std::chrono::milliseconds(150));
     } else {
       std::this_thread::sleep_for(std::chrono::milliseconds(holdMs_));
     }
@@ -292,15 +295,14 @@ void runOne(const dualc::ImplicitField& field, const Options& o, Outcome& r) {
   r.ms = msSince(t0);
   done.store(true);
   r.stderrText = oneLine(g_tlsText);
-#ifdef _WIN32
-  if (holder) { std::unique_ptr<Holder> h = std::move(holder); h->join(); r.probe = "holder: " + h->note() + " | "; }
-#endif
   const std::string part = r.path + ".part";
   r.partAfter = fs::exists(part);
   r.destAfter = fs::exists(r.path);
 
   if (r.rc != 0) {
     // The probe: would a bounded retry of the rename have landed the file?
+    // Under --force-hold the holder is still open here, so the first attempts
+    // fail and the error_code they get is printed.
     if (r.partAfter) {
       std::string note;
       retryLoop([&](std::error_code& ec) { fs::rename(part, r.path, ec); return !ec; }, 3000, note);
@@ -309,6 +311,9 @@ void runOne(const dualc::ImplicitField& field, const Options& o, Outcome& r) {
       r.probe += (r.destAfter ? "no .part, destination present" : "no .part left");
     }
   }
+#ifdef _WIN32
+  if (holder) { std::unique_ptr<Holder> h = std::move(holder); h->join(); r.probe += " | holder: " + h->note(); }
+#endif
 
   // Read back (H5: the mesh is right) -- binary STL only.
   if (fs::exists(r.path) && r.path.size() > 4 && r.path.compare(r.path.size() - 4, 4, ".stl") == 0) {
