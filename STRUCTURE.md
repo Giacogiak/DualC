@@ -180,7 +180,6 @@ DualC/
 │   ├── docs_loss_audit.json   Its triage: verdict per residual (record citation, restoring commit), rules, ratchet
 │   └── count_nm.py            Dev utility (non-manifold / count analysis)
 │
-├── plan/                      plan-run's split of docs/raw/2026-10-05-hosted-ci-plan.md: one file per phase, run.manifest.json, remote_run_check.py, handoffs/ (one per unit); the run state .plan-run/ is gitignored
 ├── data/                      Demo meshes for root-run recipes — *.obj are GITIGNORED; the build generates its own copies under build/data/; `dualc_gen_demo all --dir data` populates this one
 │                                (cube, sphere, uvsphere, torus, knot, genus2, cylinder, bracket, hexbore, bunny, molde, opA, opB)
 │
