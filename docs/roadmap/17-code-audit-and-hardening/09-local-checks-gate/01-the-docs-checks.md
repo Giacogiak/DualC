@@ -78,6 +78,11 @@ the folder an `index_roots` entry, every run `NN-<date>-<slug>.md` with its date
 first body line; `--selftest` 28 runs. The tables stay the dated 2026-09-11 reading, as
 their notes say — [19/07](../../19-docs-layers/07-record-phase-8.md).)*
 
+*(2026-10-07: the `approx-zero` check — no `Approx(<zero>)` in `tests/` without a `.margin(`,
+split lines included — turns #32's `Approx(0.0)` metric into a ratchet at 0, with its fixture
+pair; the `--metrics` needle had counted guarded uses too and read 70 while the unguarded count
+was 38 — [15](../15-test-coverage-batches.md).)*
+
 ---
 
 ← Back to [09 — the local checks gate](README.md) · the [audit ledger](../README.md) · the [Roadmap index](../../README.md).

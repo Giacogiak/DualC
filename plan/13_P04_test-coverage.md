@@ -7,7 +7,9 @@ its findings are C42–C54 in
 batches, one session each. Work on `main` after the previous merge, on a branch named
 `ci/test-coverage`; push that branch only, never `main`, never force-push. The full gate
 before every code commit; the record page for both batches is `17/13` (or the next free
-number), indexed in 17/README, with the before/after counts.
+number), indexed in 17/README, with the before/after counts. *(Corrected by P04.1, 2026-10-07:
+`17/13` and `17/14` are #31's and #33's records; the page is
+[`17/15`](../docs/roadmap/17-code-audit-and-hardening/15-test-coverage-batches.md).)*
 
 ### T1. Batch A — correct the record, then the mechanical fixes
 
@@ -29,7 +31,7 @@ number), indexed in 17/README, with the before/after counts.
 - 17/04 #32 and 17/06 C43 state the corrected counts and disposition.
 - `check.py --metrics` reports 0 unguarded `Approx(0.0)`; `ctest -j 8` passes three times
   in a row on the branch; the serial-`ctest` decision has its dated line.
-- `python3 scripts/check.py` green locally; the record page `17/13` exists with Batch A's
+- `python3 scripts/check.py` green locally; the record page `17/15` (not `17/13`, taken) exists with Batch A's
   counts; the handoff names what Batch B inherits.
 
 ### T2. Batch B — the missing tests

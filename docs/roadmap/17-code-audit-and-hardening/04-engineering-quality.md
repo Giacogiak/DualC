@@ -81,7 +81,7 @@ cwd, closing the "exit 0 while silently skipping cases" hole. Still DEFERRED: ne
 *Verified 2026-08-31:* no `add_test` for `dualc_glsl_parity` in `examples/CMakeLists.txt`.
 
 ## #32 Test-coverage ledger
-**PLANNED.** The audit's honest ledger, minus the two gaps already closed. Legacy `Approx`
+**PARTIAL: DONE (2026-10-07, Batch A); the rest PLANNED.** The audit's honest ledger, minus the two gaps already closed. Legacy `Approx`
 throughout with 36 unguarded `== Approx(0.0)` comparisons, whose default epsilon is relative
 and so degenerates to exact equality at zero (mechanical fix: `.margin(1e-12)`). No per-test
 working directory, so parallel safety is luck, plus a fixed temp filename in
@@ -97,6 +97,9 @@ only — a corrupt PNG would pass.
 *2026-09-10:* the [gate](09-local-checks-gate/README.md) **hosts** this item without advancing it: it
 runs `ctest` serial (encoding the shared-cwd constraint) and `--metrics` counts the
 `Approx(0.0)` uses. The tests are still unwritten.
+*2026-10-07:* the counts were wrong — **38** unguarded `Approx(0.0)`, not 36; **17**
+`REQUIRE_THROWS_AS` in five files, not one. Batch A and the corrections:
+[15](15-test-coverage-batches.md).
 
 **Added 2026-09-10 — a test that certifies less than it claims.**
 `tests/test_strut_lattice.cpp`'s oracle comment promises more than its sampling strategy

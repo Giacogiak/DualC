@@ -29,7 +29,7 @@ now worked through the [hosted-CI plan](../raw/2026-10-05-hosted-ci-plan.md): **
 as a GitHub Actions job — is DONE (2026-10-06, [20 #51](20-public-delivery/03-hosted-ci.md#51-hosted-ci--the-gate-as-a-github-actions-job)), and so is its
 Phase 2, **#31** (the parity gate binding through headless GL, [17/13](17-code-audit-and-hardening/13-parity-gate-binding.md)), and Phase 3,
 **#33** (`-Werror`, ASan + UBSan, the layering assertion as CI jobs, [17/14](17-code-audit-and-hardening/14-build-hardening-ci.md)); **NEXT** is
-Phase 4, **#32** (test coverage), and the rest of **#34** resumes. **Public delivery**
+Phase 4, **#32** (test coverage; Batch A DONE 2026-10-07), and the rest of **#34** resumes. **Public delivery**
 ([20](20-public-delivery/README.md)) opened 2026-09-21: the build no longer depends on a local
 geometry-central fork, and since 2026-10-03 it builds and passes the gate on Linux too (**#49**); the same day **#50**
 retired `dualc_view` and the Polyscope sibling checkout, so the GL targets own their dependencies
@@ -43,11 +43,11 @@ the block records the table links ([D-43](../decisions/01-settled.md)).
 
 | Date | What landed | Record |
 | --- | --- | --- |
+| 2026-10-07 | **#32 Batch A** — coverage counts corrected; every `Approx(0.0)` has a margin, gated at 0; each test case runs in its own directory. | [17/15](17-code-audit-and-hardening/15-test-coverage-batches.md) |
 | 2026-10-06 | **#33** — build hardening as CI jobs: `DUALC_WERROR` in the build matrix, `DUALC_SANITIZE` (ASan + UBSan over all 270 cases) as the required `sanitize` job, the layering assertion and the per-target dialect, each proven red. | [17/14](17-code-audit-and-hardening/14-build-hardening-ci.md) |
 | 2026-10-06 | **#31** — the CPU/GPU parity gate is binding: CI's `gpu` job (Xvfb + llvmpipe, `check.py --gpu --strict`, the case count asserted) is required, proven red on a deliberate `opXor` break. | [17/13](17-code-audit-and-hardening/13-parity-gate-binding.md) |
 | 2026-10-06 | **#51** — hosted CI: a GitHub Actions workflow runs `scripts/check.py` and nothing else — the docs tier, the full gate on Ubuntu, Windows and macOS (required), the parity harness under Xvfb (allowed to fail, D-49). | [20](20-public-delivery/03-hosted-ci.md#51-hosted-ci--the-gate-as-a-github-actions-job) |
 | 2026-10-03 | **#50** — `dualc_view` and Polyscope retired; the GL targets build on a vendored glad and a GLFW fetched at its pinned release (or `-DDUALC_GLFW_DIR`), the sibling-checkout mechanism gone. | [07 #50](07-viewer-polyscope.md#50-retire-dualc_view-and-the-polyscope-dependency-own-glfw--glad) |
-| 2026-10-03 | **#49** — Linux is a build host: C enabled for the vendored `miniz.c`, the gate picks its generator per OS and reads CTest 4; full gate green with GCC 15 + Ninja. | [20](20-public-delivery/02-linux-build-host.md#49-linux-as-a-build-host) |
 
 **The shipped keystone (2026-06-14 … 2026-07-06)** — builds #1–#3, the C ABI (#19) and
 the client layer's move to Boletus, each DONE with its evidence in
@@ -66,7 +66,7 @@ row (cited by ID).
 1. **Engine hardening — the audit's open findings**
    ([17](17-code-audit-and-hardening/README.md)) — a standing ledger, not a phase; the
    one status table is [17 § Tracked items](17-code-audit-and-hardening/README.md#tracked-items--status-at-a-glance).
-   **NEXT:** #32 (the CI plan's Phase 4), then the rest of #34.
+   **NEXT:** #32 Batch B (the CI plan's Phase 4), then the rest of #34.
 2. **TPMS / lattice capability** ([05](05-tpms-lattices/README.md)) — **#17 strut
    lattices** and their Phases 3–5 DONE; **#18 tight Lipschitz `cellOverlaps`**
    DEFERRED ([#18](../decisions/README.md)).
