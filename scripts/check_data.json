@@ -36,7 +36,8 @@
 
   "status_tables": [
     "docs/roadmap/README.md",
-    "docs/roadmap/17-code-audit-and-hardening/README.md"
+    "docs/roadmap/17-code-audit-and-hardening/README.md",
+    "docs/roadmap/21-cli-consolidation/README.md"
   ],
 
   "status_vocab_only": {
@@ -151,6 +152,7 @@
     "docs/roadmap/17-code-audit-and-hardening/03-correctness-and-robustness",
     "docs/roadmap/17-code-audit-and-hardening/09-local-checks-gate",
     "docs/roadmap/20-public-delivery",
+    "docs/roadmap/21-cli-consolidation",
     "docs/raw/study",
     "docs/raw",
     "docs/design",
@@ -161,7 +163,8 @@
     "docs/roadmap/17-code-audit-and-hardening/03-correctness-and-robustness/01-parallelfor-and-ray-parity.md",
     "docs/roadmap/17-code-audit-and-hardening/03-correctness-and-robustness/02-precision-and-celloverlaps.md",
     "docs/roadmap/17-code-audit-and-hardening/03-correctness-and-robustness/03-diagnostics-item.md",
-    "docs/roadmap/17-code-audit-and-hardening/04-engineering-quality.md"
+    "docs/roadmap/17-code-audit-and-hardening/04-engineering-quality.md",
+    "docs/roadmap/21-cli-consolidation/01-record.md"
   ],
 
   "external_link_prefixes": [

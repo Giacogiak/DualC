@@ -18,24 +18,19 @@ belongs there, never here; a count or a version is stated only in its home.
 
 ## Current focus
 
-**The documentation restructuring** ([19](19-docs-layers/README.md)) is **DONE**
-(2026-09-20, Phases 0–8) and merged into `main` (2026-09-21, validated by the pre-merge loss
-audit — [19/09](19-docs-layers/09-pre-merge-loss-audit.md)); it leaves the monthly
-`/docs-semantic-lint` to ordinary sessions. The engine track resumes: the 2026-06-12
-re-sequencing ([12](12-field-graph-and-app/README.md)) — *value from the command line first,
-then wrap it* — is **finished**, so what remains in DualC is the engine itself, drawn from the
-2026-08-19 audit's ledger ([17](17-code-audit-and-hardening/README.md)) as a standing queue,
-worked through the [hosted-CI plan](../raw/2026-10-05-hosted-ci-plan.md) — run closed 2026-10-07, `main`
-unpushed ([20/04](20-public-delivery/04-hosted-ci-plan-run.md)): **#51**, hosted CI, is DONE ([20 #51](20-public-delivery/03-hosted-ci.md#51-hosted-ci--the-gate-as-a-github-actions-job)), so is
-Phase 2, **#31** (the parity gate binding, [17/13](17-code-audit-and-hardening/13-parity-gate-binding.md)), Phase 3,
-**#33** (`-Werror`, ASan + UBSan as CI jobs, [17/14](17-code-audit-and-hardening/14-build-hardening-ci.md)), Phase 4,
-**#32** (test coverage, [17/15](17-code-audit-and-hardening/15-test-coverage-batches.md)); **NEXT** is the rest of **#34**. **Public delivery**
-([20](20-public-delivery/README.md)) opened 2026-09-21: the build no longer depends on a local
-geometry-central fork, and since 2026-10-03 it builds and passes the gate on Linux too (**#49**); the same day **#50**
-retired `dualc_view` and the Polyscope sibling checkout, so the GL targets own their dependencies
-([07 #50](07-viewer-polyscope.md#50-retire-dualc_view-and-the-polyscope-dependency-own-glfw--glad)). **#48** (cancellation and progress,
-Boletus's D-30 ask) landed 2026-09-22 ([14/05](14-c-abi/05-progress-and-cancel.md)); D-44 / D-45 stay open,
-the re-vendor is Boletus's ([15](15-boletus-handoff.md#dualc-retains--engine--abi-boletus-only-requests-these-upstream)).
+**CLI consolidation** ([21](21-cli-consolidation/README.md)) opened 2026-10-14: the user
+surface becomes the two framework CLIs, `dualc_field` + `dualc_field_view` — a capability only
+a side tool holds moves into the graph, and so within the C ABI's reach, and the tool retires
+([D-55 … D-59](../decisions/01-settled.md); `dualc_boolean` waits on P02's measurements,
+[D-60](../decisions/README.md)). It runs as the
+[consolidation plan](../raw/2026-10-14-cli-consolidation-plan.md) on branch
+`feat/cli-consolidation`; **NEXT** is **#55**, the inside-out demo meshes. Before it the engine
+track drew on the 2026-08-19 audit's ledger ([17](17-code-audit-and-hardening/README.md))
+through the hosted-CI plan, run closed 2026-10-07 ([20/04](20-public-delivery/04-hosted-ci-plan-run.md));
+the rest of **#34** resumes after block 21. The docs restructuring ([19](19-docs-layers/README.md))
+is DONE and leaves the monthly `/docs-semantic-lint` to ordinary sessions; **#48**
+([14/05](14-c-abi/05-progress-and-cancel.md)) left D-44 / D-45 open and the re-vendor to
+Boletus ([15](15-boletus-handoff.md#dualc-retains--engine--abi-boletus-only-requests-these-upstream)).
 
 **Recent milestones** — the last five: date, one clause, the record; older rows live in
 the block records the table links ([D-43](../decisions/01-settled.md)).
@@ -62,34 +57,38 @@ row (cited by ID).
 
 ### Track 1 — Engine & CLI expansion
 
-1. **Engine hardening — the audit's open findings**
+1. **CLI consolidation** ([21](21-cli-consolidation/README.md)) — the side CLIs folded into
+   `dualc_field` + `dualc_field_view`; the one status table is
+   [21 § The pages of this block](21-cli-consolidation/README.md#the-pages-of-this-block).
+   **NEXT:** #55.
+2. **Engine hardening — the audit's open findings**
    ([17](17-code-audit-and-hardening/README.md)) — a standing ledger, not a phase; the
    one status table is [17 § Tracked items](17-code-audit-and-hardening/README.md#tracked-items--status-at-a-glance).
-   **NEXT:** the rest of #34, then #35 on its trigger; **#53** (Linux `.so`, [14/06](14-c-abi/06-linux-shared-library.md))
+   After block 21: the rest of #34, then #35 on its trigger; **#53** (Linux `.so`, [14/06](14-c-abi/06-linux-shared-library.md))
    PARTIAL (libraries landed with #52; CI proof owed).
-2. **TPMS / lattice capability** ([05](05-tpms-lattices/README.md)) — **#17 strut
+3. **TPMS / lattice capability** ([05](05-tpms-lattices/README.md)) — **#17 strut
    lattices** and their Phases 3–5 DONE; **#18 tight Lipschitz `cellOverlaps`**
    DEFERRED ([#18](../decisions/README.md)).
-3. **Streaming-export completion**
+4. **Streaming-export completion**
    ([11 § 5a](11-dense-lattice-deliverable/03-streaming-export.md#5a-deferred-enhancements-gains-vs-the-shipped-stl-version))
    — the shipped parts there and in
    [12 § G](12-field-graph-and-app/06-decimation.md#g-post-contour-qem-decimation---decimate----simplify).
    DEFERRED: per-tile locked-seam decimation (Approach B, [D-26](../decisions/README.md))
    and `dualc_lattice --tile-depth` wiring ([D-14](../decisions/README.md)).
-4. **Core-DC algorithmic extensions** ([01 Tier 4](01-core-dual-contouring/README.md#tier-4--open-algorithmic-extensions-for-special-needs)) —
+5. **Core-DC algorithmic extensions** ([01 Tier 4](01-core-dual-contouring/README.md#tier-4--open-algorithmic-extensions-for-special-needs)) —
    **#13** intersection-free contouring, **#14** multi-material / open-boundary
    contouring (the home of an open lattice surface *as a mesh* —
    [12 § F](12-field-graph-and-app/05-open-surface.md)), **#15** GPU acceleration.
    PLANNED, unsequenced — no trigger.
-5. **Infrastructure & packaging** — `install()` + `dualcConfig.cmake` Phase 2, Python
+6. **Infrastructure & packaging** — `install()` + `dualcConfig.cmake` Phase 2, Python
    bindings, a benchmark + perf-regression suite ([10](10-infrastructure-and-integration.md)),
    each DEFERRED ([#8, #9, #11](../decisions/README.md)).
-6. **Additional export targets & I/O** — direct per-layer slicer, narrow-band VDB /
+7. **Additional export targets & I/O** — direct per-layer slicer, narrow-band VDB /
    voxel export, hybrid parametric descriptor
    ([11 § 6](11-dense-lattice-deliverable/README.md#6-not-on-the-critical-path)); read
    explicit OBJ `vn` ([09 #7](09-io-formats.md)). All DEFERRED, each gated on a concrete
    downstream consumer ([D-13, D-07, #7](../decisions/README.md)).
-7. **DAG-ref serialization superset** (`id`/`ref`, `let … in …`)
+8. **DAG-ref serialization superset** (`id`/`ref`, `let … in …`)
    ([12 § A](12-field-graph-and-app/01-field-graph.md#a-the-field-graph-keystone)) —
    DualC-retained but **Boletus-driven**, so last ([D-12](../decisions/README.md)).
 
@@ -144,6 +143,7 @@ workflow, graded-onion; GLSL codegen completeness DONE 2026-06-24 —
 | 18 | [C ABI — continued](18-c-abi-continued.md) | Retired 2026-09-18: its two entries are [14/04](14-c-abi/04-abi-0-4-0.md); the number is never reused. | tombstone — DONE |
 | 19 | [Docs layers](19-docs-layers/README.md) | The 2026-09-17 docs restructuring: the plan (immutable, `docs/raw/`), items #36–#45, the phase table, per-phase evidence, the semantic-lint runs. | Phases 0–8 **DONE** (2026-09-20); the lint runs keep landing in [19/08](19-docs-layers/08-semantic-lint/README.md) |
 | 20 | [Public delivery](20-public-delivery/README.md) | The repo as others build it: geometry-central pinned and fetched (options weighed), nanort vendored, the self-bootstrapping clean clone (#47); Linux as a build host (#49); hosted CI running the gate (#51), the plan's run (04). | **#47 DONE** (2026-09-21) · **#49 DONE** (2026-10-03) · **#51 DONE** (2026-10-06) |
+| 21 | [CLI consolidation](21-cli-consolidation/README.md) | One framework, `dualc_field` + `dualc_field_view`: the demo meshes wound outward, `mesh(sign="gwn")`, per-node `bake`, 2D profiles + lifts and a graph slice in the graph, then eight side CLIs retired (#55–#60). | #55 NEXT; #56–#60 PLANNED; D-60 DEFERRED |
 
 ## How the blocks relate
 
@@ -154,4 +154,5 @@ while it holds the rationale, the Phase 0 benchmark and the open steps. Block **
 the keystone: the **field-graph** is the single source of truth the CLI, the GPU app and
 the C ABI (**10**, **14**) build on; the client layer above the ABI lives in **Boletus**
 (**15** records what moved). Block **17** grades the engine those blocks built and is
-where DualC's remaining work comes from; **19** is the documentation system itself.
+where DualC's remaining work comes from; **19** is the documentation system itself; **21**
+folds the side CLIs of blocks 01–08 into block 12's graph.
