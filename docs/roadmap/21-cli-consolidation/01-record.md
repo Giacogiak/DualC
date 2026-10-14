@@ -56,11 +56,12 @@ D-60's row says retire, no unit removes, deprecates or migrates away `dualc_bool
 `scripts/check_data.json` `size_caps` (15,360): [`roadmap/README.md`](../README.md) at 15,355
 and [`decisions/README.md`](../../decisions/README.md) at 15,322. Nothing was baselined; each
 was trimmed to what its own rule allows, and every removed clause already lived in the page it
-links:
+links (`scripts/docs_loss_audit.py --base d6cc19d`, scratch triage: the 18 residual rows on
+the two pages are the clauses below, list lines renumbered or moved, and the reworded intro):
 
 | Page | Removed | Its home |
 | --- | --- | --- |
-| `roadmap/README.md` § Current focus | the 19 merge detail, the hosted-CI plan's per-item list (#51, #31, #33, #32), #49 / #50, and "`main` unpushed" (false since 2026-10-07: `origin/main` is `2fcb6ee`) | [19/09](../19-docs-layers/09-pre-merge-loss-audit.md), the milestones rows, [20/04](../20-public-delivery/04-hosted-ci-plan-run.md), the block rows of 20 and 07 |
+| `roadmap/README.md` § Current focus | the 19 merge detail, the 2026-06-12 re-sequencing's "finished", the hosted-CI plan's per-item list (#51, #31, #33, #32), #49 / #50, #48's date, and "`main` unpushed" (false since 2026-10-07: `origin/main` is `2fcb6ee`) | [19/09](../19-docs-layers/09-pre-merge-loss-audit.md), [12 § The new sequence](../12-field-graph-and-app/README.md#the-new-sequence-value-first-then-the-c-abi), the milestones rows, [20/04](../20-public-delivery/04-hosted-ci-plan-run.md), the block rows of 20 and 07, [14/05](../14-c-abi/05-progress-and-cancel.md) |
 | `decisions/README.md` intro | "(architecture, scope, process)" of the settled table | [01-settled.md](../../decisions/01-settled.md)'s own intro |
 | `decisions/README.md` #31, #33 status cells | how each fired and what #33 left (`clang-tidy`, coverage → #32) | [17/13](../17-code-audit-and-hardening/13-parity-gate-binding.md), [17/14](../17-code-audit-and-hardening/14-build-hardening-ci.md) |
 | `decisions/README.md` D-21, D-29 | "the CLI shipped both, 2026-07-03/06"; "ranked fix menu recorded" | [14 § 9](../14-c-abi/README.md#9-deferred-explicitly-not-in-this-version), [12/04 § Startup](../12-field-graph-and-app/04-preview-performance.md#viewer-startup--shader-compile-time) |
@@ -68,7 +69,7 @@ links:
 After the edits the snapshot is at 15,182 bytes and the decisions index at 15,317 — 43 bytes
 of room, less than D-60's status cell will need when the owner decides it. The index needs a
 relief of its own before then, as [19/10](../19-docs-layers/10-cap-relief.md) gave the
-snapshot; how is the owner's call (the index's two-table design is his).
+snapshot; how is the owner's call, since the index's two-table design is the owner's.
 
 ## #55 Generated demo meshes wound outward
 
