@@ -88,7 +88,7 @@ meshes the build generated at `22e6582`.
 
 1. *Block 21, its items and the decisions are on the branch, `--docs --strict` green* —
    block 21 (#55–#60, D-55…D-60, D-11 edit) landed in `f0f464e` (P01.1); on this unit's final
-   HEAD `python3 scripts/check.py --docs --strict`: 28 checks, 27 OK + 1 INFO (`index-staleness`, 18 entries, pre-existing), PASS.
+   HEAD `python3 scripts/check.py --docs --strict`: 28 checks, 27 OK + 1 INFO (`index-staleness`, 20 entries: the 17 pre-existing plus 01, 11/01 and design/02 newer than their indexes — their index rows still describe them, re-read), PASS.
 2. *F1 fixed and tested; full gate green; remote run green* — fixed and tested above; full
    gate green (above); remote run green on `75bfd27` (run 38621264223); the driver re-checks the final HEAD.
 
