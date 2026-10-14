@@ -32,6 +32,11 @@ in place.
 | `bracket` | `bracket.obj` | 2 / 0 | CAD part with **both** convex (90°) and concave (270°) sharp edges. |
 | `hexbore` | `hexbore.obj` | 0 / 1 | Many sharp facets + a curved cylindrical bore. |
 
+Every generated mesh is **closed and wound outward** — positive signed volume, generalized
+winding number 1 inside — so every sign oracle reads it, the orientation-sensitive ones
+(`--pseudonormal`, `--gwn`, `--gwn-field`, the graph's `winding(…)`) included; the
+`[orientation]` case in `tests/test_demo_meshes.cpp` pins it for all nine shapes.
+
 | Option | Default | Meaning |
 | --- | --- | --- |
 | `-o PATH` | `<shape>.obj` | Output path for a single shape. |

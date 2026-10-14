@@ -73,7 +73,7 @@ snapshot; how is the owner's call, since the index's two-table design is the own
 
 ## #55 Generated demo meshes wound outward
 
-**NEXT** — opened 2026-10-14; plan P01 T2. The screening's finding F1: six of the nine
+**DONE** 2026-10-14 — opened 2026-10-14; plan P01 T2. The screening's finding F1: six of the nine
 `dualc_gen_demo` shapes have negative signed volume (`torus`, `knot`, `cylinder`, `bracket`,
 `hexbore`, `uvsphere`); the default parity oracle ignores orientation, so no test noticed, but
 `--gwn`, `--gwn-field` and `winding(…)` give the empty placeholder on `torus` / `knot` and
@@ -88,9 +88,18 @@ parity's face count at `--depth 6`; every recorded count or normal that moves (o
 outward) is updated; page 09 states that every generated mesh is closed and wound outward;
 before/after numbers recorded here.
 
+*Landed 2026-10-14 (P01.2):* five shapes reversed whole; the **bracket was mixed** — caps out,
+walls in — so only its walls flipped. The new `[orientation]` case failed 14 of 18 checks on the
+old winding and passes on the new. At `--depth 6`, `--gwn` / `--gwn-field` on `torus` / `knot`
+went from the placeholder to 40,032 / 18,320 and 30,116 / 15,316 faces; `--pseudonormal
+bracket.obj` from 55,832 to parity's 34,984. Parity's output keeps its faces; its `vn` flip
+outward, positions move ≤ 0.0056; no recorded count moved. A side fix: the mesh copies next to
+the CLIs went stale on regeneration (`POST_BUILD` only) and are now `LINK_DEPENDS`. Every number,
+per shape and oracle: [02](02-demo-mesh-winding.md).
+
 ## #56 The mesh node takes sign="gwn"
 
-**PLANNED** — opened 2026-10-14; plan P02 T1. The precondition of `dualc_demo`'s retirement
+**NEXT** — opened 2026-10-14; plan P02 T1. The precondition of `dualc_demo`'s retirement
 (D-56): `dualc_demo --gwn` is the one thing it has that the graph refuses.
 
 *Acceptance:* the guard in `field_graph.cpp`'s `meshSignMethod` removed and `gwn` mapped to

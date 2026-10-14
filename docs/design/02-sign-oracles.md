@@ -22,7 +22,9 @@ namespace scope: normalised permutations of `{1, 0.7320508…, 0.5773502…}` �
 components (so an axis-aligned CAD face can never be hit edge-on), no two parallel. Cost:
 three full BVH ray traversals, the most expensive of the three methods. **The name is a
 misnomer** and the header says so: *"NOT a winding number despite the name — kept for
-backwards compatibility."* Failure modes: requires closed, oriented input; the three rays
+backwards compatibility."* Failure modes: requires closed input — not oriented: a parity
+count ignores the winding, so a mesh wound inside out contours to the right solid
+([21/02](../roadmap/21-cli-consolidation/02-demo-mesh-winding.md)); the three rays
 share an origin and all lie in the positive octant, so the majority vote hardens against a
 *single* grazing edge but not against anything systematic — the rays fail together, not
 independently.

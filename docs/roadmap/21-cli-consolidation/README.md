@@ -13,15 +13,17 @@ D-11's partly fired trigger.
 
 ## The pages of this block
 
-A folder from the start: the plan lands six items over seven phases. One record page for now;
-an item that outgrows it moves to a numbered child of its own.
+A folder from the start: the plan lands six items over seven phases. [01](01-record.md) is the
+record — every item, its acceptance line and its dated appends; an item whose measurements
+outgrow it keeps its summary there and its numbers in a numbered child:
+[02](02-demo-mesh-winding.md), the demo meshes' winding before and after (#55).
 
 | Item | Page | Status |
 | --- | --- | --- |
 | The owner's decisions of 2026-10-14 (D-55 … D-59) | [01](01-record.md#the-owners-decisions) | DONE 2026-10-14 (decided; the phases execute) |
 | D-60 — `dualc_boolean`'s retirement, decided after P02 | [01](01-record.md#the-dualc_boolean-decision) | DEFERRED — trigger: P02 T2's measurements, at the approve gate after P02 |
-| #55 Generated demo meshes wound outward (F1) | [01](01-record.md#55-generated-demo-meshes-wound-outward) | NEXT — P01 T2 |
-| #56 The mesh node takes `sign="gwn"` | [01](01-record.md#56-the-mesh-node-takes-signgwn) | PLANNED — P02 T1 |
+| #55 Generated demo meshes wound outward (F1) | [01](01-record.md#55-generated-demo-meshes-wound-outward) | DONE 2026-10-14 — P01 T2; measured in [02](02-demo-mesh-winding.md) |
+| #56 The mesh node takes `sign="gwn"` | [01](01-record.md#56-the-mesh-node-takes-signgwn) | NEXT — P02 T1 |
 | #57 Per-node bake on the mesh nodes | [01](01-record.md#57-per-node-bake-on-the-mesh-nodes) | PLANNED — P02 T2 |
 | #58 2D profiles and `revolve` / `extrude` in the graph | [01](01-record.md#58-2d-profiles-and-revolve--extrude-in-the-graph) | PLANNED — P03 |
 | #59 Slice any graph | [01](01-record.md#59-slice-any-graph) | PLANNED — P04 |

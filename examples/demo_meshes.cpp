@@ -115,13 +115,13 @@ MeshAndGeom makeUvSphere(double radius, int nLat, int nLong) {
 
   Polygons polys;
   for (int j = 0; j < nLong; ++j) // top cap
-    polys.push_back({0, ring(1, j), ring(1, j + 1)});
+    polys.push_back({0, ring(1, j + 1), ring(1, j)});
   for (int l = 1; l < nLat - 1; ++l) // middle quads
     for (int j = 0; j < nLong; ++j)
-      polys.push_back({ring(l, j), ring(l + 1, j), ring(l + 1, j + 1),
-                       ring(l, j + 1)});
+      polys.push_back({ring(l, j), ring(l, j + 1), ring(l + 1, j + 1),
+                       ring(l + 1, j)});
   for (int j = 0; j < nLong; ++j) // bottom cap
-    polys.push_back({bottom, ring(nLat - 1, j + 1), ring(nLat - 1, j)});
+    polys.push_back({bottom, ring(nLat - 1, j), ring(nLat - 1, j + 1)});
 
   return makeSurfaceMeshAndGeometry(polys, pos);
 }
@@ -149,8 +149,8 @@ MeshAndGeom makeTorus(double majorRadius, double minorRadius, int nMajor,
   polys.reserve(std::size_t(nMajor) * nMinor);
   for (int i = 0; i < nMajor; ++i)
     for (int j = 0; j < nMinor; ++j)
-      polys.push_back({idx(i, j), idx(i + 1, j), idx(i + 1, j + 1),
-                       idx(i, j + 1)});
+      polys.push_back({idx(i, j), idx(i, j + 1), idx(i + 1, j + 1),
+                       idx(i + 1, j)});
   return makeSurfaceMeshAndGeometry(polys, pos);
 }
 
@@ -223,8 +223,8 @@ MeshAndGeom makeTrefoilKnot(double tubeR, int nAlong, int nAround) {
   polys.reserve(std::size_t(nAlong) * nAround);
   for (int i = 0; i < nAlong; ++i)
     for (int j = 0; j < nAround; ++j)
-      polys.push_back({idx(i, j), idx(i + 1, j), idx(i + 1, j + 1),
-                       idx(i, j + 1)});
+      polys.push_back({idx(i, j), idx(i, j + 1), idx(i + 1, j + 1),
+                       idx(i + 1, j)});
   return makeSurfaceMeshAndGeometry(polys, pos);
 }
 
@@ -265,10 +265,10 @@ MeshAndGeom makeCylinder(double radius, double height, int nSeg) {
 
   Polygons polys;
   for (int j = 0; j < nSeg; ++j) // side wall (outward winding)
-    polys.push_back({bot(j), bot(j + 1), top(j + 1), top(j)});
+    polys.push_back({top(j), top(j + 1), bot(j + 1), bot(j)});
   std::vector<std::size_t> topCap, botCap; // flat polygon caps -> sharp rims
-  for (int j = 0; j < nSeg; ++j) topCap.push_back(top(j));
-  for (int j = nSeg - 1; j >= 0; --j) botCap.push_back(bot(j));
+  for (int j = nSeg - 1; j >= 0; --j) topCap.push_back(top(j));
+  for (int j = 0; j < nSeg; ++j) botCap.push_back(bot(j));
   polys.push_back(topCap);
   polys.push_back(botCap);
   return makeSurfaceMeshAndGeometry(polys, pos);
@@ -315,10 +315,10 @@ MeshAndGeom makeLBracket(double arm, double thick, double depth) {
     polys.push_back({0u, std::size_t(i), std::size_t(i + 1)});
   for (int i = 1; i < n - 1; ++i) // back cap, faces -z (reversed)
     polys.push_back({std::size_t(n), std::size_t(n + i + 1), std::size_t(n + i)});
-  for (int i = 0; i < n; ++i) { // side walls
+  for (int i = 0; i < n; ++i) { // side walls, facing out of the CCW profile
     const int ni = (i + 1) % n;
-    polys.push_back({std::size_t(i), std::size_t(ni), std::size_t(n + ni),
-                     std::size_t(n + i)});
+    polys.push_back({std::size_t(i), std::size_t(n + i), std::size_t(n + ni),
+                     std::size_t(ni)});
   }
   return makeSurfaceMeshAndGeometry(polys, pos);
 }
@@ -361,13 +361,13 @@ MeshAndGeom makeHexPrismBore(double outerR, double height, double boreR,
 
   Polygons polys;
   for (int j = 0; j < nSeg; ++j) { // outer wall (faces out)
-    polys.push_back({oB(j), oB(j + 1), oT(j + 1), oT(j)});
-    // bore wall (faces in -> reversed)
-    polys.push_back({iT(j), iT(j + 1), iB(j + 1), iB(j)});
+    polys.push_back({oT(j), oT(j + 1), oB(j + 1), oB(j)});
+    // bore wall (faces the axis -> reversed)
+    polys.push_back({iB(j), iB(j + 1), iT(j + 1), iT(j)});
     // top annulus cap (faces +y)
-    polys.push_back({oT(j), oT(j + 1), iT(j + 1), iT(j)});
+    polys.push_back({iT(j), iT(j + 1), oT(j + 1), oT(j)});
     // bottom annulus cap (faces -y)
-    polys.push_back({iB(j), iB(j + 1), oB(j + 1), oB(j)});
+    polys.push_back({oB(j), oB(j + 1), iB(j + 1), iB(j)});
   }
   return makeSurfaceMeshAndGeometry(polys, pos);
 }

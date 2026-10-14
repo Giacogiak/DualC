@@ -252,11 +252,16 @@ set_property(GLOBAL PROPERTY DUALC_DEMO_DATA_DIR "${DUALC_DEMO_DATA_DIR}")
 # dualc_copy_demo_meshes(<target>): make <target> build after the meshes exist
 # and copy them into its output directory. Used by every CLI below and by the
 # C ABI demo in capi/ (call it from the directory that defines <target>).
+# The copy is a POST_BUILD step, so the meshes are also link dependencies: a
+# regenerated mesh relinks <target> and the copy follows (Ninja and Makefiles;
+# the Visual Studio generators ignore LINK_DEPENDS -- a clean build is fresh).
 function(dualc_copy_demo_meshes target)
   get_property(meshes GLOBAL PROPERTY DUALC_DEMO_MESHES)
   get_property(datadir GLOBAL PROPERTY DUALC_DEMO_DATA_DIR)
   add_dependencies(${target} dualc_demo_data)
   foreach(meshfile ${meshes})
+    set_property(TARGET ${target} APPEND PROPERTY LINK_DEPENDS
+                 ${datadir}/${meshfile})
     add_custom_command(TARGET ${target} POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy_if_different
               ${datadir}/${meshfile}

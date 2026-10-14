@@ -91,7 +91,7 @@ vocabulary.
 | `gyroid` · `schwarz-p` · `diamond` · `fischer-koch` · `lidinoid` · `neovius` | `center`:[x,y,z]=0, `wavelength`=1 | TPMS. Raw value is non-metric — wrap in `normalize` before a metric `onion`/smooth boolean. |
 | `sc` · `bcc` · `fcc` · `octet` | `center`:[x,y,z]=0, `wavelength`=1, `radius`=0.1 | **Strut lattices** (wireframe crystals): simple-cubic, body-centered, face-centered, octet truss. A unit cell of capsule struts tiled infinitely; `radius` is the metric strut thickness. Already a true SDF — no `normalize` needed. Infinite extent, so clip it: `intersection(mesh(…), bcc(…))` or `intersection(box(…), bcc(…))`, or set `--bounds` for an open-ended inspection view. |
 | `mesh` | `path` **or** `id` (exactly one), `sign` ∈ `parity`(def)/`pseudonormal`, `normals` ∈ `smooth`(def)/`sharp` | Signed distance to a watertight mesh (BVH). `sign:"gwn"` is **not** accepted here — use `winding`. |
-| `winding` | `path` **or** `id` (exactly one) | Generalized-winding-number field: contours triangle **soup** / open shells / self-intersections into a watertight solid. |
+| `winding` | `path` **or** `id` (exactly one) | Generalized-winding-number field: contours triangle **soup** / open shells / self-intersections into a watertight solid. Reads the winding: faces wound inside out give an empty field. |
 | 30 analytic primitives | grouped keys or flat `params:[…]` (see below) | `sphere`, `box`, `roundbox`, `torus`, … — full param order in [02-dualc_primitive.md](../02-dualc_primitive.md). |
 
 Mesh `path`s are resolved host-side by a caching resolver (each unique path is

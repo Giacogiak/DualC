@@ -49,9 +49,13 @@ input is; the algorithms and their failure modes are
 
 | Your input | Use | Why |
 | --- | --- | --- |
-| Closed & consistently oriented | default (3-ray parity), or `--pseudonormal` for speed | both require watertight, oriented input; the pseudonormal is one closest-point query instead of three rays |
+| Closed & consistently oriented | default (3-ray parity), or `--pseudonormal` for speed | both require watertight input, the pseudonormal also an outward winding; it is one closest-point query instead of three rays |
 | Almost watertight — small gaps, self-intersections, non-manifold bits | `--gwn` | robust where parity coin-flips; edge crossings still come from the mesh, so a real hole stays a hole |
 | Genuinely open — open shells, soup, holes you want sealed | `--gwn-field` | contours the 0.5-isosurface of the winding number itself: the hole gets a smooth cap and the output is one watertight solid (D9 / D10) |
+
+Only parity ignores the winding. On a mesh wound inside out, `--gwn` and `--gwn-field` find no
+inside (the output is the placeholder triangle) and `--pseudonormal` returns the solid turned
+inside out; a mixed winding gives a wrong surface. Every `dualc_gen_demo` mesh is wound outward.
 
 ## Sharp vs. smooth normals (`--sharp`)
 
