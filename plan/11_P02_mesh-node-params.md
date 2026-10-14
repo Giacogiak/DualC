@@ -38,15 +38,24 @@
    `--grid-res` does not re-bake it. Parity case `mesh-bake`; count bumped.
 3. Tests: near the surface the baked field is within one bake cell of the exact one; the
    round-trip through `--dump-json`; the validation errors.
-4. Measure, do not equate: `dualc_boolean difference sphere.obj cube.obj --bake 64 --depth 6`
-   against `difference(mesh(path="sphere.obj",bake=64),mesh(path="cube.obj",bake=64))` —
-   face counts and wall time side by side in block 21 (regions differ by design).
+4. Measure, do not equate — **these numbers decide whether `dualc_boolean` retires** (an open
+   decision Giacomo takes at the approve gate after this unit). For each case run three ways:
+   `dualc_boolean <op> A B --bake N`, the graph with `mesh(…,bake=N)` on both children, and the
+   exact graph (no bake). Cases: `difference sphere.obj cube.obj` at `--depth 6`, `--bake 64`;
+   `smooth-union` with a `k` near the model size; and the large pair `data/opA.obj` /
+   `data/opB.obj` (local, not in CI) at the depth and `--bake` page 03 recommends. Report per
+   run: wall time, peak RSS (`/usr/bin/time -v`), face count, and the deviation from the exact
+   result (max and mean distance of output vertices to the exact field, `|valueAt|`). Write a
+   table into block 21 and the handoff, with a one-line reading: does per-node `bake` keep the
+   speed advantage, and how much accuracy does it lose against the tool's combined-region bake.
+   Do not delete or deprecate `dualc_boolean` here.
 5. Docs: 11/01 § Sources (the speed / exactness trade, `band` ≥ the parent's `k` for smooth
    ops, why `dualc_boolean`'s combined region is not reproduced); 12's `--grid-res` text.
 
 #### Acceptance criteria
 
-- Full gate and `--gpu` green; the measurement recorded; the item DONE in block 21.
+- Full gate and `--gpu` green; the measurement table recorded in block 21 and in the handoff,
+  which ends by asking Giacomo to decide `dualc_boolean`'s retirement.
 
 ## Exit criteria
 

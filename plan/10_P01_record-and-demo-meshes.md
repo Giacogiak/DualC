@@ -14,7 +14,10 @@ evidence in [the screening](../docs/raw/2026-10-14-cli-tools-screening.md). Bran
    GWN sign, mesh-node `bake`, 2D profile + lift nodes, graph slice, retirement of the eight
    tools (docs migration + removal). Each with its acceptance line from the raw plan.
 3. Decision rows for the owner's 2026-10-14 decisions (raw plan § 1), in the index's own style,
-   citing block 21: the eight retirements and their preconditions; F2 not fixed because
+   citing block 21: the retirements and their preconditions — **except `dualc_boolean`, whose
+   retirement is OPEN**: Giacomo decides it at the approve gate after P02, on P02 T2's
+   measurements (his words, 2026-10-14: "I wait P02 measures before to decide whether to remove
+   dualc_boolean"); record it as an open decision row naming that gate; F2 not fixed because
    `dualc_demo` retires and `dualc_field -o` already chooses the format; the slice form
    `dualc_field --slice` (the owner allowed either form; flag it in the handoff for
    confirmation at the approve gate). The D-11 row: trigger fired for the 2D + lift sub-grammar

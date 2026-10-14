@@ -16,7 +16,9 @@ would trip the size cap — split, never append past it):
    `dualc_field --expr 'winding(path="mesh-soup.obj")' -o sealed.stl`.
 2. **02 `dualc_primitive`** → the catalogue P1–P30 with parameters and defaults, and the
    decorator / domain-operator walk-through, in graph syntax (keep the P-numbers as anchors).
-3. **03 `dualc_boolean`** → booleans of meshes, `k` sizing, baking (`bake=`, from P02).
+3. **03 `dualc_boolean`** → booleans of meshes, `k` sizing, baking (`bake=`, from P02). Do this
+   only if Giacomo decided at the P02 gate to retire the tool (read the decision row); if he kept
+   it, page 03 stays and gains a pointer to the graph's `bake=`.
 4. **04 `dualc_lift`** → already written by P03; check nothing on 04 is missing.
 5. **05 `dualc_csg_demo`** → the six recipes as committed graph files in `examples/samples/`
    (`.json` or `.fld`, one each, parameters at the recipe defaults), each with a run line.

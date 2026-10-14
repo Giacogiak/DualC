@@ -17,7 +17,7 @@ and in the handoffs, never here. Transient: deleted at the plan's close (D-51).
 | [13_P04_graph-slice.md](13_P04_graph-slice.md) | P04 — `dualc_field --slice` on any graph | `dualc_slice` |
 | [14_P05_docs-migration.md](14_P05_docs-migration.md) | P05 — every retiring page's content moved to the framework pages | all eight retirements |
 | [15_P06_retire-tools.md](15_P06_retire-tools.md) | P06 — delete the eight tools: code + tests, then docs | all eight retirements |
-| [16_P07_close.md](16_P07_close.md) | P07 — harvest, close block 21, delete `plan/`, hand over the PR | — |
+| [16_P07_close.md](16_P07_close.md) | P07 — harvest, close block 21, hand over the PR (`plan/` is deleted after the run) | — |
 
 `remote_run_check.py` is the `remote-run` check: the pushed branch's latest GitHub Actions run
 must be green on its required jobs. The manifest `run.manifest.json` is written by

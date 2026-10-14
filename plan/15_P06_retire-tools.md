@@ -3,7 +3,9 @@
 § 2 (what references them) and § 3 P06 of
 [the raw plan](../docs/raw/2026-10-14-cli-consolidation-plan.md). The tools:
 `dualc_demo`, `dualc_primitive`, `dualc_boolean`, `dualc_lift`, `dualc_csg_demo`,
-`dualc_lattice`, `dualc_slice`, `dualc_raymarch`. Branch `feat/cli-consolidation`.
+`dualc_lattice`, `dualc_slice`, `dualc_raymarch` — **`dualc_boolean` only if Giacomo's decision
+at the P02 gate (its decision row) retires it**; if he kept it, it stays everywhere below and
+"eight" reads "seven". Branch `feat/cli-consolidation`.
 
 ### T1. Delete the code, keep every tested path tested
 
