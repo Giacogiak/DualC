@@ -5,7 +5,8 @@
 `dualc_demo`, `dualc_primitive`, `dualc_boolean`, `dualc_lift`, `dualc_csg_demo`,
 `dualc_lattice`, `dualc_slice`, `dualc_raymarch` — **`dualc_boolean` only if Giacomo's decision
 at the P02 gate (its decision row) retires it**; if he kept it, it stays everywhere below and
-"eight" reads "seven". Branch `feat/cli-consolidation`.
+"eight" reads "seven". *Decided 2026-10-15: kept (D-60)* — seven tools retire.
+Branch `feat/cli-consolidation`.
 
 ### T1. Delete the code, keep every tested path tested
 

@@ -90,7 +90,7 @@ vocabulary.
 | --- | --- | --- |
 | `gyroid` · `schwarz-p` · `diamond` · `fischer-koch` · `lidinoid` · `neovius` | `center`:[x,y,z]=0, `wavelength`=1 | TPMS. Raw value is non-metric — wrap in `normalize` before a metric `onion`/smooth boolean. |
 | `sc` · `bcc` · `fcc` · `octet` | `center`:[x,y,z]=0, `wavelength`=1, `radius`=0.1 | **Strut lattices** (wireframe crystals): simple-cubic, body-centered, face-centered, octet truss. A unit cell of capsule struts tiled infinitely; `radius` is the metric strut thickness. Already a true SDF — no `normalize` needed. Infinite extent, so clip it: `intersection(mesh(…), bcc(…))` or `intersection(box(…), bcc(…))`, or set `--bounds` for an open-ended inspection view. |
-| `mesh` | `path` **or** `id` (exactly one), `sign` ∈ `parity`(def)/`pseudonormal`/`gwn`, `normals` ∈ `smooth`(def)/`sharp`, `bake`=off, `band`=3 bake cells | Signed distance to a mesh (BVH); `sign` picks only the inside test. `parity` and `pseudonormal` need closed input (`pseudonormal` also outward-wound); `gwn` (generalized winding number, `dualc_demo --gwn`) survives small gaps, self-intersections and soup, but a real hole stays a hole — the distance is still to the mesh. To **seal** an open shell or soup into a solid use `winding`, the sealing field, not a sign oracle. |
+| `mesh` | `path` **or** `id` (exactly one), `sign` ∈ `parity`(def)/`pseudonormal`/`gwn`, `normals` ∈ `smooth`(def)/`sharp`, `bake`=off, `band`=3 bake cells (+ the margin above) | Signed distance to a mesh (BVH); `sign` picks only the inside test. `parity` and `pseudonormal` need closed input (`pseudonormal` also outward-wound); `gwn` (generalized winding number, `dualc_demo --gwn`) survives small gaps, self-intersections and soup, but a real hole stays a hole — the distance is still to the mesh. To **seal** an open shell or soup into a solid use `winding`, the sealing field, not a sign oracle. |
 | `winding` | `path` **or** `id` (exactly one), `bake`=off | Generalized-winding-number field: contours triangle **soup** / open shells / self-intersections into a watertight solid. Reads the winding: faces wound inside out give an empty field. |
 | 30 analytic primitives | grouped keys or flat `params:[…]` (see below) | `sphere`, `box`, `roundbox`, `torus`, … — full param order in [02-dualc_primitive.md](../02-dualc_primitive.md). |
 
@@ -104,23 +104,27 @@ registers no buffers and will error), and exists for the C ABI's
 
 **Baking a mesh node — `bake=N[, band=W]`.** Off by default: the node is queried exactly
 (BVH distance, sharp features kept). `bake=N` (an integer, 2–512) samples it **once** into an
-N³ grid over its own bounding box padded by 10 % of its largest extent (+ `band` when given),
-and every later query is a trilinear lookup — a speed/exactness trade for large meshes: on a
-550 mm, 8.4k-face pair at depth 7 the difference ran in 6.2 s / 0.5 GB instead of 25.8 s /
-2.0 GB, its vertices within one bake cell of the exact surface but sub-cell sharp edges
-rounded ([roadmap 21/04](../../roadmap/21-cli-consolidation/04-mesh-node-bake.md)). On
-`mesh`, `band` is the shell (world units) kept at the exact distance; beyond it the distance
-is a monotone over-estimate. `winding` bakes its full lattice and takes no `band`. Two
-consequences: a baked field's bounds are its padded region, so at the same `--depth` the
-cells are coarser unless `--bounds` pins the root box; and outside its region a grid repeats
-its face value, so **under a smooth op set `band` ≥ the op's `k` on every baked child** —
-with the default band a large `k` makes material out of that constant (measured: 3× the
-faces, max deviation 1.56 on a 2.7-wide model). `dualc_boolean --bake N`'s single region around both
-operands, padded by `k`, is not reproduced: a node sees neither its sibling nor its parent's
-`k`, so `band` is that `k`, passed by hand.
+N³ grid over its own bounding box padded by 10 % of its largest extent, and every later query
+is a trilinear lookup — a speed/exactness trade for large meshes: on a 550 mm, 8.4k-face pair
+at depth 7 the difference ran in 6.2 s / 0.5 GB instead of 25.8 s / 2.0 GB, its vertices
+within one bake cell of the exact surface but sub-cell sharp edges rounded
+([roadmap 21/04](../../roadmap/21-cli-consolidation/04-mesh-node-bake.md)). On `mesh`, `band`
+is the shell (world units, default 3 bake cells) kept at the exact distance; beyond it the
+distance is a monotone over-estimate. `winding` bakes its full lattice and takes no `band`.
+
+Outside its box a grid repeats its face value, so anything above the node that reads the field
+further out — a smooth op's `k`, an `offset` / `round` / `onion` / `displace` amount — would
+make material out of that constant. The graph handles it: each ancestor hands the baked node
+that distance (the largest smooth `k` above it plus the offsets on the way, divided by `s`
+through a `scale`), and the node widens its box by it and keeps its exact band at least that
+plus 3 cells — `dualc_boolean --bake`'s rule (pad `k`, band `k` + 3 cells), per node. A `band`
+larger than that wins. One consequence remains yours: a baked field's bounds are its padded
+box, so at the same `--depth` the cells are coarser than the exact run's unless `--bounds`
+pins the root box. `dualc_boolean --bake N`'s single box around both operands is not
+reproduced: a node never sees its sibling.
 
 ```bash
-dualc_field --expr 'smooth-union(mesh(path="torus.obj",bake=64,band=1),mesh(path="cube.obj",bake=64,band=1),k=1)' --depth 6 -o su_baked.obj
+dualc_field --expr 'smooth-union(mesh(path="torus.obj",bake=64),mesh(path="cube.obj",bake=64),k=1)' --depth 6 -o su_baked.obj
 ```
 
 ### Booleans (two children)

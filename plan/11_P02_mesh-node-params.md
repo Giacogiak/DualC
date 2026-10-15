@@ -39,6 +39,9 @@
    out of the grid's clamped far field (smooth-union torus cube, k = 1: 3× the faces, max
    deviation 1.56); `dualc_boolean` pads by `k` for the same reason. A `band` on `winding` is
    rejected as an unknown key (the unread-key rule), not ignored. Evidence: roadmap 21/04.
+   *Then, at the P02 gate (Giacomo, "(b) Propagate k"):* the builder and the codegen hand each
+   baked node its ancestors' margin (smooth `k`, offset / onion amounts, ÷ `scale`), which
+   widens band and region automatically; an explicit larger `band` wins (D-62).
 2. GLSL: a baked node's own `GridField` goes straight to `emitBakedGrid`, so preview == export;
    `--grid-res` does not re-bake it. Parity case `mesh-bake`; count bumped.
 3. Tests: near the surface the baked field is within one bake cell of the exact one; the

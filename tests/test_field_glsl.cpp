@@ -205,6 +205,48 @@ TEST_CASE("GLSL codegen uploads a baked node's own grid", "[field_glsl][bake]") 
     }
   }
 
+  // Under ancestors the texture is the grid baked with the margin they hand
+  // down (childBakeMargin), exactly as FieldGraph::build bakes it.
+  dualc::MeshSource src(*std::get<0>(boxMesh), *std::get<1>(boxMesh), true,
+                        dualc::SignMethod::WINDING_NUMBER);
+  NodeBake nb;
+  nb.res = 24;
+  const struct { const char* expr; double margin; } nested[] = {
+      {"union(mesh(path=\"box\",bake=24),sphere(radius=2))", 0.0},
+      {"smooth-union(translate(mesh(path=\"box\",bake=24),by=[0.3,0,0]),"
+       "sphere(radius=2),k=0.7)", 0.7},
+      {"smooth-union(scale(mesh(path=\"box\",bake=24),s=2),sphere(radius=2),k=1)",
+       0.5},
+      {"smooth-union(smooth-union(mesh(path=\"box\",bake=24),sphere(radius=0.3),"
+       "k=0.1),sphere(radius=2),k=1)", 1.0},
+      {"offset(smooth-union(mesh(path=\"box\",bake=24),sphere(radius=2),k=0.5),"
+       "r=0.3)", 0.5},
+      {"onion(offset(mesh(path=\"box\",bake=24),r=0.3),thickness=0.1)", 0.4},
+  };
+  for (const auto& t : nested) {
+    INFO(t.expr);
+    GlslScene s = compileToGlsl(parseShorthand(t.expr), resolver, box(-3, 3));
+    REQUIRE(s.meshes.size() == 1);
+    dualc::FieldPtr want = bakeMeshNode(src, nb, t.margin);
+    auto* g = dynamic_cast<const dualc::GridField*>(want.get());
+    REQUIRE(g != nullptr);
+    CHECK(s.meshes[0].region.min.x == g->bounds().min.x);
+    CHECK(s.meshes[0].values == g->values());
+  }
+
+  // One baked mesh under two margins is two textures; an unbaked mesh under
+  // two margins stays one (the margin only keys a subtree that bakes).
+  GlslScene twoMargins = compileToGlsl(
+      parseShorthand("union(mesh(path=\"box\",bake=24),"
+                     "onion(mesh(path=\"box\",bake=24),thickness=0.2))"),
+      resolver, box(-2, 2));
+  CHECK(twoMargins.meshes.size() == 2);
+  GlslScene oneUnbaked = compileToGlsl(
+      parseShorthand("union(mesh(path=\"box\"),"
+                     "onion(mesh(path=\"box\"),thickness=0.2))"),
+      resolver, box(-2, 2));
+  CHECK(oneUnbaked.meshes.size() == 1);
+
   // Baked and unbaked forms of one mesh are two textures, not one memo hit.
   GlslScene two = compileToGlsl(
       parseShorthand("union(mesh(path=\"box\"),mesh(path=\"box\",bake=24))"),

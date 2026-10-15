@@ -12,6 +12,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 // Field-graph -> GLSL codegen. See field_glsl.h for the contract. The walk
@@ -781,6 +782,10 @@ struct Ctx {
   int counter = 0;
   std::map<std::string, int> memo;  // structural key -> emitted node index, so a
                                     // repeated subtree (DAG dedup) reuses its fN.
+  // The emit path, root first, each node with the bake margin its ancestors
+  // handed it (childBakeMargin) -- a baked mesh / winding bakes with its own,
+  // exactly as FieldGraph::build does.
+  std::vector<std::pair<const GraphNode*, double>> path;
 };
 
 std::string fname(int idx) { return "f" + std::to_string(idx); }
@@ -1142,7 +1147,7 @@ int emitMesh(const GraphNode& n, Ctx& c) {
   // unbaked node is baked here, over the trace box at --grid-res.
   dualc::FieldPtr gridPtr;
   if (nb.res > 0) {
-    gridPtr = bakeMeshNode(src, nb);
+    gridPtr = bakeMeshNode(src, nb, c.path.back().second);
   } else {
     const dualc::Vector3 e = c.bounds.extent();
     const double maxCell =
@@ -1172,7 +1177,7 @@ int emitWinding(const GraphNode& n, Ctx& c) {
   MeshHandle h = c.resolver->resolve(path);
   dualc::FieldPtr wf = dualc::windingNumberField(*h.mesh, *h.geom);
   dualc::FieldPtr gridPtr =
-      nb.res > 0 ? bakeWindingNode(*wf, nb)
+      nb.res > 0 ? bakeWindingNode(*wf, nb, c.path.back().second)
                  : dualc::bakeToGrid(*wf, c.bounds,
                                      dualc::Vector3i{c.gridRes, c.gridRes, c.gridRes});
   auto* grid = dynamic_cast<const dualc::GridField*>(gridPtr.get());
@@ -1261,12 +1266,36 @@ int emitBoolean(const GraphNode& n, Ctx& c, BoolOp op) {
 // to the un-deduped walk, it just drops duplicate functions / uniforms (and, for
 // meshes, duplicate bakes + sampler3D textures via emitMesh).
 int emitNode(const GraphNode& n, Ctx& c) {
-  const std::string key = nodeKey(n);
+  // The margin this node is handed: its parent's, through childBakeMargin.
+  double margin = 0.0;
+  if (!c.path.empty()) {
+    const GraphNode& parent = *c.path.back().first;
+    margin = c.path.back().second;
+    for (std::size_t i = 0; i < parent.in.size(); ++i)
+      if (&parent.in[i] == &n) {
+        margin = childBakeMargin(parent, i, margin);
+        break;
+      }
+  }
+  // A subtree holding a baked node bakes differently under a different margin,
+  // so the margin joins its key; every other key is the structural one.
+  std::string key = nodeKey(n);
+  if (margin > 0.0 && hasBakedNode(n)) {
+    std::ostringstream m;
+    m.precision(17);
+    m << "|margin=" << margin;
+    key += m.str();
+  }
   auto it = c.memo.find(key);
   if (it != c.memo.end()) return it->second;
   // The unread-key check runs only on this, the real emission path: a memo hit
   // above is a value-identical node whose params were already validated.
   ReadScope scope{n};
+  c.path.push_back({&n, margin});
+  struct PathPop {
+    Ctx& c;
+    ~PathPop() { c.path.pop_back(); }
+  } pop{c};
   const int idx = emitNodeImpl(n, c);
   rejectUnreadParams(n);
   c.memo[key] = idx;

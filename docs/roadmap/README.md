@@ -21,8 +21,8 @@ belongs there, never here; a count or a version is stated only in its home.
 **CLI consolidation** ([21](21-cli-consolidation/README.md)) opened 2026-10-14: the user
 surface becomes the two framework CLIs, `dualc_field` + `dualc_field_view` — a capability only
 a side tool holds moves into the graph, and so within the C ABI's reach, and the tool retires
-([D-55 … D-59](../decisions/01-settled.md); `dualc_boolean` waits on P02's measurements,
-[D-60](../decisions/README.md)). It runs as the
+([D-55 … D-59](../decisions/01-settled.md); `dualc_boolean` stays,
+[D-60](../decisions/01-settled.md)). It runs as the
 [consolidation plan](../raw/2026-10-14-cli-consolidation-plan.md) on branch
 `feat/cli-consolidation`; #55–#57 are DONE, **NEXT** is **#58**, 2D profiles + lifts. Before it the engine
 track drew on the 2026-08-19 audit's ledger ([17](17-code-audit-and-hardening/README.md))
@@ -37,7 +37,7 @@ the block records the table links ([D-43](../decisions/01-settled.md)).
 
 | Date | What landed | Record |
 | --- | --- | --- |
-| 2026-10-15 | **#57** — per-node `bake=N` on `mesh` / `winding`: ~4× faster than exact on the large pair, the tool's accuracy at its root box; smooth ops need `band ≥ k`. | [21/04](21-cli-consolidation/04-mesh-node-bake.md) |
+| 2026-10-15 | **#57** — per-node `bake=N` on `mesh` / `winding`: ~4× faster than exact on the large pair, the tool's accuracy at its root box; a baked node inherits its ancestors' `k` (D-62); `dualc_boolean` kept (D-60). | [21/04](21-cli-consolidation/04-mesh-node-bake.md) |
 | 2026-10-15 | **#56** — `mesh(sign="gwn")`: the graph's mesh node takes the GWN sign oracle, byte-identical to `dualc_demo --gwn`; parity case `mesh-gwn`. | [21/03](21-cli-consolidation/03-mesh-sign-gwn.md) |
 | 2026-10-14 | **#55** — the six inside-out demo meshes wound outward (the bracket's walls only): `--gwn`, `--gwn-field` and `--pseudonormal` now agree with parity on them. | [21/02](21-cli-consolidation/02-demo-mesh-winding.md) |
 | 2026-10-07 | **#52** — Boletus's Windows flake: an inherited handle, not a scanner; non-inheritable handles; ABI 0.5.1. | [17/16](17-code-audit-and-hardening/16-windows-rename-race/README.md#52-windows-export-io-flake--the-part-rename-under-an-on-access-scanner) |
@@ -143,7 +143,7 @@ workflow, graded-onion; GLSL codegen completeness DONE 2026-06-24 —
 | 18 | [C ABI — continued](18-c-abi-continued.md) | Retired 2026-09-18: its two entries are [14/04](14-c-abi/04-abi-0-4-0.md); the number is never reused. | tombstone — DONE |
 | 19 | [Docs layers](19-docs-layers/README.md) | The 2026-09-17 docs restructuring: the plan (immutable, `docs/raw/`), items #36–#45, the phase table, per-phase evidence, the semantic-lint runs. | Phases 0–8 **DONE** (2026-09-20); the lint runs keep landing in [19/08](19-docs-layers/08-semantic-lint/README.md) |
 | 20 | [Public delivery](20-public-delivery/README.md) | The repo as others build it: geometry-central pinned and fetched (options weighed), nanort vendored, the self-bootstrapping clean clone (#47); Linux as a build host (#49); hosted CI running the gate (#51), the plan's run (04). | **#47 DONE** (2026-09-21) · **#49 DONE** (2026-10-03) · **#51 DONE** (2026-10-06) |
-| 21 | [CLI consolidation](21-cli-consolidation/README.md) | One framework, `dualc_field` + `dualc_field_view`: the demo meshes wound outward, `mesh(sign="gwn")`, per-node `bake`, 2D profiles + lifts and a graph slice in the graph, then eight side CLIs retired (#55–#60). | #55–#57 DONE; #58 NEXT; #59–#60 PLANNED; D-60 DEFERRED |
+| 21 | [CLI consolidation](21-cli-consolidation/README.md) | One framework, `dualc_field` + `dualc_field_view`: the demo meshes wound outward, `mesh(sign="gwn")`, per-node `bake`, 2D profiles + lifts and a graph slice in the graph, then seven side CLIs retired (#55–#60). | #55–#57 DONE; #58 NEXT; #59–#60 PLANNED; D-60 DONE (kept) |
 
 ## How the blocks relate
 

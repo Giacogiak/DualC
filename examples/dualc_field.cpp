@@ -123,7 +123,7 @@ void printVocabulary() {
                "its own box + 10%:\n"
                "              fast, approximate within a bake cell; band = the "
                "exact-distance\n"
-               "              shell, and it must be >= k under a smooth op\n";
+               "              shell, widened by the k / offset of the ops above it\n";
 
   std::cout << "\nBooleans (2 children; smooth-* take k=0.25):\n";
   struct BoolHint { dce::BoolOp op; const char* hint; };

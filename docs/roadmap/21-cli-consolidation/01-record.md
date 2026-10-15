@@ -36,19 +36,17 @@ lives only in a side CLI is also out of Boletus's reach: closing the gaps serves
   decisions row.
 - **D-59** — `dualc_gen_demo`, `dualc_glsl_parity` and `dualc_io_stress` stay:
   infrastructure, not modelling tools. F1 is fixed in `dualc_gen_demo` (#55).
-- **D-60** — `dualc_boolean` is the one retirement not decided:
+- **D-60** — `dualc_boolean` was the one retirement left open, then kept:
   [§ The dualc_boolean decision](#the-dualc_boolean-decision).
 
 ## The dualc_boolean decision
 
-**DEFERRED — 2026-10-14.** Trigger: P02 T2's measurements — the face counts of a per-node
-`mesh(…, bake=N)` (#57) beside `dualc_boolean --bake N` on the screening's
-`difference sphere cube` case — read by the owner at the approve gate after P02. The owner's
-words, 2026-10-14: *"I wait P02 measures before to decide whether to remove dualc_boolean."*
-The plan's own row says "retire after a graph addition", a per-node `bake`; it cannot be
-byte-identical to the tool, whose bake region is the two meshes' combined box padded by
-`0.10 · extent + k` and whose band is `k` + 3 cells (plan § 2), which a node cannot see. Until
-D-60's row says retire, no unit removes, deprecates or migrates away `dualc_boolean`.
+**DONE — decided 2026-10-15: keep** (DEFERRED 2026-10-14; trigger: P02 T2's measurements,
+read at the approve gate after P02). The owner's words, 2026-10-14: *"I wait P02 measures
+before to decide whether to remove dualc_boolean."*; 2026-10-15, on [04](04-mesh-node-bake.md):
+*"Keep it"* — a convenience CLI for "two meshes, one op". The graph's `bake=` matches its
+`--bake` at equal cells but is not byte-identical: the tool bakes one box around both meshes,
+padded by `0.10 · extent + k` (plan § 2). P05 points page 03 at `bake=`; P06 retires seven.
 
 ## Opening the record at the cap
 
@@ -150,9 +148,9 @@ round-trip, a parity case `mesh-bake` (the count +1); the face counts of both on
 screening's `difference sphere cube` case recorded side by side — equivalence with
 `dualc_boolean --bake N` is not byte-level.
 
-*Landed 2026-10-15 (P02.2):* as specified, except `band` also widens the region — without
-it a smooth op makes material out of the grid's clamp; parity `mesh-bake` (75). D-60's
-numbers: [04](04-mesh-node-bake.md).
+*Landed 2026-10-15 (P02.2):* plus a margin each ancestor hands a baked node (smooth `k`,
+offset / onion amounts, ÷ `scale`) widening band and region — the plan's rule made material
+out of the grid's clamp (D-62); parity `mesh-bake`, `mesh-bake-smooth` (76); D-60: [04](04-mesh-node-bake.md).
 
 ## #58 2D profiles and revolve / extrude in the graph
 

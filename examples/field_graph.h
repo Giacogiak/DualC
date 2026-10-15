@@ -146,22 +146,28 @@ std::string dumpJson(const GraphNode& root);
 
 // Per-node bake: `mesh(…, bake=N[, band=W])` and `winding(…, bake=N)` replace
 // the source with a GridField of N³ samples over the node's OWN bounds padded by
-// 10 % of their largest extent, plus `band` when one is given -- dualc_boolean
-// --bake's rule (pad 10 % + k) without the sibling's box, with the parent's k
-// passed in as `band` since a node cannot see it. A mesh bakes through
-// MeshSource's narrow band, `band` world units wide (default 3 bake cells); a
-// winding node bakes the full lattice. Outside its region a grid clamps to the
-// face value, which never grows: under a smooth parent whose k exceeds that
-// margin the blend makes material out of the clamp, so a smooth op needs
-// band >= k on a baked child (measured, roadmap 21/04). The contour builder
-// and the GLSL codegen both call these, so a baked node's preview IS its
-// export, and --grid-res does not re-bake it. The ceiling bounds memory: N³
-// floats, 512 MiB at 512.
+// 10 % of their largest extent plus a margin. A mesh bakes through MeshSource's
+// narrow band (default 3 bake cells); a winding node bakes the full lattice. The
+// contour builder and the GLSL codegen both call these, so a baked node's
+// preview IS its export, and --grid-res does not re-bake it. The ceiling bounds
+// memory: N³ floats, 512 MiB at 512.
+//
+// The margin. Outside its region a grid clamps to the face value, which never
+// grows; an ancestor that reads the field below that value -- a smooth blend of
+// radius k, an offset or onion of r -- makes material out of the clamp, and an
+// offset surface beyond the band lands on the over-estimated far field
+// (measured, roadmap 21/04). So every ancestor hands its baked descendants the
+// distance it needs (childBakeMargin): the nearest-or-larger smooth k, plus the
+// offset / round / onion / displace amounts on the way down, divided by |s|
+// through a scale. A baked node pads its region by max(band, margin) and keeps
+// the exact band at least margin + 3 cells -- dualc_boolean --bake's rule
+// (pad 10 % + k, band k + 3 cells) per node. An explicit band larger than the
+// margin wins.
 inline constexpr int kMaxNodeBakeRes = 512;
 
 struct NodeBake {
   int res = 0;          // 0: the node is not baked
-  double band = 0.0;    // mesh only; 0: the default, 3 bake cells
+  double band = 0.0;    // mesh only, as written; 0: absent
 };
 
 // Validate a node's raw `bake` / `band` values (nullptr = the key is absent).
@@ -169,14 +175,24 @@ struct NodeBake {
 NodeBake checkNodeBake(const GraphNode& n, const double* bake,
                        const double* band);
 
-// The region a baked node samples: its own field bounds padded by 10 % of
-// their largest extent plus `band` (0 for the default band and for winding).
-dualc::BBox nodeBakeRegion(const dualc::BBox& nodeBounds, double band);
+// The margin `parent` hands its child `i`, given the margin it was handed
+// (0 at the root). Reads the parent's params raw (no unread-key bookkeeping:
+// the op itself reads them). Unchanged through every op not listed above.
+double childBakeMargin(const GraphNode& parent, std::size_t i, double margin);
 
-// Bake a mesh / winding source as NodeBake says; both return a GridField.
-dualc::FieldPtr bakeMeshNode(const dualc::MeshSource& src, const NodeBake& b);
+// True when `n` or a descendant is a mesh / winding node with `bake`.
+bool hasBakedNode(const GraphNode& n);
+
+// The region a baked node samples: its own field bounds padded by 10 % of
+// their largest extent plus `pad`.
+dualc::BBox nodeBakeRegion(const dualc::BBox& nodeBounds, double pad);
+
+// Bake a mesh / winding source as NodeBake and the handed-down margin say;
+// both return a GridField.
+dualc::FieldPtr bakeMeshNode(const dualc::MeshSource& src, const NodeBake& b,
+                             double margin);
 dualc::FieldPtr bakeWindingNode(const dualc::ImplicitField& winding,
-                                const NodeBake& b);
+                                const NodeBake& b, double margin);
 
 // A built field: owns the FieldPtr tree. The meshes it references are owned by
 // the MeshResolver passed to build(), which the caller must keep alive.

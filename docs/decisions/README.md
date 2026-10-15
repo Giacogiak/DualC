@@ -50,7 +50,6 @@ only the status cell changes.
 | D-50 | A coverage job in CI (an option and a reported or ratcheted percentage); measured once instead | DEFERRED — trigger: a regression in a line no test reached, or a coverage floor someone will act on | 2026-10-07 | [17/15](../roadmap/17-code-audit-and-hardening/15-test-coverage-batches.md#coverage-measured-once) |
 | D-52 | Chasing the one-off macOS `parallelForPolled` flake (finding 8; 550 Linux runs clean) | DEFERRED — trigger: a second failure in CI | 2026-10-07 | [17/14](../roadmap/17-code-audit-and-hardening/14-build-hardening-ci.md#findings-and-what-was-done-with-each) |
 | D-53 | A `--gpu`-tier `--snapshot` smoke check of the GL viewers | DEFERRED — trigger: a viewer regression the parity harness missed, or a change to their window or snapshot code | 2026-10-07 | [17/13](../roadmap/17-code-audit-and-hardening/13-parity-gate-binding.md#what-changed) |
-| D-60 | `dualc_boolean` retires after a per-node `bake` (#57) | DEFERRED — trigger: P02 T2's measurements, at the approve gate after P02 | 2026-10-14 | [21/01](../roadmap/21-cli-consolidation/01-record.md#the-dualc_boolean-decision) |
 | D-40 | An FTS5 search index over the docs — `rg` and the README indexes are the search layer; no vector database, no RAG skill | DEFERRED — trigger: `docs/raw/` exceeds 50 text files or 1 MB of text (SVG and HTML assets do not count), or three sessions in a row where `rg` failed to find a fact that was in the repo | 2026-09-17 | [plan § 6](../raw/2026-09-17-docs-restructuring-plan.md#6-deliberately-not-done) |
 
 ---

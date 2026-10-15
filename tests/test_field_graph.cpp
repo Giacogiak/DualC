@@ -254,38 +254,130 @@ TEST_CASE("mesh and winding bake=N sample the node into its own grid",
   }
 }
 
-TEST_CASE("a baked child under a smooth op needs band >= k",
+TEST_CASE("childBakeMargin hands each child the distance its ancestors read",
+          "[field_graph][bake]") {
+  // #57, D-60's companion decision (b): smooth ops hand down max(margin, k),
+  // offset / round / onion / displace add their amount, scale divides by |s|,
+  // the graded ops add max(|t1|,|t2|) to the base only, all else passes it on.
+  auto margin = [](const std::string& expr, std::size_t i, double m) {
+    return childBakeMargin(parseShorthand(expr), i, m);
+  };
+  const std::string a = "sphere(radius=1)", b = "sphere(radius=2)";
+  REQUIRE(margin("union(" + a + "," + b + ")", 0, 0.0) == 0.0);
+  REQUIRE(margin("difference(" + a + "," + b + ")", 1, 0.4) == 0.4);
+  REQUIRE(margin("smooth-union(" + a + "," + b + ",k=1)", 0, 0.0) == 1.0);
+  REQUIRE(margin("smooth-difference(" + a + "," + b + ",k=0.5)", 1, 2.0) == 2.0);
+  REQUIRE(margin("smooth-intersection(" + a + "," + b + ")", 0, 0.0) == 0.25);
+  REQUIRE(margin("scale(" + a + ",s=2)", 0, 1.0) == 0.5);
+  REQUIRE(margin("scale(" + a + ",s=-4)", 0, 1.0) == 0.25);
+  REQUIRE(margin("offset(" + a + ",r=0.3)", 0, 0.5) == Catch::Approx(0.8));
+  REQUIRE(margin("offset(" + a + ",r=-0.3)", 0, 0.5) == 0.5);
+  REQUIRE(margin("round(" + a + ",r=0.2)", 0, 0.0) == Catch::Approx(0.2));
+  REQUIRE(margin("onion(" + a + ",thickness=0.1)", 0, 0.0) == Catch::Approx(0.1));
+  REQUIRE(margin("displace(" + a + ",amplitude=0.05)", 0, 0.0) ==
+          Catch::Approx(0.05));
+  const std::string g = "graded-onion(" + a + ",plane(0,1,0,0),t1=0.3,t2=0.1,d1=1)";
+  REQUIRE(margin(g, 0, 0.0) == Catch::Approx(0.3));
+  REQUIRE(margin(g, 1, 0.0) == 0.0);
+  REQUIRE(margin("translate(" + a + ",by=[1,0,0])", 0, 0.7) == 0.7);
+  REQUIRE(margin("normalize(" + a + ")", 0, 0.7) == 0.7);
+}
+
+TEST_CASE("a baked child inherits its ancestors' margin",
           "[field_graph][bake]") {
   // Outside its region a grid clamps to the face value, which does not grow
-  // with distance; a smooth blend with k beyond that margin turns the clamp
-  // into material (measured on smooth-union torus cube, k=1: 3x the faces,
-  // max deviation 1.56 -- roadmap 21/04). band=k widens the region by k, as
-  // dualc_boolean pads its own by k, and the sign is the exact one again.
+  // with distance; an ancestor reading below it -- a smooth blend of k, an
+  // offset or onion of r -- makes material out of the clamp (measured on
+  // smooth-union torus cube, k=1: 3x the faces, max deviation 1.56 -- roadmap
+  // 21/04). The builder now hands the margin down, so the default band is
+  // right through nesting; the bare library composition still shows the trap.
   auto box = makeBox(1.0);
   FixedResolver meshes{std::get<0>(box).get(), std::get<1>(box).get()};
   const std::string other = "translate(sphere(radius=0.5),by=[2.2,0,0])";
+  auto signsAgree = [&](const std::string& exactExpr,
+                        const std::string& bakedExpr, double skip) {
+    FieldGraph exact = FieldGraph::build(parseShorthand(exactExpr), meshes);
+    FieldGraph baked = FieldGraph::build(parseShorthand(bakedExpr), meshes);
+    int samples = 0;
+    for (int i = 0; i < 31; ++i)
+      for (int j = 0; j < 31; ++j)
+        for (int k = 0; k < 31; ++k) {
+          const Vector3 p{-2.9 + i * 0.2, -2.9 + j * 0.2, -2.9 + k * 0.2};
+          const double e = exact.field().valueAt(p);
+          if (std::abs(e) < skip) continue;
+          ++samples;
+          INFO(bakedExpr << " at " << p.x << "," << p.y << "," << p.z);
+          REQUIRE((baked.field().valueAt(p) < 0.0) == (e < 0.0));
+        }
+    REQUIRE(samples > 15000);
+  };
+  const std::string m = "mesh(path=\"x\")", mb = "mesh(path=\"x\",bake=32)";
+  // Directly under the smooth op, through a rigid move, through a scale, and
+  // under a nested smooth op whose outer k is the larger.
+  signsAgree("smooth-union(" + m + "," + other + ",k=1)",
+             "smooth-union(" + mb + "," + other + ",k=1)", 0.25);
+  signsAgree("smooth-union(translate(" + m + ",by=[0.3,0,0])," + other + ",k=1)",
+             "smooth-union(translate(" + mb + ",by=[0.3,0,0])," + other + ",k=1)",
+             0.25);
+  signsAgree("smooth-union(scale(" + m + ",s=0.6)," + other + ",k=1)",
+             "smooth-union(scale(" + mb + ",s=0.6)," + other + ",k=1)", 0.25);
+  signsAgree("smooth-union(smooth-union(" + m + ",sphere(radius=0.3),k=0.1)," +
+                 other + ",k=1)",
+             "smooth-union(smooth-union(" + mb + ",sphere(radius=0.3),k=0.1)," +
+                 other + ",k=1)",
+             0.25);
+  // An offset or onion wider than the 10 % pad: without the margin these
+  // contoured to 1 and 588 faces against the exact 9,804 and 10,392.
+  signsAgree("offset(" + m + ",r=0.3)", "offset(" + mb + ",r=0.3)", 0.25);
+  signsAgree("onion(" + m + ",thickness=0.3)", "onion(" + mb + ",thickness=0.3)",
+             0.25);
+
+  // The trap itself, on the library composition with no margin handed down.
+  dualc::MeshSource src(*std::get<0>(box), *std::get<1>(box), true,
+                        dualc::SignMethod::WINDING_NUMBER);
+  NodeBake nb;
+  nb.res = 32;
   FieldGraph exact = FieldGraph::build(
-      parseShorthand("smooth-union(mesh(path=\"x\")," + other + ",k=1)"), meshes);
-  FieldGraph narrow = FieldGraph::build(
-      parseShorthand("smooth-union(mesh(path=\"x\",bake=32)," + other + ",k=1)"),
-      meshes);
-  FieldGraph wide = FieldGraph::build(
-      parseShorthand("smooth-union(mesh(path=\"x\",bake=32,band=1)," + other +
-                     ",k=1)"),
-      meshes);
-  int narrowWrong = 0, samples = 0;
+      parseShorthand("smooth-union(" + m + "," + other + ",k=1)"), meshes);
+  FieldGraph otherField = FieldGraph::build(parseShorthand(other), meshes);
+  dualc::FieldPtr bare = dualc::smoothUnionOf(bakeMeshNode(src, nb, 0.0),
+                                              otherField.fieldPtr(), 1.0);
+  int wrong = 0;
   for (int i = 0; i < 31; ++i)
     for (int j = 0; j < 31; ++j)
       for (int k = 0; k < 31; ++k) {
         const Vector3 p{-2.9 + i * 0.2, -2.9 + j * 0.2, -2.9 + k * 0.2};
         const double e = exact.field().valueAt(p);
-        if (std::abs(e) < 0.25) continue;   // two bake cells of `wide`
-        ++samples;
-        if ((narrow.field().valueAt(p) < 0.0) != (e < 0.0)) ++narrowWrong;
-        REQUIRE((wide.field().valueAt(p) < 0.0) == (e < 0.0));
+        if (std::abs(e) >= 0.25 && (bare->valueAt(p) < 0.0) != (e < 0.0)) ++wrong;
       }
-  REQUIRE(samples > 20000);
-  REQUIRE(narrowWrong > 0);   // the trap the docs warn about is real
+  REQUIRE(wrong > 0);
+}
+
+TEST_CASE("an explicit band larger than the margin wins",
+          "[field_graph][bake]") {
+  auto box = makeBox(1.0);
+  FixedResolver meshes{std::get<0>(box).get(), std::get<1>(box).get()};
+  dualc::MeshSource src(*std::get<0>(box), *std::get<1>(box), true,
+                        dualc::SignMethod::WINDING_NUMBER);
+  NodeBake nb;
+  nb.res = 16;
+  nb.band = 2.0;
+  dualc::FieldPtr bigPtr = bakeMeshNode(src, nb, 1.0);
+  auto big = dynamic_cast<const dualc::GridField*>(bigPtr.get());
+  REQUIRE(big != nullptr);
+  REQUIRE(big->bounds().min.x == Catch::Approx(-1.0 - 0.2 - 2.0));
+  nb.band = 0.5;
+  dualc::FieldPtr smallPtr = bakeMeshNode(src, nb, 1.0);
+  auto small = dynamic_cast<const dualc::GridField*>(smallPtr.get());
+  REQUIRE(small != nullptr);
+  REQUIRE(small->bounds().max.y == Catch::Approx(1.0 + 0.2 + 1.0));
+  // winding has no band: its region pads by the margin alone.
+  FieldGraph w = FieldGraph::build(parseShorthand("winding(path=\"x\")"), meshes);
+  dualc::FieldPtr wPtr = bakeWindingNode(w.field(), nb, 0.75);
+  const dualc::BBox wb = w.field().bounds();
+  const double wpad =
+      0.1 * std::max({wb.extent().x, wb.extent().y, wb.extent().z}) + 0.75;
+  REQUIRE(wPtr->bounds().min.z == Catch::Approx(wb.min.z - wpad));
 }
 
 TEST_CASE("mesh bake round-trips through dumpJson + parseJson",

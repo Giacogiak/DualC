@@ -7,8 +7,8 @@ graph and nothing else — and the tool retires. Born 2026-10-14 from the owner'
 tool, eight byte-identical tool-vs-graph runs, three side findings); worked through the
 [consolidation plan](../../raw/2026-10-14-cli-consolidation-plan.md), run by `plan-run` on
 branch `feat/cli-consolidation`. Headings are frozen at ID + title; status, date and trigger
-live on the body lines. The decisions are D-55 … D-59
-([settled](../../decisions/01-settled.md)), D-60 (open, [index](../../decisions/README.md)) and
+live on the body lines. The decisions are D-55 … D-62
+([settled](../../decisions/01-settled.md); D-60 was open until the P02 gate, 2026-10-15) and
 D-11's partly fired trigger.
 
 ## The pages of this block
@@ -19,12 +19,12 @@ outgrow it keeps its summary there and its numbers in a numbered child:
 [02](02-demo-mesh-winding.md), the demo meshes' winding before and after (#55);
 [03](03-mesh-sign-gwn.md), `mesh(sign="gwn")`'s equivalence, tests and ABI call (#56);
 [04](04-mesh-node-bake.md), per-node `bake` against `dualc_boolean --bake` and the exact
-graph — D-60's evidence (#57).
+graph — D-60's evidence — and the margin a baked node inherits (D-62) (#57).
 
 | Item | Page | Status |
 | --- | --- | --- |
 | The owner's decisions of 2026-10-14 (D-55 … D-59) | [01](01-record.md#the-owners-decisions) | DONE 2026-10-14 (decided; the phases execute) |
-| D-60 — `dualc_boolean`'s retirement, decided after P02 | [01](01-record.md#the-dualc_boolean-decision) | DEFERRED — trigger: P02 T2's measurements ([04](04-mesh-node-bake.md), in since 2026-10-15), read at the approve gate after P02 |
+| D-60 — `dualc_boolean`'s retirement, decided after P02 | [01](01-record.md#the-dualc_boolean-decision) | DONE 2026-10-15 — kept, on [04](04-mesh-node-bake.md)'s measurements |
 | #55 Generated demo meshes wound outward (F1) | [01](01-record.md#55-generated-demo-meshes-wound-outward) | DONE 2026-10-14 — P01 T2; measured in [02](02-demo-mesh-winding.md) |
 | #56 The mesh node takes `sign="gwn"` | [01](01-record.md#56-the-mesh-node-takes-signgwn) | DONE 2026-10-15 — P02 T1; measured in [03](03-mesh-sign-gwn.md) |
 | #57 Per-node bake on the mesh nodes | [01](01-record.md#57-per-node-bake-on-the-mesh-nodes) | DONE 2026-10-15 — P02 T2; measured in [04](04-mesh-node-bake.md) |

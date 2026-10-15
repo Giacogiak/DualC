@@ -394,6 +394,15 @@ int main() {
     runList.push_back({"mesh-bake",
                        "mesh(path=\"" + cubePath + "\",bake=24)", box(-1, 1),
                        2e-3, 2e-3});
+    // (f) The handed-down margin (#57, decision (b)): the baked node sits under
+    //     a translate inside a smooth-union, so it bakes with band and region
+    //     widened by k on both paths. Compared against the built CPU field, a
+    //     codegen that handed down a different margin than the builder would
+    //     upload a different grid and miss by more than tol.
+    runList.push_back({"mesh-bake-smooth",
+                       "smooth-union(translate(mesh(path=\"" + cubePath +
+                           "\",bake=24),by=[0.3,0,0]),sphere(radius=0.4),k=0.5)",
+                       box(-1.2, 1.2), 2e-3, 2e-3});
   }
   if (!cubePath.empty()) {
     // winding bakes 0.5 - windingNumber over the full lattice (no band): same

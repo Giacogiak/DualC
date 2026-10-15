@@ -816,12 +816,16 @@ NodeBake readNodeBake(const GraphNode& n, bool readBand) {
   return checkNodeBake(n, hasBake ? &bake : nullptr, hasBand ? &band : nullptr);
 }
 
-dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes);
+dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes,
+                                    double margin);
 
-dualc::FieldPtr buildField(const GraphNode& n, MeshResolver& meshes) {
+// `margin` is the bake margin the ancestors hand down (childBakeMargin); only
+// a baked mesh / winding node reads it.
+dualc::FieldPtr buildField(const GraphNode& n, MeshResolver& meshes,
+                           double margin) {
   ReadScope scope{n};
   try {
-    dualc::FieldPtr f = buildFieldUnchecked(n, meshes);
+    dualc::FieldPtr f = buildFieldUnchecked(n, meshes, margin);
     rejectUnreadParams(n);
     return f;
   } catch (const std::invalid_argument& e) {
@@ -835,16 +839,19 @@ dualc::FieldPtr buildField(const GraphNode& n, MeshResolver& meshes) {
   }
 }
 
-dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes) {
+dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes,
+                                    double margin) {
   const std::string& op = n.op;
+  auto child = [&](std::size_t i) {
+    return buildField(n.in[i], meshes, childBakeMargin(n, i, margin));
+  };
 
   // 1. Booleans (two children).
   BoolOp bop;
   if (parseBoolOp(op, bop)) {
     requireChildren(n, 2);
     double k = numParam(n, "k", 0.25);
-    return applyBoolOp(bop, buildField(n.in[0], meshes),
-                       buildField(n.in[1], meshes), k);
+    return applyBoolOp(bop, child(0), child(1), k);
   }
 
   // 2. TPMS sources.
@@ -883,7 +890,7 @@ dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes) {
     MeshHandle h = id.empty() ? meshes.resolve(path) : meshes.resolveId(id);
     auto src = std::make_shared<dualc::MeshSource>(*h.mesh, *h.geom, interp, sm);
     if (nb.res == 0) return src;
-    return bakeMeshNode(*src, nb);
+    return bakeMeshNode(*src, nb, margin);
   }
   if (op == "winding") {
     std::string path = strParam(n, "path", "");
@@ -895,25 +902,24 @@ dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes) {
     MeshHandle h = id.empty() ? meshes.resolve(path) : meshes.resolveId(id);
     dualc::FieldPtr wf = dualc::windingNumberField(*h.mesh, *h.geom);
     if (nb.res == 0) return wf;
-    return bakeWindingNode(*wf, nb);
+    return bakeWindingNode(*wf, nb, margin);
   }
 
   // 4. Decorators not covered by the PostOp machinery (one child).
   if (op == "normalize") {
     requireChildren(n, 1);
-    return dualc::normalizedOf(buildField(n.in[0], meshes));
+    return dualc::normalizedOf(child(0));
   }
   if (op == "transform") {
     requireChildren(n, 1);
-    return dualc::transformed(buildField(n.in[0], meshes),
+    return dualc::transformed(child(0),
                               mat4From16(vecParam(n, "matrix", 16, true, {})));
   }
   // graded-onion: a two-child decorator (base, control) -- not a single-child
   // PostOp, so it is wired explicitly like normalize/transform above.
   if (op == "graded-onion") {
     requireChildren(n, 2);
-    return dualc::gradedOnionOf(buildField(n.in[0], meshes),
-                               buildField(n.in[1], meshes), requireNum(n, "t1"),
+    return dualc::gradedOnionOf(child(0), child(1), requireNum(n, "t1"),
                                requireNum(n, "t2"), numParam(n, "d0", 0.0),
                                requireNum(n, "d1"));
   }
@@ -921,8 +927,7 @@ dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes) {
   // inflates the solid (base - t) instead of hollowing it (|base| - t).
   if (op == "graded-offset") {
     requireChildren(n, 2);
-    return dualc::gradedOffsetOf(buildField(n.in[0], meshes),
-                                buildField(n.in[1], meshes), requireNum(n, "t1"),
+    return dualc::gradedOffsetOf(child(0), child(1), requireNum(n, "t1"),
                                 requireNum(n, "t2"), numParam(n, "d0", 0.0),
                                 requireNum(n, "d1"));
   }
@@ -931,8 +936,7 @@ dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes) {
   // graded's d0); hi is required (like d1).
   if (op == "mix") {
     requireChildren(n, 3);
-    return dualc::mixOf(buildField(n.in[0], meshes), buildField(n.in[1], meshes),
-                        buildField(n.in[2], meshes), numParam(n, "lo", 0.0),
+    return dualc::mixOf(child(0), child(1), child(2), numParam(n, "lo", 0.0),
                         requireNum(n, "hi"));
   }
 
@@ -940,7 +944,7 @@ dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes) {
   PostOp pop;
   if (tryMakePostOp(n, pop)) {
     requireChildren(n, 1);
-    return applyPostOps(buildField(n.in[0], meshes), {pop});
+    return applyPostOps(child(0), {pop});
   }
 
   // 6. Analytic primitives (leaf source).
@@ -979,29 +983,76 @@ NodeBake checkNodeBake(const GraphNode& n, const double* bake,
   return nb;
 }
 
-dualc::BBox nodeBakeRegion(const dualc::BBox& nodeBounds, double band) {
-  const dualc::Vector3 e = nodeBounds.extent();
-  const double pad = 0.10 * std::max({e.x, e.y, e.z}) + band;
-  return dualc::BBox{nodeBounds.min - dualc::Vector3{pad, pad, pad},
-                     nodeBounds.max + dualc::Vector3{pad, pad, pad}};
+namespace {
+
+// A param read for the margin only: Number or one-element Vector, else `def`.
+double rawNum(const GraphNode& n, const std::string& key, double def) {
+  auto it = n.params.find(key);
+  if (it == n.params.end()) return def;
+  const ParamValue& p = it->second;
+  if (p.kind == ParamValue::Kind::Number) return p.num;
+  if (p.kind == ParamValue::Kind::Vector && p.vec.size() == 1) return p.vec[0];
+  return def;
 }
 
-dualc::FieldPtr bakeMeshNode(const dualc::MeshSource& src, const NodeBake& b) {
-  const dualc::BBox region = nodeBakeRegion(src.bounds(), b.band);
+}  // namespace
+
+double childBakeMargin(const GraphNode& parent, std::size_t i, double margin) {
+  const std::string& op = parent.op;
+  BoolOp bop;
+  if (parseBoolOp(op, bop))
+    return boolOpIsSmooth(bop)
+               ? std::max(margin, std::abs(rawNum(parent, "k", 0.25)))
+               : margin;
+  if (op == "scale") {
+    const double s = std::abs(rawNum(parent, "s", 1.0));
+    return s > 0.0 ? margin / s : margin;
+  }
+  if (op == "offset" || op == "round")
+    return margin + std::max(0.0, rawNum(parent, "r", 0.0));
+  if (op == "onion")
+    return margin + std::abs(rawNum(parent, "thickness", 0.0));
+  if (op == "displace")
+    return margin + std::abs(rawNum(parent, "amplitude", 0.1));
+  if ((op == "graded-onion" || op == "graded-offset") && i == 0)
+    return margin + std::max(std::abs(rawNum(parent, "t1", 0.0)),
+                             std::abs(rawNum(parent, "t2", 0.0)));
+  return margin;
+}
+
+bool hasBakedNode(const GraphNode& n) {
+  if ((n.op == "mesh" || n.op == "winding") && n.params.count("bake")) return true;
+  for (const GraphNode& c : n.in)
+    if (hasBakedNode(c)) return true;
+  return false;
+}
+
+dualc::BBox nodeBakeRegion(const dualc::BBox& nodeBounds, double pad) {
+  const dualc::Vector3 e = nodeBounds.extent();
+  const double p = 0.10 * std::max({e.x, e.y, e.z}) + pad;
+  return dualc::BBox{nodeBounds.min - dualc::Vector3{p, p, p},
+                     nodeBounds.max + dualc::Vector3{p, p, p}};
+}
+
+dualc::FieldPtr bakeMeshNode(const dualc::MeshSource& src, const NodeBake& b,
+                             double margin) {
+  const dualc::BBox region =
+      nodeBakeRegion(src.bounds(), std::max(b.band, margin));
   const dualc::Vector3 e = region.extent();
   const double cell = std::max({e.x, e.y, e.z}) / (b.res - 1);
-  return src.bakeToGrid(region, dualc::Vector3i{b.res, b.res, b.res},
-                        b.band > 0.0 ? b.band : 3.0 * cell);
+  double band = b.band > 0.0 ? b.band : 3.0 * cell;
+  if (margin > 0.0) band = std::max(band, margin + 3.0 * cell);
+  return src.bakeToGrid(region, dualc::Vector3i{b.res, b.res, b.res}, band);
 }
 
 dualc::FieldPtr bakeWindingNode(const dualc::ImplicitField& winding,
-                                const NodeBake& b) {
-  return dualc::bakeToGrid(winding, nodeBakeRegion(winding.bounds(), 0.0),
+                                const NodeBake& b, double margin) {
+  return dualc::bakeToGrid(winding, nodeBakeRegion(winding.bounds(), margin),
                            dualc::Vector3i{b.res, b.res, b.res});
 }
 
 FieldGraph FieldGraph::build(const GraphNode& root, MeshResolver& meshes) {
-  return FieldGraph(buildField(root, meshes));
+  return FieldGraph(buildField(root, meshes, 0.0));
 }
 
 }  // namespace fieldgraph
