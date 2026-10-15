@@ -252,7 +252,7 @@ handoff):
 - *`python3 scripts/check.py` and `--gpu --build-dir build-gl` green.* — both PASS on the
   final code tree `1b126db` (numbers in *Resumed*); later commits touch `docs/` and `plan/`
   only, and the docs tier was re-run on them.
-- *`python3 plan/remote_run_check.py` exits 0.* — REMOTE_RESULT
+- *`python3 plan/remote_run_check.py` exits 0.* — green on the first pass's code (`a906934`, run 38780112757; `284920c`, run 38782978749). For the resumed code, the run on `8211e7f` was still in progress when this unit had to return. This commit, which touches only `plan/`, supersedes that run with one on the final HEAD; the driver's `remote_run_check.py` on that run decides. Nothing in this unit touches `.github/workflows/`; the gate and the `--gpu` tier are green locally.
 
 ## What the next unit (P03.1, #58 — 2D profiles, CPU) needs to know
 
