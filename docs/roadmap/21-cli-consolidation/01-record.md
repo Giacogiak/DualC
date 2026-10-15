@@ -71,6 +71,12 @@ of room, less than D-60's status cell will need when the owner decides it. The i
 relief of its own before then, as [19/10](../19-docs-layers/10-cap-relief.md) gave the
 snapshot; how is the owner's call, since the index's two-table design is the owner's.
 
+**2026-10-15, at the P01 approve gate.** Giacomo chose to split the DROPPED rows into
+[`decisions/02-dropped.md`](../../decisions/02-dropped.md) (D-61): six rows moved unchanged,
+`decisions-index` reads both pages (`check_data.json` `decisions_index.index` is a list), and
+the index went from 15,317 to about 13,700 bytes. He also confirmed D-58's form,
+`dualc_field --slice`.
+
 ## #55 Generated demo meshes wound outward
 
 **DONE** 2026-10-14 — opened 2026-10-14; plan P01 T2. The screening's finding F1: six of the nine

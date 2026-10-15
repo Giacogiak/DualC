@@ -44,7 +44,8 @@
     "_comment": "Tables status-vocab reads in addition to status_tables and status-sync does not: their Status cells use the legend, but their links land on the record anchor of the decision (often a bullet under a DONE heading), so the first-body-line comparison status-sync makes would be false disagreement. decisions-index checks these rows' anchors and triggers instead.",
     "tables": [
       "docs/decisions/README.md",
-      "docs/decisions/01-settled.md"
+      "docs/decisions/01-settled.md",
+      "docs/decisions/02-dropped.md"
     ]
   },
 
@@ -90,8 +91,8 @@
   },
 
   "decisions_index": {
-    "_comment": "decisions-index: every DROPPED/DEFERRED entry under scope needs a row in index whose link lands on its heading. The index is the README only (its 01-settled.md child holds the DONE-by-decision rows, which the check does not read).",
-    "index": "docs/decisions/README.md",
+    "_comment": "decisions-index: every DROPPED/DEFERRED entry under scope needs a row in index whose link lands on its heading. The index is the README (open rows) plus 02-dropped.md (DROPPED rows, split out 2026-10-15 for the byte cap, D-61); 01-settled.md holds the DONE-by-decision rows, which the check does not read.",
+    "index": ["docs/decisions/README.md", "docs/decisions/02-dropped.md"],
     "scope": "docs/roadmap/"
   },
 

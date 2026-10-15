@@ -1190,7 +1190,7 @@ def check_decisions_index(ctx):
     anywhere else -- the next agent proposes it again. Every entry in
     `docs/roadmap/` whose first body line opens with **DROPPED** or
     **DEFERRED** (or whose grandfathered heading carries the word) must have a
-    row in `docs/decisions/README.md` linking `file#that-heading`, and every
+    row in `docs/decisions/README.md` (or `02-dropped.md`) linking `file#that-heading`, and every
     DEFERRED row must carry a trigger (non-empty text after the word). Several
     rows may cite one heading (D-14/D-23 both cite 11/03 § 5a), so the rows
     are kept per (file, anchor) as a list and each DEFERRED row is checked on
@@ -1198,27 +1198,33 @@ def check_decisions_index(ctx):
     Phase 4 of roadmap 19 writes the index.
     """
     cfg = ctx.data["decisions_index"]
-    index = ctx.text(cfg["index"])
-    if index is None:
-        return Result(SKIP, "%s not written yet (roadmap 19 Phase 4)" % cfg["index"])
-    idx_dir = os.path.dirname(cfg["index"])
+    # The index is the README, plus any child page that carries open or rejected
+    # rows (02-dropped.md since 2026-10-15, D-61): a list, the README first.
+    idx_files = cfg["index"] if isinstance(cfg["index"], list) else [cfg["index"]]
+    if ctx.text(idx_files[0]) is None:
+        return Result(SKIP, "%s not written yet (roadmap 19 Phase 4)" % idx_files[0])
     rows, nrows, bad = {}, 0, []
-    for i, line in enumerate(strip_fences(index).split("\n"), 1):
-        if not line.lstrip().startswith("|"):
+    for idx_file in idx_files:
+        index = ctx.text(idx_file)
+        if index is None:
             continue
-        cells = table_cells(line)
-        status = next((c for c in cells if "DEFERRED" in c), "")
-        if status and not re.sub(r"\W*DEFERRED\W*", "", status).strip():
-            bad.append("%s:%d: DEFERRED row names no trigger" % (cfg["index"], i))
-        keyed = False
-        for m in LINK_RE.finditer(line):
-            if "#" not in m.group(1):
+        idx_dir = os.path.dirname(idx_file)
+        for i, line in enumerate(strip_fences(index).split("\n"), 1):
+            if not line.lstrip().startswith("|"):
                 continue
-            path, anchor = m.group(1).split("#", 1)
-            tgt = os.path.normpath(os.path.join(idx_dir, path)).replace(os.sep, "/")
-            rows.setdefault((tgt, anchor), []).append(i)
-            keyed = True
-        nrows += keyed
+            cells = table_cells(line)
+            status = next((c for c in cells if "DEFERRED" in c), "")
+            if status and not re.sub(r"\W*DEFERRED\W*", "", status).strip():
+                bad.append("%s:%d: DEFERRED row names no trigger" % (idx_file, i))
+            keyed = False
+            for m in LINK_RE.finditer(line):
+                if "#" not in m.group(1):
+                    continue
+                path, anchor = m.group(1).split("#", 1)
+                tgt = os.path.normpath(os.path.join(idx_dir, path)).replace(os.sep, "/")
+                rows.setdefault((tgt, anchor), []).append(i)
+                keyed = True
+            nrows += keyed
     entries = 0
     for rel in ctx.md:
         if not rel.startswith(cfg["scope"]):
@@ -1236,7 +1242,7 @@ def check_decisions_index(ctx):
             key = (rel, slugify(htext))
             if key not in rows:
                 bad.append("%s:%d: %s entry has no row in %s"
-                           % (rel, hline, m.group(1), cfg["index"]))
+                           % (rel, hline, m.group(1), " or ".join(idx_files)))
     return Result(FAIL if bad else OK,
                   "%d decision entries, %d rows, %d problems" % (entries, nrows, len(bad)),
                   bad)
