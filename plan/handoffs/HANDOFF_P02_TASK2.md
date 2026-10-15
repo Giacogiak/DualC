@@ -189,7 +189,11 @@ Other numbers:
   `scripts/check_data.json` says 75 and the harness runs 75/75.
 - *`python3 scripts/check.py` and `--gpu --build-dir build-gl` green.* — both PASS on the
   final code tree (numbers above); this handoff commit changes `plan/` only.
-- *`python3 plan/remote_run_check.py` exits 0.* — **not yet closed when this unit returned:** `3c7c288` was pushed and its run was still queued / in progress (the first poll found no run registered yet); this handoff commit triggers a new run on the final HEAD. The driver's own `remote_run_check.py` is the verdict; nothing in this unit touches `.github/workflows/`, and the gate and `--gpu` tier are green locally.
+- *`python3 plan/remote_run_check.py` exits 0.* — **green on `a906934`**: run
+  [38780112757](https://github.com/Giacogiak/DualC/actions/runs/38780112757), conclusion
+  `success` (all jobs, `gpu` included). The earlier run on `3c7c288` (38779843837) ended
+  `cancelled` (every job), superseded by the `a906934` push, not a failure. This line's own
+  commit re-triggers the run; its result on the final HEAD is the driver's to read.
 
 ## What the next unit (P03.1, #58 — 2D profiles, CPU) needs to know
 
