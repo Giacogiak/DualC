@@ -10,6 +10,7 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <algorithm>
 #include <cmath>
 #include <filesystem>
 #include <memory>
@@ -169,6 +170,189 @@ TEST_CASE("mesh sign=gwn is the GWN sign oracle on a metric field",
             Catch::Approx(4.0).margin(1e-9));
     REQUIRE(winding.field().valueAt(Vector3{5, 0, 0}) ==
             Catch::Approx(0.5).margin(0.05));
+  }
+}
+
+TEST_CASE("mesh and winding bake=N sample the node into its own grid",
+          "[field_graph][bake]") {
+  // #57: `bake=N` replaces the source with a GridField over the node's own
+  // bounds padded by 10 % of their largest extent -- not the sampling box,
+  // not a sibling's box.
+  auto box = makeBox(1.0);
+  FixedResolver meshes{std::get<0>(box).get(), std::get<1>(box).get()};
+  FieldGraph exact = FieldGraph::build(parseShorthand("mesh(path=\"x\")"), meshes);
+  FieldGraph baked =
+      FieldGraph::build(parseShorthand("mesh(path=\"x\",bake=32)"), meshes);
+
+  auto* grid = dynamic_cast<const dualc::GridField*>(&baked.field());
+  REQUIRE(grid != nullptr);
+  REQUIRE(grid->resolution().x == 32);
+  REQUIRE(grid->resolution().z == 32);
+  const dualc::BBox r = grid->bounds();   // [-1,1]^3 padded by 0.1 * 2
+  REQUIRE(r.min.x == Catch::Approx(-1.2));
+  REQUIRE(r.max.z == Catch::Approx(1.2));
+  const double cell = 2.4 / 31.0;
+
+  // Near the surface the baked field is within one bake cell of the exact one,
+  // and it never flips the sign more than a cell away from the surface.
+  int nearCount = 0;
+  for (int i = 0; i < 23; ++i)
+    for (int j = 0; j < 23; ++j)
+      for (int k = 0; k < 23; ++k) {
+        const Vector3 p{-1.15 + i * 0.1037, -1.15 + j * 0.1037,
+                        -1.15 + k * 0.1037};
+        const double e = exact.field().valueAt(p);
+        const double b = baked.field().valueAt(p);
+        if (std::abs(e) < 2.0 * cell) {
+          ++nearCount;
+          REQUIRE(std::abs(b - e) <= cell);
+        } else {
+          REQUIRE((b < 0.0) == (e < 0.0));
+        }
+      }
+  REQUIRE(nearCount > 100);
+
+  // `band` is the exact-distance shell: lattice nodes inside it hold the exact
+  // distance (to float precision), here 0.5 -- 4.6 cells -- deep. It also
+  // widens the region by itself, so it is the margin a smooth parent's k
+  // needs: [-1,1] + 0.2 + 0.5.
+  FieldGraph banded = FieldGraph::build(
+      parseShorthand("mesh(path=\"x\",bake=32,band=0.5)"), meshes);
+  auto* bgrid = dynamic_cast<const dualc::GridField*>(&banded.field());
+  REQUIRE(bgrid != nullptr);
+  REQUIRE(bgrid->bounds().min.y == Catch::Approx(-1.7));
+  REQUIRE(bgrid->bounds().max.x == Catch::Approx(1.7));
+  const double bcell = 3.4 / 31.0;
+  int inBand = 0;
+  for (int i = 0; i < 32; ++i) {
+    const double c = -1.7 + i * bcell;
+    const Vector3 p{c, -1.7 + 15 * bcell, -1.7 + 15 * bcell};
+    const double e = exact.field().valueAt(p);
+    if (std::abs(e) >= 0.45) continue;
+    ++inBand;
+    REQUIRE(banded.field().valueAt(p) == Catch::Approx(e).margin(1e-5));
+  }
+  REQUIRE(inBand > 6);
+
+  // winding bakes the full lattice of its own (already padded) bounds; away
+  // from the surface its sign is the exact field's.
+  FieldGraph wExact = FieldGraph::build(parseShorthand("winding(path=\"x\")"), meshes);
+  FieldGraph wBaked =
+      FieldGraph::build(parseShorthand("winding(path=\"x\",bake=24)"), meshes);
+  auto* wgrid = dynamic_cast<const dualc::GridField*>(&wBaked.field());
+  REQUIRE(wgrid != nullptr);
+  REQUIRE(wgrid->resolution().y == 24);
+  const dualc::BBox wb = wExact.field().bounds();
+  const double wpad = 0.1 * std::max({wb.extent().x, wb.extent().y, wb.extent().z});
+  REQUIRE(wgrid->bounds().min.x == Catch::Approx(wb.min.x - wpad));
+  REQUIRE(wgrid->bounds().max.y == Catch::Approx(wb.max.y + wpad));
+  const double wcell = wgrid->bounds().extent().x / 23.0;
+  for (int i = 0; i < 15; ++i) {
+    const Vector3 p{-1.4 + i * 0.2, 0.13, -0.07};
+    if (std::abs(exact.field().valueAt(p)) < 1.5 * wcell) continue;
+    REQUIRE((wBaked.field().valueAt(p) < 0.0) == (wExact.field().valueAt(p) < 0.0));
+  }
+}
+
+TEST_CASE("a baked child under a smooth op needs band >= k",
+          "[field_graph][bake]") {
+  // Outside its region a grid clamps to the face value, which does not grow
+  // with distance; a smooth blend with k beyond that margin turns the clamp
+  // into material (measured on smooth-union torus cube, k=1: 3x the faces,
+  // max deviation 1.56 -- roadmap 21/04). band=k widens the region by k, as
+  // dualc_boolean pads its own by k, and the sign is the exact one again.
+  auto box = makeBox(1.0);
+  FixedResolver meshes{std::get<0>(box).get(), std::get<1>(box).get()};
+  const std::string other = "translate(sphere(radius=0.5),by=[2.2,0,0])";
+  FieldGraph exact = FieldGraph::build(
+      parseShorthand("smooth-union(mesh(path=\"x\")," + other + ",k=1)"), meshes);
+  FieldGraph narrow = FieldGraph::build(
+      parseShorthand("smooth-union(mesh(path=\"x\",bake=32)," + other + ",k=1)"),
+      meshes);
+  FieldGraph wide = FieldGraph::build(
+      parseShorthand("smooth-union(mesh(path=\"x\",bake=32,band=1)," + other +
+                     ",k=1)"),
+      meshes);
+  int narrowWrong = 0, samples = 0;
+  for (int i = 0; i < 31; ++i)
+    for (int j = 0; j < 31; ++j)
+      for (int k = 0; k < 31; ++k) {
+        const Vector3 p{-2.9 + i * 0.2, -2.9 + j * 0.2, -2.9 + k * 0.2};
+        const double e = exact.field().valueAt(p);
+        if (std::abs(e) < 0.25) continue;   // two bake cells of `wide`
+        ++samples;
+        if ((narrow.field().valueAt(p) < 0.0) != (e < 0.0)) ++narrowWrong;
+        REQUIRE((wide.field().valueAt(p) < 0.0) == (e < 0.0));
+      }
+  REQUIRE(samples > 20000);
+  REQUIRE(narrowWrong > 0);   // the trap the docs warn about is real
+}
+
+TEST_CASE("mesh bake round-trips through dumpJson + parseJson",
+          "[field_graph][bake]") {
+  auto box = makeBox(1.0);
+  FixedResolver meshes{std::get<0>(box).get(), std::get<1>(box).get()};
+  GraphNode viaShort = parseShorthand(
+      "difference(sphere(radius=1.3),mesh(path=\"x\",bake=20,band=0.4))");
+  const std::string json = dumpJson(viaShort);
+  REQUIRE(json.find("\"bake\"") != std::string::npos);
+  REQUIRE(json.find("\"band\"") != std::string::npos);
+  GraphNode viaJson = parseJson(json);
+  FieldGraph a = FieldGraph::build(viaShort, meshes);
+  FieldGraph b = FieldGraph::build(viaJson, meshes);
+  for (const Vector3& p : {Vector3{0, 0, 0}, Vector3{1.1, 0.3, -0.2},
+                           Vector3{0.9, 0.9, 0.9}, Vector3{3, 0, 0}})
+    REQUIRE(a.field().valueAt(p) == b.field().valueAt(p));
+}
+
+TEST_CASE("mesh and winding bake reject bad values with a located error",
+          "[field_graph][bake]") {
+  auto box = makeBox(1.0);
+  FixedResolver meshes{std::get<0>(box).get(), std::get<1>(box).get()};
+  // Each error must be located on the baked node, not on its parent.
+  std::string childPointer;
+  auto errorOf = [&](const std::string& child) -> GraphError {
+    const GraphNode g = parseShorthand("union(sphere(radius=1)," + child + ")");
+    childPointer = g.in.at(1).pointer;
+    REQUIRE(!childPointer.empty());
+    REQUIRE(childPointer != g.pointer);
+    try {
+      FieldGraph::build(g, meshes);
+    } catch (const GraphError& e) {
+      return e;
+    }
+    FAIL("expected a GraphError for " + child);
+    return GraphError("", "");
+  };
+  for (const char* bad :
+       {"mesh(path=\"x\",bake=1)", "mesh(path=\"x\",bake=513)",
+        "mesh(path=\"x\",bake=32.5)", "winding(path=\"x\",bake=0)",
+        "winding(path=\"x\",bake=-8)"}) {
+    GraphError e = errorOf(bad);
+    INFO(bad << " -> " << e.what());
+    REQUIRE(std::string(e.what()).find("integer in [2, 512]") != std::string::npos);
+    REQUIRE(e.pointer() == childPointer);
+  }
+  {
+    GraphError e = errorOf("mesh(path=\"x\",band=0.3)");
+    REQUIRE(std::string(e.what()).find("'band' needs 'bake'") != std::string::npos);
+    REQUIRE(e.pointer() == childPointer);
+  }
+  for (const char* bad :
+       {"mesh(path=\"x\",bake=16,band=0)", "mesh(path=\"x\",bake=16,band=-1)"}) {
+    GraphError e = errorOf(bad);
+    INFO(bad << " -> " << e.what());
+    REQUIRE(std::string(e.what()).find("'band' must be a positive") !=
+            std::string::npos);
+    REQUIRE(e.pointer() == childPointer);
+  }
+  REQUIRE(meshes.calls == 0);   // every check above runs before the mesh loads
+  // winding bakes the full lattice: a band is a key it does not read.
+  {
+    GraphError e = errorOf("winding(path=\"x\",bake=16,band=0.3)");
+    REQUIRE(std::string(e.what()).find("unknown parameter 'band' for 'winding'") !=
+            std::string::npos);
+    REQUIRE(e.pointer() == childPointer);
   }
 }
 

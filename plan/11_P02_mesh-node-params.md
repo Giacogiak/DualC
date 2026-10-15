@@ -34,6 +34,11 @@
    largest extent; `band` defaults to 3 cells of the bake (mesh) and is ignored for `winding`
    (full-lattice bake, as `field_glsl.cpp` already does). `N` validated: ≥ 2 and a documented
    ceiling, with a located error.
+   *Corrected by P02.2 (2026-10-15), on a measurement:* an explicit `band` also widens the
+   region (pad = 10 % + `band`). Without it a smooth parent with a large `k` makes material
+   out of the grid's clamped far field (smooth-union torus cube, k = 1: 3× the faces, max
+   deviation 1.56); `dualc_boolean` pads by `k` for the same reason. A `band` on `winding` is
+   rejected as an unknown key (the unread-key rule), not ignored. Evidence: roadmap 21/04.
 2. GLSL: a baked node's own `GridField` goes straight to `emitBakedGrid`, so preview == export;
    `--grid-res` does not re-bake it. Parity case `mesh-bake`; count bumped.
 3. Tests: near the surface the baked field is within one bake cell of the exact one; the

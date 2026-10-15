@@ -136,7 +136,7 @@ parity case `mesh-gwn` (74); no ABI version move. Numbers: [03](03-mesh-sign-gwn
 
 ## #57 Per-node bake on the mesh nodes
 
-**NEXT** — opened 2026-10-14; plan P02 T2. The graph addition `dualc_boolean`'s retirement
+**DONE** 2026-10-15 — opened 2026-10-14; plan P02 T2. The graph addition `dualc_boolean`'s retirement
 would need (D-60): its `--bake N`, the narrow-band SDF-grid bake of each mesh, is a speed /
 quality trade no node exposes.
 
@@ -150,9 +150,13 @@ round-trip, a parity case `mesh-bake` (the count +1); the face counts of both on
 screening's `difference sphere cube` case recorded side by side — equivalence with
 `dualc_boolean --bake N` is not byte-level.
 
+*Landed 2026-10-15 (P02.2):* as specified, except `band` also widens the region — without
+it a smooth op makes material out of the grid's clamp; parity `mesh-bake` (75). D-60's
+numbers: [04](04-mesh-node-bake.md).
+
 ## #58 2D profiles and revolve / extrude in the graph
 
-**PLANNED** — opened 2026-10-14; plan P03 T1–T2. The precondition of `dualc_lift`'s retirement
+**NEXT** — opened 2026-10-14; plan P03 T1–T2. The precondition of `dualc_lift`'s retirement
 (D-57); fires D-11 for this sub-grammar only. The library layer exists
 (`include/dualc/implicit2d.h`: `Circle2D`, `Box2D`, `Segment2D`, `Polygon2D`, `RevolveField`,
 `ExtrudeField`); the graph and `field_glsl.cpp` have no 2D node.

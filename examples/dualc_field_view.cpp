@@ -14,8 +14,10 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <set>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 // dualc_field_view -- a standalone GPU raymarch viewer for an arbitrary
@@ -63,7 +65,8 @@ void printUsage() {
     "                    infinite field -- plane/repeat -- requires this).\n"
     "  --grid-res N      Mesh-source bake resolution per axis (default 96,\n"
     "                    max 256). The bake covers the raymarch box, so it\n"
-    "                    composes with --bounds.\n"
+    "                    composes with --bounds. A node with its own bake=N\n"
+    "                    is uploaded as baked; this does not apply to it.\n"
     "  --preview-scale S Resolution factor while orbiting / editing a param\n"
     "                    (default 0.5). The raymarch renders at S x the window\n"
     "                    while the view moves, then snaps to full-res when it\n"
@@ -226,15 +229,21 @@ int main(int argc, char** argv) {
   std::cout << "[dualc_field_view] compiled " << scene.nodeCount << " nodes, "
             << scene.bindings.size() << " params, " << scene.meshes.size()
             << " mesh texture(s)";
-  // Report the bake resolution AND its world cell size once (every mesh node
-  // bakes at the same resolution over the same box). --grid-res went unnoticed
-  // as a no-op precisely because the render never changed with it.
-  if (!scene.meshes.empty()) {
-    const auto& mt = scene.meshes.front();
-    const dualc::Vector3 e = mt.region.extent();
-    const double cell = std::max({e.x, e.y, e.z}) /
-                        std::max(mt.resolution.x - 1, 1);
-    std::cout << " @ " << mt.resolution.x << "^3 (cell " << cell << ")";
+  // Report each distinct bake resolution AND its world cell size: an unbaked
+  // mesh node bakes at --grid-res over the trace box, a node with its own
+  // bake=N over its own box (#57). --grid-res went unnoticed as a no-op
+  // precisely because the render never changed with it.
+  {
+    std::set<std::pair<int, double>> seen;
+    const char* sep = " @ ";
+    for (const auto& mt : scene.meshes) {
+      const dualc::Vector3 e = mt.region.extent();
+      const double cell = std::max({e.x, e.y, e.z}) /
+                          std::max(mt.resolution.x - 1, 1);
+      if (!seen.insert({mt.resolution.x, cell}).second) continue;
+      std::cout << sep << mt.resolution.x << "^3 (cell " << cell << ")";
+      sep = ", ";
+    }
   }
   std::cout << ", stepScale " << scene.stepScale << "\n";
 

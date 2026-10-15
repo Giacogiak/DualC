@@ -88,7 +88,8 @@ inline constexpr int kMaxMeshGridRes = 256;
 
 // Compile a graph to GLSL. `bounds` is the trace/sampling box (the CLI flag, not
 // a graph node); mesh sources bake within it. `gridRes` is the per-axis bake
-// resolution of every mesh/winding node -- because the bake region IS `bounds`,
+// resolution of every mesh/winding node without its own `bake=N` (a node with
+// one uploads the builder's grid unchanged) -- because the bake region IS `bounds`,
 // tightening `bounds` concentrates that resolution on the region of interest
 // rather than spreading it over the whole mesh AABB. Throws GraphError
 // (op-located) on an op the codegen does not yet support, or any builder-style

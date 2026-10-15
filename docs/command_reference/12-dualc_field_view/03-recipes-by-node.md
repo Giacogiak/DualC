@@ -76,7 +76,8 @@ sphere-trace stays safe through the non-metric warp — no flag needed.
 `winding(path="…")` reconstructs a **solid** from a triangle mesh via the 0.5-GWN
 isosurface — **robust to non-watertight input / soup** (where ray-parity `mesh`
 would mis-sign). It bakes to a `sampler3D` for preview exactly like `mesh` (so
-`--grid-res` controls its resolution); its bounds are the padded mesh AABB, so no
+`--grid-res` controls its resolution, unless the node carries its own `bake=N`, which
+is uploaded as baked); its bounds are the padded mesh AABB, so no
 `--bounds` is needed. It benefits more than `mesh` from a higher `--grid-res`: the
 GWN field is nearly a step function, so a large model shows visible voxel terracing
 at `96³` that `--grid-res 256` removes. Run from the repo root so `data/…` resolves.

@@ -144,6 +144,40 @@ GraphNode parseShorthand(const std::string& text);
 // } }` (the "in" array is omitted when empty). Round-trips through parseJson.
 std::string dumpJson(const GraphNode& root);
 
+// Per-node bake: `mesh(…, bake=N[, band=W])` and `winding(…, bake=N)` replace
+// the source with a GridField of N³ samples over the node's OWN bounds padded by
+// 10 % of their largest extent, plus `band` when one is given -- dualc_boolean
+// --bake's rule (pad 10 % + k) without the sibling's box, with the parent's k
+// passed in as `band` since a node cannot see it. A mesh bakes through
+// MeshSource's narrow band, `band` world units wide (default 3 bake cells); a
+// winding node bakes the full lattice. Outside its region a grid clamps to the
+// face value, which never grows: under a smooth parent whose k exceeds that
+// margin the blend makes material out of the clamp, so a smooth op needs
+// band >= k on a baked child (measured, roadmap 21/04). The contour builder
+// and the GLSL codegen both call these, so a baked node's preview IS its
+// export, and --grid-res does not re-bake it. The ceiling bounds memory: N³
+// floats, 512 MiB at 512.
+inline constexpr int kMaxNodeBakeRes = 512;
+
+struct NodeBake {
+  int res = 0;          // 0: the node is not baked
+  double band = 0.0;    // mesh only; 0: the default, 3 bake cells
+};
+
+// Validate a node's raw `bake` / `band` values (nullptr = the key is absent).
+// Throws a GraphError located at the node.
+NodeBake checkNodeBake(const GraphNode& n, const double* bake,
+                       const double* band);
+
+// The region a baked node samples: its own field bounds padded by 10 % of
+// their largest extent plus `band` (0 for the default band and for winding).
+dualc::BBox nodeBakeRegion(const dualc::BBox& nodeBounds, double band);
+
+// Bake a mesh / winding source as NodeBake says; both return a GridField.
+dualc::FieldPtr bakeMeshNode(const dualc::MeshSource& src, const NodeBake& b);
+dualc::FieldPtr bakeWindingNode(const dualc::ImplicitField& winding,
+                                const NodeBake& b);
+
 // A built field: owns the FieldPtr tree. The meshes it references are owned by
 // the MeshResolver passed to build(), which the caller must keep alive.
 class FieldGraph {

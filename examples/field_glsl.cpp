@@ -691,6 +691,17 @@ std::string strParam(const GraphNode& n, const std::string& key,
   return p->str;
 }
 
+// A mesh / winding node's `bake` / `band`, read as field_graph.cpp reads them;
+// the validation and the bake itself are the builder's (checkNodeBake,
+// bakeMeshNode, bakeWindingNode), so a baked node's texture is its export grid.
+NodeBake readNodeBake(const GraphNode& n, bool readBand) {
+  const bool hasBake = findParam(n, "bake") != nullptr;
+  const double bake = numParam(n, "bake", 0.0);
+  const bool hasBand = readBand && findParam(n, "band") != nullptr;
+  const double band = readBand ? numParam(n, "band", 0.0) : 0.0;
+  return checkNodeBake(n, hasBake ? &bake : nullptr, hasBand ? &band : nullptr);
+}
+
 int axisIndex(const GraphNode& n, const std::string& s) {
   if (s == "x" || s == "0") return 0;
   if (s == "y" || s == "1") return 1;
@@ -1123,13 +1134,22 @@ int emitMesh(const GraphNode& n, Ctx& c) {
   else if (normals == "sharp") interp = false;
   else throw GraphError("mesh normals must be 'smooth' or 'sharp'", n.pointer);
 
+  const NodeBake nb = readNodeBake(n, true);
+
   MeshHandle h = c.resolver->resolve(path);
   dualc::MeshSource src(*h.mesh, *h.geom, interp, sm);
-  const dualc::Vector3 e = c.bounds.extent();
-  const double maxCell =
-      std::max({e.x, e.y, e.z}) / std::max(c.gridRes - 1, 1);
-  dualc::FieldPtr gridPtr = src.bakeToGrid(
-      c.bounds, dualc::Vector3i{c.gridRes, c.gridRes, c.gridRes}, 3.0 * maxCell);
+  // A node with its own bake (#57) uploads exactly the export's grid; only an
+  // unbaked node is baked here, over the trace box at --grid-res.
+  dualc::FieldPtr gridPtr;
+  if (nb.res > 0) {
+    gridPtr = bakeMeshNode(src, nb);
+  } else {
+    const dualc::Vector3 e = c.bounds.extent();
+    const double maxCell =
+        std::max({e.x, e.y, e.z}) / std::max(c.gridRes - 1, 1);
+    gridPtr = src.bakeToGrid(
+        c.bounds, dualc::Vector3i{c.gridRes, c.gridRes, c.gridRes}, 3.0 * maxCell);
+  }
   auto* grid = dynamic_cast<const dualc::GridField*>(gridPtr.get());
   if (!grid)
     throw GraphError("internal: mesh bake did not return a GridField", n.pointer);
@@ -1140,17 +1160,21 @@ int emitMesh(const GraphNode& n, Ctx& c) {
 // NOT a metric SDF and has no narrow band, so it bakes via the generic
 // full-lattice bakeToGrid(field, ...) rather than MeshSource's banded one. The
 // field's sign convention (negative inside) matches MeshSource, so the baked grid
-// feeds the same texture()-as-SDF emission with no sign flip.
+// feeds the same texture()-as-SDF emission with no sign flip. With its own
+// bake=N it uploads the builder's grid over its own box, as emitMesh does.
 int emitWinding(const GraphNode& n, Ctx& c) {
   std::string path = strParam(n, "path", "");
   if (path.empty())
     throw GraphError("'winding' requires a 'path'; id-based in-memory sources are "
                      "not supported by the GLSL preview (use a file path)",
                      n.pointer);
+  const NodeBake nb = readNodeBake(n, false);
   MeshHandle h = c.resolver->resolve(path);
   dualc::FieldPtr wf = dualc::windingNumberField(*h.mesh, *h.geom);
-  dualc::FieldPtr gridPtr = dualc::bakeToGrid(
-      *wf, c.bounds, dualc::Vector3i{c.gridRes, c.gridRes, c.gridRes});
+  dualc::FieldPtr gridPtr =
+      nb.res > 0 ? bakeWindingNode(*wf, nb)
+                 : dualc::bakeToGrid(*wf, c.bounds,
+                                     dualc::Vector3i{c.gridRes, c.gridRes, c.gridRes});
   auto* grid = dynamic_cast<const dualc::GridField*>(gridPtr.get());
   if (!grid)
     throw GraphError("internal: winding bake did not return a GridField",

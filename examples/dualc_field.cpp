@@ -113,11 +113,17 @@ void printVocabulary() {
 
   std::cout << "\nMesh sources:\n"
                "  mesh     -- signed distance to a mesh "
-               "(path, sign=parity|pseudonormal|gwn, normals);\n"
-               "              parity/pseudonormal need it closed, gwn "
-               "tolerates holes and soup\n"
+               "(path, sign=parity|pseudonormal|gwn, normals,\n"
+               "              bake=N, band=3 cells); parity/pseudonormal need "
+               "it closed, gwn\n"
+               "              tolerates holes and soup\n"
                "  winding  -- generalized-winding-number field for soup / open "
-               "shells (path)\n";
+               "shells (path, bake=N)\n"
+               "  bake=N samples the node once into an N^3 grid (2..512) over "
+               "its own box + 10%:\n"
+               "              fast, approximate within a bake cell; band = the "
+               "exact-distance\n"
+               "              shell, and it must be >= k under a smooth op\n";
 
   std::cout << "\nBooleans (2 children; smooth-* take k=0.25):\n";
   struct BoolHint { dce::BoolOp op; const char* hint; };

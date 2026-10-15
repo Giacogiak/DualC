@@ -25,6 +25,8 @@
 #include "geometrycentral/surface/surface_mesh_factories.h"
 #include "geometrycentral/surface/vertex_position_geometry.h"
 
+#include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -804,6 +806,16 @@ dualc::SignMethod meshSignMethod(const GraphNode& n) {
                    n.pointer);
 }
 
+// A mesh / winding node's `bake` (and, on a mesh, `band`), read through the
+// same findParam as every other key so the unread-key check sees them.
+NodeBake readNodeBake(const GraphNode& n, bool readBand) {
+  const bool hasBake = findParam(n, "bake") != nullptr;
+  const double bake = numParam(n, "bake", 0.0);
+  const bool hasBand = readBand && findParam(n, "band") != nullptr;
+  const double band = readBand ? numParam(n, "band", 0.0) : 0.0;
+  return checkNodeBake(n, hasBake ? &bake : nullptr, hasBand ? &band : nullptr);
+}
+
 dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes);
 
 dualc::FieldPtr buildField(const GraphNode& n, MeshResolver& meshes) {
@@ -867,8 +879,11 @@ dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes) {
     else if (normals == "sharp") interp = false;
     else throw GraphError("mesh normals must be 'smooth' or 'sharp'", n.pointer);
     dualc::SignMethod sm = meshSignMethod(n);
+    const NodeBake nb = readNodeBake(n, true);
     MeshHandle h = id.empty() ? meshes.resolve(path) : meshes.resolveId(id);
-    return std::make_shared<dualc::MeshSource>(*h.mesh, *h.geom, interp, sm);
+    auto src = std::make_shared<dualc::MeshSource>(*h.mesh, *h.geom, interp, sm);
+    if (nb.res == 0) return src;
+    return bakeMeshNode(*src, nb);
   }
   if (op == "winding") {
     std::string path = strParam(n, "path", "");
@@ -876,8 +891,11 @@ dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes) {
     if (path.empty() == id.empty())
       throw GraphError("'winding' requires exactly one of 'path' or 'id'",
                        n.pointer);
+    const NodeBake nb = readNodeBake(n, false);
     MeshHandle h = id.empty() ? meshes.resolve(path) : meshes.resolveId(id);
-    return dualc::windingNumberField(*h.mesh, *h.geom);
+    dualc::FieldPtr wf = dualc::windingNumberField(*h.mesh, *h.geom);
+    if (nb.res == 0) return wf;
+    return bakeWindingNode(*wf, nb);
   }
 
   // 4. Decorators not covered by the PostOp machinery (one child).
@@ -934,6 +952,53 @@ dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes) {
 }
 
 }  // namespace
+
+NodeBake checkNodeBake(const GraphNode& n, const double* bake,
+                       const double* band) {
+  NodeBake nb;
+  if (bake) {
+    const double v = *bake;
+    if (!std::isfinite(v) || v != std::floor(v) || v < 2.0 ||
+        v > static_cast<double>(kMaxNodeBakeRes))
+      throw GraphError("'" + n.op + "' bake must be an integer in [2, " +
+                           std::to_string(kMaxNodeBakeRes) +
+                           "] (samples per axis; the grid holds N^3 floats)",
+                       n.pointer);
+    nb.res = static_cast<int>(v);
+  }
+  if (band) {
+    if (!bake)
+      throw GraphError("'band' needs 'bake' (it is the exact-distance shell of "
+                       "the bake, in world units)",
+                       n.pointer);
+    if (!std::isfinite(*band) || *band <= 0.0)
+      throw GraphError("'band' must be a positive width in world units",
+                       n.pointer);
+    nb.band = *band;
+  }
+  return nb;
+}
+
+dualc::BBox nodeBakeRegion(const dualc::BBox& nodeBounds, double band) {
+  const dualc::Vector3 e = nodeBounds.extent();
+  const double pad = 0.10 * std::max({e.x, e.y, e.z}) + band;
+  return dualc::BBox{nodeBounds.min - dualc::Vector3{pad, pad, pad},
+                     nodeBounds.max + dualc::Vector3{pad, pad, pad}};
+}
+
+dualc::FieldPtr bakeMeshNode(const dualc::MeshSource& src, const NodeBake& b) {
+  const dualc::BBox region = nodeBakeRegion(src.bounds(), b.band);
+  const dualc::Vector3 e = region.extent();
+  const double cell = std::max({e.x, e.y, e.z}) / (b.res - 1);
+  return src.bakeToGrid(region, dualc::Vector3i{b.res, b.res, b.res},
+                        b.band > 0.0 ? b.band : 3.0 * cell);
+}
+
+dualc::FieldPtr bakeWindingNode(const dualc::ImplicitField& winding,
+                                const NodeBake& b) {
+  return dualc::bakeToGrid(winding, nodeBakeRegion(winding.bounds(), 0.0),
+                           dualc::Vector3i{b.res, b.res, b.res});
+}
 
 FieldGraph FieldGraph::build(const GraphNode& root, MeshResolver& meshes) {
   return FieldGraph(buildField(root, meshes));

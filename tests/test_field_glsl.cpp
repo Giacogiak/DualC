@@ -179,6 +179,39 @@ TEST_CASE("GLSL codegen honours the requested bake resolution", "[field_glsl]") 
   CHECK(clamped.meshes[0].resolution.x == 2);
 }
 
+TEST_CASE("GLSL codegen uploads a baked node's own grid", "[field_glsl][bake]") {
+  auto boxMesh = makeBox(1.0);
+  FixedResolver resolver(std::get<0>(boxMesh).get(),
+                         std::get<1>(boxMesh).get());
+
+  // #57: a node with bake=N is the export's GridField, uploaded as is -- the
+  // texture is the CPU grid bit for bit (preview == export), and neither the
+  // compile bounds nor gridRes (--grid-res) re-bake it.
+  for (const char* expr :
+       {"mesh(path=\"box\",bake=24)", "mesh(path=\"box\",bake=24,band=0.5)",
+        "winding(path=\"box\",bake=20)"}) {
+    INFO(expr);
+    GraphNode g = parseShorthand(expr);
+    FieldGraph fg = FieldGraph::build(g, resolver);
+    auto* grid = dynamic_cast<const dualc::GridField*>(&fg.field());
+    REQUIRE(grid != nullptr);
+    for (int gridRes : {48, 129}) {
+      GlslScene s = compileToGlsl(g, resolver, box(-3, 3), gridRes);
+      REQUIRE(s.meshes.size() == 1);
+      CHECK(s.meshes[0].resolution.x == grid->resolution().x);
+      CHECK(s.meshes[0].region.min.x == grid->bounds().min.x);
+      CHECK(s.meshes[0].region.max.z == grid->bounds().max.z);
+      CHECK(s.meshes[0].values == grid->values());
+    }
+  }
+
+  // Baked and unbaked forms of one mesh are two textures, not one memo hit.
+  GlslScene two = compileToGlsl(
+      parseShorthand("union(mesh(path=\"box\"),mesh(path=\"box\",bake=24))"),
+      resolver, box(-2, 2));
+  CHECK(two.meshes.size() == 2);
+}
+
 TEST_CASE("GLSL codegen emits every registered primitive", "[field_glsl]") {
   FileMeshResolver resolver;
   // Every primitive token in the registry must compile to a single-node scene

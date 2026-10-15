@@ -197,7 +197,7 @@
     "src/internal/third_party/"
   ],
 
-  "parity_expected_cases": 74,
+  "parity_expected_cases": 75,
 
   "io_stress": { "concurrency": 6, "iterations": 30 }
 }

@@ -385,6 +385,15 @@ int main() {
                        "mesh(path=\"" + cubePath + "\",sign=\"gwn\")",
                        dualc::BBox{{-0.2, -0.2, -0.2}, {1.5, 1.5, 1.5}}, A, R,
                        Ref::CpuSignOnly});
+    // (e) Preview == export for a node with its own bake (#57): the GPU reads
+    //     the node's GridField, so it is compared against the BUILT CPU field
+    //     (not a re-read texture) at filter precision. The region is wider than
+    //     the bake's own [-0.6,0.6]^3, so the edge clamp is compared too, and
+    //     bake=24 differs from the codegen's --grid-res default: a codegen that
+    //     re-baked the node over the trace box would miss by far more than tol.
+    runList.push_back({"mesh-bake",
+                       "mesh(path=\"" + cubePath + "\",bake=24)", box(-1, 1),
+                       2e-3, 2e-3});
   }
   if (!cubePath.empty()) {
     // winding bakes 0.5 - windingNumber over the full lattice (no band): same
