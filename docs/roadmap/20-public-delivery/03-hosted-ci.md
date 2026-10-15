@@ -128,6 +128,14 @@ cold on every OS under the new keys and passed every job, ctest 304 with
 [10 #54](../10-infrastructure-and-integration.md)'s cases on all three OSes: `docs` 8 s, ubuntu 3 min 33 s,
 macOS 1 min 47 s, windows 7 min 17 s, `sanitize` 9 min 40 s, `gpu` 4 min 36 s.
 
+*2026-10-15:* run [38767086631](https://github.com/Giacogiak/DualC/actions/runs/38767086631)
+(`6ac8b00`, [21 #56](../21-cli-consolidation/01-record.md#56-the-mesh-node-takes-signgwn))
+failed on `gpu` alone, at *Configure with the parity harness*. A clean local configure with
+the job's flags failed the same way, and showed why: the Eigen clone from gitlab.com was
+refused with `GitLab is currently unable to handle this request due to load`; a clone
+succeeded minutes later. The `gpu` job is the one gate job with no FetchContent cache, so
+every run fetches Eigen from GitLab cold. A cache for it, or a system Eigen, is not done.
+
 ---
 
 ← Back to [20 — public delivery](README.md) · the [Roadmap index](../README.md).

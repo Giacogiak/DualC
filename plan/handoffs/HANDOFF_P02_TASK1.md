@@ -75,6 +75,15 @@ Linux, GCC 15, Ninja, Release, `build/examples/`, `--depth 6`, demo meshes as ge
   sources touched so the warnings scan is meaningful): 32 checks, 30 OK, 1 SKIP, 0 failed —
   **7 TUs compiled, 0 DualC-origin warnings, ctest 308 / 0 failed** (97.5 s; 307 + the new
   case), PASS.
+- **Remote run on `6ac8b00` (run 38767086631): red, not this change.** `docs`, the three
+  `build` jobs and `sanitize` green; `gpu` failed at *Configure with the parity harness*
+  (no gate log). Reproduced locally with CI's exact configure flags in a clean tree:
+  geometry-central's `deps/CMakeLists.txt` clones Eigen 3.3.9 from gitlab.com, which
+  answered `remote error: GitLab is currently unable to handle this request due to load`
+  (twice at 18:20 and 18:27 CEST; a clone succeeded at 18:31). This commit re-triggers the
+  run; its result is what `plan/remote_run_check.py` reports for the final HEAD.
+  The `gpu` job is the only one that configures from an empty `_deps` with a GitLab fetch on
+  the critical path — a standing fragility, see *Open* 3.
 - `docs_loss_audit.py --base a37c8a0 --head 67dfe89 --scope docs/` with an empty scratch
   triage: on the pages this unit edited, 6 residual rows that are not scoring noise, each
   intentional — the two "`gwn` is rejected / the `gwn`→`winding` hint" statements (now
@@ -98,6 +107,13 @@ Linux, GCC 15, Ninja, Release, `build/examples/`, `--depth 6`, demo meshes as ge
    close that; not in this task's scope.
 2. Still open from P01.2: `include/dualc/types.h` says parity is "Correct for closed,
    oriented meshes" (orientation does not matter); left alone.
+3. **CI depends on gitlab.com being up**: geometry-central (pinned) fetches Eigen from GitLab
+   at configure when no system Eigen is found; a GitLab overload turns the run red with no
+   code at fault (2026-10-15, above; recorded in 20/03). The `gpu` job is the one gate job
+   without the FetchContent cache the `build` matrix and `sanitize` restore (`gate.yml`), so
+   it fetches Eigen cold on every run. Options, none taken here: give `gpu` the same
+   `_deps` cache, or install a system Eigen (whether geometry-central prefers a found Eigen
+   is to be verified). Not this task's scope; it touches `.github/workflows/`.
 
 ## What the next unit (P02.2, T2 — per-node `bake`) needs to know
 
