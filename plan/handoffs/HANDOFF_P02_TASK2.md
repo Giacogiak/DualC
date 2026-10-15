@@ -12,6 +12,11 @@ both) and adds what the next unit and Giacomo need.
 
 Commits: `3c7c288` (code, tests, parity case, docs, plan correction), then this handoff.
 
+> **Read with § Resumed at the P02 gate.** The sections from here to *Measured* describe the
+> first pass (`3c7c288`), before Giacomo's answers. Where they say a smooth op needs
+> `band ≥ k` by hand, or count 75 parity cases, D-62 (`1b126db`) superseded them: the margin
+> is now handed down automatically and the count is 76.
+
 - **One bake rule, two callers.** `examples/field_graph.{h,cpp}` export `kMaxNodeBakeRes`
   (512), `NodeBake`, `checkNodeBake`, `nodeBakeRegion`, `bakeMeshNode`, `bakeWindingNode`.
   `buildFieldUnchecked` (`mesh`, `winding`) and `field_glsl.cpp` (`emitMesh`, `emitWinding`)
@@ -129,7 +134,8 @@ tool's combined-region bake it loses **no** accuracy: at the tool's root box it 
 tool's face count to the face and its deviation (3.11 / 0.0333 vs 3.11 / 0.0331), at 1.5× the
 tool's wall (4.9 s vs 3.4 s). By default it is finer than the tool (its root box is the
 operand's own): 2.4× the faces, 2.6× lower mean deviation, ~2× time and memory. The cost is
-ergonomic: under a smooth op the user must pass `band=k` by hand, or the result is wrong.
+ergonomic: under a smooth op the user had to pass `band=k` by hand, or the result was wrong
+— the trap D-62 then closed (§ Resumed).
 
 Other numbers:
 
@@ -150,6 +156,71 @@ Other numbers:
   in `roadmap/README.md`, and #33's milestone row (rolled off per D-43; its record is 17/14).
   No docs file deleted.
 
+## Resumed at the P02 gate — Giacomo's answers (2026-10-15)
+
+The unit returned `blocked` with two questions; the answers, and what was done with each:
+
+1. **D-60: "Keep it."** `dualc_boolean` stays as the convenience CLI for "two meshes, one op".
+   Recorded: D-60's row left the open index (`decisions/README.md`) for
+   `decisions/01-settled.md` as DONE (kept), with the deferral's date and trigger in its status
+   cell; 21/01 § The dualc_boolean decision rewritten as DONE — decided 2026-10-15 (the
+   owner's words of both days kept); 21/README's row; `roadmap/README.md` § Current focus, the
+   principal-blocks row ("seven side CLIs", "D-60 DONE (kept)") and the #57 milestone row.
+   The plans: P05 T1 step 3 and P06's header now say *Decided 2026-10-15: kept (D-60)* — page
+   03 stays and gains a pointer to `bake=` in P05; P06 retires seven tools. Nothing in this
+   unit touched `dualc_boolean` itself.
+2. **The trap: "(b) Propagate k."** Implemented as part of #57 and recorded as **D-62**
+   (settled, 21/04 § The margin (decision (b))). `childBakeMargin(parent, i, margin)` in
+   `field_graph.{h,cpp}` hands each child a margin; `buildField` takes it as a parameter
+   (`child(i)` in the dispatcher), `emitNode` tracks it on a `Ctx::path` stack (so no emit
+   call site changed). A baked mesh pads its region by max(`band`, margin) and keeps its band
+   ≥ margin + 3 cells; an explicit larger `band` wins; `winding` pads by the margin. Two
+   choices beyond the literal answer, both recorded in 21/04 and D-62:
+   - **max of the smooth `k`s above, not only the nearest:** an outer blend reads the inner
+     blend's values, which carry the clamp too (test case: inner `k`=0.1, outer `k`=1).
+   - **`offset` / `round` / `onion` / `displace` / the graded ops' base add their amount:**
+     the same clamp, and worse — measured before the change, `offset(mesh(cube,bake=32),
+     r=0.3)` contoured to **1 face** and `onion(…,thickness=0.3)` to 588, against the exact
+     9,804 / 10,392 (`--depth 5`), because 0.3 exceeds the 10 % pad. If Giacomo wants the
+     literal "smooth `k` only", it is three lines in `childBakeMargin`.
+   - The GLSL dedup memo keys a subtree on its margin **only when it holds a baked node**,
+     so the existing "duplicated unbaked mesh bakes once" contract holds (tested both ways).
+
+Evidence of the resumed work (commit `1b126db`, then 21/04's preservation line and this
+handoff):
+
+- **Tests:** *childBakeMargin hands each child the distance its ancestors read* (the rule, op
+  by op); *a baked child inherits its ancestors' margin* — sign agrees with the exact field
+  off the surface (|exact| ≥ 0.25 on a 31³ grid over [-2.9,3.1]³) for: direct smooth child,
+  through `translate`, through `scale(0.6)`, nested smooth with the larger `k` outside,
+  `offset` 0.3, `onion` 0.3; with `childBakeMargin` forced to 0 the first case fails; the bare
+  library composition (`smoothUnionOf(bakeMeshNode(…, 0), …)`) still shows the trap;
+  *an explicit band larger than the margin wins* (regions 1 + 0.2 + 2 vs 1 + 0.2 + 1, winding
+  pad); *GLSL codegen uploads a baked node's own grid* gained six nested graphs (texture ==
+  `bakeMeshNode(src, nb, expected)` bit for bit: margins 0, 0.7, 0.5, 1.0, 0.5, 0.4) and the
+  memo split. **Replaced, not weakened:** my own test *a baked child under a smooth op needs
+  band >= k* (committed in `3c7c288`) asserted the trap in the graph, which decision (b)
+  removes; its trap assertion now runs on the library composition, as P02.1 replaced the
+  "gwn throws" assertion its own decision removed.
+- **Parity:** new case `mesh-bake-smooth` — a baked cube under `translate` inside a
+  `smooth-union(k=0.5)`, GPU vs the built CPU field: maxErr 5.70e-4; with the GLSL side forced
+  to margin 0: FAIL, 8.66e-1, 3,752/4,096 over tol. `parity_expected_cases` 75 → **76**.
+- **Measurements:** the smooth-union table re-run (same conditions as below): the graph with
+  default band now 0.66 s / 29 MB / 3,564 faces / max 0.00851 / mean 0.00186 — the tool's
+  0.65 s / 29 MB / 3,468 / 0.00819 / 0.00195; at the tool's root box 3,468 faces, 0.00673 /
+  0.00188. The hard-op tables are unchanged by construction (no margin), and the graph's
+  `difference` output is `cmp`-identical before and after. 21/04 keeps the *before* row.
+- **Gate:** `python3 scripts/check.py` with the five changed TUs touched → 30 passed, 1 SKIP
+  (configure), **7 TUs, 0 DualC-origin warnings, ctest 315 / 0 failed**; `cmake --build
+  build-gl -j && python3 scripts/check.py --gpu --strict --build-dir build-gl` → **76/76**
+  (0 warnings in the `build-gl` rebuild); `--docs --strict` green.
+- **Loss audit** `--base 284920c --head 1b126db --scope docs/`: the residuals on the edited
+  pages are the D-60 row's move (its text now in the settled row), 21/01's deferral section
+  condensed (the trigger detail, "the face counts on difference sphere cube", lives in 21/04's
+  tables; "until D-60 says retire, no unit removes …" is moot, kept), 11/01's `band ≥ k`
+  guidance (superseded by D-62), and 21/04's first smooth-union run — whose explicit `band=1`
+  row was the one fact not carried over; it is now a sentence in 21/04.
+
 ## What I got wrong on the way
 
 - Implemented the region exactly as the plan said, measured the smooth-union, found it wrong
@@ -160,49 +231,40 @@ Other numbers:
   `--write-dump` + grep replaced it.
 - The gate's warnings scan reported SKIP on the incremental build; touching the changed TUs
   and re-running `--build` made it meaningful (7 TUs).
+- Resumed work: twice took a raw pointer from a temporary `FieldPtr` / `make_shared` in a
+  test (dangling; one read 0.0 for a bound) — now held in named locals.
+- The first return ran `remote_run_check.py` before GitHub had registered the run ("no run
+  for HEAD"); the next run on that commit was then cancelled by my own later push.
 
 ## Open — for Giacomo
 
-1. **D-60 — decide `dualc_boolean`'s retirement** (the approve gate after P02). The evidence
-   is the tables above / 21/04: a graph with `mesh(…,bake=N)` (and `band=k` under smooth ops)
-   covers `--bake N` at equal accuracy and comparable speed; the exact path is already
-   byte-identical. What retiring would lose: the tool's one-flag ergonomics (combined region,
-   `k` folded into the band automatically). **Please decide: retire, or keep.**
-2. **The smooth-op trap** (only if retire, or regardless): today a baked child under a smooth
-   op with the default band is silently wrong; it is documented and tested, not prevented.
-   Options, none taken: (a) leave it documented (now); (b) the builder passes the enclosing
-   smooth op's `k` down so a baked descendant widens its band/region itself — closes the trap
-   and reproduces the tool's ergonomics, but needs scale-aware propagation through decorators
-   (`scale`, `offset`) on both CPU and GLSL paths; (c) a located error when a smooth boolean's
-   *direct* child is a baked mesh with `band < k` — cheap, misses nested cases; (d) library:
-   `GridField` extrapolates outside its region (face value + distance to the box) — fixes all
-   cases at the root, but changes library semantics (`dualc_raymarch`, `gridBoundsExceeded`,
-   design 08) and needs `/docs-semantic-lint`.
-3. Bakes above 256 on the GPU are untested (GL 3.3's guaranteed 3D-texture size is 256).
-4. Still open from P02.1: `mesh-gwn` cannot tell GWN from parity (closed cube); `types.h`'s
+1. Decision (b) went slightly beyond its words (max of the smooth `k`s, and offset-type ops
+   add their amount) — see *Resumed* 2; say if the literal rule is wanted.
+2. Bakes above 256 on the GPU are untested (GL 3.3's guaranteed 3D-texture size is 256).
+3. Still open from P02.1: `mesh-gwn` cannot tell GWN from parity (closed cube); `types.h`'s
    parity comment; CI's `gpu` job fetches Eigen from GitLab cold (no `_deps` cache).
 
 ## Exit criteria of P02 — bullet by bullet
 
 - *Both parameters shipped CPU + GPU with parity cases; `parity_expected_cases` matches.* —
-  `sign="gwn"` (P02.1, `mesh-gwn`) and `bake` (this unit, `mesh-bake`) on both paths;
-  `scripts/check_data.json` says 75 and the harness runs 75/75.
+  `sign="gwn"` (P02.1, `mesh-gwn`) and `bake` (this unit, `mesh-bake`, `mesh-bake-smooth`)
+  on both paths; `scripts/check_data.json` says 76 and the harness runs 76/76.
 - *`python3 scripts/check.py` and `--gpu --build-dir build-gl` green.* — both PASS on the
-  final code tree (numbers above); this handoff commit changes `plan/` only.
-- *`python3 plan/remote_run_check.py` exits 0.* — **green on `a906934`**: run
-  [38780112757](https://github.com/Giacogiak/DualC/actions/runs/38780112757), conclusion
-  `success` (all jobs, `gpu` included). The earlier run on `3c7c288` (38779843837) ended
-  `cancelled` (every job), superseded by the `a906934` push, not a failure. This line's own
-  commit re-triggers the run; its result on the final HEAD is the driver's to read.
+  final code tree `1b126db` (numbers in *Resumed*); later commits touch `docs/` and `plan/`
+  only, and the docs tier was re-run on them.
+- *`python3 plan/remote_run_check.py` exits 0.* — REMOTE_RESULT
 
 ## What the next unit (P03.1, #58 — 2D profiles, CPU) needs to know
 
-- #58 is NEXT in 21/README, 21/01 and `roadmap/README.md`; D-60 waits at this gate.
-- **Byte room is nearly gone:** 21/01 at 15,207 of 15,360 — #58's landing must be one or two
-  lines pointing at a new child `05-…md`; `roadmap/README.md` at 14,991.
-- `parity_expected_cases` is **75**. Next free IDs unchanged: **#61**, **D-62**.
+- #58 is NEXT in 21/README, 21/01 and `roadmap/README.md`; D-60 is decided (kept).
+- **Byte room is nearly gone:** 21/01 at 15,132 of 15,360 — #58's landing must be one or two
+  lines pointing at a new child `05-…md`; `roadmap/README.md` at 15,024.
+- `parity_expected_cases` is **76**. Next free IDs: **#61**, **D-63** (D-62 = the margin).
 - Pattern that worked for a node param read on both paths: a small `readX(n)` in each TU
-  (own `findParam`), validation and maths shared through `field_graph.h`.
+  (own `findParam`), validation and maths shared through `field_graph.h`. A rule that depends
+  on ancestors: a parameter on `buildField`, a `Ctx::path` stack in `emitNode`.
+- A new decorator that reads its child's field further out than the child's surface (an
+  offset-like amount) should get a line in `childBakeMargin`.
 
 ---
 

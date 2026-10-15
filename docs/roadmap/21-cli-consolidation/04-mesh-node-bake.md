@@ -79,7 +79,9 @@ and mean, by a scratch evaluator linked against `libdualc_examples_fieldgraph`. 
 `dualc_field` and `dualc_boolean` both auto-fit the octree to the field's bounds + 5 %, and a
 baked field's bounds are its region, so a bake also coarsens the cells at a given depth; the
 "… root box" rows pin `--bounds` to the exact run's or the tool's root to separate the two.
-The smooth-union table was re-run after D-62 (the *before* row is the first run's); the two
+The smooth-union table was re-run after D-62 (the *before* row is the first run's; that run's
+explicit `band=1` on both children gave the margin row's faces and deviations, 3,564 /
+0.00851 / 0.00186, at 0.59 s, and its other wall times differ by run-to-run noise); the two
 hard-op tables are unchanged by it (hard ops hand down no margin; the graph's difference
 output was `cmp`-identical before and after).
 In every case `dualc_boolean` without `--bake` and the exact graph wrote byte-identical OBJ.
