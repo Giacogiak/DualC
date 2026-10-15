@@ -389,6 +389,12 @@ if(DUALC_BUILD_TESTS)
   add_test(NAME cli_field_strut
     COMMAND dualc_field --expr "intersection(mesh(path=\"cube.obj\"),octet(wavelength=0.5,radius=0.05))" --depth 5 -o cli_field_strut.obj
     WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
+  # The 2D layer in the graph (roadmap 21 #58): cli_lift's revolve as a graph.
+  # cli_field_lift_same holds the two outputs byte-identical (cmake -E
+  # compare_files), the equivalence that lets dualc_lift retire.
+  add_test(NAME cli_field_lift
+    COMMAND dualc_field --expr "revolve(circle(0,0,0.5),offset=2)" --depth 5 -o cli_field_lift.obj
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
   # Demo-mesh generator + a few pipeline runs over the new meshes. The sphere
   # and torus exercise smooth/genus regimes; the bracket run exercises the
   # sharp-feature toggle on a part with a reentrant edge.
@@ -433,6 +439,7 @@ if(DUALC_BUILD_TESTS)
       cli_csg_demo=cli_csg.obj cli_lattice=cli_lattice.obj
       cli_field=cli_field.obj cli_field_mesh=cli_field_mesh.obj
       cli_field_expr=cli_field_expr.obj cli_field_strut=cli_field_strut.obj
+      cli_field_lift=cli_field_lift.obj
       cli_demo_sphere=cli_sphere.obj cli_demo_torus=cli_torus.obj
       cli_demo_bracket_sharp=cli_bracket.obj)
     string(REPLACE "=" ";" pair "${pair}")
@@ -454,6 +461,11 @@ if(DUALC_BUILD_TESTS)
     NEEDS cli_slice OPTIONS -DWIDTH=128 -DHEIGHT=128)
   dualc_cli_content(cli_slice_svg_content cli_slice.svg svg
     NEEDS cli_slice OPTIONS "-DCONTAINS=<line ")
+  add_test(NAME cli_field_lift_same
+    COMMAND ${CMAKE_COMMAND} -E compare_files cli_lift.obj cli_field_lift.obj
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
+  set_tests_properties(cli_field_lift_same PROPERTIES
+    FIXTURES_REQUIRED "cli_lift;cli_field_lift")
   # --dump-json prints the graph: the check runs the tool itself.
   dualc_cli_content(cli_field_dump_json_content cli_field_dump.json json
     OPTIONS -DJSON_ROOT_OP=difference

@@ -3,8 +3,9 @@
 Part of [Tool 11: `dualc_field`](README.md). How to hand the tool a graph (JSON file,
 `--expr`, stdin — and shell quoting), then every node `dualc_field` (and
 `dualc_field_view`) accepts — sources, booleans, decorators, domain operators, the
-primitive parameter forms — and the `--expr` text grammar. Strut and graded lattices
-have their own pages ([02](02-strut-lattices.md), [03](03-graded-and-morph.md)).
+primitive parameter forms — and the `--expr` text grammar. Strut and graded lattices,
+2D profiles and lifts have their own pages ([02](02-strut-lattices.md),
+[03](03-graded-and-morph.md), [09](09-2d-profiles-and-lifts.md)).
 
 ## Choosing an input form (JSON file vs `--expr` vs stdin)
 
@@ -127,6 +128,13 @@ reproduced: a node never sees its sibling.
 dualc_field --expr 'smooth-union(mesh(path="torus.obj",bake=64),mesh(path="cube.obj",bake=64),k=1)' --depth 6 -o su_baked.obj
 ```
 
+### 2D profiles and lifts
+
+`revolve(profile, offset=1)` and `extrude(profile, height=0.5)` lift one 2D profile —
+`circle`, `rect`, `segment`, `polygon` — into a 3D node; a profile is legal nowhere else.
+Keys, defaults, typing errors and recipes: [09](09-2d-profiles-and-lifts.md). Not in
+`dualc_field_view` yet.
+
 ### Booleans (two children)
 
 `union` · `intersection` · `difference` · `xor` — no params. `smooth-union` ·
@@ -194,7 +202,7 @@ args  := arg (',' arg)*
 arg   := node                  # nested op-call → a child (appended to "in", in order)
        | key '=' value         # named param → params[key]
        | number | '[' … ']'    # bare positional scalar/array → flat params (see below)
-value := number | '[' number (',' number)* ']' | IDENT | "string"
+value := number | '[' number (',' number)* ']' | '[' array (',' array)* ']' | IDENT | "string"
 ```
 
 - **Children vs. params interleave freely** — `onion(normalize(gyroid()),thickness=0.3)`
@@ -210,6 +218,8 @@ value := number | '[' number (',' number)* ']' | IDENT | "string"
   concatenated, in order, into the universal flat `params:[…]` array — the same
   positional primitive order as `--dump-json` / `dualc_primitive`. Example:
   `sphere(0,0,0,0.5)` ≡ `sphere(params=[0,0,0,0.5])` ≡ `sphere(center=[0,0,0],radius=0.5)`.
+- **Arrays of arrays** nest one level, rows of one length — a polygon's
+  `points=[[0,0],[1,0],[0,1]]`; JSON alike, and `--dump-json` keeps the rows.
 
 **Underscore aliases** — because shell tokens dislike hyphens, the *op token*
 accepts an underscore form of each hyphenated registry token (only at op

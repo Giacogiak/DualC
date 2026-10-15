@@ -22,6 +22,10 @@
    `dualc_lift extrude polygon 0,0 1,0 1,1 0,1 --height 0.5` against their graphs.
 7. Docs: an 11/01 section for the 2D profiles and lifts (`dualc_field_view` cannot show them
    until T2 — say so until then).
+   *Corrected 2026-10-15 (P03.1):* 11/01 sat at 13,824 of the 15,360-byte cap, too little room
+   for the keys table, the typing errors and the recipes; 11/01 gained a short section that
+   points at a new page, [11/09](../docs/command_reference/11-dualc_field/09-2d-profiles-and-lifts.md),
+   which carries them (and the viewer note T2 removes).
 
 #### Acceptance criteria
 

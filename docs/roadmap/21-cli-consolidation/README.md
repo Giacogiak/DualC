@@ -19,7 +19,9 @@ outgrow it keeps its summary there and its numbers in a numbered child:
 [02](02-demo-mesh-winding.md), the demo meshes' winding before and after (#55);
 [03](03-mesh-sign-gwn.md), `mesh(sign="gwn")`'s equivalence, tests and ABI call (#56);
 [04](04-mesh-node-bake.md), per-node `bake` against `dualc_boolean --bake` and the exact
-graph — D-60's evidence — and the margin a baked node inherits (D-62) (#57).
+graph — D-60's evidence — and the margin a baked node inherits (D-62) (#57);
+[05](05-2d-profiles-and-lifts.md), the 2D profiles and lifts, the `rect` token and the
+equivalence with `dualc_lift` (#58).
 
 | Item | Page | Status |
 | --- | --- | --- |
@@ -28,7 +30,7 @@ graph — D-60's evidence — and the margin a baked node inherits (D-62) (#57).
 | #55 Generated demo meshes wound outward (F1) | [01](01-record.md#55-generated-demo-meshes-wound-outward) | DONE 2026-10-14 — P01 T2; measured in [02](02-demo-mesh-winding.md) |
 | #56 The mesh node takes `sign="gwn"` | [01](01-record.md#56-the-mesh-node-takes-signgwn) | DONE 2026-10-15 — P02 T1; measured in [03](03-mesh-sign-gwn.md) |
 | #57 Per-node bake on the mesh nodes | [01](01-record.md#57-per-node-bake-on-the-mesh-nodes) | DONE 2026-10-15 — P02 T2; measured in [04](04-mesh-node-bake.md) |
-| #58 2D profiles and `revolve` / `extrude` in the graph | [01](01-record.md#58-2d-profiles-and-revolve--extrude-in-the-graph) | NEXT — P03 |
+| #58 2D profiles and `revolve` / `extrude` in the graph | [01](01-record.md#58-2d-profiles-and-revolve--extrude-in-the-graph) | PARTIAL — P03 T1 (CPU) DONE 2026-10-15 in [05](05-2d-profiles-and-lifts.md); T2 (GPU) NEXT |
 | #59 Slice any graph | [01](01-record.md#59-slice-any-graph) | PLANNED — P04 |
 | #60 Retire the eight tools | [01](01-record.md#60-retire-the-eight-tools) | PLANNED — P05, P06 |
 

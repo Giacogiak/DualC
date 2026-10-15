@@ -85,6 +85,7 @@ Design rationale and status: [roadmap 05 §17 / §17b](../roadmap/05-tpms-lattic
 | Streaming / tiled export at one-tile RAM | `--tile-depth` | [11/06](11-dualc_field/06-streaming-tiled-export.md) |
 | Pick the tile depth from a RAM budget | `--mem` | [11/07](11-dualc_field/07-mem-budget.md) |
 | Slicer-native 3MF and a globally welded object | `-o .3mf`, `--weld` | [11/08](11-dualc_field/08-3mf-and-weld.md) |
+| Revolve or extrude a 2D profile | `dualc_lift`; `revolve(…)` / `extrude(…)` | [04](04-dualc_lift.md); [11/09](11-dualc_field/09-2d-profiles-and-lifts.md) |
 | Headless PNG of a field graph; smooth orbit on a weak GPU; the WebGL2 shader | `--snapshot`, `--preview-scale`, `--es` | [12/README](12-dualc_field_view/README.md#cli-flags) |
 | Inspect a lattice membrane without the volume's skin | `intersection(onion(normalize(tpms)), volume)` | [12/04](12-dualc_field_view/04-open-surface-preview.md); export it: [11/04](11-dualc_field/04-workflow-open-surface.md) |
 | Cross-section of a field on a plane | `--plane`, `--res` | [07](07-dualc_slice.md) |

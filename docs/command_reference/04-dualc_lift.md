@@ -1,6 +1,8 @@
 # Tool 4: `dualc_lift` (2D primitives + the 2 lifts)
 
-Revolve or extrude a 2D profile into 3D.
+Revolve or extrude a 2D profile into 3D. The same lifts are graph nodes in `dualc_field`
+(`box` is spelled `rect` there), byte-identical output:
+[11/09](11-dualc_field/09-2d-profiles-and-lifts.md).
 
 ```
 dualc_lift revolve <profile> [params...] --offset O [options]

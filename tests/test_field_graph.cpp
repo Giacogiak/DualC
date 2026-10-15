@@ -678,3 +678,230 @@ TEST_CASE("shorthand value identifiers become string params", "[field_graph]") {
   REQUIRE(ax->second.kind == ParamValue::Kind::String);
   REQUIRE(ax->second.str == "z");
 }
+
+// ---------------------------------------------------------------------------
+// The 2D layer (#58): four profiles, legal only as the one child of a lift.
+// ---------------------------------------------------------------------------
+
+namespace {
+
+// The field at a spread of points inside, on and outside a unit-ish shape.
+std::vector<Vector3> liftSamples() {
+  std::vector<Vector3> pts;
+  for (double x : {-2.6, -1.1, -0.3, 0.0, 0.45, 1.0, 2.2})
+    for (double y : {-1.4, -0.2, 0.0, 0.5, 1.3})
+      for (double z : {-0.9, 0.0, 0.3, 1.7}) pts.push_back(Vector3{x, y, z});
+  return pts;
+}
+
+void requireSameField(const dualc::ImplicitField& a,
+                      const dualc::ImplicitField& b) {
+  for (const Vector3& p : liftSamples()) REQUIRE(a.valueAt(p) == b.valueAt(p));
+  const dualc::BBox ba = a.bounds(), bb = b.bounds();
+  REQUIRE(ba.min.x == bb.min.x);
+  REQUIRE(ba.min.y == bb.min.y);
+  REQUIRE(ba.min.z == bb.min.z);
+  REQUIRE(ba.max.x == bb.max.x);
+  REQUIRE(ba.max.y == bb.max.y);
+  REQUIRE(ba.max.z == bb.max.z);
+}
+
+}  // namespace
+
+TEST_CASE("2D profiles under revolve and extrude build the library lifts",
+          "[field_graph][lift]") {
+  using dualc::Vector2;
+  FixedResolver meshes{nullptr, nullptr};
+  auto build = [&](const std::string& e) {
+    return FieldGraph::build(parseShorthand(e), meshes).fieldPtr();
+  };
+  const auto circle = std::make_shared<dualc::Circle2D>(Vector2{0.2, -0.1}, 0.5);
+  const auto rect =
+      std::make_shared<dualc::Box2D>(Vector2{0.1, 0.3}, Vector2{0.8, 0.4});
+  const auto seg = std::make_shared<dualc::Segment2D>(Vector2{-1, 0},
+                                                      Vector2{1, 0.5}, 0.25);
+  // Concave (an L), so the crossing-count sign is exercised too.
+  const auto poly = std::make_shared<dualc::Polygon2D>(std::vector<Vector2>{
+      {0, 0}, {1, 0}, {1, 0.4}, {0.4, 0.4}, {0.4, 1}, {0, 1}});
+
+  SECTION("each profile, named keys, under both lifts") {
+    const std::vector<std::pair<std::string, dualc::Field2DPtr>> cases = {
+        {"circle(center=[0.2,-0.1],radius=0.5)", circle},
+        {"rect(center=[0.1,0.3],half=[0.8,0.4])", rect},
+        {"segment(a=[-1,0],b=[1,0.5],radius=0.25)", seg},
+        {"polygon(points=[[0,0],[1,0],[1,0.4],[0.4,0.4],[0.4,1],[0,1]])",
+         poly}};
+    for (const auto& c : cases) {
+      INFO(c.first);
+      requireSameField(*build("revolve(" + c.first + ",offset=1.5)"),
+                       dualc::RevolveField(c.second, 1.5));
+      requireSameField(*build("extrude(" + c.first + ",height=0.3)"),
+                       dualc::ExtrudeField(c.second, 0.3));
+    }
+  }
+  SECTION("the flat params form and the shorthand positionals agree") {
+    requireSameField(*build("extrude(circle(params=[0.2,-0.1,0.5]),height=0.3)"),
+                     dualc::ExtrudeField(circle, 0.3));
+    requireSameField(*build("extrude(rect(0.1,0.3,0.8,0.4),height=0.3)"),
+                     dualc::ExtrudeField(rect, 0.3));
+    requireSameField(*build("extrude(segment(-1,0,1,0.5,0.25),height=0.3)"),
+                     dualc::ExtrudeField(seg, 0.3));
+    requireSameField(
+        *build("extrude(polygon(0,0,1,0,1,0.4,0.4,0.4,0.4,1,0,1),height=0.3)"),
+        dualc::ExtrudeField(poly, 0.3));
+    // A short flat list overrides from the front, as on a primitive.
+    requireSameField(*build("extrude(circle(params=[0.2]))"),
+                     dualc::ExtrudeField(std::make_shared<dualc::Circle2D>(
+                                             Vector2{0.2, 0}, 0.5),
+                                         0.5));
+  }
+  SECTION("defaults are dualc_lift's") {
+    requireSameField(*build("revolve(circle)"),
+                     dualc::RevolveField(std::make_shared<dualc::Circle2D>(
+                                             Vector2{0, 0}, 0.5),
+                                         1.0));
+    requireSameField(*build("extrude(rect)"),
+                     dualc::ExtrudeField(std::make_shared<dualc::Box2D>(
+                                             Vector2{0, 0}, Vector2{1, 0.5}),
+                                         0.5));
+    requireSameField(*build("extrude(segment)"),
+                     dualc::ExtrudeField(std::make_shared<dualc::Segment2D>(
+                                             Vector2{-1, 0}, Vector2{1, 0}, 0.3),
+                                         0.5));
+  }
+  SECTION("a lift composes like any 3D node, and contours") {
+    FieldGraph fg = FieldGraph::build(
+        parseShorthand("difference(revolve(circle(radius=0.5),offset=2),"
+                       "sphere(center=[2,0,0],radius=0.4))"),
+        meshes);
+    dualc::SamplerParams sp;
+    sp.maxDepth = 5;
+    dualc::ContourerParams cp;
+    auto [mesh, geom, normals] = dualc::dualContourField(fg.field(), sp, cp);
+    (void)geom;
+    (void)normals;
+    REQUIRE(mesh->nFaces() > 0);
+  }
+}
+
+TEST_CASE("a 2D profile outside a lift, or a 3D child under one, is located",
+          "[field_graph][lift]") {
+  FixedResolver meshes{nullptr, nullptr};
+  auto errorOf = [&](const std::string& json) -> GraphError {
+    try {
+      FieldGraph::build(parseJson(json), meshes);
+    } catch (const GraphError& e) {
+      return e;
+    }
+    FAIL("expected a GraphError for " << json);
+    return GraphError("", "");
+  };
+
+  // A profile as a boolean's child, as the root, and under a decorator.
+  GraphError e = errorOf(
+      R"({"op":"union","in":[{"op":"sphere"},{"op":"circle","radius":1}]})");
+  REQUIRE(std::string(e.what()).find("'circle' is a 2D profile") !=
+          std::string::npos);
+  REQUIRE(e.pointer() == "/in/1");
+  REQUIRE(errorOf(R"({"op":"rect"})").pointer() == "");
+  e = errorOf(R"({"op":"union","in":[{"op":"extrude","in":[{"op":"segment"}]},
+      {"op":"translate","by":[1,0,0],"in":[{"op":"rect"}]}]})");
+  REQUIRE(e.pointer() == "/in/1/in/0");
+  e = errorOf(R"({"op":"onion","thickness":0.1,"in":[{"op":"polygon",
+      "points":[[0,0],[1,0],[0,1]]}]})");
+  REQUIRE(e.pointer() == "/in/0");
+  REQUIRE(std::string(e.what()).find("2D profile") != std::string::npos);
+
+  // A 3D node (and an unknown op) under a lift, located on the child.
+  e = errorOf(R"({"op":"revolve","in":[{"op":"sphere"}]})");
+  REQUIRE(std::string(e.what()).find("'revolve' takes one 2D profile") !=
+          std::string::npos);
+  REQUIRE(std::string(e.what()).find("not 'sphere'") != std::string::npos);
+  REQUIRE(e.pointer() == "/in/0");
+  e = errorOf(R"({"op":"extrude","in":[{"op":"extrude","in":[{"op":"circle"}]}]})");
+  REQUIRE(e.pointer() == "/in/0");
+  REQUIRE(errorOf(R"({"op":"extrude","in":[{"op":"frobnicate"}]})").pointer() ==
+          "/in/0");
+
+  // Arity: exactly one child, and a profile takes none.
+  REQUIRE(std::string(errorOf(R"({"op":"revolve"})").what())
+              .find("expects 1 child") != std::string::npos);
+  REQUIRE(errorOf(R"({"op":"revolve","in":[{"op":"circle"},{"op":"rect"}]})")
+              .pointer() == "");
+  REQUIRE(errorOf(R"({"op":"extrude","in":[{"op":"circle","in":[
+      {"op":"rect"}]}]})").pointer() == "/in/0");
+}
+
+TEST_CASE("2D profiles and lifts reject bad values with a located error",
+          "[field_graph][lift]") {
+  FixedResolver meshes{nullptr, nullptr};
+  struct Bad {
+    const char* expr;
+    const char* what;
+  };
+  const Bad bad[] = {
+      {"extrude(circle(radius=0))", "'circle' radius must be > 0"},
+      {"extrude(segment(radius=-1))", "'segment' radius must be > 0"},
+      {"extrude(rect(half=[1,0]))", "'rect' half extents must be > 0"},
+      {"extrude(circle(1,2,3,4))", "'circle' takes at most 3 values"},
+      {"extrude(circle(center=[0,0,0]))", "'center' must be an array of 2"},
+      {"extrude(circle(radius=1,major=2))", "unknown parameter 'major'"},
+      {"extrude(polygon)", "'polygon' needs points="},
+      {"extrude(polygon(0,0,1,0))", "'polygon' needs >= 3 [x,y] vertices"},
+      {"extrude(polygon(0,0,1,0,1))", "'polygon' needs >= 3 [x,y] vertices"},
+      {"extrude(polygon(points=[[0,0,0],[1,0,0],[0,1,0]]))",
+       "'polygon' needs >= 3 [x,y] vertices"},
+      {"extrude(polygon(points=[[0,0],[1,0],[0,1]],params=[0,0,1,0,0,1]))",
+       "not both"},
+      {"extrude(circle,height=0)", "'extrude' height"},
+      {"extrude(circle,height=-1)", "'extrude' height"},
+      {"extrude(circle,offset=1)", "unknown parameter 'offset'"},
+      {"revolve(circle,height=1)", "unknown parameter 'height'"},
+  };
+  for (const Bad& b : bad) {
+    INFO(b.expr);
+    try {
+      FieldGraph::build(parseShorthand(b.expr), meshes);
+      FAIL("expected a GraphError");
+    } catch (const GraphError& e) {
+      REQUIRE(std::string(e.what()).find(b.what) != std::string::npos);
+      REQUIRE(e.pointer() != "");
+    }
+  }
+  // A ragged or doubly nested array is a parse error, in both readers.
+  REQUIRE_THROWS_AS(parseShorthand("polygon(points=[[0,0],[1]])"), GraphError);
+  REQUIRE_THROWS_AS(parseShorthand("polygon(points=[[[0,0]]])"), GraphError);
+  REQUIRE_THROWS_AS(parseJson(R"({"op":"polygon","points":[[0,0],[1]]})"),
+                    GraphError);
+  REQUIRE_THROWS_AS(parseJson(R"({"op":"polygon","points":[[0,0],1]})"),
+                    GraphError);
+  REQUIRE_THROWS_AS(parseJson(R"({"op":"polygon","points":[[0,[0]]]})"),
+                    GraphError);
+}
+
+TEST_CASE("2D profiles and lifts round-trip through dumpJson + parseJson",
+          "[field_graph][lift]") {
+  FixedResolver meshes{nullptr, nullptr};
+  const std::string expr =
+      "union(revolve(circle(center=[0.1,0],radius=0.5),offset=2),"
+      "union(extrude(polygon(points=[[0,0],[1,0],[1,1],[0,1]]),height=0.5),"
+      "union(extrude(rect(params=[0,0,1,0.5])),"
+      "revolve(segment(a=[-0.5,-1],b=[0.5,1],radius=0.2),offset=1))))";
+  const GraphNode viaShort = parseShorthand(expr);
+  const std::string dumped = dumpJson(viaShort);
+  // The polygon's rows come back as rows, not a flat list.
+  REQUIRE(dumped.find("\"points\": [\n") != std::string::npos);
+  const GraphNode viaJson = parseJson(dumped);
+  REQUIRE(dumpJson(viaJson) == dumped);
+
+  // The JSON form written by hand reads to the same tree.
+  const std::string json = R"({"op":"extrude","height":0.5,"in":[
+      {"op":"polygon","points":[[0,0],[1,0],[1,1],[0,1]]}]})";
+  REQUIRE(dumpJson(parseJson(json)) ==
+          dumpJson(parseShorthand(
+              "extrude(polygon(points=[[0,0],[1,0],[1,1],[0,1]]),height=0.5)")));
+
+  const FieldGraph a = FieldGraph::build(viaShort, meshes);
+  const FieldGraph b = FieldGraph::build(viaJson, meshes);
+  requireSameField(a.field(), b.field());
+}

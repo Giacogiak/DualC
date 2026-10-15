@@ -2,6 +2,7 @@
 
 #include "dualc/dualc.h"
 
+#include <cstddef>
 #include <cstdint>
 #include <map>
 #include <memory>
@@ -52,6 +53,10 @@ struct ParamValue {
   double num = 0.0;             // Kind::Number
   std::vector<double> vec;      // Kind::Vector
   std::string str;              // Kind::String
+  // Kind::Vector written as an array of equal-length arrays (a polygon's
+  // `points=[[x,y],...]`): `vec` holds the rows flattened, `rowSize` their
+  // length; 0 for a flat array. Only dumpJson reads it, to write the rows back.
+  std::size_t rowSize = 0;
 };
 
 struct GraphNode {
@@ -193,6 +198,21 @@ dualc::FieldPtr bakeMeshNode(const dualc::MeshSource& src, const NodeBake& b,
                              double margin);
 dualc::FieldPtr bakeWindingNode(const dualc::ImplicitField& winding,
                                 const NodeBake& b, double margin);
+
+// The 2D layer (implicit2d.h). A profile is a 2D field, legal only as the one
+// child of a lift: `revolve(profile, offset=O)` spins it around y (profile x =
+// distance from the axis - O), `extrude(profile, height=H)` sweeps it along z
+// by +/- H. Every other position for a profile, and a 3D child under a lift,
+// is a located GraphError. `rect` is the 2D box: `box` is the 3D primitive's
+// token (roadmap 21/05).
+struct ProfileKind {
+  std::string name;
+  std::string keys;   // the named form, e.g. "center=[x,y], radius"
+  std::string flat;   // the params=[...] / positional order
+};
+const std::vector<ProfileKind>& profileKinds();
+bool isProfileOp(const std::string& op);
+bool isLiftOp(const std::string& op);
 
 // A built field: owns the FieldPtr tree. The meshes it references are owned by
 // the MeshResolver passed to build(), which the caller must keep alive.

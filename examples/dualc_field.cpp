@@ -182,6 +182,17 @@ void printVocabulary() {
   std::cout << "\nAnalytic primitives (grouped keys or flat params=[...]):\n";
   for (const dce::PrimEntry& e : dce::primitiveCatalogue())
     std::cout << "  " << e.name << "  (" << e.signature << ")\n";
+
+  std::cout << "\n2D profiles / lifts (a profile is legal only as a lift's one "
+               "child):\n"
+               "  revolve  -- spin the profile around y (offset=1: profile x = "
+               "distance\n"
+               "              from the axis - offset)\n"
+               "  extrude  -- sweep the profile along z (height=0.5, the "
+               "half-height)\n";
+  for (const dce::fieldgraph::ProfileKind& k : dce::fieldgraph::profileKinds())
+    std::cout << "  " << k.name << "  (" << k.keys << "; or params=[" << k.flat
+              << "])\n";
 }
 
 // Choose JSON vs shorthand for file/stdin input: a .fld path is shorthand;

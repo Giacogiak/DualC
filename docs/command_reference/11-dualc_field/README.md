@@ -80,7 +80,7 @@ own and links back here for the options table.
 
 | Page | What it covers |
 | --- | --- |
-| [Input forms, op vocabulary & text shorthand](01-op-vocabulary.md) | How to hand the tool a graph (JSON file, `--expr`, stdin — and shell quoting), then every node `dualc_field` (and `dualc_field_view`) accepts — sources, booleans, decorators, domain operators, the primitive parameter forms — and the `--expr` text grammar. Strut and graded lattices have their own pages ([02](02-strut-lattices.md), [03](03-graded-and-morph.md)). |
+| [Input forms, op vocabulary & text shorthand](01-op-vocabulary.md) | How to hand the tool a graph (JSON file, `--expr`, stdin — and shell quoting), then every node `dualc_field` (and `dualc_field_view`) accepts — sources, booleans, decorators, domain operators, the primitive parameter forms — and the `--expr` text grammar. Strut and graded lattices, 2D profiles and lifts have their own pages ([02](02-strut-lattices.md), [03](03-graded-and-morph.md), [09](09-2d-profiles-and-lifts.md)). |
 | [Strut lattices (`sc` · `bcc` · `fcc` · `octet`)](02-strut-lattices.md) | The wireframe-crystal source nodes: parameters, tapered struts (`nodeRadius`), clipping to a mesh, and the recipe block (infill, spatial blend, hollow, graded and tapered struts). |
 | [Graded shell, graded inflation & spatial morph](03-graded-and-morph.md) | The two-child `graded-onion` / `graded-offset` decorators, the three-child `mix` morph, the critical callout on interpolating disjoint fields, and grafting two crystals into one body. |
 | [Workflow: isolate → thicken → skin → union a TPMS lattice](04-workflow-open-surface.md) | The four-step manufacturing workflow that turns a TPMS lattice and its enclosing part into one printable solid, with the RAM-bounded and preview variants. |
@@ -88,6 +88,7 @@ own and links back here for the options table.
 | [Streaming / tiled export (`--tile-depth`)](06-streaming-tiled-export.md) | Contour in grid-aligned tiles and stream the mesh at one-tile RAM: how it works, choosing `D`, the constraints and the watertightness contract, and why the stream is STL. |
 | [Auto-budget (`--mem BUDGET`)](07-mem-budget.md) | Let the tool pick the largest `--tile-depth` that fits a RAM budget instead of choosing `D` by hand: syntax, the estimate, precedence, recipes. |
 | [The 3MF path and `--weld`](08-3mf-and-weld.md) | Streaming to a slicer-native 3MF (per-tile objects, `1 unit = 1 mm`), `--weld` for a single globally-manifold object, and the tiled/welded recipes. |
+| [2D profiles and lifts (`revolve` · `extrude`)](09-2d-profiles-and-lifts.md) | The profiles `circle`, `rect`, `segment`, `polygon` and the two lifts that make them 3D — the graph form of `dualc_lift`: keys and defaults, the typing rule, recipes. |
 
 ## Diagnostics
 
@@ -99,7 +100,8 @@ Errors are reported with the offending node's **JSON pointer**:
 
 Caught cases: invalid JSON, unknown op, wrong boolean arity, missing required
 param, bad `mesh` sign/normals (the message lists the accepted values), a `bake` outside
-[2, 512] or a `band` without `bake` on `mesh`/`winding`, mesh-not-found.
+[2, 512] or a `band` without `bake` on `mesh`/`winding`, a 2D profile outside a lift or a
+3D child under one ([09](09-2d-profiles-and-lifts.md#typing-errors)), mesh-not-found.
 An **unbounded** graph contoured without `--bounds` prints the sampler's
 `--bounds` hint and exits non-zero.
 
@@ -164,6 +166,7 @@ Two ready-to-run samples ship next to the binary:
 | T1–T2 | Tiled STL / 3MF at one-tile RAM | [06](06-streaming-tiled-export.md#recipes) |
 | U1–U5 | `--mem` budgets | [07](07-mem-budget.md#recipes) |
 | Z1–Z4 | Tiled and welded 3MF | [08](08-3mf-and-weld.md#recipes) |
+| R1–R4 | 2D profiles revolved and extruded, `dualc_lift`'s recipes as graphs | [09](09-2d-profiles-and-lifts.md#recipes) |
 
 ## Scope
 
