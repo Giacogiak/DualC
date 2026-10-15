@@ -98,7 +98,7 @@ Errors are reported with the offending node's **JSON pointer**:
 ```
 
 Caught cases: invalid JSON, unknown op, wrong boolean arity, missing required
-param, bad `mesh` sign/normals (incl. the `gwn`→`winding` hint), mesh-not-found.
+param, bad `mesh` sign/normals (the message lists the accepted values), mesh-not-found.
 An **unbounded** graph contoured without `--bounds` prints the sampler's
 `--bounds` hint and exits non-zero.
 

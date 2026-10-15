@@ -24,7 +24,7 @@ a side tool holds moves into the graph, and so within the C ABI's reach, and the
 ([D-55 … D-59](../decisions/01-settled.md); `dualc_boolean` waits on P02's measurements,
 [D-60](../decisions/README.md)). It runs as the
 [consolidation plan](../raw/2026-10-14-cli-consolidation-plan.md) on branch
-`feat/cli-consolidation`; #55 is DONE, **NEXT** is **#56**, `mesh(sign="gwn")`. Before it the engine
+`feat/cli-consolidation`; #55 and #56 are DONE, **NEXT** is **#57**, per-node `bake`. Before it the engine
 track drew on the 2026-08-19 audit's ledger ([17](17-code-audit-and-hardening/README.md))
 through the hosted-CI plan, run closed 2026-10-07 ([20/04](20-public-delivery/04-hosted-ci-plan-run.md));
 the rest of **#34** resumes after block 21. The docs restructuring ([19](19-docs-layers/README.md))
@@ -37,11 +37,11 @@ the block records the table links ([D-43](../decisions/01-settled.md)).
 
 | Date | What landed | Record |
 | --- | --- | --- |
+| 2026-10-15 | **#56** — `mesh(sign="gwn")`: the graph's mesh node takes the GWN sign oracle, byte-identical to `dualc_demo --gwn`; parity case `mesh-gwn`. | [21/03](21-cli-consolidation/03-mesh-sign-gwn.md) |
 | 2026-10-14 | **#55** — the six inside-out demo meshes wound outward (the bracket's walls only): `--gwn`, `--gwn-field` and `--pseudonormal` now agree with parity on them. | [21/02](21-cli-consolidation/02-demo-mesh-winding.md) |
 | 2026-10-07 | **#52** — Boletus's Windows flake: an inherited handle, not a scanner; non-inheritable handles; ABI 0.5.1. | [17/16](17-code-audit-and-hardening/16-windows-rename-race/README.md#52-windows-export-io-flake--the-part-rename-under-an-on-access-scanner) |
 | 2026-10-07 | **#32** — test coverage: 256 cube cases, depth convergence, all five contourer knobs, normals and CLI output content. | [17/15](17-code-audit-and-hardening/15-test-coverage-batches.md) |
 | 2026-10-06 | **#33** — build hardening as CI jobs: `DUALC_WERROR` in the build matrix, `DUALC_SANITIZE` (ASan + UBSan over all 270 cases) as the required `sanitize` job, the layering assertion and the per-target dialect, each proven red. | [17/14](17-code-audit-and-hardening/14-build-hardening-ci.md) |
-| 2026-10-06 | **#31** — the CPU/GPU parity gate is binding: CI's `gpu` job (Xvfb + llvmpipe, `check.py --gpu --strict`, the case count asserted) is required, proven red on a deliberate `opXor` break. | [17/13](17-code-audit-and-hardening/13-parity-gate-binding.md) |
 
 **The shipped keystone (2026-06-14 … 2026-07-06)** — builds #1–#3, the C ABI (#19) and
 the client layer's move to Boletus, each DONE with its evidence in
@@ -60,7 +60,7 @@ row (cited by ID).
 1. **CLI consolidation** ([21](21-cli-consolidation/README.md)) — the side CLIs folded into
    `dualc_field` + `dualc_field_view`; the one status table is
    [21 § The pages of this block](21-cli-consolidation/README.md#the-pages-of-this-block).
-   **NEXT:** #56.
+   **NEXT:** #57.
 2. **Engine hardening — the audit's open findings**
    ([17](17-code-audit-and-hardening/README.md)) — a standing ledger, not a phase; the
    one status table is [17 § Tracked items](17-code-audit-and-hardening/README.md#tracked-items--status-at-a-glance).
@@ -143,7 +143,7 @@ workflow, graded-onion; GLSL codegen completeness DONE 2026-06-24 —
 | 18 | [C ABI — continued](18-c-abi-continued.md) | Retired 2026-09-18: its two entries are [14/04](14-c-abi/04-abi-0-4-0.md); the number is never reused. | tombstone — DONE |
 | 19 | [Docs layers](19-docs-layers/README.md) | The 2026-09-17 docs restructuring: the plan (immutable, `docs/raw/`), items #36–#45, the phase table, per-phase evidence, the semantic-lint runs. | Phases 0–8 **DONE** (2026-09-20); the lint runs keep landing in [19/08](19-docs-layers/08-semantic-lint/README.md) |
 | 20 | [Public delivery](20-public-delivery/README.md) | The repo as others build it: geometry-central pinned and fetched (options weighed), nanort vendored, the self-bootstrapping clean clone (#47); Linux as a build host (#49); hosted CI running the gate (#51), the plan's run (04). | **#47 DONE** (2026-09-21) · **#49 DONE** (2026-10-03) · **#51 DONE** (2026-10-06) |
-| 21 | [CLI consolidation](21-cli-consolidation/README.md) | One framework, `dualc_field` + `dualc_field_view`: the demo meshes wound outward, `mesh(sign="gwn")`, per-node `bake`, 2D profiles + lifts and a graph slice in the graph, then eight side CLIs retired (#55–#60). | #55 DONE; #56 NEXT; #57–#60 PLANNED; D-60 DEFERRED |
+| 21 | [CLI consolidation](21-cli-consolidation/README.md) | One framework, `dualc_field` + `dualc_field_view`: the demo meshes wound outward, `mesh(sign="gwn")`, per-node `bake`, 2D profiles + lifts and a graph slice in the graph, then eight side CLIs retired (#55–#60). | #55–#56 DONE; #57 NEXT; #58–#60 PLANNED; D-60 DEFERRED |
 
 ## How the blocks relate
 

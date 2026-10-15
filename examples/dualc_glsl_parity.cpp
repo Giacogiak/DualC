@@ -377,6 +377,14 @@ int main() {
     //     round-trip) rather than the bake. Tolerance is filter precision.
     runList.push_back({"mesh-texture", meshExpr, box(-2, 2), 2e-3, 2e-3,
                        Ref::BakedGrid});
+    // (d) SIGN parity with the GWN oracle inside the bake (#56): the straddle
+    //     region of (b), baked through MeshSource with sign="gwn". On the
+    //     closed cube GWN and parity agree, so this gates that the codegen
+    //     accepts the sign and carries it into the bake, not that it differs.
+    runList.push_back({"mesh-gwn",
+                       "mesh(path=\"" + cubePath + "\",sign=\"gwn\")",
+                       dualc::BBox{{-0.2, -0.2, -0.2}, {1.5, 1.5, 1.5}}, A, R,
+                       Ref::CpuSignOnly});
   }
   if (!cubePath.empty()) {
     // winding bakes 0.5 - windingNumber over the full lattice (no band): same

@@ -112,8 +112,10 @@ void printVocabulary() {
     std::cout << "  " << k.name << "  -- " << k.blurb << "\n";
 
   std::cout << "\nMesh sources:\n"
-               "  mesh     -- signed distance to a watertight mesh "
-               "(path, sign, normals)\n"
+               "  mesh     -- signed distance to a mesh "
+               "(path, sign=parity|pseudonormal|gwn, normals);\n"
+               "              parity/pseudonormal need it closed, gwn "
+               "tolerates holes and soup\n"
                "  winding  -- generalized-winding-number field for soup / open "
                "shells (path)\n";
 

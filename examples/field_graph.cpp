@@ -799,11 +799,9 @@ dualc::SignMethod meshSignMethod(const GraphNode& n) {
   std::string sign = strParam(n, "sign", "parity");
   if (sign == "parity") return dualc::SignMethod::WINDING_NUMBER;
   if (sign == "pseudonormal") return dualc::SignMethod::PSEUDONORMAL;
-  if (sign == "gwn")
-    throw GraphError("mesh sign 'gwn' is not supported by the 'mesh' node; use "
-                     "a 'winding' node for generalized-winding-number soups",
-                     n.pointer);
-  throw GraphError("mesh sign must be 'parity' or 'pseudonormal'", n.pointer);
+  if (sign == "gwn") return dualc::SignMethod::GENERALIZED_WINDING_NUMBER;
+  throw GraphError("mesh sign must be 'parity', 'pseudonormal' or 'gwn'",
+                   n.pointer);
 }
 
 dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes);

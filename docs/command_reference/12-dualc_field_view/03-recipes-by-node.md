@@ -97,8 +97,8 @@ The same two in PowerShell 5.1 form (path quotes `\"`):
 ```
 
 > `mesh` vs `winding`: use **`mesh`** for clean watertight, oriented input (faster,
-> exact narrow-band bake); use **`winding`** for soup / open / self-intersecting
-> input. `mesh(sign=gwn)` is intentionally rejected — route GWN through `winding`.
+> exact narrow-band bake) — `mesh(sign=gwn)` when it is almost watertight (small gaps,
+> self-intersections); use **`winding`** to seal soup / open shells into a solid.
 
 ### DAG dedup is automatic
 

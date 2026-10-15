@@ -116,6 +116,62 @@ TEST_CASE("mesh and winding source nodes build a solid field",
   REQUIRE(meshes.calls == 2);
 }
 
+TEST_CASE("mesh sign=gwn is the GWN sign oracle on a metric field",
+          "[field_graph][gwn]") {
+  // On a closed, outward mesh the GWN oracle agrees with parity everywhere the
+  // sampler looks, so the contoured outputs are identical (#56).
+  {
+    auto box = makeBox(1.0);
+    FixedResolver meshes{std::get<0>(box).get(), std::get<1>(box).get()};
+    FieldGraph parity = FieldGraph::build(
+        parseShorthand("mesh(path=\"x\",sign=parity)"), meshes);
+    FieldGraph gwn = FieldGraph::build(
+        parseShorthand("mesh(path=\"x\",sign=gwn)"), meshes);
+
+    dualc::SamplerParams sp;
+    sp.maxDepth = 5;
+    dualc::ContourerParams cp;
+    auto [pMesh, pGeom, pNormals] = dualc::dualContourField(parity.field(), sp, cp);
+    auto [gMesh, gGeom, gNormals] = dualc::dualContourField(gwn.field(), sp, cp);
+    REQUIRE(pMesh->nFaces() > 0);
+    REQUIRE(gMesh->nFaces() == pMesh->nFaces());
+    REQUIRE(gMesh->nVertices() == pMesh->nVertices());
+    for (std::size_t i = 0; i < pMesh->nVertices(); ++i)
+      REQUIRE(gGeom->vertexPositions[i] == pGeom->vertexPositions[i]);
+  }
+
+  // On an open shell (the cube without its +z face) it stays a sign oracle on
+  // the distance to the shell, which is NOT the `winding` node's sealing field
+  // 0.5 - w: at the centre the walls are 1 away (mesh: -1) while the shell
+  // subtends 5/6 of the sphere (winding: 0.5 - 5/6 = -1/3).
+  {
+    std::vector<Vector3> positions = {
+        {-1, -1, -1}, {1, -1, -1}, {1, 1, -1}, {-1, 1, -1},
+        {-1, -1, 1},  {1, -1, 1},  {1, 1, 1},  {-1, 1, 1},
+    };
+    std::vector<std::vector<std::size_t>> polygons = {
+        {0, 3, 2, 1}, {0, 1, 5, 4}, {3, 7, 6, 2}, {0, 4, 7, 3}, {1, 2, 6, 5},
+    };
+    auto open =
+        geometrycentral::surface::makeSurfaceMeshAndGeometry(polygons, positions);
+    FixedResolver meshes{std::get<0>(open).get(), std::get<1>(open).get()};
+    FieldGraph gwn = FieldGraph::build(
+        parseShorthand("mesh(path=\"x\",sign=gwn)"), meshes);
+    FieldGraph winding =
+        FieldGraph::build(parseShorthand("winding(path=\"x\")"), meshes);
+    const Vector3 centre{0, 0, 0};
+    REQUIRE(gwn.field().valueAt(centre) == Catch::Approx(-1.0).margin(1e-9));
+    REQUIRE(winding.field().valueAt(centre) ==
+            Catch::Approx(-1.0 / 3.0).margin(0.05));
+    // Far outside both read outside, but only `mesh` is a distance; `winding`
+    // stays near 0.5 - 0 (the hierarchical GWN reads 0.5025 here).
+    REQUIRE(gwn.field().valueAt(Vector3{5, 0, 0}) ==
+            Catch::Approx(4.0).margin(1e-9));
+    REQUIRE(winding.field().valueAt(Vector3{5, 0, 0}) ==
+            Catch::Approx(0.5).margin(0.05));
+  }
+}
+
 TEST_CASE("FileMeshResolver caches by path", "[field_graph]") {
   auto box = makeBox(1.0);
   // A bare name: the case runs in a working directory of its own
@@ -148,11 +204,19 @@ TEST_CASE("field-graph reports located errors", "[field_graph]") {
       FieldGraph::build(parseJson(R"({"op":"difference","in":[{"op":"sphere"}]})"),
                         meshes),
       GraphError);
-  // gwn is not a 'mesh' sign mode (the doc-12 fallback: use a 'winding' node).
-  REQUIRE_THROWS_AS(
-      FieldGraph::build(
-          parseJson(R"({"op":"mesh","path":"x","sign":"gwn"})"), meshes),
-      GraphError);
+  // An unknown 'mesh' sign names all three accepted values and is located on
+  // the mesh node, not its parent. (Until #56 'gwn' itself threw here.)
+  try {
+    FieldGraph::build(
+        parseJson(R"({"op":"union","in":[{"op":"sphere"},
+            {"op":"mesh","path":"x","sign":"bogus"}]})"),
+        meshes);
+    FAIL("expected a GraphError");
+  } catch (const GraphError& e) {
+    const std::string what = e.what();
+    REQUIRE(what.find("'parity', 'pseudonormal' or 'gwn'") != std::string::npos);
+    REQUIRE(e.pointer() == "/in/1");
+  }
 
   // The error carries the offending node's JSON pointer.
   const std::string g =

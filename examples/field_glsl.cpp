@@ -1113,11 +1113,10 @@ int emitMesh(const GraphNode& n, Ctx& c) {
   dualc::SignMethod sm;
   if (sign == "parity") sm = dualc::SignMethod::WINDING_NUMBER;
   else if (sign == "pseudonormal") sm = dualc::SignMethod::PSEUDONORMAL;
-  else if (sign == "gwn")
-    throw GraphError("mesh sign 'gwn' is not supported by 'mesh'; a 'winding' "
-                     "node is not yet supported by the GLSL codegen",
+  else if (sign == "gwn") sm = dualc::SignMethod::GENERALIZED_WINDING_NUMBER;
+  else
+    throw GraphError("mesh sign must be 'parity', 'pseudonormal' or 'gwn'",
                      n.pointer);
-  else throw GraphError("mesh sign must be 'parity' or 'pseudonormal'", n.pointer);
   std::string normals = strParam(n, "normals", "smooth");
   bool interp;
   if (normals == "smooth") interp = true;

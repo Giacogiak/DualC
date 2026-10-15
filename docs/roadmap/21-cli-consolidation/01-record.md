@@ -105,7 +105,7 @@ per shape and oracle: [02](02-demo-mesh-winding.md).
 
 ## #56 The mesh node takes sign="gwn"
 
-**NEXT** — opened 2026-10-14; plan P02 T1. The precondition of `dualc_demo`'s retirement
+**DONE** 2026-10-15 — opened 2026-10-14; plan P02 T1. The precondition of `dualc_demo`'s retirement
 (D-56): `dualc_demo --gwn` is the one thing it has that the graph refuses.
 
 *Acceptance:* the guard in `field_graph.cpp`'s `meshSignMethod` removed and `gwn` mapped to
@@ -129,9 +129,14 @@ its constructor (`src/implicit/mesh_source.cpp`) builds the GWN oracle from it;
 node through `MeshSource::bakeToGrid` (`field_glsl.cpp` `emitMesh` → `emitBakedGrid`), so the
 sign oracle is inside the bake.
 
+*Landed 2026-10-15 (P02.1):* `gwn` mapped on the CPU and GPU paths; at `--depth 6` the two
+torus commands write byte-identical OBJ (40,032 faces, = parity's), and on `mesh-soup.obj`,
+where the oracles differ, so do both tools' `gwn` runs (30,120 faces vs parity's 33,610);
+parity case `mesh-gwn` (74); no ABI version move. Numbers: [03](03-mesh-sign-gwn.md).
+
 ## #57 Per-node bake on the mesh nodes
 
-**PLANNED** — opened 2026-10-14; plan P02 T2. The graph addition `dualc_boolean`'s retirement
+**NEXT** — opened 2026-10-14; plan P02 T2. The graph addition `dualc_boolean`'s retirement
 would need (D-60): its `--bake N`, the narrow-band SDF-grid bake of each mesh, is a speed /
 quality trade no node exposes.
 

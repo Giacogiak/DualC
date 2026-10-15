@@ -345,4 +345,15 @@ TEST_CASE("GLSL codegen does not over-collapse distinct nodes", "[field_glsl]") 
     CHECK(s.meshes.size() == 2);
     CHECK(resolver.calls == 2);
   }
+
+  SECTION("same mesh path, parity vs gwn bakes two textures") {
+    auto boxMesh = makeBox(1.0);
+    FixedResolver resolver(std::get<0>(boxMesh).get(),
+                           std::get<1>(boxMesh).get());
+    GraphNode g = parseShorthand(
+        "union(mesh(path=\"box\",sign=parity),mesh(path=\"box\",sign=gwn))");
+    GlslScene s = compileToGlsl(g, resolver, box(-2, 2));
+    CHECK(s.meshes.size() == 2);
+    CHECK(resolver.calls == 2);
+  }
 }

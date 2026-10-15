@@ -150,7 +150,7 @@ class FieldGraph {
  public:
   // Lower a parsed node tree to a FieldPtr, resolving mesh sources via `meshes`.
   // Throws GraphError on any semantic problem (unknown op, wrong arity, bad
-  // param, gwn-on-mesh, mesh-not-found).
+  // param, mesh-not-found).
   static FieldGraph build(const GraphNode& root, MeshResolver& meshes);
 
   const dualc::ImplicitField& field() const { return *field_; }
