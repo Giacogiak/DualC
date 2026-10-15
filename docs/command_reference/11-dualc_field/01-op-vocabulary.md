@@ -132,8 +132,8 @@ dualc_field --expr 'smooth-union(mesh(path="torus.obj",bake=64),mesh(path="cube.
 
 `revolve(profile, offset=1)` and `extrude(profile, height=0.5)` lift one 2D profile —
 `circle`, `rect`, `segment`, `polygon` — into a 3D node; a profile is legal nowhere else.
-Keys, defaults, typing errors and recipes: [09](09-2d-profiles-and-lifts.md). Not in
-`dualc_field_view` yet.
+Keys, defaults, typing errors and recipes: [09](09-2d-profiles-and-lifts.md); the viewer
+previews them (a `polygon` up to 64 vertices).
 
 ### Booleans (two children)
 

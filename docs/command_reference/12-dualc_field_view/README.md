@@ -83,7 +83,7 @@ the resolution model.
 | --- | --- |
 | [Controls](01-controls.md) | Everything you press: the orbit and section-plane keys, how `tab` + nudge edits a parameter live (and why some edits recompile), reload vs reset, the viewport-only cuts. |
 | [Supported nodes and worked examples](02-nodes-and-examples.md) | The node vocabulary (the same as `dualc_field`'s) and recipes P1–P16: composed CSG, mesh sources, graded and tapered lattices, dense previews, headless snapshots. |
-| [Recipes by node category (the full vocabulary)](03-recipes-by-node.md) | One ready-to-run preview per node family, N1–N19: the primitive parameter forms, the domain operators, `winding` soups, DAG dedup. |
+| [Recipes by node category (the full vocabulary)](03-recipes-by-node.md) | One ready-to-run preview per node family, N1–N21: the primitive parameter forms, the domain operators, `winding` soups, the 2D profiles under the lifts, DAG dedup. |
 | [Isolating a TPMS surface inside a volume (meshless preview)](04-open-surface-preview.md) | The thin-shell recipe `intersection(onion(normalize(tpms)), volume)` that shows a lattice membrane without the volume's skin, O1–O5. |
 
 ## Verifying preview == export

@@ -894,8 +894,7 @@ void requirePositive(const GraphNode& n, double v, const char* what) {
     throw GraphError("'" + n.op + "' " + what + " must be > 0", n.pointer);
 }
 
-dualc::Field2DPtr buildProfileUnchecked(const GraphNode& n) {
-  using dualc::Vector2;
+std::vector<double> readProfileUnchecked(const GraphNode& n) {
   if (!n.in.empty())
     throw GraphError("'" + n.op + "' is a 2D profile and takes no children",
                      n.pointer);
@@ -920,10 +919,7 @@ dualc::Field2DPtr buildProfileUnchecked(const GraphNode& n) {
                        "of >= 6 numbers)",
                        n.pointer);
     requireFinite(n, src->vec);
-    std::vector<Vector2> verts;
-    for (std::size_t i = 0; i < src->vec.size(); i += 2)
-      verts.push_back(Vector2{src->vec[i], src->vec[i + 1]});
-    return std::make_shared<dualc::Polygon2D>(std::move(verts));
+    return src->vec;
   }
 
   const ProfileLayout& layout = profileLayouts().at(n.op);
@@ -943,35 +939,42 @@ dualc::Field2DPtr buildProfileUnchecked(const GraphNode& n) {
     for (std::size_t i = 0; i < flat->vec.size(); ++i) p[i] = flat->vec[i];
   }
   requireFinite(n, p);
-  if (n.op == "circle") {
-    requirePositive(n, p[2], "radius");
-    return std::make_shared<dualc::Circle2D>(Vector2{p[0], p[1]}, p[2]);
-  }
-  if (n.op == "rect") {
-    requirePositive(n, std::min(p[2], p[3]), "half extents");
-    return std::make_shared<dualc::Box2D>(Vector2{p[0], p[1]},
-                                          Vector2{p[2], p[3]});
-  }
-  requirePositive(n, p[4], "radius");  // segment
-  return std::make_shared<dualc::Segment2D>(Vector2{p[0], p[1]},
-                                            Vector2{p[2], p[3]}, p[4]);
+  if (n.op == "circle") requirePositive(n, p[2], "radius");
+  else if (n.op == "rect") requirePositive(n, std::min(p[2], p[3]), "half extents");
+  else requirePositive(n, p[4], "radius");  // segment
+  return p;
 }
 
-// The profile under `lift`: anything but a 2D profile is refused, located at
-// the child. Same unread-key rule and library-error locator as buildField.
+// The profile under `lift`, built from readProfile's values.
 dualc::Field2DPtr buildProfile(const GraphNode& n, const std::string& lift) {
-  if (!isProfileOp(n.op))
-    throw GraphError("'" + lift + "' takes one 2D profile (circle, rect, "
-                     "segment, polygon), not '" + n.op + "'",
-                     n.pointer);
-  ReadScope scope{n};
+  using dualc::Vector2;
+  const std::vector<double> p = readProfile(n, lift);
   try {
-    dualc::Field2DPtr f = buildProfileUnchecked(n);
-    rejectUnreadParams(n);
-    return f;
+    if (n.op == "polygon") {
+      std::vector<Vector2> verts;
+      for (std::size_t i = 0; i < p.size(); i += 2)
+        verts.push_back(Vector2{p[i], p[i + 1]});
+      return std::make_shared<dualc::Polygon2D>(std::move(verts));
+    }
+    if (n.op == "circle")
+      return std::make_shared<dualc::Circle2D>(Vector2{p[0], p[1]}, p[2]);
+    if (n.op == "rect")
+      return std::make_shared<dualc::Box2D>(Vector2{p[0], p[1]},
+                                            Vector2{p[2], p[3]});
+    return std::make_shared<dualc::Segment2D>(Vector2{p[0], p[1]},
+                                              Vector2{p[2], p[3]}, p[4]);
   } catch (const std::invalid_argument& e) {
     throw GraphError(e.what(), n.pointer);
   }
+}
+
+// A lift's own value, read through this TU's findParam (the unread-key check
+// sees it) and checked by checkLiftParam -- the readNodeBake pattern.
+double readLiftParam(const GraphNode& n) {
+  const char* key = liftParamKey(n.op);
+  const bool has = findParam(n, key) != nullptr;
+  const double v = numParam(n, key, 0.0);
+  return checkLiftParam(n, has ? &v : nullptr);
 }
 
 dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes,
@@ -1067,24 +1070,14 @@ dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes,
   // typing error, located on the profile.
   if (isLiftOp(op)) {
     requireChildren(n, 1);
-    if (op == "revolve") {
-      const double offset = numParam(n, "offset", 1.0);
-      if (!std::isfinite(offset))
-        throw GraphError("'revolve' offset must be finite", n.pointer);
+    const double amount = readLiftParam(n);
+    if (op == "revolve")
       return std::make_shared<dualc::RevolveField>(buildProfile(n.in[0], op),
-                                                   offset);
-    }
-    const double height = numParam(n, "height", 0.5);
-    if (!std::isfinite(height) || !(height > 0.0))
-      throw GraphError("'extrude' height (the half-height along z) must be > 0",
-                       n.pointer);
+                                                   amount);
     return std::make_shared<dualc::ExtrudeField>(buildProfile(n.in[0], op),
-                                                 height);
+                                                 amount);
   }
-  if (isProfileOp(op))
-    throw GraphError("'" + op + "' is a 2D profile: it is legal only as the "
-                     "one child of 'revolve' or 'extrude'",
-                     n.pointer);
+  if (isProfileOp(op)) throwProfileOutsideLift(n);
 
   // 4. Decorators not covered by the PostOp machinery (one child).
   if (op == "normalize") {
@@ -1196,6 +1189,41 @@ bool isProfileOp(const std::string& op) {
 
 bool isLiftOp(const std::string& op) {
   return op == "revolve" || op == "extrude";
+}
+
+std::vector<double> readProfile(const GraphNode& n, const std::string& lift) {
+  if (!isProfileOp(n.op))
+    throw GraphError("'" + lift + "' takes one 2D profile (circle, rect, "
+                     "segment, polygon), not '" + n.op + "'",
+                     n.pointer);
+  ReadScope scope{n};
+  std::vector<double> p = readProfileUnchecked(n);
+  rejectUnreadParams(n);
+  return p;
+}
+
+const char* liftParamKey(const std::string& lift) {
+  return lift == "revolve" ? "offset" : "height";
+}
+
+double checkLiftParam(const GraphNode& n, const double* value) {
+  if (n.op == "revolve") {
+    const double offset = value ? *value : 1.0;
+    if (!std::isfinite(offset))
+      throw GraphError("'revolve' offset must be finite", n.pointer);
+    return offset;
+  }
+  const double height = value ? *value : 0.5;
+  if (!std::isfinite(height) || !(height > 0.0))
+    throw GraphError("'extrude' height (the half-height along z) must be > 0",
+                     n.pointer);
+  return height;
+}
+
+void throwProfileOutsideLift(const GraphNode& n) {
+  throw GraphError("'" + n.op + "' is a 2D profile: it is legal only as the "
+                   "one child of 'revolve' or 'extrude'",
+                   n.pointer);
 }
 
 double childBakeMargin(const GraphNode& parent, std::size_t i, double margin) {

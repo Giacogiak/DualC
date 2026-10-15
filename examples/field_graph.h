@@ -214,6 +214,22 @@ const std::vector<ProfileKind>& profileKinds();
 bool isProfileOp(const std::string& op);
 bool isLiftOp(const std::string& op);
 
+// The one profile reader, shared by the builder and the GLSL codegen (as
+// checkNodeBake is): the profile under `lift`, its values resolved (defaults,
+// named keys, then params / positionals from the front) and validated, in the
+// flat order profileKinds() lists -- circle cx cy r; rect cx cy hx hy; segment
+// ax ay bx by r; polygon x1 y1 x2 y2 .... Runs the profile's own unread-key
+// check. A non-profile child is the located typing error.
+std::vector<double> readProfile(const GraphNode& profile, const std::string& lift);
+// A lift's own key ("offset" for revolve, "height" for extrude) and its value
+// checked as the builder checks it: `value` null means the key is absent (the
+// default, dualc_lift's, is returned). Each TU reads the key itself, so its
+// unread-key check sees it.
+const char* liftParamKey(const std::string& lift);
+double checkLiftParam(const GraphNode& lift, const double* value);
+// The typing error for a profile anywhere but as a lift's one child.
+[[noreturn]] void throwProfileOutsideLift(const GraphNode& profile);
+
 // A built field: owns the FieldPtr tree. The meshes it references are owned by
 // the MeshResolver passed to build(), which the caller must keep alive.
 class FieldGraph {

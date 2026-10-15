@@ -7,10 +7,11 @@ Part of [Tool 11: `dualc_field`](README.md). A **profile** is a 2D field drawn i
 recipe writes a byte-identical mesh
 ([roadmap 21/05](../../roadmap/21-cli-consolidation/05-2d-profiles-and-lifts.md)).
 
-> **Not in the live viewer yet.** `dualc_field_view` (and the GLSL codegen behind it) has no
-> 2D emitter: a graph holding `revolve` / `extrude` is refused with
-> `GLSL codegen does not support op 'revolve'`. Contour it with `dualc_field`. The GPU half
-> is the next step of [21 #58](../../roadmap/21-cli-consolidation/01-record.md#58-2d-profiles-and-revolve--extrude-in-the-graph).
+`dualc_field_view` previews the same graphs: the profile's scalars (`radius`) and the lift's
+(`offset`, `height`) are live uniforms (`tab` + `↓`/`↑`), its points are `vec2` uniforms, and
+a `polygon`'s vertices are compiled in — the preview takes **at most 64 vertices** and refuses
+more with a located error (the export path has no ceiling). Recipes N20–N21 in
+[12/03](../12-dualc_field_view/03-recipes-by-node.md#2d-profiles-under-the-lifts).
 
 ## The two lifts
 

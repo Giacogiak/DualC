@@ -15,6 +15,7 @@ family. All are `--expr` one-liners; on PowerShell put each on one line (the
 | N12 | analytic primitives | An open primitive (`quad`) given a wall by `onion` |
 | N13–N17 | domain operators | `mirror`, `repeat` (needs `--bounds`), `repeat-limited`, `displace`, `round` |
 | N18–N19 | `winding` | The GWN solid of a mesh; a gyroid shell clipped to it |
+| N20–N21 | 2D profiles under the lifts | A revolved concave profile; an extruded L, cut by a sphere |
 
 ### Analytic primitives (mesh-free, instant)
 
@@ -100,6 +101,22 @@ The same two in PowerShell 5.1 form (path quotes `\"`):
 > `mesh` vs `winding`: use **`mesh`** for clean watertight, oriented input (faster,
 > exact narrow-band bake) — `mesh(sign=gwn)` when it is almost watertight (small gaps,
 > self-intersections); use **`winding`** to seal soup / open shells into a solid.
+
+### 2D profiles under the lifts
+
+`revolve` / `extrude` over a `circle`, `rect`, `segment` or `polygon`
+([11/09](../11-dualc_field/09-2d-profiles-and-lifts.md)). `tab` reaches the profile's
+`radius` and the lift's `offset` / `height` (nudgeable scalars); its points are `vec2`
+knobs, and a `polygon`'s vertices are compiled in — edit the file, it reloads. The preview
+takes a `polygon` of at most 64 vertices.
+
+```bash
+# N20 — a concave profile (a notch in its top) spun around y: a grooved ring
+dualc_field_view --expr "revolve(polygon(points=[[0,-0.6],[0.6,-0.6],[0.6,0.6],[0.3,0],[0,0.6]]),offset=0.5)"
+
+# N21 — an L-shaped prism with a ball carved out of its corner
+dualc_field_view --expr "difference(extrude(polygon(points=[[-1,-1],[1,-1],[1,-0.2],[-0.2,-0.2],[-0.2,1],[-1,1]]),height=0.5),sphere(center=[-1,-1,0.5],radius=0.6))"
+```
 
 ### DAG dedup is automatic
 

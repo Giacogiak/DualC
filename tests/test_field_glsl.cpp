@@ -11,6 +11,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <cmath>
 #include <cstddef>
 #include <memory>
 #include <string>
@@ -431,4 +432,142 @@ TEST_CASE("GLSL codegen does not over-collapse distinct nodes", "[field_glsl]") 
     CHECK(s.meshes.size() == 2);
     CHECK(resolver.calls == 2);
   }
+}
+
+// ---------------------------------------------------------------------------
+// The 2D layer (#58): profiles under revolve / extrude. Values are read by
+// field_graph's readProfile, so the GLSL path takes the builder's defaults,
+// checks and typing errors; these assert the emission shape and the binding
+// table (the scalars are float uniforms, so tab + arrows nudge them).
+// ---------------------------------------------------------------------------
+
+namespace {
+
+const UniformBinding* findBinding(const GlslScene& s, const std::string& key,
+                                  const std::string& type) {
+  for (const UniformBinding& b : s.bindings)
+    if (b.paramKey == key && b.glslType == type) return &b;
+  return nullptr;
+}
+
+// The (pointer, message) a graph fails with on the GPU path, and on the CPU.
+std::string glslError(const std::string& expr) {
+  FileMeshResolver resolver;
+  try {
+    compileToGlsl(parseShorthand(expr), resolver, box(-2, 2));
+  } catch (const GraphError& e) {
+    return e.pointer() + ": " + e.what();
+  }
+  return "<no error>";
+}
+
+std::string buildError(const std::string& expr) {
+  FileMeshResolver resolver;
+  try {
+    FieldGraph::build(parseShorthand(expr), resolver);
+  } catch (const GraphError& e) {
+    return e.pointer() + ": " + e.what();
+  }
+  return "<no error>";
+}
+
+}  // namespace
+
+TEST_CASE("GLSL codegen emits the 2D profiles under both lifts",
+          "[field_glsl][lift]") {
+  FileMeshResolver resolver;
+  struct Case {
+    std::string expr;
+    std::string marker;
+  };
+  const std::vector<Case> cases = {
+      {"revolve(circle(radius=0.4),offset=1.2)", "sd2Circle(p,"},
+      {"extrude(circle,height=0.6)", "sd2Circle(p,"},
+      {"extrude(rect(half=[0.8,0.5]),height=0.4)", "sd2Rect(p,"},
+      {"extrude(segment(radius=0.25))", "sd2Segment(p,"},
+      {"extrude(polygon(0,0,1,0,1,1,0,1))", "vec2[4]("},
+      {"revolve(polygon(points=[[0,0],[1,0],[0.5,1]]))", "vec2[3]("},
+  };
+  for (const Case& cs : cases) {
+    GlslScene s = compileToGlsl(parseShorthand(cs.expr), resolver, box(-2, 2));
+    CHECK(countOccurrences(s.generatedSource, cs.marker) == 1);
+    const bool rev = cs.expr.rfind("revolve", 0) == 0;
+    CHECK(countOccurrences(s.generatedSource,
+                           rev ? "(dcRevolveQ(p," : "dcExtrude(f") == 1);
+    CHECK(s.nodeCount == 2);  // the profile + the lift
+    CHECK(s.stepScale == 1.0f);  // exact SDFs: the metric fast path
+  }
+
+  // The new scalars are float uniforms (nudgeable), the 2D points vec2.
+  GlslScene r = compileToGlsl(
+      parseShorthand("revolve(circle(center=[0.1,0.2],radius=0.4),offset=1.2)"),
+      resolver, box(-2, 2));
+  const UniformBinding* radius = findBinding(r, "radius", "float");
+  const UniformBinding* offset = findBinding(r, "offset", "float");
+  const UniformBinding* center = findBinding(r, "center", "vec2");
+  REQUIRE(radius);
+  REQUIRE(offset);
+  REQUIRE(center);
+  CHECK(radius->value == std::vector<float>{0.4f});
+  CHECK(radius->nodePointer == "8");  // the circle (a shorthand char offset)
+  CHECK(offset->nodePointer == "0");  // the lift
+  CHECK(offset->value == std::vector<float>{1.2f});
+  CHECK(center->value == std::vector<float>{0.1f, 0.2f});
+  GlslScene e = compileToGlsl(parseShorthand("extrude(segment,height=0.7)"),
+                              resolver, box(-2, 2));
+  REQUIRE(findBinding(e, "height", "float"));
+  CHECK(findBinding(e, "height", "float")->value == std::vector<float>{0.7f});
+  CHECK(findBinding(e, "radius", "float"));  // the segment's
+  CHECK(bindingsWithKey(e, "a") == 1);
+  CHECK(bindingsWithKey(e, "b") == 1);
+
+  // One profile under two lifts emits once (its own memo key space).
+  GlslScene u = compileToGlsl(
+      parseShorthand("union(revolve(circle,offset=2),extrude(circle))"),
+      resolver, box(-3, 3));
+  CHECK(countOccurrences(u.generatedSource, "sd2Circle(p,") == 1);
+  CHECK(u.nodeCount == 4);
+}
+
+TEST_CASE("GLSL codegen keeps the builder's 2D typing and value errors",
+          "[field_glsl][lift]") {
+  // The same message, located on the same node, as FieldGraph::build.
+  for (const char* expr :
+       {"circle", "union(sphere,rect)", "revolve(sphere)", "extrude(revolve(circle))",
+        "extrude(circle(radius=0))", "extrude(circle(radius=0.5,typo=1))",
+        "extrude(rect(params=[0,0,1,1,1]))", "extrude(polygon(0,0,1,0))",
+        "extrude(circle,height=0)", "revolve(circle,offset=1,height=1)",
+        "revolve(circle,circle)"}) {
+    INFO(expr);
+    const std::string gpu = glslError(expr);
+    CHECK(gpu != "<no error>");
+    CHECK(gpu == buildError(expr));
+  }
+}
+
+TEST_CASE("GLSL codegen caps the polygon at its vertex ceiling",
+          "[field_glsl][lift]") {
+  auto polygonOf = [](int n) {
+    std::string pts;
+    for (int i = 0; i < n; ++i) {
+      const double a = 2.0 * 3.14159265358979 * i / n;
+      pts += (i ? "," : "") + std::string("[") + std::to_string(std::cos(a)) +
+             "," + std::to_string(std::sin(a)) + "]";
+    }
+    return "extrude(polygon(points=[" + pts + "]))";
+  };
+  FileMeshResolver resolver;
+  GlslScene s = compileToGlsl(parseShorthand(polygonOf(kMaxGlslPolygonVertices)),
+                              resolver, box(-2, 2));
+  CHECK(countOccurrences(s.generatedSource,
+                         "vec2[" + std::to_string(kMaxGlslPolygonVertices) +
+                             "](") == 1);
+  // One more is refused, located on the polygon; the export path builds it.
+  const std::string over = polygonOf(kMaxGlslPolygonVertices + 1);
+  const std::string err = glslError(over);
+  CHECK(err.find("'polygon' has 65 vertices; the GLSL preview takes at most 64") !=
+        std::string::npos);
+  // Located on the polygon (shorthand pointers are character offsets).
+  CHECK(err.rfind(std::to_string(over.find("polygon")) + ":", 0) == 0);
+  CHECK_NOTHROW(FieldGraph::build(parseShorthand(over), resolver));
 }

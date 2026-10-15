@@ -114,6 +114,7 @@ void setBinding(GLuint prog, const dce::fieldgraph::UniformBinding& b) {
   const GLint loc = glGetUniformLocation(prog, b.name.c_str());
   if (loc < 0) return;
   if (b.glslType == "float") glUniform1f(loc, b.value[0]);
+  else if (b.glslType == "vec2") glUniform2f(loc, b.value[0], b.value[1]);
   else if (b.glslType == "vec3") glUniform3f(loc, b.value[0], b.value[1], b.value[2]);
   else if (b.glslType == "mat4") glUniformMatrix4fv(loc, 1, GL_TRUE, b.value.data());
 }

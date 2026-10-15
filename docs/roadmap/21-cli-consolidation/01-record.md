@@ -154,7 +154,7 @@ out of the grid's clamp (D-62); parity `mesh-bake`, `mesh-bake-smooth` (76); D-6
 
 ## #58 2D profiles and revolve / extrude in the graph
 
-**PARTIAL** — opened 2026-10-14; plan P03 T1–T2. The precondition of `dualc_lift`'s retirement
+**DONE** 2026-10-15 — opened 2026-10-14; plan P03 T1–T2. The precondition of `dualc_lift`'s retirement
 (D-57); fires D-11 for this sub-grammar only. The library layer exists
 (`include/dualc/implicit2d.h`: `Circle2D`, `Box2D`, `Segment2D`, `Polygon2D`, `RevolveField`,
 `ExtrudeField`); the graph and `field_glsl.cpp` have no 2D node.
@@ -170,8 +170,8 @@ GLSL for the four 2D distances and the two lifts (the polygon as a loop over a b
 documented constant array), a parity case for each (the count bumped), parameter nudging in
 `dualc_field_view` working on them, `--gpu` green.
 
-*CPU half landed 2026-10-15 (P03.1):* token `rect`; [05](05-2d-profiles-and-lifts.md). GPU
-half NEXT (T2).
+*Landed 2026-10-15:* CPU (P03.1), token `rect`; GPU (P03.2), polygon ≤ 64 vertices, parity
+82; [05](05-2d-profiles-and-lifts.md).
 
 ## #59 Slice any graph
 
