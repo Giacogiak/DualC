@@ -87,7 +87,8 @@ graph twin was stopped before it finished.
 `scripts/docs_loss_audit.py --base 2fcb6ee --scope docs/ --untriaged` against a scratch commit
 — this branch's docs with the seven retiring pages deleted (03 kept, D-60) — scratch triage
 (the script's thresholds, no items). On the eight pages, 400 residual rows (247 sentences, 116
-identifiers, 23 headings, 14 evidence tokens, before the patches below), triaged by hand:
+identifiers, 23 headings, 14 evidence tokens; 396 after the patches below, re-run on the final
+docs), triaged by hand:
 
 - **The old command lines and flag-table rows** (most rows): superseded — each recipe has its
   graph twin in a *Was* column or a mapping table (11/11, 11/12, 11/13, 11/14, 11/09, 11/10,
