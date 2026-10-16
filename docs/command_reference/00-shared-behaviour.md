@@ -62,7 +62,7 @@ twins of the C ABI ([`capi/README.md`](../../capi/README.md)) for everyone else.
 
 ## The output file appears only complete (`.part`)
 
-Every tool that exports through the shared writer (the six above, monolithic or
+Every tool that exports through the shared writer (the two above, monolithic or
 `--tile-depth`) writes to **`<path>.part`** and renames it over `<path>` only after
 the file is finished, so `<path>` is either the complete output or absent — never
 a truncated file:

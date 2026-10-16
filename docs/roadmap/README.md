@@ -24,10 +24,10 @@ a side tool holds moves into the graph, and so within the C ABI's reach, and the
 ([D-55 … D-59](../decisions/01-settled.md); `dualc_boolean` stays,
 [D-60](../decisions/01-settled.md)). It runs as the
 [consolidation plan](../raw/2026-10-14-cli-consolidation-plan.md) on branch
-`feat/cli-consolidation`; #55–#60 are DONE (seven tools retired 2026-10-16); **NEXT** is the plan's close (P07) and the PR. Before it the engine
+`feat/cli-consolidation`; #55–#60 are DONE (seven tools retired) and the block closed 2026-10-16 ([21/09](21-cli-consolidation/09-plan-run.md)); the PR is the owner's. Before it the engine
 track drew on the 2026-08-19 audit's ledger ([17](17-code-audit-and-hardening/README.md))
 through the hosted-CI plan, run closed 2026-10-07 ([20/04](20-public-delivery/04-hosted-ci-plan-run.md));
-the rest of **#34** resumes after block 21. The docs restructuring ([19](19-docs-layers/README.md))
+**NEXT** is the rest of **#34**, after that PR. The docs restructuring ([19](19-docs-layers/README.md))
 is DONE and leaves the monthly `/docs-semantic-lint` to ordinary sessions; **#48**
 ([14/05](14-c-abi/05-progress-and-cancel.md)) left D-44 / D-45 open and the re-vendor to
 Boletus ([15](15-boletus-handoff.md#dualc-retains--engine--abi-boletus-only-requests-these-upstream)).
@@ -37,11 +37,11 @@ the block records the table links ([D-43](../decisions/01-settled.md)).
 
 | Date | What landed | Record |
 | --- | --- | --- |
+| 2026-10-16 | **Block 21 closed** — the consolidation plan's eleven units harvested; the branch awaits its PR. | [21/09](21-cli-consolidation/09-plan-run.md) |
 | 2026-10-16 | **#60** — seven side CLIs retired into `dualc_field` + `dualc_field_view`, each tested path twinned (ctest 358 → 344), pages 01–07 and 10 tombstones. | [21/08](21-cli-consolidation/08-retire-tools.md) |
 | 2026-10-16 | **#59** — `dualc_field --slice AXIS=VALUE`: any graph sampled on a plane to PNG + SVG, `dualc_slice`'s output byte-identical. | [21/06](21-cli-consolidation/06-slice-any-graph.md) |
 | 2026-10-15 | **#58** — 2D profiles under `revolve` / `extrude` in the graph: `dualc_lift`'s recipes byte-identical, and in the viewer (parity 82). | [21/05](21-cli-consolidation/05-2d-profiles-and-lifts.md) |
 | 2026-10-15 | **#57** — per-node `bake=N` on `mesh` / `winding`: ~4× faster than exact on the large pair, the tool's accuracy at its root box; a baked node inherits its ancestors' `k` (D-62); `dualc_boolean` kept (D-60). | [21/04](21-cli-consolidation/04-mesh-node-bake.md) |
-| 2026-10-15 | **#56** — `mesh(sign="gwn")`: the graph's mesh node takes the GWN sign oracle, byte-identical to `dualc_demo --gwn`; parity case `mesh-gwn`. | [21/03](21-cli-consolidation/03-mesh-sign-gwn.md) |
 
 **The shipped keystone (2026-06-14 … 2026-07-06)** — builds #1–#3, the C ABI (#19) and
 the client layer's move to Boletus, each DONE with its evidence in
@@ -60,12 +60,12 @@ row (cited by ID).
 1. **CLI consolidation** ([21](21-cli-consolidation/README.md)) — the side CLIs folded into
    `dualc_field` + `dualc_field_view`; the one status table is
    [21 § The pages of this block](21-cli-consolidation/README.md#the-pages-of-this-block).
-   **NEXT:** the plan's close (P07) and the PR — #60 DONE 2026-10-16 (P05 21/07, P06
-   21/08).
+   DONE — closed 2026-10-16, the run harvested in
+   [21/09](21-cli-consolidation/09-plan-run.md); the PR is the owner's.
 2. **Engine hardening — the audit's open findings**
    ([17](17-code-audit-and-hardening/README.md)) — a standing ledger, not a phase; the
    one status table is [17 § Tracked items](17-code-audit-and-hardening/README.md#tracked-items--status-at-a-glance).
-   After block 21: the rest of #34, then #35 on its trigger; **#53** (Linux `.so`, [14/06](14-c-abi/06-linux-shared-library.md))
+   **NEXT:** the rest of #34, then #35 on its trigger; **#53** (Linux `.so`, [14/06](14-c-abi/06-linux-shared-library.md))
    PARTIAL (libraries landed with #52; CI proof owed).
 3. **TPMS / lattice capability** ([05](05-tpms-lattices/README.md)) — **#17 strut
    lattices** and their Phases 3–5 DONE; **#18 tight Lipschitz `cellOverlaps`**
@@ -144,7 +144,7 @@ workflow, graded-onion; GLSL codegen completeness DONE 2026-06-24 —
 | 18 | [C ABI — continued](18-c-abi-continued.md) | Retired 2026-09-18: its two entries are [14/04](14-c-abi/04-abi-0-4-0.md); the number is never reused. | tombstone — DONE |
 | 19 | [Docs layers](19-docs-layers/README.md) | The 2026-09-17 docs restructuring: the plan (immutable, `docs/raw/`), items #36–#45, the phase table, per-phase evidence, the semantic-lint runs. | Phases 0–8 **DONE** (2026-09-20); the lint runs keep landing in [19/08](19-docs-layers/08-semantic-lint/README.md) |
 | 20 | [Public delivery](20-public-delivery/README.md) | The repo as others build it: geometry-central pinned and fetched (options weighed), nanort vendored, the self-bootstrapping clean clone (#47); Linux as a build host (#49); hosted CI running the gate (#51), the plan's run (04). | **#47 DONE** (2026-09-21) · **#49 DONE** (2026-10-03) · **#51 DONE** (2026-10-06) |
-| 21 | [CLI consolidation](21-cli-consolidation/README.md) | One framework, `dualc_field` + `dualc_field_view`: the demo meshes wound outward, `mesh(sign="gwn")`, per-node `bake`, 2D profiles + lifts and a graph slice in the graph, then seven side CLIs retired (#55–#60). | #55–#60 DONE; D-60 DONE (kept) |
+| 21 | [CLI consolidation](21-cli-consolidation/README.md) | One framework, `dualc_field` + `dualc_field_view`: the demo meshes wound outward, `mesh(sign="gwn")`, per-node `bake`, 2D profiles + lifts and a graph slice in the graph, then seven side CLIs retired (#55–#60). | **DONE** (2026-10-16) — #55–#60; D-60 kept; the run harvested (09) |
 
 ## How the blocks relate
 

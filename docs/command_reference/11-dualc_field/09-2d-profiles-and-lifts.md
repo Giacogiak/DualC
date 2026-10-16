@@ -36,7 +36,7 @@ defaults are the retired `dualc_lift`'s.
 
 - **`rect`, not `box`:** `box` is the 3D primitive's token; a profile token never shadows a
   3D one, so a misplaced profile is always a typing error and never a silently different
-  shape.
+  shape ([design/12](../../design/12-field-graph.md#the-2d-layer)).
 - A flat list **shorter** than the profile's arity overrides from the front (the rest keep
   their defaults), as on a 3D primitive; a **longer** one is refused.
 - `polygon` takes `points` as rows (`[[0,0],[1,0],[1,1]]`) or flat (`[0,0,1,0,1,1]`), or

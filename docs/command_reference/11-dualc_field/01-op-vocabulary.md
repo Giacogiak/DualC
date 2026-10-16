@@ -91,7 +91,7 @@ vocabulary.
 | --- | --- | --- |
 | `gyroid` · `schwarz-p` · `diamond` · `fischer-koch` · `lidinoid` · `neovius` | `center`:[x,y,z]=0, `wavelength`=1 | TPMS. Raw value is non-metric — wrap in `normalize` before a metric `onion`/smooth boolean. |
 | `sc` · `bcc` · `fcc` · `octet` | `center`:[x,y,z]=0, `wavelength`=1, `radius`=0.1 | **Strut lattices** (wireframe crystals): simple-cubic, body-centered, face-centered, octet truss. A unit cell of capsule struts tiled infinitely; `radius` is the metric strut thickness. Already a true SDF — no `normalize` needed. Infinite extent, so clip it: `intersection(mesh(…), bcc(…))` or `intersection(box(…), bcc(…))`, or set `--bounds` for an open-ended inspection view. |
-| `mesh` | `path` **or** `id` (exactly one), `sign` ∈ `parity`(def)/`pseudonormal`/`gwn`, `normals` ∈ `smooth`(def)/`sharp`, `bake`=off, `band`=3 bake cells (+ the margin above) | Signed distance to a mesh (BVH); `sign` picks only the inside test. `parity` and `pseudonormal` need closed input (`pseudonormal` also outward-wound); `gwn` (generalized winding number, `dualc_demo --gwn`) survives small gaps, self-intersections and soup, but a real hole stays a hole — the distance is still to the mesh. To **seal** an open shell or soup into a solid use `winding`, the sealing field, not a sign oracle. |
+| `mesh` | `path` **or** `id` (exactly one), `sign` ∈ `parity`(def)/`pseudonormal`/`gwn`, `normals` ∈ `smooth`(def)/`sharp`, `bake`=off, `band`=3 bake cells (+ the margin above) | Signed distance to a mesh (BVH); `sign` picks only the inside test. `parity` and `pseudonormal` need closed input (`pseudonormal` also outward-wound); `gwn` (generalized winding number) survives small gaps, self-intersections and soup, but a real hole stays a hole — the distance is still to the mesh. To **seal** an open shell or soup into a solid use `winding`, the sealing field, not a sign oracle. |
 | `winding` | `path` **or** `id` (exactly one), `bake`=off | Generalized-winding-number field: contours triangle **soup** / open shells / self-intersections into a watertight solid. Reads the winding: faces wound inside out give an empty field. |
 | 30 analytic primitives | grouped keys or flat `params:[…]` (see below) | `sphere`, `box`, `roundbox`, `torus`, … — full param order in [12](12-primitive-catalogue.md). |
 
@@ -118,7 +118,8 @@ further out — a smooth op's `k`, an `offset` / `round` / `onion` / `displace` 
 make material out of that constant. The graph handles it: each ancestor hands the baked node
 that distance (the largest smooth `k` above it plus the offsets on the way, divided by `s`
 through a `scale`), and the node widens its box by it and keeps its exact band at least that
-plus 3 cells — `dualc_boolean --bake`'s rule (pad `k`, band `k` + 3 cells), per node. A `band`
+plus 3 cells — `dualc_boolean --bake`'s rule (pad `k`, band `k` + 3 cells), per node; the
+rule, op by op, is [design/12](../../design/12-field-graph.md#per-node-bake). A `band`
 larger than that wins. One consequence remains yours: a baked field's bounds are its padded
 box, so at the same `--depth` the cells are coarser than the exact run's unless `--bounds`
 pins the root box. `dualc_boolean --bake N`'s single box around both operands is not

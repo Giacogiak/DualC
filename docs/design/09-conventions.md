@@ -36,7 +36,7 @@ and diagnostic assumes it.
 
 ## Export-format dispatch
 
-The output format is chosen **by the `-o` extension, lower-cased, and by nothing else**:
+A mesh export's format is chosen **by the `-o` extension, lower-cased, and by nothing else**:
 `.obj`, `.stl` or `.3mf`, read by `lowerExt` in `examples/example_common.cpp` and dispatched
 after a single contour pass — in `dispatchWrite` on the plain path, in `writeField`'s
 decimation branch, and as a guard in each tiled writer; any other extension is an error —
@@ -54,8 +54,11 @@ each format carries follows from what its consumer needs, not from the engine:
 Streaming export (`--tile-depth`) writes `.stl` or `.3mf` only: a tiled OBJ would be huge
 and share no vertices, so it is refused rather than written badly. The user-facing table — extension, format, one-line note — is the command reference's
 [Export formats](../command_reference/README.md#export-formats--o-extension-dispatch).
+`dualc_field --slice` writes no mesh: `-o` is a base name (a trailing `.png` / `.svg` is
+stripped, any other suffix kept), and it always writes `<base>.png` and `<base>.svg`, in
+place, without the temp below (`stripSliceExt`, `writeFieldSlice` in `examples/field_slice.cpp`).
 
-Every writer targets `path + ".part"`, not `path`: the driver (`writeField`, the tiled
+Every mesh writer targets `path + ".part"`, not `path`: the driver (`writeField`, the tiled
 driver behind both `writeFieldTiled*`) holds an `AtomicOutput` that renames the temp over
 `path` with `std::filesystem::rename` — which replaces an existing file on every platform —
 only after the writer's `finish()` succeeded, and removes the temp on any other exit. The
