@@ -11,7 +11,9 @@ The codegen accepts the **same node vocabulary as `dualc_field`** —
 the 4 strut lattices (with `nodeRadius`), all 30 analytic primitives (the open
 `triangle`/`quad` paired with `onion`, the infinite ones clipped by the sample
 bounds), the 7 booleans, every decorator and domain operator, the three-child
-`mix`, and the `mesh` / `winding` sources (baked to a `sampler3D`). Every scalar
+`mix`, the `mesh` / `winding` sources (baked to a `sampler3D`), and the 2D profiles
+under `revolve` / `extrude` (a `polygon` up to 64 vertices,
+[11/09](../11-dualc_field/09-2d-profiles-and-lifts.md)). Every scalar
 parameter is a live uniform (`tab` + nudge), including the `graded-*` ramps and
 `mix`'s `lo`/`hi` — and `mix` blends *values*, so between two different crystals it
 leaves a gap ([design/10](../../design/10-invariants-and-tolerances.md#mix-blends-values-not-shapes)). Every node is

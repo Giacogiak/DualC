@@ -16,7 +16,7 @@ dualc_boolean <op> a.obj b.obj [-o PATH] [--k K] [--depth N] [--collapse E] [--s
 | `--k K` | `0.25` | Blend radius of the three `smooth-*` ops, in world units; the hard ops ignore it. |
 | `--depth N` | `7` | Octree max depth; cell size ≈ root extent / `2^N`. |
 | `--collapse E` | `0` (off) | Adaptive cell-collapse threshold (QEF energy, length²) — [common options](README.md#common-options--which-tool-takes-which). |
-| `--sharp` | off | Record each crossing's geometric face normal instead of the smooth per-vertex blend ([Sharp vs. smooth normals](01-dualc_demo.md#sharp-vs-smooth-normals---sharp)). |
+| `--sharp` | off | Record each crossing's geometric face normal instead of the smooth per-vertex blend ([Sharp vs. smooth normals](11-dualc_field/11-mesh-in.md#sharp-vs-smooth-normals-normalssharp)). |
 | `--bake N` | off (direct) | Pre-sample each operand into an `N³` narrow-band signed-distance grid before combining. |
 
 ## The options in detail
@@ -40,6 +40,9 @@ dualc_boolean <op> a.obj b.obj [-o PATH] [--k K] [--depth N] [--collapse E] [--s
   with an enclosed cavity (a hollow shell) keeps its cavity on the baked path,
   the same as on the direct one — the fix and its test are
   [roadmap 12/07 § H2](../roadmap/12-field-graph-and-app/07-mesh-preview-sweep.md#h2-the-bakes-far-field-sign-flood-assumed-a-padded-region).
+  In a graph, each `mesh` node bakes on its own with `bake=N` — over its own padded box, not
+  one box round both operands, so not byte-identical to `--bake`
+  ([11/01 § Sources](11-dualc_field/01-op-vocabulary.md#sources)).
 
 ## Recipes
 
@@ -52,7 +55,7 @@ dualc_boolean <op> a.obj b.obj [-o PATH] [--k K] [--depth N] [--collapse E] [--s
 | B5 | `smooth-union` | `dualc_boolean smooth-union cube.obj cube.obj --k 0.25 -o b_sunion.obj` | A ∪ B with a fillet of radius `--k`. |
 | B6 | `smooth-intersection` | `dualc_boolean smooth-intersection cube.obj cube.obj --k 0.25 -o b_sinter.obj` | A ∩ B, rounded. |
 | B7 | `smooth-difference` | `dualc_boolean smooth-difference cube.obj cube.obj --k 0.25 -o b_sdiff.obj` | A − B, rounded. |
-| B8 | `difference`, baked | `dualc_boolean difference cube.obj sphere.obj --sharp --bake 128 -o carved.obj` | A − B on the `--bake` accelerator path, face normals keeping the seams square. |
+| B8 | `difference`, baked | `dualc_boolean difference genus2.obj sphere.obj --sharp --bake 128 -o carved.obj` | A − B on the `--bake` accelerator path, face normals keeping the seams square: the sphere bores the genus-2 body's middle. |
 
 ---
 

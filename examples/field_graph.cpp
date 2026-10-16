@@ -25,6 +25,8 @@
 #include "geometrycentral/surface/surface_mesh_factories.h"
 #include "geometrycentral/surface/vertex_position_geometry.h"
 
+#include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -184,11 +186,30 @@ ParamValue toParam(const json& v, const std::string& pointer) {
     pv.str = v.get<std::string>();
   } else if (v.is_array()) {
     pv.kind = ParamValue::Kind::Vector;
+    // An array of arrays (a polygon's points=[[x,y],...]) is read row by row
+    // into the flat vector; every row must be a non-empty number array of the
+    // first row's length.
+    const bool rows = !v.empty() && v[0].is_array();
     for (std::size_t i = 0; i < v.size(); ++i) {
-      if (!v[i].is_number())
-        throw GraphError("array parameter must contain only numbers",
-                         pointer + "/" + std::to_string(i));
-      pv.vec.push_back(v[i].get<double>());
+      const std::string at = pointer + "/" + std::to_string(i);
+      if (!rows) {
+        if (!v[i].is_number())
+          throw GraphError("array parameter must contain only numbers", at);
+        pv.vec.push_back(v[i].get<double>());
+        continue;
+      }
+      if (!v[i].is_array() || v[i].empty() ||
+          (i > 0 && v[i].size() != pv.rowSize))
+        throw GraphError("an array of arrays must hold non-empty number arrays "
+                         "of one length",
+                         at);
+      pv.rowSize = v[i].size();
+      for (std::size_t k = 0; k < v[i].size(); ++k) {
+        if (!v[i][k].is_number())
+          throw GraphError("array parameter must contain only numbers",
+                           at + "/" + std::to_string(k));
+        pv.vec.push_back(v[i][k].get<double>());
+      }
     }
   } else {
     throw GraphError("unsupported parameter type (expected number, string or "
@@ -351,8 +372,12 @@ class ShorthandParser {
     return out;
   }
 
-  // A bracketed number array: '[' number (',' number)* ']'.
-  std::vector<double> readArray() {
+  // A bracketed number array: '[' number (',' number)* ']', or an array of
+  // equal-length number arrays '[' '[' ... ']' (',' '[' ... ']')* ']' (a
+  // polygon's points), read row by row; `rowSize` gets the row length (0 for
+  // a flat array).
+  std::vector<double> readArray(std::size_t* rowSize = nullptr,
+                                bool allowRows = true) {
     ++pos_;  // consume '['
     std::vector<double> v;
     skipWs();
@@ -360,9 +385,22 @@ class ShorthandParser {
       ++pos_;
       return v;
     }
+    const bool rows = peek() == '[';
+    if (rows && !allowRows) fail("arrays nest one level deep at most");
+    std::size_t width = 0;
     while (true) {
       skipWs();
-      v.push_back(readNumber());
+      if (rows) {
+        if (eof() || peek() != '[') fail("expected '[' (an array of arrays)");
+        std::vector<double> row = readArray(nullptr, false);
+        if (row.empty() || (width != 0 && row.size() != width))
+          fail("an array of arrays must hold non-empty number arrays of one "
+               "length");
+        width = row.size();
+        v.insert(v.end(), row.begin(), row.end());
+      } else {
+        v.push_back(readNumber());
+      }
       skipWs();
       if (eof()) fail("unterminated array");
       char c = peek();
@@ -376,6 +414,7 @@ class ShorthandParser {
       }
       fail("expected ',' or ']' in array");
     }
+    if (rowSize) *rowSize = width;
     return v;
   }
 
@@ -387,7 +426,7 @@ class ShorthandParser {
     ParamValue pv;
     if (c == '[') {
       pv.kind = ParamValue::Kind::Vector;
-      pv.vec = readArray();
+      pv.vec = readArray(&pv.rowSize);
     } else if (c == '"') {
       pv.kind = ParamValue::Kind::String;
       pv.str = readString();
@@ -505,8 +544,15 @@ ojson paramToJson(const ParamValue& pv) {
       return ojson(pv.num);
     case ParamValue::Kind::String:
       return ojson(pv.str);
-    case ParamValue::Kind::Vector:
-      return ojson(pv.vec);
+    case ParamValue::Kind::Vector: {
+      if (pv.rowSize == 0) return ojson(pv.vec);
+      ojson rows = ojson::array();
+      for (std::size_t i = 0; i + pv.rowSize <= pv.vec.size(); i += pv.rowSize)
+        rows.push_back(ojson(std::vector<double>(
+            pv.vec.begin() + static_cast<std::ptrdiff_t>(i),
+            pv.vec.begin() + static_cast<std::ptrdiff_t>(i + pv.rowSize))));
+      return rows;
+    }
   }
   return ojson(nullptr);
 }
@@ -799,19 +845,149 @@ dualc::SignMethod meshSignMethod(const GraphNode& n) {
   std::string sign = strParam(n, "sign", "parity");
   if (sign == "parity") return dualc::SignMethod::WINDING_NUMBER;
   if (sign == "pseudonormal") return dualc::SignMethod::PSEUDONORMAL;
-  if (sign == "gwn")
-    throw GraphError("mesh sign 'gwn' is not supported by the 'mesh' node; use "
-                     "a 'winding' node for generalized-winding-number soups",
-                     n.pointer);
-  throw GraphError("mesh sign must be 'parity' or 'pseudonormal'", n.pointer);
+  if (sign == "gwn") return dualc::SignMethod::GENERALIZED_WINDING_NUMBER;
+  throw GraphError("mesh sign must be 'parity', 'pseudonormal' or 'gwn'",
+                   n.pointer);
 }
 
-dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes);
+// A mesh / winding node's `bake` (and, on a mesh, `band`), read through the
+// same findParam as every other key so the unread-key check sees them.
+NodeBake readNodeBake(const GraphNode& n, bool readBand) {
+  const bool hasBake = findParam(n, "bake") != nullptr;
+  const double bake = numParam(n, "bake", 0.0);
+  const bool hasBand = readBand && findParam(n, "band") != nullptr;
+  const double band = readBand ? numParam(n, "band", 0.0) : 0.0;
+  return checkNodeBake(n, hasBake ? &bake : nullptr, hasBand ? &band : nullptr);
+}
 
-dualc::FieldPtr buildField(const GraphNode& n, MeshResolver& meshes) {
+// ---------------------------------------------------------------------------
+// The 2D layer. A profile reads like a primitive -- grouped keys fill slices of
+// a default vector, `params=[...]` (or shorthand positionals) overrides it from
+// the front -- but in 2D, and it is built only through a lift (buildProfile).
+// The defaults are the retired dualc_lift's, so `extrude(circle)` writes what
+// `dualc_lift extrude circle` wrote. A flat list longer than the profile's
+// arity is refused, as dualc_lift refused it; the polygon takes any even count
+// for >= 3 vertices.
+// ---------------------------------------------------------------------------
+struct ProfileLayout {
+  std::vector<double> defaults;
+  std::vector<Slot> slots;
+};
+
+const std::map<std::string, ProfileLayout>& profileLayouts() {
+  static const std::map<std::string, ProfileLayout> m = {
+      {"circle", {{0, 0, 0.5}, {{"center", 0, 2}, {"radius", 2, 1}}}},
+      {"rect", {{0, 0, 1, 0.5}, {{"center", 0, 2}, {"half", 2, 2}}}},
+      {"segment",
+       {{-1, 0, 1, 0, 0.3}, {{"a", 0, 2}, {"b", 2, 2}, {"radius", 4, 1}}}},
+  };
+  return m;
+}
+
+void requireFinite(const GraphNode& n, const std::vector<double>& p) {
+  for (double v : p)
+    if (!std::isfinite(v))
+      throw GraphError("'" + n.op + "' values must be finite", n.pointer);
+}
+
+void requirePositive(const GraphNode& n, double v, const char* what) {
+  if (!(v > 0.0))
+    throw GraphError("'" + n.op + "' " + what + " must be > 0", n.pointer);
+}
+
+std::vector<double> readProfileUnchecked(const GraphNode& n) {
+  if (!n.in.empty())
+    throw GraphError("'" + n.op + "' is a 2D profile and takes no children",
+                     n.pointer);
+  const ParamValue* flat = findParam(n, "params");
+  if (flat && flat->kind != ParamValue::Kind::Vector)
+    throw GraphError("'params' must be a number array", n.pointer);
+
+  if (n.op == "polygon") {
+    const ParamValue* pts = findParam(n, "points");
+    if (pts && flat)
+      throw GraphError("'polygon' takes 'points' or 'params', not both",
+                       n.pointer);
+    const ParamValue* src = pts ? pts : flat;
+    if (!src)
+      throw GraphError("'polygon' needs points=[[x,y],...] (>= 3 vertices) "
+                       "or params=[x1,y1,x2,y2,...]",
+                       n.pointer);
+    if (src->kind != ParamValue::Kind::Vector ||
+        (src->rowSize != 0 && src->rowSize != 2) || src->vec.size() % 2 != 0 ||
+        src->vec.size() < 6)
+      throw GraphError("'polygon' needs >= 3 [x,y] vertices (an even count "
+                       "of >= 6 numbers)",
+                       n.pointer);
+    requireFinite(n, src->vec);
+    return src->vec;
+  }
+
+  const ProfileLayout& layout = profileLayouts().at(n.op);
+  std::vector<double> p = layout.defaults;
+  for (const Slot& sl : layout.slots) {
+    if (!findParam(n, sl.key)) continue;
+    std::vector<double> vals =
+        sl.arity == 1 ? std::vector<double>{numParam(n, sl.key, 0.0)}
+                      : vecParam(n, sl.key, sl.arity, false, {});
+    for (std::size_t i = 0; i < sl.arity; ++i) p[sl.offset + i] = vals[i];
+  }
+  if (flat) {
+    if (flat->vec.size() > p.size())
+      throw GraphError("'" + n.op + "' takes at most " +
+                           std::to_string(p.size()) + " values in params",
+                       n.pointer);
+    for (std::size_t i = 0; i < flat->vec.size(); ++i) p[i] = flat->vec[i];
+  }
+  requireFinite(n, p);
+  if (n.op == "circle") requirePositive(n, p[2], "radius");
+  else if (n.op == "rect") requirePositive(n, std::min(p[2], p[3]), "half extents");
+  else requirePositive(n, p[4], "radius");  // segment
+  return p;
+}
+
+// The profile under `lift`, built from readProfile's values.
+dualc::Field2DPtr buildProfile(const GraphNode& n, const std::string& lift) {
+  using dualc::Vector2;
+  const std::vector<double> p = readProfile(n, lift);
+  try {
+    if (n.op == "polygon") {
+      std::vector<Vector2> verts;
+      for (std::size_t i = 0; i < p.size(); i += 2)
+        verts.push_back(Vector2{p[i], p[i + 1]});
+      return std::make_shared<dualc::Polygon2D>(std::move(verts));
+    }
+    if (n.op == "circle")
+      return std::make_shared<dualc::Circle2D>(Vector2{p[0], p[1]}, p[2]);
+    if (n.op == "rect")
+      return std::make_shared<dualc::Box2D>(Vector2{p[0], p[1]},
+                                            Vector2{p[2], p[3]});
+    return std::make_shared<dualc::Segment2D>(Vector2{p[0], p[1]},
+                                              Vector2{p[2], p[3]}, p[4]);
+  } catch (const std::invalid_argument& e) {
+    throw GraphError(e.what(), n.pointer);
+  }
+}
+
+// A lift's own value, read through this TU's findParam (the unread-key check
+// sees it) and checked by checkLiftParam -- the readNodeBake pattern.
+double readLiftParam(const GraphNode& n) {
+  const char* key = liftParamKey(n.op);
+  const bool has = findParam(n, key) != nullptr;
+  const double v = numParam(n, key, 0.0);
+  return checkLiftParam(n, has ? &v : nullptr);
+}
+
+dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes,
+                                    double margin);
+
+// `margin` is the bake margin the ancestors hand down (childBakeMargin); only
+// a baked mesh / winding node reads it.
+dualc::FieldPtr buildField(const GraphNode& n, MeshResolver& meshes,
+                           double margin) {
   ReadScope scope{n};
   try {
-    dualc::FieldPtr f = buildFieldUnchecked(n, meshes);
+    dualc::FieldPtr f = buildFieldUnchecked(n, meshes, margin);
     rejectUnreadParams(n);
     return f;
   } catch (const std::invalid_argument& e) {
@@ -825,16 +1001,19 @@ dualc::FieldPtr buildField(const GraphNode& n, MeshResolver& meshes) {
   }
 }
 
-dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes) {
+dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes,
+                                    double margin) {
   const std::string& op = n.op;
+  auto child = [&](std::size_t i) {
+    return buildField(n.in[i], meshes, childBakeMargin(n, i, margin));
+  };
 
   // 1. Booleans (two children).
   BoolOp bop;
   if (parseBoolOp(op, bop)) {
     requireChildren(n, 2);
     double k = numParam(n, "k", 0.25);
-    return applyBoolOp(bop, buildField(n.in[0], meshes),
-                       buildField(n.in[1], meshes), k);
+    return applyBoolOp(bop, child(0), child(1), k);
   }
 
   // 2. TPMS sources.
@@ -869,8 +1048,11 @@ dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes) {
     else if (normals == "sharp") interp = false;
     else throw GraphError("mesh normals must be 'smooth' or 'sharp'", n.pointer);
     dualc::SignMethod sm = meshSignMethod(n);
+    const NodeBake nb = readNodeBake(n, true);
     MeshHandle h = id.empty() ? meshes.resolve(path) : meshes.resolveId(id);
-    return std::make_shared<dualc::MeshSource>(*h.mesh, *h.geom, interp, sm);
+    auto src = std::make_shared<dualc::MeshSource>(*h.mesh, *h.geom, interp, sm);
+    if (nb.res == 0) return src;
+    return bakeMeshNode(*src, nb, margin);
   }
   if (op == "winding") {
     std::string path = strParam(n, "path", "");
@@ -878,26 +1060,41 @@ dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes) {
     if (path.empty() == id.empty())
       throw GraphError("'winding' requires exactly one of 'path' or 'id'",
                        n.pointer);
+    const NodeBake nb = readNodeBake(n, false);
     MeshHandle h = id.empty() ? meshes.resolve(path) : meshes.resolveId(id);
-    return dualc::windingNumberField(*h.mesh, *h.geom);
+    dualc::FieldPtr wf = dualc::windingNumberField(*h.mesh, *h.geom);
+    if (nb.res == 0) return wf;
+    return bakeWindingNode(*wf, nb, margin);
   }
+
+  // 3b. The lifts: one 2D profile child each. A profile anywhere else is a
+  // typing error, located on the profile.
+  if (isLiftOp(op)) {
+    requireChildren(n, 1);
+    const double amount = readLiftParam(n);
+    if (op == "revolve")
+      return std::make_shared<dualc::RevolveField>(buildProfile(n.in[0], op),
+                                                   amount);
+    return std::make_shared<dualc::ExtrudeField>(buildProfile(n.in[0], op),
+                                                 amount);
+  }
+  if (isProfileOp(op)) throwProfileOutsideLift(n);
 
   // 4. Decorators not covered by the PostOp machinery (one child).
   if (op == "normalize") {
     requireChildren(n, 1);
-    return dualc::normalizedOf(buildField(n.in[0], meshes));
+    return dualc::normalizedOf(child(0));
   }
   if (op == "transform") {
     requireChildren(n, 1);
-    return dualc::transformed(buildField(n.in[0], meshes),
+    return dualc::transformed(child(0),
                               mat4From16(vecParam(n, "matrix", 16, true, {})));
   }
   // graded-onion: a two-child decorator (base, control) -- not a single-child
   // PostOp, so it is wired explicitly like normalize/transform above.
   if (op == "graded-onion") {
     requireChildren(n, 2);
-    return dualc::gradedOnionOf(buildField(n.in[0], meshes),
-                               buildField(n.in[1], meshes), requireNum(n, "t1"),
+    return dualc::gradedOnionOf(child(0), child(1), requireNum(n, "t1"),
                                requireNum(n, "t2"), numParam(n, "d0", 0.0),
                                requireNum(n, "d1"));
   }
@@ -905,8 +1102,7 @@ dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes) {
   // inflates the solid (base - t) instead of hollowing it (|base| - t).
   if (op == "graded-offset") {
     requireChildren(n, 2);
-    return dualc::gradedOffsetOf(buildField(n.in[0], meshes),
-                                buildField(n.in[1], meshes), requireNum(n, "t1"),
+    return dualc::gradedOffsetOf(child(0), child(1), requireNum(n, "t1"),
                                 requireNum(n, "t2"), numParam(n, "d0", 0.0),
                                 requireNum(n, "d1"));
   }
@@ -915,8 +1111,7 @@ dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes) {
   // graded's d0); hi is required (like d1).
   if (op == "mix") {
     requireChildren(n, 3);
-    return dualc::mixOf(buildField(n.in[0], meshes), buildField(n.in[1], meshes),
-                        buildField(n.in[2], meshes), numParam(n, "lo", 0.0),
+    return dualc::mixOf(child(0), child(1), child(2), numParam(n, "lo", 0.0),
                         requireNum(n, "hi"));
   }
 
@@ -924,7 +1119,7 @@ dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes) {
   PostOp pop;
   if (tryMakePostOp(n, pop)) {
     requireChildren(n, 1);
-    return applyPostOps(buildField(n.in[0], meshes), {pop});
+    return applyPostOps(child(0), {pop});
   }
 
   // 6. Analytic primitives (leaf source).
@@ -937,8 +1132,157 @@ dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes) {
 
 }  // namespace
 
+NodeBake checkNodeBake(const GraphNode& n, const double* bake,
+                       const double* band) {
+  NodeBake nb;
+  if (bake) {
+    const double v = *bake;
+    if (!std::isfinite(v) || v != std::floor(v) || v < 2.0 ||
+        v > static_cast<double>(kMaxNodeBakeRes))
+      throw GraphError("'" + n.op + "' bake must be an integer in [2, " +
+                           std::to_string(kMaxNodeBakeRes) +
+                           "] (samples per axis; the grid holds N^3 floats)",
+                       n.pointer);
+    nb.res = static_cast<int>(v);
+  }
+  if (band) {
+    if (!bake)
+      throw GraphError("'band' needs 'bake' (it is the exact-distance shell of "
+                       "the bake, in world units)",
+                       n.pointer);
+    if (!std::isfinite(*band) || *band <= 0.0)
+      throw GraphError("'band' must be a positive width in world units",
+                       n.pointer);
+    nb.band = *band;
+  }
+  return nb;
+}
+
+namespace {
+
+// A param read for the margin only: Number or one-element Vector, else `def`.
+double rawNum(const GraphNode& n, const std::string& key, double def) {
+  auto it = n.params.find(key);
+  if (it == n.params.end()) return def;
+  const ParamValue& p = it->second;
+  if (p.kind == ParamValue::Kind::Number) return p.num;
+  if (p.kind == ParamValue::Kind::Vector && p.vec.size() == 1) return p.vec[0];
+  return def;
+}
+
+}  // namespace
+
+const std::vector<ProfileKind>& profileKinds() {
+  static const std::vector<ProfileKind> k = {
+      {"circle", "center=[x,y], radius", "cx cy radius"},
+      {"rect", "center=[x,y], half=[x,y]", "cx cy halfx halfy"},
+      {"segment", "a=[x,y], b=[x,y], radius", "ax ay bx by radius"},
+      {"polygon", "points=[[x,y],...], >= 3 vertices", "x1 y1 x2 y2 x3 y3 ..."},
+  };
+  return k;
+}
+
+bool isProfileOp(const std::string& op) {
+  for (const ProfileKind& k : profileKinds())
+    if (k.name == op) return true;
+  return false;
+}
+
+bool isLiftOp(const std::string& op) {
+  return op == "revolve" || op == "extrude";
+}
+
+std::vector<double> readProfile(const GraphNode& n, const std::string& lift) {
+  if (!isProfileOp(n.op))
+    throw GraphError("'" + lift + "' takes one 2D profile (circle, rect, "
+                     "segment, polygon), not '" + n.op + "'",
+                     n.pointer);
+  ReadScope scope{n};
+  std::vector<double> p = readProfileUnchecked(n);
+  rejectUnreadParams(n);
+  return p;
+}
+
+const char* liftParamKey(const std::string& lift) {
+  return lift == "revolve" ? "offset" : "height";
+}
+
+double checkLiftParam(const GraphNode& n, const double* value) {
+  if (n.op == "revolve") {
+    const double offset = value ? *value : 1.0;
+    if (!std::isfinite(offset))
+      throw GraphError("'revolve' offset must be finite", n.pointer);
+    return offset;
+  }
+  const double height = value ? *value : 0.5;
+  if (!std::isfinite(height) || !(height > 0.0))
+    throw GraphError("'extrude' height (the half-height along z) must be > 0",
+                     n.pointer);
+  return height;
+}
+
+void throwProfileOutsideLift(const GraphNode& n) {
+  throw GraphError("'" + n.op + "' is a 2D profile: it is legal only as the "
+                   "one child of 'revolve' or 'extrude'",
+                   n.pointer);
+}
+
+double childBakeMargin(const GraphNode& parent, std::size_t i, double margin) {
+  const std::string& op = parent.op;
+  BoolOp bop;
+  if (parseBoolOp(op, bop))
+    return boolOpIsSmooth(bop)
+               ? std::max(margin, std::abs(rawNum(parent, "k", 0.25)))
+               : margin;
+  if (op == "scale") {
+    const double s = std::abs(rawNum(parent, "s", 1.0));
+    return s > 0.0 ? margin / s : margin;
+  }
+  if (op == "offset" || op == "round")
+    return margin + std::max(0.0, rawNum(parent, "r", 0.0));
+  if (op == "onion")
+    return margin + std::abs(rawNum(parent, "thickness", 0.0));
+  if (op == "displace")
+    return margin + std::abs(rawNum(parent, "amplitude", 0.1));
+  if ((op == "graded-onion" || op == "graded-offset") && i == 0)
+    return margin + std::max(std::abs(rawNum(parent, "t1", 0.0)),
+                             std::abs(rawNum(parent, "t2", 0.0)));
+  return margin;
+}
+
+bool hasBakedNode(const GraphNode& n) {
+  if ((n.op == "mesh" || n.op == "winding") && n.params.count("bake")) return true;
+  for (const GraphNode& c : n.in)
+    if (hasBakedNode(c)) return true;
+  return false;
+}
+
+dualc::BBox nodeBakeRegion(const dualc::BBox& nodeBounds, double pad) {
+  const dualc::Vector3 e = nodeBounds.extent();
+  const double p = 0.10 * std::max({e.x, e.y, e.z}) + pad;
+  return dualc::BBox{nodeBounds.min - dualc::Vector3{p, p, p},
+                     nodeBounds.max + dualc::Vector3{p, p, p}};
+}
+
+dualc::FieldPtr bakeMeshNode(const dualc::MeshSource& src, const NodeBake& b,
+                             double margin) {
+  const dualc::BBox region =
+      nodeBakeRegion(src.bounds(), std::max(b.band, margin));
+  const dualc::Vector3 e = region.extent();
+  const double cell = std::max({e.x, e.y, e.z}) / (b.res - 1);
+  double band = b.band > 0.0 ? b.band : 3.0 * cell;
+  if (margin > 0.0) band = std::max(band, margin + 3.0 * cell);
+  return src.bakeToGrid(region, dualc::Vector3i{b.res, b.res, b.res}, band);
+}
+
+dualc::FieldPtr bakeWindingNode(const dualc::ImplicitField& winding,
+                                const NodeBake& b, double margin) {
+  return dualc::bakeToGrid(winding, nodeBakeRegion(winding.bounds(), margin),
+                           dualc::Vector3i{b.res, b.res, b.res});
+}
+
 FieldGraph FieldGraph::build(const GraphNode& root, MeshResolver& meshes) {
-  return FieldGraph(buildField(root, meshes));
+  return FieldGraph(buildField(root, meshes, 0.0));
 }
 
 }  // namespace fieldgraph

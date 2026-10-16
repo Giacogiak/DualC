@@ -34,11 +34,11 @@ of these links here rather than restating the number.
   mechanism (ghost rings, owned cells) is
   [11/03](../roadmap/11-dense-lattice-deliverable/03-streaming-export.md).
 - **Preview equals export.** `dualc_field_view` and `dualc_field` parse one graph
-  (`examples/field_graph.{h,cpp}`) and the GPU renders the GLSL the codegen emits from that
-  same tree, so the field on screen is the field that is contoured — no mesh round-trip. The
-  GLSL prelude is held to the C++ formulas by `dualc_glsl_parity` at the tolerances in the
-  table below; the harness needs a GL context, so it is opt-in and outside CTest, and
-  `check.py --gpu` runs it — in CI's required `gpu` job too, under Xvfb + Mesa llvmpipe.
+  (`examples/field_graph.{h,cpp}`) and the GPU renders the GLSL `field_glsl.{h,cpp}` emits
+  from that same tree, no mesh round-trip; the exceptions are
+  [12](12-field-graph.md#what-the-preview-cannot-show-as-exported). `dualc_glsl_parity` holds
+  the prelude to the C++ formulas at the tolerances below; it needs a GL context, so
+  `check.py --gpu` runs it outside CTest — in CI's `gpu` job under Xvfb + Mesa llvmpipe.
 - **Fallbacks are reported, never silent when asked.** An invalid root box and an empty
   contour each degrade to a defined placeholder and set a `Diagnostics` flag
   ([§ 9](07-limitations.md#behavioural-notes-worth-knowing)).
@@ -170,7 +170,7 @@ condition is `D ≥ depth + 1`; the text is imprecise, the behaviour is as above
 | Constant | Value | Decides | Where |
 | --- | --- | --- | --- |
 | Duplicate-hit merge, ray parity | 4 ULP of the hit distance | two hits on an edge shared by two triangles count once; a genuinely thin wall (tens of ULP apart) counts twice | `countRayHits`, `src/internal/mesh_bvh.cpp`; [§ 3.4](02-sign-oracles.md) |
-| Root-box padding | `padFraction = 0.05` of the longest axis, every axis | the auto-fitted root box; explicit `rootBounds` gets no padding | `padBBox`, `src/sampler.cpp`; [§ 7](06-parameters-and-vendoring.md#7-configuration-parameters) |
+| Root-box padding | `padFraction = 0.05` of the longest axis, every axis | the auto-fitted root box and `--slice`'s default region; explicit `rootBounds` gets no padding | `padBBox`, `src/sampler.cpp`; [§ 7](06-parameters-and-vendoring.md#7-configuration-parameters) |
 | Lipschitz-1 prune test | `\|f(centre)\| ≤ halfDiagonal` | the default `cellOverlaps` after the corner-sign test; wrong for a field with `\|∇f\| > 1` | [§ 9](07-limitations.md#standing-limitations), [§ 10.1](08-implicit-field-layer.md#101-implicitfield) |
 | `edgeHit` budget | 6 Illinois regula-falsi steps | where a crossing is placed on an edge and the normal is taken | [§ 10.1](08-implicit-field-layer.md#101-implicitfield) |
 | Central-difference step | `e = 1e-4`, absolute, `double` | every finite-difference gradient: `PrimitiveField`, `PrimitiveField2D`, the distorting domain ops, `normalizedOf` | `include/dualc/primitives.h`, `implicit2d.h`, `src/implicit/domain_ops.cpp`, `decorators.cpp`; the absoluteness is [17 E20](../roadmap/17-code-audit-and-hardening/01-findings-ledger-engine.md) |

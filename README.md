@@ -55,8 +55,8 @@ With Ninja: `-G Ninja -DCMAKE_BUILD_TYPE=Release`, then `cmake --build build -j`
 tests on Windows (Visual Studio 2022) and Linux (GCC 15, CMake 4, Ninja; on Ubuntu
 `sudo apt install cmake ninja-build g++`); the tests and examples also compile one C file
 (miniz), so they need a C compiler next to the C++ one. The GL
-tools and the C ABI are opt-in (`-DDUALC_BUILD_RAYMARCH_VIEWER`, `_FIELD_VIEW`,
-`_GLSL_PARITY`, `_C_ABI`, all `OFF` by default); none of them adds a dependency
+tools and the C ABI are opt-in (`-DDUALC_BUILD_FIELD_VIEW`, `_GLSL_PARITY`, `_C_ABI`,
+all `OFF` by default); none of them adds a dependency
 to `libdualc`. Two diagnostics options are `OFF` / empty by default too:
 `-DDUALC_WERROR=ON` makes a warning in DualC's own code an error (`-Werror` / `/WX`; CI's
 build jobs turn it on), and `-DDUALC_SANITIZE=address,undefined` instruments DualC's own
@@ -115,39 +115,32 @@ under `src/internal/` is private.
 
 ## Command-line tools
 
-Every tool lives under `examples/`, shares one set of registries (primitives, recipes,
-booleans, post-ops) and chooses its export format from the `-o` extension — `.obj`, `.stl`,
-`.3mf` (**1 world unit = 1 mm**). The [command reference](docs/command_reference/README.md)
-has one page per tool with the full flag table and ready-to-run recipes; the one-line
-version:
+Every tool lives under `examples/`, shares one set of registries (primitives, booleans,
+post-ops) and chooses its export format from the `-o` extension — `.obj`, `.stl`, `.3mf`
+(**1 world unit = 1 mm**). The [command reference](docs/command_reference/README.md) has one
+page per tool with the full flag table and ready-to-run recipes; the one-line version:
 
-- [`dualc_demo`](docs/command_reference/01-dualc_demo.md) — re-mesh a triangle mesh through
-  the dual contourer (sign oracles, sharp-feature mode, winding-number sealing of open scans).
-- [`dualc_primitive`](docs/command_reference/02-dualc_primitive.md),
-  [`dualc_boolean`](docs/command_reference/03-dualc_boolean.md),
-  [`dualc_lift`](docs/command_reference/04-dualc_lift.md),
-  [`dualc_csg_demo`](docs/command_reference/05-dualc_csg_demo.md) — analytic primitives
-  with decorators and domain operators; hard and smooth booleans of two meshes; revolve /
-  extrude of 2D profiles; baked CSG recipes.
-- [`dualc_lattice`](docs/command_reference/06-dualc_lattice.md) — TPMS lattice infill
-  (gyroid, Schwarz P, diamond, …) bounded by an input mesh, solid or thick-walled shell.
-- [`dualc_slice`](docs/command_reference/07-dualc_slice.md) — sample a field on a cutting
-  plane and write a PNG heatmap + SVG contour: inspection and slicing at a cost independent of
-  lattice density.
 - [`dualc_field`](docs/command_reference/11-dualc_field/README.md) — the general field-graph
-  CLI: compose any node (primitives, booleans, TPMS and strut lattices, graded thickness, mesh
-  sources) from JSON or a shorthand expression and contour once; streaming tiled export for
-  meshes too large for RAM.
+  CLI: compose any node (the 30 primitives with decorators and domain operators, booleans,
+  mesh sources with every sign oracle and winding-number sealing of open scans, 2D profiles
+  revolved or extruded, TPMS and strut lattices, graded thickness) from JSON or a shorthand
+  expression and contour once; streaming tiled export for meshes too large for RAM;
+  `--slice` samples any graph on a cutting plane into a PNG heatmap + SVG contour, at a cost
+  independent of lattice density.
 - [`dualc_field_view`](docs/command_reference/12-dualc_field_view/README.md) (opt-in) — the
   same field-graph compiled to GLSL and sphere-traced on the GPU: *the field you preview is
   the field you export*, at densities that would OOM the contourer.
-- [`dualc_raymarch`](docs/command_reference/10-dualc_raymarch.md) (opt-in) — the analytic
-  TPMS raymarcher that preceded `dualc_field_view`.
+- [`dualc_boolean`](docs/command_reference/03-dualc_boolean.md) — hard and smooth booleans of
+  two meshes, with a baked fast path: a shortcut for the graph's mesh booleans.
 - [`dualc_gen_demo`](docs/command_reference/09-dualc_gen_demo.md) — generates the demo
   meshes (they are gitignored; the generator is the source of truth). The build runs it into
   `build/data/` and copies the meshes next to every tool, so a clean clone needs no manual
   step; `dualc_gen_demo all --dir data` populates the repo's `data/` for running recipes from
   the root.
+
+Seven older side CLIs (`dualc_demo`, `dualc_primitive`, `dualc_lift`, `dualc_csg_demo`,
+`dualc_lattice`, `dualc_slice`, `dualc_raymarch`) retired into these two on 2026-10-16; their
+pages in the command reference say where each use went.
 
 ## Documentation
 

@@ -5,11 +5,10 @@
 #include <functional>
 #include <string>
 
-// Shared GL plumbing for the standalone GPU viewers (dualc_raymarch, the
-// field-graph viewer dualc_field_view, and the dualc_glsl_parity harness): GLFW
-// + glad window/context bring-up, shader compile/link, scalar/vector uniform
+// Shared GL plumbing for the field-graph viewer dualc_field_view and the
+// dualc_glsl_parity harness: GLFW + glad window/context bring-up, shader compile/link, scalar/vector uniform
 // setters, an orbit camera, and the headless one-frame PNG snapshot. Authored
-// once here so the three apps share it instead of each owning a copy. GL types
+// once here so the two apps share it instead of each owning a copy. GL types
 // are referenced as plain unsigned int so this header pulls in no GL headers.
 
 struct GLFWwindow;

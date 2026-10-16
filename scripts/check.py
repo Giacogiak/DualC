@@ -791,9 +791,10 @@ def check_flag_table(ctx):
 
     The second direction (roadmap 19 Phase 6): every `--flag` a recipe uses is
     documented in a table of the page that owns the binary the recipe names --
-    a recipe on page 09 that runs `dualc_demo --sharp` is held to page 01's
-    tables, and a post-op flag of `dualc_primitive` to page 02's decorator
-    tables. A recipe flag the tool's parser does not know is reported too.
+    a recipe on any page that runs `dualc_boolean --sharp` is held to page 03's
+    tables. A recipe flag the tool's parser does not know is reported too. A
+    page whose tool has no `examples/<tool>.cpp` any more (a retired tool's
+    tombstone) is not a tool page.
     """
     exempt = set(ctx.data["flag_table_exempt"])
     bad, pages, flags = [], 0, 0
@@ -830,11 +831,7 @@ def check_flag_table(ctx):
             if flag not in page:
                 bad.append("docs/command_reference/%s:0: examples/%s.cpp parses `%s` "
                            "but the page never mentions it" % (name, tool, flag))
-    # Post-op flags are parsed by the shared registry, not by dualc_primitive.cpp.
-    common = ctx.text("examples/example_common.cpp") or ""
     known = {t: set(re.findall(r'"(--[a-z][a-z0-9-]*)', s)) for t, s in srcs.items()}
-    if "dualc_primitive" in known:
-        known["dualc_primitive"] |= set(re.findall(r'"(--[a-z][a-z0-9-]*)', common))
     documented = {}
     for tool, name in page_of.items():
         documented[tool] = set()
@@ -1190,7 +1187,7 @@ def check_decisions_index(ctx):
     anywhere else -- the next agent proposes it again. Every entry in
     `docs/roadmap/` whose first body line opens with **DROPPED** or
     **DEFERRED** (or whose grandfathered heading carries the word) must have a
-    row in `docs/decisions/README.md` linking `file#that-heading`, and every
+    row in `docs/decisions/README.md` (or `02-dropped.md`) linking `file#that-heading`, and every
     DEFERRED row must carry a trigger (non-empty text after the word). Several
     rows may cite one heading (D-14/D-23 both cite 11/03 § 5a), so the rows
     are kept per (file, anchor) as a list and each DEFERRED row is checked on
@@ -1198,27 +1195,33 @@ def check_decisions_index(ctx):
     Phase 4 of roadmap 19 writes the index.
     """
     cfg = ctx.data["decisions_index"]
-    index = ctx.text(cfg["index"])
-    if index is None:
-        return Result(SKIP, "%s not written yet (roadmap 19 Phase 4)" % cfg["index"])
-    idx_dir = os.path.dirname(cfg["index"])
+    # The index is the README, plus any child page that carries open or rejected
+    # rows (02-dropped.md since 2026-10-15, D-61): a list, the README first.
+    idx_files = cfg["index"] if isinstance(cfg["index"], list) else [cfg["index"]]
+    if ctx.text(idx_files[0]) is None:
+        return Result(SKIP, "%s not written yet (roadmap 19 Phase 4)" % idx_files[0])
     rows, nrows, bad = {}, 0, []
-    for i, line in enumerate(strip_fences(index).split("\n"), 1):
-        if not line.lstrip().startswith("|"):
+    for idx_file in idx_files:
+        index = ctx.text(idx_file)
+        if index is None:
             continue
-        cells = table_cells(line)
-        status = next((c for c in cells if "DEFERRED" in c), "")
-        if status and not re.sub(r"\W*DEFERRED\W*", "", status).strip():
-            bad.append("%s:%d: DEFERRED row names no trigger" % (cfg["index"], i))
-        keyed = False
-        for m in LINK_RE.finditer(line):
-            if "#" not in m.group(1):
+        idx_dir = os.path.dirname(idx_file)
+        for i, line in enumerate(strip_fences(index).split("\n"), 1):
+            if not line.lstrip().startswith("|"):
                 continue
-            path, anchor = m.group(1).split("#", 1)
-            tgt = os.path.normpath(os.path.join(idx_dir, path)).replace(os.sep, "/")
-            rows.setdefault((tgt, anchor), []).append(i)
-            keyed = True
-        nrows += keyed
+            cells = table_cells(line)
+            status = next((c for c in cells if "DEFERRED" in c), "")
+            if status and not re.sub(r"\W*DEFERRED\W*", "", status).strip():
+                bad.append("%s:%d: DEFERRED row names no trigger" % (idx_file, i))
+            keyed = False
+            for m in LINK_RE.finditer(line):
+                if "#" not in m.group(1):
+                    continue
+                path, anchor = m.group(1).split("#", 1)
+                tgt = os.path.normpath(os.path.join(idx_dir, path)).replace(os.sep, "/")
+                rows.setdefault((tgt, anchor), []).append(i)
+                keyed = True
+            nrows += keyed
     entries = 0
     for rel in ctx.md:
         if not rel.startswith(cfg["scope"]):
@@ -1236,7 +1239,7 @@ def check_decisions_index(ctx):
             key = (rel, slugify(htext))
             if key not in rows:
                 bad.append("%s:%d: %s entry has no row in %s"
-                           % (rel, hline, m.group(1), cfg["index"]))
+                           % (rel, hline, m.group(1), " or ".join(idx_files)))
     return Result(FAIL if bad else OK,
                   "%d decision entries, %d rows, %d problems" % (entries, nrows, len(bad)),
                   bad)

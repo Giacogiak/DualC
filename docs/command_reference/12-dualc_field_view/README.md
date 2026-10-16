@@ -1,7 +1,7 @@
 # Tool 12: `dualc_field_view` (field-graph GPU raymarch viewer)
 
 Standalone GPU viewer that **compiles an arbitrary field-graph to GLSL and
-sphere-traces it** — the general successor to `dualc_raymarch` (opt-in build).
+sphere-traces it** — the general successor to `dualc_raymarch`, retired 2026-10-16 (opt-in build).
 
 ```
 dualc_field_view <graph.fld|graph.json|-> [--bounds x0,y0,z0,x1,y1,z1]
@@ -9,7 +9,7 @@ dualc_field_view <graph.fld|graph.json|-> [--bounds x0,y0,z0,x1,y1,z1]
 dualc_field_view --expr "onion(gyroid(wavelength=0.3),thickness=0.05)" [...]
 ```
 
-Where `dualc_raymarch` hand-codes one TPMS-in-mesh field, this takes the **same
+Where `dualc_raymarch` hand-coded one TPMS-in-mesh field, this takes the **same
 field-graph** `dualc_field` contours for export (`.fld` shorthand or `.json`, or
 `--expr`/stdin) and lowers it to a generated `float sceneSDF(vec3 p)` via the
 field→GLSL codegen, then sphere-traces that. So **the field you preview is the
@@ -35,7 +35,7 @@ so it has no CTest — `--snapshot` renders one frame headless for scripted chec
 | `<graph>` | (none) | A `.fld` (text shorthand) or `.json` (canonical) field-graph, or `-` for stdin. The same files `dualc_field` accepts. |
 | `--expr STR` | — | Inline text shorthand instead of a file. |
 | `--bounds x0,y0,z0,x1,y1,z1` | the field's own `bounds()` + 5% | Raymarch box. An **infinite** field (`plane`, `repeat`, …) has no finite bounds and **requires** this. |
-| `--grid-res N` | `96` (max 256) | Mesh-source bake resolution per axis (the `sampler3D` clip). The bake region **is** the raymarch box, so this composes with `--bounds`: zooming in concentrates the same grid on the region you are inspecting instead of spreading it over the whole mesh AABB. `256³` R32F is 64 MB per unique mesh node. The compile line reports the resolution *and* the resulting world cell size. |
+| `--grid-res N` | `96` (max 256) | Mesh-source bake resolution per axis (the `sampler3D` clip). The bake region **is** the raymarch box, so this composes with `--bounds`: zooming in concentrates the same grid on the region you are inspecting instead of spreading it over the whole mesh AABB. `256³` R32F is 64 MB per unique mesh node. It does **not** apply to a node with its own `bake=N` ([11/01](../11-dualc_field/01-op-vocabulary.md#sources)): that node uploads the grid `dualc_field` contours, over its own padded box, so its preview is its export. The compile line reports each distinct resolution *and* its world cell size. |
 | `--preview-scale S` | `0.5` (range `0.1`–`1.0`) | **Adaptive resolution** while the view is moving (see below). `1.0` disables it (always full-res). |
 | `--es` | off | Emit a `#version 300 es` shader (the WebGL2-portable subset) instead of desktop `330 core`. A portability check; the shader body is identical, only the version/precision header differs. |
 | `--snapshot PATH` | — | Render one frame headless to a PNG and exit (no window). |
@@ -83,8 +83,9 @@ the resolution model.
 | --- | --- |
 | [Controls](01-controls.md) | Everything you press: the orbit and section-plane keys, how `tab` + nudge edits a parameter live (and why some edits recompile), reload vs reset, the viewport-only cuts. |
 | [Supported nodes and worked examples](02-nodes-and-examples.md) | The node vocabulary (the same as `dualc_field`'s) and recipes P1–P16: composed CSG, mesh sources, graded and tapered lattices, dense previews, headless snapshots. |
-| [Recipes by node category (the full vocabulary)](03-recipes-by-node.md) | One ready-to-run preview per node family, N1–N19: the primitive parameter forms, the domain operators, `winding` soups, DAG dedup. |
+| [Recipes by node category (the full vocabulary)](03-recipes-by-node.md) | One ready-to-run preview per node family, N1–N21: the primitive parameter forms, the domain operators, `winding` soups, the 2D profiles under the lifts, DAG dedup. |
 | [Isolating a TPMS surface inside a volume (meshless preview)](04-open-surface-preview.md) | The thin-shell recipe `intersection(onion(normalize(tpms)), volume)` that shows a lattice membrane without the volume's skin, O1–O5. |
+| [Previewing a TPMS lattice inside a mesh](05-tpms-in-mesh-preview.md) | The density-independent lattice-in-mesh preview `dualc_raymarch` hard-coded: its defaults written into the graph, what replaces its lattice hotkeys, recipes M1–M8. |
 
 ## Verifying preview == export
 
@@ -105,4 +106,4 @@ dualc_field_view mygraph.fld                 # raymarched preview of the same fi
 
 ← Back to the [Command Reference index](../README.md) · see also
 [`11-dualc_field/`](../11-dualc_field/README.md) (export) and
-[`10-dualc_raymarch.md`](../10-dualc_raymarch.md) (the single-TPMS predecessor).
+[`10-dualc_raymarch.md`](../10-dualc_raymarch.md) (the retired single-TPMS predecessor).

@@ -15,12 +15,13 @@ family. All are `--expr` one-liners; on PowerShell put each on one line (the
 | N12 | analytic primitives | An open primitive (`quad`) given a wall by `onion` |
 | N13–N17 | domain operators | `mirror`, `repeat` (needs `--bounds`), `repeat-limited`, `displace`, `round` |
 | N18–N19 | `winding` | The GWN solid of a mesh; a gyroid shell clipped to it |
+| N20–N21 | 2D profiles under the lifts | A revolved concave profile; an extruded L, cut by a sphere |
 
 ### Analytic primitives (mesh-free, instant)
 
 All 30 primitives render. The seven core primitives take grouped named keys,
 every other one its parameters positionally in the
-[`dualc_primitive`](../02-dualc_primitive.md) order, and a bare `op()` uses the
+[primitive catalogue](../11-dualc_field/12-primitive-catalogue.md)'s order, and a bare `op()` uses the
 registry defaults — [design/09 § Primitive parameters](../../design/09-conventions.md#primitive-parameters-grouped-keys-positional-fallback-one-registry).
 
 ```bash
@@ -28,7 +29,7 @@ registry defaults — [design/09 § Primitive parameters](../../design/09-conven
 dualc_field_view --expr "capsule(a=[-1,0,0],b=[1,0,0],radius=0.4)"
 dualc_field_view --expr "ellipsoid(center=[0,0,0],radii=[1.2,0.7,0.5])"
 
-# N3–N6 — positional (long-tail) primitives -- args follow the dualc_primitive page's order
+# N3–N6 — positional (long-tail) primitives -- args follow the primitive catalogue's order
 dualc_field_view --expr "octahedron(0,0,0,1.2)"            # cx cy cz size
 dualc_field_view --expr "hexprism(0,0,0,0.8,1.2)"          # cx cy cz radius halfLength
 dualc_field_view --expr "cappedtorus(0,0,0,2.0,1.0,0.3)"   # cx cy cz angleRad major minor
@@ -76,7 +77,8 @@ sphere-trace stays safe through the non-metric warp — no flag needed.
 `winding(path="…")` reconstructs a **solid** from a triangle mesh via the 0.5-GWN
 isosurface — **robust to non-watertight input / soup** (where ray-parity `mesh`
 would mis-sign). It bakes to a `sampler3D` for preview exactly like `mesh` (so
-`--grid-res` controls its resolution); its bounds are the padded mesh AABB, so no
+`--grid-res` controls its resolution, unless the node carries its own `bake=N`, which
+is uploaded as baked); its bounds are the padded mesh AABB, so no
 `--bounds` is needed. It benefits more than `mesh` from a higher `--grid-res`: the
 GWN field is nearly a step function, so a large model shows visible voxel terracing
 at `96³` that `--grid-res 256` removes. Run from the repo root so `data/…` resolves.
@@ -97,8 +99,24 @@ The same two in PowerShell 5.1 form (path quotes `\"`):
 ```
 
 > `mesh` vs `winding`: use **`mesh`** for clean watertight, oriented input (faster,
-> exact narrow-band bake); use **`winding`** for soup / open / self-intersecting
-> input. `mesh(sign=gwn)` is intentionally rejected — route GWN through `winding`.
+> exact narrow-band bake) — `mesh(sign=gwn)` when it is almost watertight (small gaps,
+> self-intersections); use **`winding`** to seal soup / open shells into a solid.
+
+### 2D profiles under the lifts
+
+`revolve` / `extrude` over a `circle`, `rect`, `segment` or `polygon`
+([11/09](../11-dualc_field/09-2d-profiles-and-lifts.md)). `tab` reaches the profile's
+`radius` and the lift's `offset` / `height` (nudgeable scalars); its points are `vec2`
+knobs, and a `polygon`'s vertices are compiled in — edit the file, it reloads. The preview
+takes a `polygon` of at most 64 vertices.
+
+```bash
+# N20 — a concave profile (a notch in its top) spun around y: a grooved ring
+dualc_field_view --expr "revolve(polygon(points=[[0,-0.6],[0.6,-0.6],[0.6,0.6],[0.3,0],[0,0.6]]),offset=0.5)"
+
+# N21 — an L-shaped prism with a ball carved out of its corner
+dualc_field_view --expr "difference(extrude(polygon(points=[[-1,-1],[1,-1],[1,-0.2],[-0.2,-0.2],[-0.2,1],[-1,1]]),height=0.5),sphere(center=[-1,-1,0.5],radius=0.6))"
+```
 
 ### DAG dedup is automatic
 

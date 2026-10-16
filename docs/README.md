@@ -7,7 +7,7 @@ One folder per class of fact. Each folder's README indexes every file below it; 
 | [`design/`](design/README.md) | **How it is**: pipeline, algorithms, invariants, conventions, glossary. Rewritten freely, dated nowhere. | compiled, mutable |
 | [`roadmap/`](roadmap/README.md) | **How it got here**: one numbered block per topic, tracked items, evidence, rejected approaches. Entries are appended with a date, never rewritten. | append-only record |
 | [`command_reference/`](command_reference/README.md) | **How to use it**: one page per CLI tool — flag tables with real defaults, recipes, exact messages. | usage contract |
-| [`decisions/`](decisions/README.md) | **What was decided**: ID, decision, status with trigger, date, where recorded — the open and dropped ones on the README, the settled ones in `01-settled.md`. | index |
+| [`decisions/`](decisions/README.md) | **What was decided**: ID, decision, status with trigger, date, where recorded — the open ones on the README, the dropped ones in `02-dropped.md`, the settled ones in `01-settled.md`. | index |
 | [`raw/`](raw/README.md) | **Immutable inputs**: chat imports, screenings, plans as drafted, benchmark dumps. Never edited; a correction is a new dated file. | exempt from every contract |
 
 ## One home per fact

@@ -36,7 +36,7 @@ and diagnostic assumes it.
 
 ## Export-format dispatch
 
-The output format is chosen **by the `-o` extension, lower-cased, and by nothing else**:
+A mesh export's format is chosen **by the `-o` extension, lower-cased, and by nothing else**:
 `.obj`, `.stl` or `.3mf`, read by `lowerExt` in `examples/example_common.cpp` and dispatched
 after a single contour pass — in `dispatchWrite` on the plain path, in `writeField`'s
 decimation branch, and as a guard in each tiled writer; any other extension is an error —
@@ -46,7 +46,7 @@ types anyway, and a format is never inferred from content or from a tool's defau
 each format carries follows from what its consumer needs, not from the engine:
 
 - `.obj` is the inspection format: per-vertex normals, smooth-shaded, human-readable, and the
-  only one `dualc_demo` / `dualc_gen_demo` write.
+  only one `dualc_gen_demo` writes.
 - `.stl` is the print format: binary, no normals worth keeping, accepted by every slicer.
 - `.3mf` is the compact print format: deflated, shared vertices, and the `1 unit = 1 mm`
   header above — the interchange a desktop slicer expects.
@@ -54,6 +54,10 @@ each format carries follows from what its consumer needs, not from the engine:
 Streaming export (`--tile-depth`) writes `.stl` or `.3mf` only: a tiled OBJ would be huge
 and share no vertices, so it is refused rather than written badly. The user-facing table — extension, format, one-line note — is the command reference's
 [Export formats](../command_reference/README.md#export-formats--o-extension-dispatch).
+`dualc_field --slice` writes no mesh: `-o` is a base name (a trailing `.png` / `.svg` is
+stripped, any other suffix kept), and it always writes `<base>.png` and `<base>.svg`, each
+encoded in memory and then written through the same temp as below (`stripSliceExt`,
+`writeFieldSlice` in `examples/field_slice.cpp`; `writeBytesAtomic` in `example_common.cpp`).
 
 Every writer targets `path + ".part"`, not `path`: the driver (`writeField`, the tiled
 driver behind both `writeFieldTiled*`) holds an `AtomicOutput` that renames the temp over
@@ -101,17 +105,17 @@ forms, including the fiddlier alternates, are on the
 
 GLFW reports a key by its **physical US-layout position**, so a binding written as
 `GLFW_KEY_Z` or `GLFW_KEY_LEFT_BRACKET` lands on a different — often dead or AltGr — key on an
-AZERTY or QWERTZ keyboard. The rule for every GL viewer (`dualc_raymarch`,
+AZERTY or QWERTZ keyboard. The rule for every GL viewer (today the one,
 `dualc_field_view`):
 
 - A **letter** control is matched by the character the key prints (`glfwGetKeyName`), not
   by keycode: the section keys `x`/`y`/`z`/`f` are, and `z` is the case that bites (it swaps
-  with `w` on AZERTY). The remaining letters (`r`, `t`, `n`, `l`) are keycode-matched and
+  with `w` on AZERTY). The remaining letters (`r`, `l`) are keycode-matched and
   work only because those keys sit in the same place on every Latin layout — a new letter
   control is matched by character.
-- A **value** control (nudge, slide, wavelength, offset) sits on the arrow and Page keys,
+- A **value** control (nudge, slide) sits on the arrow keys,
   which are identical on every layout.
-- The US-position keys (`[`/`]`, `-`/`=`) are kept only as alternates for US keyboards; their
+- The US-position keys (`[`/`]`) are kept only as alternates for US keyboards; their
   glyphs live on the AltGr layer elsewhere and `glfwGetKeyName` cannot see them, so they are
   never the *only* binding.
 
@@ -131,7 +135,7 @@ added there is available everywhere with the same spelling. In a field graph (JS
   slice of the parameter vector (`center`, `radius`, `min`, `max`, `a`, `b`, `major`, `minor`,
   `radii`).
 - **A flat `params:[…]` array** for every primitive, mapping positionally onto the registry's
-  order (the order the [`dualc_primitive` page](../command_reference/02-dualc_primitive.md)
+  order (the order the [primitive catalogue](../command_reference/11-dualc_field/12-primitive-catalogue.md)
   lists); omitted trailing values fall back to the registry defaults, and a flat array
   overrides grouped keys where both are given.
 

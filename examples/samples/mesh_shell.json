@@ -1,0 +1,3 @@
+{ "version": 1, "units": "mm",
+  "root": { "op": "onion", "thickness": 0.05, "in": [
+    { "op": "mesh", "path": "cube.obj" } ] } }

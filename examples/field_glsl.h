@@ -30,8 +30,11 @@
 // path (field_graph.cpp) -- the 6 TPMS, all ~29 analytic primitives (incl. the
 // open triangle/quad and the infinite plane/cylinder/cone), all 7 booleans,
 // offset/round/onion/scale/elongate/normalize/transform/translate/rotate, the
-// twist/bend/mirror/repeat/repeat-limited/displace domain ops, and `mesh`/`winding`
-// (baked to a sampler3D). A genuinely unknown op still throws a GraphError naming
+// twist/bend/mirror/repeat/repeat-limited/displace domain ops, `mesh`/`winding`
+// (baked to a sampler3D), and (#58, 2026-10-15) the 2D profiles circle/rect/
+// segment/polygon under the lifts revolve/extrude -- a profile emits a
+// `float fN(vec2 p)`, read through field_graph's readProfile, and a polygon
+// above kMaxGlslPolygonVertices is refused. A genuinely unknown op still throws a GraphError naming
 // it. Each prelude helper is bit-faithful to its src/implicit/ formula (gated by
 // dualc_glsl_parity). Emission is a **deduped DAG**: nodes are keyed by
 // structural equality (op + params + children), so a duplicated subtree emits one
@@ -49,8 +52,8 @@ namespace fieldgraph {
 // so a UI / the side-car can map a widget to a uniform.
 struct UniformBinding {
   std::string name;        // GLSL uniform name, e.g. "u_n3_radius"
-  std::string glslType;    // "float" | "vec3" | "mat4"
-  std::vector<float> value;
+  std::string glslType;    // "float" | "vec2" | "vec3" | "mat4"
+  std::vector<float> value; // 1 / 2 / 3 / 16 floats by glslType
   std::string nodePointer; // source node's diagnostic pointer
   std::string paramKey;    // which graph param drives it ("radius", "k", ...)
 };
@@ -86,9 +89,16 @@ struct GlslScene {
 inline constexpr int kDefaultMeshGridRes = 96;
 inline constexpr int kMaxMeshGridRes = 256;
 
+// A `polygon` profile compiles to a constant vertex array walked by a loop of
+// that fixed length, so the codegen takes at most this many vertices and
+// refuses more with a located error. The export path (field_graph) has no
+// ceiling; 64 keeps the unrolled-or-looped cost of one profile below a TPMS's.
+inline constexpr int kMaxGlslPolygonVertices = 64;
+
 // Compile a graph to GLSL. `bounds` is the trace/sampling box (the CLI flag, not
 // a graph node); mesh sources bake within it. `gridRes` is the per-axis bake
-// resolution of every mesh/winding node -- because the bake region IS `bounds`,
+// resolution of every mesh/winding node without its own `bake=N` (a node with
+// one uploads the builder's grid unchanged) -- because the bake region IS `bounds`,
 // tightening `bounds` concentrates that resolution on the region of interest
 // rather than spreading it over the whole mesh AABB. Throws GraphError
 // (op-located) on an op the codegen does not yet support, or any builder-style

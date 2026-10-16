@@ -137,6 +137,7 @@ each close a specific gap; all build on the same `writeFieldTiledStl` /
    already streams). Good to mention, not a focus; deferred behind the
    capability-adding items (5a.1 3MF streaming, 5a.4 seam-welding).
    **DEFERRED** (status added 2026-09-11; 5a.1/5a.4 shipped 2026-07-03 without triggering it) — *trigger:* a `dualc_lattice` user who cannot switch to `dualc_field`.
+   *Dropped 2026-10-16:* `dualc_lattice` retired ([21 #60](../21-cli-consolidation/01-record.md#60-retire-the-eight-tools)); D-14's row moved to the dropped decisions.
 
 4. **Topological seam-welding. — DONE (2026-07-03).** *Was:* the streamed output
    never built a global *connected* mesh — each tile emitted its own patch, so

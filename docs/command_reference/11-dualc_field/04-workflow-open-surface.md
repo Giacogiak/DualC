@@ -20,7 +20,7 @@ Facts worth keeping in mind:
   `≈ 2·thickness`** (each sheet sits ±t from the membrane). For a 1 mm wall with
   `normalize`, use `thickness=0.5`.
 - `normalize` makes `thickness` first-order metric; confirm a critical wall on a
-  [`dualc_slice`](../07-dualc_slice.md) section or the exported STL.
+  [`--slice`](10-slice.md) section or the exported STL.
 - A volume-filling TPMS refines **everywhere**, so a high monolithic `--depth` is
   expensive — prefer [`--tile-depth`](06-streaming-tiled-export.md#streaming--tiled-export---tile-depth) to
   hold RAM down. The wall must be ≥ ~2–3 cells — the

@@ -82,26 +82,21 @@ DualC/
 ├── examples/                  CLI tools + host-side glue (linked to geometry-central, NOT into libdualc)
 │   ├── CMakeLists.txt         Builds the example libs, the always-on CLIs and the opt-in GL targets
 │   ├── example_common.{h,cpp} Shared CLI parsing, OBJ/STL/3MF writers, and the CENTRAL registries
-│   │                            (primitive catalogue, CSG recipes, TPMS kinds, boolean ops, post-ops)
+│   │                            (primitive catalogue, TPMS kinds, boolean ops, post-ops)
 │   ├── field_graph.{h,cpp}    Field-graph parser/builder: canonical JSON → FieldPtr via the registries
 │   │                            (own lib dualc_examples_fieldgraph; shared by dualc_field and the C ABI in capi/)
+│   ├── field_slice.{h,cpp}    Any field sampled on an axis plane → PNG heatmap + SVG contour (marching squares)
+│   │                            (lib dualc_examples_slice, the one CLI lib with the PNG writer; dualc_field --slice)
 │   ├── field_glsl.{h,cpp}     Field-graph → GLSL codegen: GraphNode → generated sceneSDF() + binding table
 │   │                            (lib dualc_examples_fieldglsl, no GL dep; mirrors field_graph's walk + the C++ formulas)
-│   ├── raymarch_gl.{h,cpp}    Shared GL plumbing (window/compile/snapshot/orbit camera) for the GPU viewers + parity
-│   │                            (lib dualc_examples_gl; gated on any GL viewer/harness flag)
+│   ├── raymarch_gl.{h,cpp}    Shared GL plumbing (window/compile/snapshot/orbit camera) for the GPU viewer + parity
+│   │                            (lib dualc_examples_gl; gated on the viewer or the parity-harness flag)
 │   ├── gpu_preference.h       Exports NvOptimusEnablement / AmdPowerXpressRequestHighPerformance so the GL
 │   │                            exes pick the discrete GPU on hybrid laptops (Win-only; include from one TU per exe)
 │   ├── demo_meshes.{h,cpp}    Procedural mesh generators (sphere, torus, knot, genus2, bracket, hexbore, …)
-│   ├── dualc_demo.cpp         Mesh-in → dual-contoured mesh-out (v1 reference; --sharp/--gwn/--gwn-field)
-│   ├── dualc_primitive.cpp    Single analytic primitive + decorator/domain post-op chain
 │   ├── dualc_boolean.cpp      7 boolean ops on two meshes (hard + smooth; optional --bake)
-│   ├── dualc_lift.cpp         Revolve/extrude a 2D profile to 3D
-│   ├── dualc_csg_demo.cpp     Parametrized baked CSG recipes
-│   ├── dualc_lattice.cpp      TPMS lattice infill bounded by a mesh; STL/3MF export
-│   ├── dualc_slice.cpp        Field cross-section on a plane → PNG heatmap + SVG contour (O(res²))
 │   ├── dualc_gen_demo.cpp     Generate the procedural demo meshes (the build runs it into build/data/)
-│   ├── dualc_raymarch.cpp     OPT-IN GPU sphere-trace viewer for dense TPMS (GLFW + the vendored glad)
-│   ├── dualc_field.cpp        General field-graph CLI: parse JSON graph → build → contour once → export
+│   ├── dualc_field.cpp        General field-graph CLI: parse JSON graph → build → contour once → export (or --slice)
 │   ├── dualc_field_view.cpp   OPT-IN GPU viewer for ANY field-graph: compile to GLSL (field_glsl) → sphere-trace; live edit
 │   ├── dualc_glsl_parity.cpp  OPT-IN field→GLSL acceptance gate: GPU sceneSDF vs C++ valueAt, per node + the baked
 │   │                            mesh/winding sources (sign parity + texture plumbing) (no CTest, needs GL)
@@ -110,11 +105,13 @@ DualC/
 │   ├── dualc_io_stress.cpp    OPT-IN concurrent-export I/O harness (17 #52): N exports at once to the temp dir, every
 │   │                            `.part` rename must land; keeps each `[dualc] error` line, probes the rename again,
 │   │                            `--force-hold` (Windows) pins the sharing-violation case (no CTest; `check.py --io-stress`)
-│   ├── samples/              Ready-to-run field-graphs (gyroid_box.json, mesh_lattice.json) copied next to dualc_field
+│   ├── samples/              Ready-to-run field-graphs (gyroid_box.json, mesh_lattice.json) copied next to dualc_field,
+│   │                            with the retired dualc_csg_demo's six recipes as graphs (cube_minus_sphere.json, smooth_blend.json,
+│   │                            displaced_sphere.json, mesh_shell.json, mesh_minus_sphere.json, twisted_mesh.json)
 │   └── third_party/          Host-only I/O deps (never linked into libdualc)
 │       ├── miniz.{c,h}          ZIP/deflate for 3MF export (MIT)
 │       ├── miniz_LICENSE.txt
-│       ├── stb_image_write.h    PNG output for dualc_slice (PD/MIT)
+│       ├── stb_image_write.h    PNG output for field_slice and the GL snapshots (PD/MIT)
 │       ├── stb_impl.cpp         stb implementation TU
 │       ├── json.hpp             nlohmann/json single-header (MIT) for the field-graph; dualc_field only
 │       ├── json_LICENSE.txt
@@ -202,14 +199,14 @@ DualC/
   binary depends on it and copies the meshes next to itself (`dualc_copy_demo_meshes()`).
 - `dualc_tests` — Catch2 test executable (CTest).
 - `dualc_examples_io`, `dualc_examples_img`, `dualc_examples_common`,
-  `dualc_examples_fieldgraph`, `dualc_demo_meshes` — example support static libs.
+  `dualc_examples_fieldgraph`, `dualc_examples_slice`, `dualc_demo_meshes` — example support
+  static libs.
 - `dualc_examples_fieldglsl` (codegen, no GL) and `dualc_examples_gl` (GL plumbing,
   opt-in) — the field→GLSL support libs.
-- The always-on CLI executables: `dualc_demo`, `dualc_primitive`, `dualc_boolean`,
-  `dualc_lift`, `dualc_csg_demo`, `dualc_lattice`, `dualc_slice`, `dualc_field`,
-  `dualc_gen_demo`.
+- The always-on CLI executables: `dualc_field`, `dualc_boolean`, `dualc_gen_demo` (seven
+  more retired 2026-10-16, roadmap 21 #60).
 - Opt-in, each behind its own `DUALC_BUILD_*` option and needing a GL window:
-  `dualc_raymarch`, `dualc_field_view`, `dualc_glsl_parity` (with `dualc_examples_glad`, the
+  `dualc_field_view`, `dualc_glsl_parity` (with `dualc_examples_glad`, the
   vendored loader they share).
 - `dualc_capi` (`dualc::capi`, shared) + `dualc_c_demo` — the C ABI, opt-in
   (`-DDUALC_BUILD_C_ABI=ON`).
