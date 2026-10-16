@@ -21,7 +21,9 @@ outgrow it keeps its summary there and its numbers in a numbered child:
 [04](04-mesh-node-bake.md), per-node `bake` against `dualc_boolean --bake` and the exact
 graph — D-60's evidence — and the margin a baked node inherits (D-62) (#57);
 [05](05-2d-profiles-and-lifts.md), the 2D profiles and lifts, the `rect` token, the
-equivalence with `dualc_lift` and the GLSL half's parity (#58).
+equivalence with `dualc_lift` and the GLSL half's parity (#58);
+[06](06-slice-any-graph.md), `dualc_field --slice`, its refusals, its region and the
+equivalence with `dualc_slice` (#59).
 
 | Item | Page | Status |
 | --- | --- | --- |
@@ -31,7 +33,7 @@ equivalence with `dualc_lift` and the GLSL half's parity (#58).
 | #56 The mesh node takes `sign="gwn"` | [01](01-record.md#56-the-mesh-node-takes-signgwn) | DONE 2026-10-15 — P02 T1; measured in [03](03-mesh-sign-gwn.md) |
 | #57 Per-node bake on the mesh nodes | [01](01-record.md#57-per-node-bake-on-the-mesh-nodes) | DONE 2026-10-15 — P02 T2; measured in [04](04-mesh-node-bake.md) |
 | #58 2D profiles and `revolve` / `extrude` in the graph | [01](01-record.md#58-2d-profiles-and-revolve--extrude-in-the-graph) | DONE 2026-10-15 — P03 T1 (CPU) + T2 (GPU); measured in [05](05-2d-profiles-and-lifts.md) |
-| #59 Slice any graph | [01](01-record.md#59-slice-any-graph) | PLANNED — P04 |
+| #59 Slice any graph | [01](01-record.md#59-slice-any-graph) | DONE 2026-10-16 — P04 T1; measured in [06](06-slice-any-graph.md) |
 | #60 Retire the eight tools | [01](01-record.md#60-retire-the-eight-tools) | PLANNED — P05, P06 |
 
 ---

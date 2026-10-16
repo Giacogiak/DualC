@@ -1,5 +1,6 @@
 #include "example_common.h"
 #include "field_graph.h"
+#include "field_slice.h"
 
 #include <algorithm>
 #include <cctype>
@@ -9,6 +10,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 // dualc_field -- general field-graph CLI: parse a composable field description
 // (the canonical JSON form), build the dualc ImplicitField it denotes, dual-
@@ -19,6 +21,8 @@
 // The parser/builder lives in field_graph.{h,cpp} (shared with the future
 // raymarch side-car and C ABI). The op vocabulary is the example_common
 // registry vocabulary; the schema is docs/roadmap/12-field-graph-and-app/01-field-graph.md.
+// --slice samples the built field on a plane instead (field_slice.{h,cpp}, the
+// core dualc_slice uses): a PNG heatmap + an SVG contour, no mesh.
 
 namespace {
 
@@ -29,6 +33,7 @@ void printUsage() {
       "USAGE\n"
       "  dualc_field <graph.json> [options]\n"
       "  dualc_field -            [options]   (read the graph from stdin)\n"
+      "  dualc_field <graph> --slice AXIS=VALUE [--res N] [--bounds B] [-o BASE]\n"
       "\n"
       "  The graph is the canonical JSON form: a document\n"
       "  { \"version\":1, \"units\":\"mm\", \"root\": <node> } or a bare node.\n"
@@ -70,6 +75,18 @@ void printUsage() {
       "                 of E world units (mm) instead of a ratio. Mutually\n"
       "                 exclusive with --decimate; monolithic only.\n"
       "  --no-manifold  Disable Manifold Dual Contouring (one vertex per cell).\n"
+      "  --slice AXIS=VALUE\n"
+      "                 Sample the field on an axis-aligned plane (e.g. z=0,\n"
+      "                 x=1.5) instead of contouring it: writes BASE.png (heatmap,\n"
+      "                 blue = inside, red = outside, the zero-contour in black)\n"
+      "                 and BASE.svg (the zero-contour as line segments). The\n"
+      "                 region is --bounds, else the graph's bounds padded 5%.\n"
+      "                 -o names the base (a .png / .svg extension is stripped);\n"
+      "                 default field_slice. No mesh is built, so the mesh flags\n"
+      "                 (--depth, --collapse, --no-manifold, --tile-depth, --mem,\n"
+      "                 --weld, --decimate, --simplify) are refused with it.\n"
+      "  --res N        With --slice: grid resolution per side (default 512,\n"
+      "                 clamped to 2..4096).\n"
       "  --expr S       Build from a terse text shorthand string instead of a\n"
       "                 file/stdin: op(child,...,key=value). Underscore aliases\n"
       "                 map the hyphenated tokens (schwarz_p, smooth_union, ...).\n"
@@ -233,6 +250,14 @@ int main(int argc, char** argv) {
   std::uint64_t memBudget = 0;  // --mem: RAM budget (bytes) -> auto tile-depth
   bool haveMem = false;
   dce::DecimateOpts dec;  // --decimate / --simplify: post-contour QEM pass
+  bool haveSlice = false;  // --slice: sample on a plane, write PNG + SVG
+  int sliceAxis = 2;
+  double slicePos = 0.0;
+  int sliceRes = dce::kSliceDefaultRes;
+  bool haveRes = false;
+  // Every flag that only means something to the contour path, in the order
+  // given; --slice refuses the first one.
+  std::vector<std::string> meshFlags;
   dualc::SamplerParams sp;
   dualc::ContourerParams cp;
 
@@ -255,10 +280,12 @@ int main(int argc, char** argv) {
     } else if (a == "--depth") {
       const char* v = needValue("--depth");
       if (!v) return 2;
+      meshFlags.push_back(a);
       sp.maxDepth = std::atoi(v);
     } else if (a == "--collapse") {
       const char* v = needValue("--collapse");
       if (!v) return 2;
+      meshFlags.push_back(a);
       cp.simplificationError = std::atof(v);
     } else if (a == "--bounds") {
       const char* v = needValue("--bounds");
@@ -273,12 +300,15 @@ int main(int argc, char** argv) {
     } else if (a == "--tile-depth") {
       const char* v = needValue("--tile-depth");
       if (!v) return 2;
+      meshFlags.push_back(a);
       tileDepth = std::atoi(v);
     } else if (a == "--weld") {
       weld = true;
+      meshFlags.push_back(a);
     } else if (a == "--mem") {
       const char* v = needValue("--mem");
       if (!v) return 2;
+      meshFlags.push_back(a);
       if (!dce::parseMemBudget(v, memBudget)) {
         std::cerr << "[dualc_field] --mem expects a positive size like 4G, "
                      "512M, or a byte count\n";
@@ -288,6 +318,7 @@ int main(int argc, char** argv) {
     } else if (a == "--decimate") {
       const char* v = needValue("--decimate");
       if (!v) return 2;
+      meshFlags.push_back(a);
       if (dec.mode != dce::DecimateOpts::Mode::None) {
         std::cerr << "[dualc_field] --decimate and --simplify are mutually "
                      "exclusive\n";
@@ -303,6 +334,7 @@ int main(int argc, char** argv) {
     } else if (a == "--simplify") {
       const char* v = needValue("--simplify");
       if (!v) return 2;
+      meshFlags.push_back(a);
       if (dec.mode != dce::DecimateOpts::Mode::None) {
         std::cerr << "[dualc_field] --decimate and --simplify are mutually "
                      "exclusive\n";
@@ -317,6 +349,21 @@ int main(int argc, char** argv) {
       dec = {dce::DecimateOpts::Mode::Error, e};
     } else if (a == "--no-manifold") {
       cp.manifoldDC = false;
+      meshFlags.push_back(a);
+    } else if (a == "--slice") {
+      const char* v = needValue("--slice");
+      if (!v) return 2;
+      if (!dce::parseSlicePlane(v, sliceAxis, slicePos)) {
+        std::cerr << "[dualc_field] --slice expects AXIS=VALUE with AXIS x, y "
+                     "or z (e.g. z=0)\n";
+        return 2;
+      }
+      haveSlice = true;
+    } else if (a == "--res") {
+      const char* v = needValue("--res");
+      if (!v) return 2;
+      sliceRes = dce::clampSliceRes(std::atoi(v));
+      haveRes = true;
     } else if (a == "--expr") {
       const char* v = needValue("--expr");
       if (!v) return 2;
@@ -349,6 +396,19 @@ int main(int argc, char** argv) {
     printUsage();
     return 2;
   }
+  if (haveRes && !haveSlice) {
+    std::cerr << "[dualc_field] --res only applies with --slice\n";
+    return 2;
+  }
+  if (haveSlice && !meshFlags.empty()) {
+    std::cerr << "[dualc_field] --slice writes no mesh; it cannot be combined "
+                 "with " << meshFlags.front() << "\n";
+    return 2;
+  }
+  if (haveSlice && dumpJson) {
+    std::cerr << "[dualc_field] --slice and --dump-json are exclusive\n";
+    return 2;
+  }
 
   // Obtain the graph text (from --expr, stdin, or a file) and decide JSON vs
   // shorthand. --expr is always shorthand; a file/stdin chooses by .fld
@@ -374,7 +434,7 @@ int main(int argc, char** argv) {
     shorthand = looksLikeShorthand(inPath, text);
   }
 
-  if (outPath.empty()) outPath = "field.obj";
+  if (outPath.empty()) outPath = haveSlice ? "field_slice" : "field.obj";
 
   // Parse -> (dump | build -> contour -> export). The mesh resolver owns every
   // loaded mesh and must outlive the field, so keep it in scope through
@@ -393,6 +453,33 @@ int main(int argc, char** argv) {
 
     dce::fieldgraph::FieldGraph graph =
         dce::fieldgraph::FieldGraph::build(root, meshes);
+
+    if (haveSlice) {
+      // The region: --bounds verbatim, else the graph's bounds padded the way
+      // the contour path auto-fits its root box (5% of the largest extent,
+      // src/sampler.cpp's padBBox).
+      dualc::BBox region;
+      if (sp.rootBounds.has_value()) {
+        region = *sp.rootBounds;
+      } else {
+        const dualc::BBox raw = graph.field().bounds();
+        if (raw.isInfinite() || !raw.isValid()) {
+          std::cerr << "[dualc_field] error: this field is "
+                    << (raw.isInfinite() ? "unbounded" : "empty")
+                    << " -- pass --bounds x0,y0,z0,x1,y1,z1 to give the slice "
+                       "an explicit finite region.\n";
+          return 1;
+        }
+        const dualc::Vector3 e = raw.extent();
+        const double pad = std::max({e.x, e.y, e.z, 1e-12}) * sp.padFraction;
+        region.min = raw.min - dualc::Vector3{pad, pad, pad};
+        region.max = raw.max + dualc::Vector3{pad, pad, pad};
+      }
+      const std::string base = dce::stripSliceExt(outPath);
+      return dce::writeFieldSlice(graph.field(), region, sliceAxis, slicePos,
+                                  sliceRes, base + ".png", base + ".svg",
+                                  "dualc_field");
+    }
     std::cout << "[dualc_field] depth = " << sp.maxDepth
               << ", manifold = " << (cp.manifoldDC ? "on" : "off") << "\n";
 

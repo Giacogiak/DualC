@@ -88,7 +88,7 @@ Design rationale and status: [roadmap 05 §17 / §17b](../roadmap/05-tpms-lattic
 | Revolve or extrude a 2D profile | `dualc_lift`; `revolve(…)` / `extrude(…)` | [04](04-dualc_lift.md); [11/09](11-dualc_field/09-2d-profiles-and-lifts.md) |
 | Headless PNG of a field graph; smooth orbit on a weak GPU; the WebGL2 shader | `--snapshot`, `--preview-scale`, `--es` | [12/README](12-dualc_field_view/README.md#cli-flags) |
 | Inspect a lattice membrane without the volume's skin | `intersection(onion(normalize(tpms)), volume)` | [12/04](12-dualc_field_view/04-open-surface-preview.md); export it: [11/04](11-dualc_field/04-workflow-open-surface.md) |
-| Cross-section of a field on a plane | `--plane`, `--res` | [07](07-dualc_slice.md) |
+| Cross-section of a field on a plane | `--plane`, `--res`; `--slice` (any graph) | [07](07-dualc_slice.md); [11/10](11-dualc_field/10-slice.md) |
 
 ## GPU viewer keyboard map (`dualc_raymarch` & `dualc_field_view`)
 

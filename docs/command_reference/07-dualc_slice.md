@@ -16,6 +16,9 @@ the cross-section of) parts far too dense to mesh. The marching-squares contour
 is kept separable as the kernel of future per-layer print-slicing.
 
 There is **no `--depth`**: the tool samples the field, it does not dual-contour.
+The same slice of **any** field graph is `dualc_field <graph> --slice AXIS=VALUE`
+([11/10](11-dualc_field/10-slice.md)), which shares this tool's core and writes the
+same bytes for the same field.
 
 | Flag | Default | Meaning |
 | --- | --- | --- |

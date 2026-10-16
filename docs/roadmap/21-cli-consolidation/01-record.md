@@ -175,8 +175,8 @@ documented constant array), a parity case for each (the count bumped), parameter
 
 ## #59 Slice any graph
 
-**PLANNED** — opened 2026-10-14; plan P04 T1. The precondition of `dualc_slice`'s retirement
-(D-58); the form `dualc_field <graph> --slice AXIS=VALUE` awaits the owner's confirmation.
+**DONE** 2026-10-16 — opened 2026-10-14; plan P04 T1. The precondition of `dualc_slice`'s
+retirement (D-58, the form confirmed 2026-10-15).
 
 *Acceptance:* the slice core moved out of `dualc_slice.cpp` into a field-agnostic shared module
 (`examples/field_slice.{h,cpp}`); `dualc_field <graph> --slice AXIS=VALUE [--res N] -o
@@ -186,6 +186,8 @@ graph's bounds (unbounded → the existing error); `--slice` refuses `--tile-dep
 --offset 0.1 --plane z=0 --res 128` and the equivalent graph (the TPMS centred where
 `dualc_slice` centres it) write byte-identical PNG and SVG; a `cli_field_slice` ctest with
 content checks; a new 11 child page with its flag table and recipes.
+
+*Landed 2026-10-16 (P04.1):* byte-identical; all eight mesh flags refused; [06](06-slice-any-graph.md).
 
 ## #60 Retire the eight tools
 

@@ -13,10 +13,11 @@ dualc_target_options(dualc_demo)
 #   miniz.{h,c}        -- MIT (deflate ZIP for 3MF). Needed by example_common's
 #                         writeField, so PUBLIC-linked into dualc_examples_common
 #                         (every CLI's -o .3mf path uses it).
-#   stb_image_write.h  -- Public Domain (PNG output). Used only by dualc_slice
-#                         and the GL plumbing's snapshot path, so it lives in its
-#                         OWN lib and is NOT pulled into dualc_examples_common:
-#                         the mesh-only CLIs never carry a PNG writer.
+#   stb_image_write.h  -- Public Domain (PNG output). Used only by the slice
+#                         module (dualc_slice, dualc_field --slice) and the GL
+#                         plumbing's snapshot path, so it lives in its OWN lib
+#                         and is NOT pulled into dualc_examples_common: the
+#                         mesh-only CLIs never carry a PNG writer.
 add_library(dualc_examples_io STATIC third_party/miniz.c)
 target_include_directories(dualc_examples_io
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/third_party)
@@ -61,7 +62,7 @@ endif()
 # Shared glue: field-to-mesh writers (OBJ/STL/3MF), arg parsing, the bump
 # library. PUBLIC-links miniz so every CLI's writeField gains STL/3MF, and
 # meshoptimizer so writeField's --decimate/--simplify path is available; stb
-# (PNG) is deliberately NOT here -- only dualc_slice links it (see above).
+# (PNG) is deliberately NOT here -- only the slice module links it (see above).
 add_library(dualc_examples_common STATIC example_common.cpp)
 target_link_libraries(dualc_examples_common
   PUBLIC dualc::dualc dualc_examples_io dualc_examples_decimate)
@@ -77,8 +78,15 @@ foreach(tool dualc_primitive dualc_boolean dualc_lift dualc_csg_demo dualc_latti
   dualc_target_options(${tool})
 endforeach()
 
-# dualc_slice is the only example that writes PNG -> give it the stb impl.
-target_link_libraries(dualc_slice PRIVATE dualc_examples_img)
+# The slice module (field_slice.{h,cpp}, roadmap 21 #59): any field sampled on
+# a plane -> PNG heatmap + SVG contour. It is the only CLI code that writes PNG,
+# so it alone carries the stb impl; dualc_slice and dualc_field --slice share it.
+add_library(dualc_examples_slice STATIC field_slice.cpp)
+target_link_libraries(dualc_examples_slice
+  PUBLIC dualc::dualc dualc_examples_common dualc_examples_img)
+target_compile_features(dualc_examples_slice PUBLIC cxx_std_17)
+dualc_target_options(dualc_examples_slice)
+target_link_libraries(dualc_slice PRIVATE dualc_examples_slice)
 
 # --- Field-graph parser/builder + the general dualc_field CLI ------------
 # field_graph.{h,cpp} parses the composable field-graph (canonical JSON) and
@@ -98,7 +106,8 @@ if(MSVC)
 endif()
 
 add_executable(dualc_field dualc_field.cpp)
-target_link_libraries(dualc_field PRIVATE dualc::dualc dualc_examples_fieldgraph)
+target_link_libraries(dualc_field PRIVATE dualc::dualc dualc_examples_fieldgraph
+  dualc_examples_slice)
 target_compile_features(dualc_field PRIVATE cxx_std_17)
 dualc_target_options(dualc_field)
 
@@ -395,6 +404,20 @@ if(DUALC_BUILD_TESTS)
   add_test(NAME cli_field_lift
     COMMAND dualc_field --expr "revolve(circle(0,0,0.5),offset=2)" --depth 5 -o cli_field_lift.obj
     WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
+  # Any graph sliced (roadmap 21 #59): cli_slice's field as a graph, over the
+  # box dualc_slice samples (cube.obj's AABB padded 5% per axis).
+  # cli_field_slice_same holds both outputs byte-identical to cli_slice's, the
+  # equivalence that lets dualc_slice retire. cli_field_slice_refuse: --slice
+  # writes no mesh, so a mesh flag beside it is refused.
+  add_test(NAME cli_field_slice
+    COMMAND dualc_field --expr "intersection(onion(gyroid(center=[0,0,0],wavelength=0.5),thickness=0.1),mesh(path=\"cube.obj\"))"
+            --slice z=0 --res 128 --bounds -0.55,-0.55,-0.55,0.55,0.55,0.55
+            -o cli_field_slice.png
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
+  add_test(NAME cli_field_slice_refuse
+    COMMAND dualc_field --expr "sphere(radius=1)" --slice z=0 --depth 5)
+  set_tests_properties(cli_field_slice_refuse PROPERTIES
+    PASS_REGULAR_EXPRESSION "--slice writes no mesh. it cannot be combined with --depth")
   # Demo-mesh generator + a few pipeline runs over the new meshes. The sphere
   # and torus exercise smooth/genus regimes; the bracket run exercises the
   # sharp-feature toggle on a part with a reentrant edge.
@@ -461,6 +484,18 @@ if(DUALC_BUILD_TESTS)
     NEEDS cli_slice OPTIONS -DWIDTH=128 -DHEIGHT=128)
   dualc_cli_content(cli_slice_svg_content cli_slice.svg svg
     NEEDS cli_slice OPTIONS "-DCONTAINS=<line ")
+  dualc_cli_content(cli_field_slice_content cli_field_slice.png png
+    NEEDS cli_field_slice OPTIONS -DWIDTH=128 -DHEIGHT=128)
+  dualc_cli_content(cli_field_slice_svg_content cli_field_slice.svg svg
+    NEEDS cli_field_slice OPTIONS "-DCONTAINS=<line ")
+  foreach(ext png svg)
+    add_test(NAME cli_field_slice_same_${ext}
+      COMMAND ${CMAKE_COMMAND} -E compare_files cli_slice.${ext}
+              cli_field_slice.${ext}
+      WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
+    set_tests_properties(cli_field_slice_same_${ext} PROPERTIES
+      FIXTURES_REQUIRED "cli_slice;cli_field_slice")
+  endforeach()
   add_test(NAME cli_field_lift_same
     COMMAND ${CMAKE_COMMAND} -E compare_files cli_lift.obj cli_field_lift.obj
     WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)

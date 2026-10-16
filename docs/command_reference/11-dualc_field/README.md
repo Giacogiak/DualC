@@ -21,6 +21,7 @@ dualc_field -            [options]      # graph from stdin (for pipes / Grasshop
 dualc_field --expr "<shorthand>" [options]   # graph from an inline shorthand string
 dualc_field --list                     # print the op vocabulary and exit
 dualc_field <graph> --dump-json        # canonicalise any input to JSON and exit
+dualc_field <graph> --slice z=0        # sample on a plane → PNG + SVG, no mesh (page 10)
 ```
 
 The graph can be given two ways — **JSON** (the canonical form, in a file or on
@@ -37,7 +38,7 @@ lives in `examples/field_graph.{h,cpp}`, a separate translation unit that
 
 | Option | Default | Meaning |
 | --- | --- | --- |
-| `-o PATH` | `field.obj` | Output mesh; `.obj` / `.stl` / `.3mf` by extension ([export formats](../README.md#export-formats--o-extension-dispatch)). |
+| `-o PATH` | `field.obj` | Output mesh; `.obj` / `.stl` / `.3mf` by extension ([export formats](../README.md#export-formats--o-extension-dispatch)). With `--slice`, the PNG + SVG base (default `field_slice`). |
 | `--depth N` | `7` | Octree max depth; cell size ≈ root extent / `2^N`. |
 | `--collapse E` | `0` | Adaptive octree cell-collapse *during* contouring (QEF energy, length²); helps flat regions, ~nil on dense TPMS. How it works and [which lighter-files lever](05-decimation.md#which-lighter-files-lever---collapse-vs---decimate-vs---tile-depth) to reach for: [05](05-decimation.md). |
 | `--decimate R` | off | **Post-contour QEM decimation** (monolithic only): keep fraction `R` ∈ (0,1) of the triangles (e.g. `0.1` ≈ 10× lighter) via a global [meshoptimizer](https://github.com/zeux/meshoptimizer) simplify on the finished mesh, before export. Global (quality-optimal), watertight in/out. **Monolithic only** — cannot combine with `--tile-depth`. See [Decimation](05-decimation.md#decimation---decimate----simplify). |
@@ -47,6 +48,8 @@ lives in `examples/field_graph.{h,cpp}`, a separate translation unit that
 | `--weld` | off | With `--tile-depth` and `.3mf` output, weld across-tile seam vertices into a **single globally-manifold, shared-vertex** object (topology-identical to the monolithic mesh) — for consumers that need connectivity (re-booleans, FEA, decimation). Bounded to a 2D seam-vertex hash, not one tile. See [The 3MF path](08-3mf-and-weld.md#the-3mf-path--o-3mf). |
 | `--mem BUDGET` | off | **Auto-pick `--tile-depth`** from a RAM budget (`4G`, `512M`, `2048K`, or a byte count) instead of choosing `D` by hand: a cheap coarse probe estimates the busiest tile and selects the **largest `D` that fits**. `.stl` or `.3mf` output. Conservative (errs to a smaller `D`, never OOMs); an explicit `--tile-depth` overrides it. See [Auto-budget](07-mem-budget.md#auto-budget---mem-budget). |
 | `--no-manifold` | off | Disable Manifold Dual Contouring (one vertex per cell instead of per surface component). |
+| `--slice AXIS=VALUE` | off | Sample the field on an axis plane instead of contouring: `BASE.png` heatmap + `BASE.svg` contour; refuses the mesh flags. See [Slicing a graph](10-slice.md#options). |
+| `--res N` | `512` | With `--slice` only: grid resolution per side, clamped to `2 … 4096`. |
 | `--expr S` | — | Build from a terse [text shorthand](01-op-vocabulary.md#text-shorthand) string instead of a file/stdin. |
 | `--dump-json` | — | Print the canonical JSON for the parsed graph and exit (no build/contour) — round-trip / Grasshopper aid. |
 | `--list` | — | Print the op vocabulary (grouped) and exit. |
@@ -89,6 +92,7 @@ own and links back here for the options table.
 | [Auto-budget (`--mem BUDGET`)](07-mem-budget.md) | Let the tool pick the largest `--tile-depth` that fits a RAM budget instead of choosing `D` by hand: syntax, the estimate, precedence, recipes. |
 | [The 3MF path and `--weld`](08-3mf-and-weld.md) | Streaming to a slicer-native 3MF (per-tile objects, `1 unit = 1 mm`), `--weld` for a single globally-manifold object, and the tiled/welded recipes. |
 | [2D profiles and lifts (`revolve` · `extrude`)](09-2d-profiles-and-lifts.md) | The profiles `circle`, `rect`, `segment`, `polygon` and the two lifts that make them 3D — the graph form of `dualc_lift`: keys and defaults, the typing rule, recipes. |
+| [Slicing a graph (`--slice`)](10-slice.md) | Any graph sampled on an axis plane → PNG heatmap + SVG contour, no mesh — the graph form of `dualc_slice`: options and defaults, the refused mesh flags, the region, recipes. |
 
 ## Diagnostics
 
@@ -167,6 +171,7 @@ Two ready-to-run samples ship next to the binary:
 | U1–U5 | `--mem` budgets | [07](07-mem-budget.md#recipes) |
 | Z1–Z4 | Tiled and welded 3MF | [08](08-3mf-and-weld.md#recipes) |
 | R1–R4 | 2D profiles revolved and extruded, `dualc_lift`'s recipes as graphs | [09](09-2d-profiles-and-lifts.md#recipes) |
+| X1–X5 | Slices: a TPMS section, a shell's wall, a lattice layer, `dualc_slice`'s S1 as a graph | [10](10-slice.md#recipes) |
 
 ## Scope
 
