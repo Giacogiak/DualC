@@ -23,7 +23,7 @@ shapes.
 ## The 30 analytic primitives
 
 Defaults in the flat order. **∞** = unbounded, needs `--bounds` (the box of the old default
-command is given); **open** = a surface with no inside, needs an `onion` for a wall.
+command is given); **open** = an unsigned-distance surface with no inside, needs an `onion` for a wall.
 
 | # | op | Flat order = defaults | Needs |
 | --- | --- | --- | --- |
@@ -93,7 +93,7 @@ The graph adds `normalize` and `transform` (a 4×4 matrix), which had no flag
 | O5 | `repeat-limited(sphere,period=[3,0,0],count=[4,1,1])` | `--repeat-limited 3,0,0,4,1,1` | Finite tiling: period + counts |
 | O6 | `displace(box,fn=sine,amplitude=0.1,frequency=6)` | `--displace sine,0.1,6` | Analytic surface bump |
 
-**Twist / bend axis.** Twisting a body of revolution about *its own* axis of symmetry shows
+**Twist / bend axis.** `twist` / `bend` rotate the plane keyed to the chosen axis. Twisting a body of revolution about *its own* axis of symmetry shows
 nothing — O1's `twist(torus,…,axis=y)` among them, a torus being invariant under rotation
 about y; twist such a shape about another axis, or twist a non-symmetric one (a box twists
 visibly about any).
@@ -115,7 +115,7 @@ Strong displacement adds fine detail the octree must resolve: keep `--bounds` ti
 `--depth` so a cell is a few times smaller than the bump
 ([the resolution rule](../../design/10-invariants-and-tolerances.md#the-resolution-rule-a-feature-is--23-cells-or-it-does-not-exist)).
 If the output has holes, raise `--depth` and watch the trend: holes that **shrink** were
-under-resolution; holes that **persist or grow** mean the bumped surface truly
+under-resolution; holes that **persist or grow** (a boundary-edge count stable or rising) mean the bumped surface truly
 self-intersects — a property of `SDF + bump`, not of the mesher; lower `amplitude`. `gyroid`
 grows handles and tunnels, so it self-intersects at a lower amplitude than the other two.
 
@@ -126,7 +126,7 @@ grows handles and tunnels, so it self-intersects at a lower amplitude than the o
 | C1 | Positional override: a radius-2 sphere |
 | C2 | Grouped keys: torus of major 3, minor 0.5 |
 | C3 | A 4-unit box |
-| C4–C6 | Strong sine / bumps / gyroid displacement on the unit sphere, bounds snug round the bumps |
+| C4–C6 | Strong sine / bumps / gyroid displacement on the unit sphere (±15 %, ±15 %, ±12 %), bounds snug round the bumps |
 | C7 | Composed decorators: a hollow torus, then twisted |
 
 ```bash

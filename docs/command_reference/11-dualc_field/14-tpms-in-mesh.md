@@ -21,7 +21,7 @@ intersection(onion(normalize(TPMS(center=C,wavelength=W)),thickness=T),mesh(path
 | *(the lattice phase)* | `center=C` | the mesh **AABB centre**; the node's own default is the origin |
 | `--offset T` | the `onion(…, thickness=T)` wrapper: the double-sheet wall `\|F\| − T` | `0` — no `onion`: the solid phase `F ≤ 0` |
 | `--normalize-thickness` | the `normalize(…)` wrapper, directly round the TPMS (inside any `onion`) | off |
-| `--bounds …` | `--bounds …` | the mesh **AABB + 5 % per axis**; `dualc_field`'s auto-fit pads 5 % of the *largest* extent, which is the same box only on a cube |
+| `--bounds …` | `--bounds …` — the intersection clips to the mesh, so the box need only contain it | the mesh **AABB + 5 % per axis**; `dualc_field`'s auto-fit pads 5 % of the *largest* extent, which is the same box only on a cube |
 | `-o PATH` | `-o PATH` — `.obj` / `.stl` / `.3mf` by extension | `<type>_lattice.obj`; here `field.obj` |
 | `--depth N` · `--collapse E` | the same options | `7` · `0` (off) |
 

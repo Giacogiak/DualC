@@ -66,7 +66,7 @@ and diagonal / 10, rounded.
 | M5 | Millimetre scale: 5 mm gyroid cells and 2 mm walls in the foot, a 128³ clip |
 | M6 | Headless: one PNG of a gyroid shell in the cube, and exit |
 | M7 | Section a solid lattice: press `z`, then `→` / `←`, `f` to flip, `0` to clear |
-| M8 | The bake zoomed into the ankle: the same 96³ grid on 28 mm instead of 150 mm |
+| M8 | The bake zoomed into the ankle: the same 96³ grid on 28 mm instead of 150 mm (0.3 mm cells) |
 
 ```bash
 dualc_field_view --expr "gyroid(wavelength=0.2)" --bounds -0.5,-0.5,-0.5,0.5,0.5,0.5     # M1

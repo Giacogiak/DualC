@@ -42,7 +42,8 @@ that it did something — a `--depth 9` slice looks no different from a `--depth
   source cannot flatten the band), with the zero-contour burned in black.
 - **The SVG**: the zero-contour as line segments (marching squares; a saddle cell is
   resolved by its four corners' average), in world units — the authoritative cross-section
-  geometry.
+  geometry. The marching squares is kept separable as the kernel of a future per-layer
+  print slicer.
 - Both share the world-up orientation (PNG row 0 = the largest `v`; the SVG flips `y`), so the
   SVG overlays the PNG exactly. In-plane axes: `z` → (u = x, v = y), `x` → (u = y, v = z),
   `y` → (u = x, v = z).

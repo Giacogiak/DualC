@@ -82,6 +82,28 @@ graph twin was stopped before it finished.
   5 % per axis; `dualc_field`'s auto-fit pads 5 % of the largest extent (`dualc_field_view` per
   axis, as the tools). On a cube they agree; elsewhere 11/14's T14 passes the tool's box.
 
+## What P06's deletion would lose
+
+`scripts/docs_loss_audit.py --base 2fcb6ee --scope docs/ --untriaged` against a scratch commit
+— this branch's docs with the seven retiring pages deleted (03 kept, D-60) — scratch triage
+(the script's thresholds, no items). On the eight pages, 400 residual rows (247 sentences, 116
+identifiers, 23 headings, 14 evidence tokens, before the patches below), triaged by hand:
+
+- **The old command lines and flag-table rows** (most rows): superseded — each recipe has its
+  graph twin in a *Was* column or a mapping table (11/11, 11/12, 11/13, 11/14, 11/09, 11/10,
+  12/05), which is why the text differs.
+- **Headings**: each has a new home (the map is in the P05.1 handoff); the inbound links to the
+  old anchors are P06's, when the pages become tombstones.
+- **Facts the first pass had dropped**, now carried: the open primitives' unsigned distance, the
+  boundary-edge trend as the self-intersection test, C4–C6's ±15 % / ±12 %, what `twist` /
+  `bend` rotate (11/12); the box only needs to contain the mesh (11/14); marching squares as a
+  future print slicer's kernel (11/10); M8's 0.3 mm cells (12/05).
+- **Not carried, on purpose**: `dualc_raymarch`'s note that a wall much thinner than its
+  wavelength can show holes (its own march constants, wavelength-relative; the viewer steps
+  differently) and its missing-mesh message; `dualc_demo`'s flag-override order (no overrides
+  in the graph, 11/11 says so); D9 / D10's `open_shell.obj` / `scene.obj`, which never existed
+  (G9 runs on `mesh-soup.obj`).
+
 ---
 
 ← Back to [CLI consolidation](README.md) · the [Roadmap index](../README.md).
