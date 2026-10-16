@@ -4,8 +4,8 @@ Part of [Tool 11: `dualc_field`](README.md). `--slice AXIS=VALUE` samples the bu
 an axis-aligned plane instead of contouring it, and writes what the plane shows: a **PNG
 heatmap** and an **SVG of the zero-contour**. Cost is `O(res²)`, independent of how dense the
 field is, so it inspects parts far too dense to mesh. Any graph slices — a lattice, a mesh
-source, a boolean, a lift. It is the graph form of [`dualc_slice`](../07-dualc_slice.md): the
-same core (`examples/field_slice.{h,cpp}`), and the same field writes the same bytes
+source, a boolean, a lift. It replaced [`dualc_slice`](../07-dualc_slice.md), retired 2026-10-16: the
+same core (`examples/field_slice.{h,cpp}`), and the same field wrote the same bytes
 ([roadmap 21/06](../../roadmap/21-cli-consolidation/06-slice-any-graph.md)).
 
 ## Synopsis
@@ -105,10 +105,10 @@ dualc_field --expr 'intersection(onion(normalize(gyroid(center=[0,0,44.5],wavele
   is thicker than the bunny (≈ 0.15 across) and fills every cell
   ([12/05](../12-dualc_field_view/05-tpms-in-mesh-preview.md#recipes) M4 shows it).
 
-- **X4 and the region.** `dualc_slice` pads the mesh's box by 5 % **per axis**; `--slice`
+- **X4 and the region.** `dualc_slice` padded the mesh's box by 5 % **per axis**; `--slice`
   without `--bounds` pads by 5 % of the **largest** extent. On a cube they agree (X4 without
   `--bounds` writes the same bytes); on any other shape pass `dualc_slice`'s box as
-  `--bounds` to reproduce it. `dualc_slice`'s `--normalize-thickness` is
+  `--bounds` to reproduce it. `dualc_slice`'s `--normalize-thickness` was
   `onion(normalize(tpms), …)` in the graph — normalise first, then the shell.
 - The meshes are the demo meshes next to the binary; the quoting of a `path` inside `--expr`
   on Windows PowerShell 5.1 is

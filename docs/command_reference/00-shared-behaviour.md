@@ -37,8 +37,7 @@ the rationale is
 ## Diagnostics warnings (every exporting tool)
 
 Every tool that exports through the shared writer (`dualc_field`,
-`dualc_primitive`, `dualc_boolean`, `dualc_lattice`, `dualc_lift`,
-`dualc_csg_demo`) prints the engine's raised signals to **stderr** before the
+`dualc_boolean`) prints the engine's raised signals to **stderr** before the
 `[dualc] wrote ...` line — always on, no flag, silent on a clean run. The
 **tiled/streaming** path (`--tile-depth`) runs none of the per-mesh checks — it
 contours per tile, where an empty tile is normal — and prints one warning of its
@@ -47,7 +46,7 @@ sampled region.`, if *no* tile produced a surface.
 
 | Warning | What happened | What to do |
 | --- | --- | --- |
-| `no surface crossed the sampled region -- the output is a single placeholder triangle, not geometry.` | The field had no zero crossing anywhere in the sampled box. The file still exists and still parses — it holds one meaningless triangle. | Check `--bounds`, and check the sign convention (a field that is positive everywhere has no surface; a mesh under `--gwn` / `--gwn-field` / `winding` must be wound outward). |
+| `no surface crossed the sampled region -- the output is a single placeholder triangle, not geometry.` | The field had no zero crossing anywhere in the sampled box. The file still exists and still parses — it holds one meaningless triangle. | Check `--bounds`, and check the sign convention (a field that is positive everywhere has no surface; a mesh under `sign=gwn` or `winding` must be wound outward). |
 | `the field reported unusable bounds, so the sampled region fell back to the unit cube [-0.5,0.5]^3.` | `bounds()` was neither valid nor infinite, so the sampler used `[-0.5,0.5]³`. Anything outside that cube was never looked at. | Pass `--bounds x0,y0,z0,x1,y1,z1`. |
 | `the sampled region reaches outside the baked grid, where the field reads clamped edge values instead of real samples.` | The graph is a baked grid and the root box is bigger than the bake. Outside the bake every probe reads the nearest face value, so the far field is flat, not real. | Shrink `--bounds` to the baked region, or re-bake over a larger one. |
 | `the output mesh is not closed (N boundary edge(s), M non-manifold edge(s))` | The contoured mesh has holes or non-manifold junctions. Two causes: a wall or gap thinner than the cells can resolve, or a surface **deliberately clipped by `--bounds`**, which leaves a genuine open rim. | If unintended, raise `--depth` or thicken the feature — the [resolution rule](../design/10-invariants-and-tolerances.md#the-resolution-rule-a-feature-is--23-cells-or-it-does-not-exist). If you clipped on purpose the warning is correct and expected: the mesh really is open, and a slicer may reject it as-is. |

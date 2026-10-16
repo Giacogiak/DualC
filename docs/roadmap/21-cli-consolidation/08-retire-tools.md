@@ -1,8 +1,8 @@
 # The seven tools retired (#60, P06)
 
 The evidence page of the second half of [#60](01-record.md#60-retire-the-eight-tools), plan
-P06, on branch `feat/cli-consolidation`. T1 — the code and the tests — landed 2026-10-16;
-T2 (the tombstones, the indexes, the loss audit) follows. Seven tools, not eight:
+P06, on branch `feat/cli-consolidation`. T1 — the code and the tests — and T2 — the
+tombstones, the indexes, the loss audit — landed 2026-10-16. Seven tools, not eight:
 `dualc_boolean` stays (D-60).
 
 ## T1 — the code and the tests
@@ -82,6 +82,60 @@ parity 82/82.
 - **The per-node bake matched the tool's bake byte for byte** here (both operands the same
   `cube.obj`, `k` 0.3, depth 5). The per-node region is not the tool's in general
   ([04](04-mesh-node-bake.md), D-62), so no test holds the two to it.
+
+## T2 — the tombstones, the indexes, the loss audit
+
+- **Tombstones**: pages 01, 02, 04, 05, 06, 07 and 10 are rewritten in 08's form — the H1
+  kept (an anchor), the retirement date and decision (D-55 … D-58), this page as the record,
+  and a *Was / Now* table sending each old section to its home under 11 or 12 (P05's heading
+  map). The numbers are never reused. The two links into old anchors were re-pointed: 03's
+  *Sharp vs. smooth normals* to 11/11, the keyboard map's *Live controls* to 12/01 and 12/05.
+- **The command-reference index**: the tool index (seven rows say *Retired 2026-10-16*), the
+  build prelude's opt-in list (`DUALC_BUILD_FIELD_VIEW`, `_GLSL_PARITY`), the keyboard map
+  (one viewer: the `dualc_raymarch` column and its four lattice rows out), the common-options
+  matrix (four columns — the `view` column #50 left behind went too), the export list, the
+  inventory (4 tools, the composition samples, `rect`, the decorators by node name).
+- **Other live pages**: 00's warnings list; 08's *Now* cell; 09's G2, G3, G5 as `dualc_field`
+  graphs (run: 40,032, 34,984 and 60,180 faces — G2 and G3 equal to the T1 twins); the 11 and 12
+  pages that called themselves "the graph form of" a tool now say it *replaced* it, and 11's
+  § Scope names the two framework CLIs as the user surface; `README.md`'s tool list,
+  `STRUCTURE.md`, `AGENTS.md`'s opt-in list, `THIRD_PARTY.md`, design/09 (`t`, `n`, the Page
+  keys and `-` / `=` were `dualc_raymarch`'s, so the layout rule now lists `r`, `l`, the arrows
+  and `[` / `]`).
+- **Decisions**: #18's trigger reads "a TPMS lattice in a mesh" instead of the tool; **D-14**
+  (`dualc_lattice --tile-depth`) moved to the dropped table — its trigger, a `dualc_lattice`
+  user, can no longer fire — with a dated line on 11/03 § 5a.
+- **Left as they are**: `scripts/docs_loss_audit.json` names the pages only as base-tree
+  sources of the 3d73220 audit, and no `record` there cites them; the roadmap records (history);
+  `tests/test_field_graph.cpp`'s SECTION name (a passing test).
+
+### The loss audit
+
+Before the rewrites were committed, `scripts/docs_loss_audit.py --base 2fcb6ee --scope docs/`
+ran against a scratch commit of the working tree (never a branch, never pushed), with a scratch
+triage (the script's thresholds, a ceiling above the tree-wide noise); then again on the
+committed docs. As in P05 the tree-wide count is mostly rows of unchanged files, so the audited
+set is the rows T2 can cause: every row on the eight pages, and every row not already residual
+on this branch before T2 (the same run on 8b154e1). Each class below is a scratch-triage rule
+or item the script verifies, with its citation:
+
+- **Class A — superseded by its P05 home**: a row of the eight pages whose content lives under
+  11 or 12, the tombstone's table naming where; P05's triage of the same rows is 21/07.
+- **Class B — a recorded drop**: what P05 did not carry on purpose (21/07), still not carried.
+- **Class C — rewritten in place**: a sentence of a live page that named a retired tool as
+  present, now in the past tense or pointing at the graph; a table row of a retired tool's
+  column or row; the D-14 row, moved to the dropped table; the #55 milestone row, out of the
+  rolling five-row window (D-43) with #60's arrival.
+- **Class D — noise of quotation**: an identifier on an unchanged quotation-only page (the
+  2026-09-20 audit dump, roadmap 19's phase-6 record) that was "kept" only through a retired
+  page or a deleted source file.
+
+**The numbers**, 2026-10-16: tree-wide 9,207 residual rows against the pre-T2 run's 8,797 —
+the noise of unchanged files P05 met too; the audited set **437 rows**, 391 of them on the
+eight pages (P05's run found 396 there; the tombstones keep a few of their words): **393 class
+A, 6 B, 36 C, 2 D — 0 untriaged**, every citation resolved, exit 0. Four minutes a run. The
+report — the audited set row by row, its counts, the scratch triage file — follows in
+`docs/raw/`, from the same run on this commit.
 
 ---
 

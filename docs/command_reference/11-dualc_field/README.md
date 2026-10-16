@@ -2,7 +2,7 @@
 
 The general **field-graph** CLI: parse a composable field description, build the
 `dualc::ImplicitField` it denotes, dual-contour it **once**, and export. Where
-`dualc_lattice`/`dualc_boolean`/`dualc_csg_demo` are fixed-shape shortcuts,
+`dualc_boolean` is a fixed-shape shortcut,
 `dualc_field` lets you compose *any* of the registry operations into one tree —
 and crucially it composes them at the **field** level, so a boolean over a TPMS
 lattice is a single contour pass, not a mesh round-trip.
@@ -138,8 +138,8 @@ auto-fit bounds), exported straight to print-ready 3MF:
 dualc_field gyroid_box.json --depth 7 -o part.3mf
 ```
 
-A TPMS lattice clipped to an input volume — the field-level equivalent of
-`dualc_lattice`, and freely composable with further booleans:
+A TPMS lattice clipped to an input volume — what the retired `dualc_lattice` made
+([14](14-tpms-in-mesh.md)), and freely composable with further booleans:
 
 ```json
 { "op": "intersection", "in": [
@@ -183,9 +183,10 @@ Eight ready-to-run samples ship next to the binary (sources in `examples/samples
 
 ## Scope
 
-`dualc_field` **generalises but does not replace** `dualc_lattice`,
-`dualc_boolean`, or `dualc_csg_demo` — those remain convenience shortcuts and
-the registries stay the single source of truth. The DAG-ref syntax (`id`/`ref`,
+`dualc_field` and `dualc_field_view` are the user surface (D-55): the side CLIs that
+composed one fixed graph retired into them on 2026-10-16 (#60), each number kept as a
+tombstone page in the [tool index](../README.md#the-12-tools-binaries). `dualc_boolean`
+remains, a convenience shortcut (D-60), and the registries stay the single source of truth. The DAG-ref syntax (`id`/`ref`,
 `let … in …`) of the serialization superset is not implemented — row D-12 of the
 [decisions index](../../decisions/README.md).
 

@@ -4,8 +4,8 @@ Part of [Tool 11: `dualc_field`](README.md). Six small graphs that show composit
 booleans, a smooth blend, a displaced surface, and a mesh source hollowed, carved and warped.
 They were [`dualc_csg_demo`](../05-dualc_csg_demo.md)'s six hand-built recipes; each is now a
 JSON file in `examples/samples/`, copied next to `dualc_field` (and `dualc_field_view`) by the
-build, with every parameter at the old recipe's default — and each writes the same bytes as
-`dualc_csg_demo --recipe=NAME` ([roadmap 21/07](../../roadmap/21-cli-consolidation/07-docs-migration.md)).
+build, with every parameter at the old recipe's default — and each wrote the same bytes as
+`dualc_csg_demo --recipe=NAME` before the tool retired (2026-10-16) ([roadmap 21/07](../../roadmap/21-cli-consolidation/07-docs-migration.md)).
 The old tool's `displaced` needed a C++ lambda; the graph's `displace(fn=sine,…)` is the same
 function ([12 § displace functions](12-primitive-catalogue.md#the-three-displace-functions)).
 

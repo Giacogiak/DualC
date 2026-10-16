@@ -1,9 +1,9 @@
 # A TPMS lattice inside a mesh
 
 Part of [Tool 11: `dualc_field`](README.md). Fill a closed mesh with a triply-periodic
-minimal-surface (TPMS) lattice and contour the result as one closed solid — the graph form of
-[`dualc_lattice`](../06-dualc_lattice.md). The tool composed one fixed graph and computed three
-defaults from the mesh; written out, the same graph and the same numbers write the same bytes
+minimal-surface (TPMS) lattice and contour the result as one closed solid — the graph that
+replaced [`dualc_lattice`](../06-dualc_lattice.md), retired 2026-10-16. The tool composed one fixed graph and computed three
+defaults from the mesh; written out, the same graph and the same numbers wrote the same bytes
 ([roadmap 21/07](../../roadmap/21-cli-consolidation/07-docs-migration.md)). Previewing it live:
 [12/05](../12-dualc_field_view/05-tpms-in-mesh-preview.md).
 

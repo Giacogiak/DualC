@@ -14,8 +14,8 @@ downloaded asset). The build runs `dualc_gen_demo all` itself into `build/data/`
 and copies the result next to every tool (target `dualc_demo_data`), so a clean
 clone needs no manual step; run `dualc_gen_demo all --dir <repo>/data` to
 populate the repo's `data/` for recipes launched from the root. Each shape targets a distinct topology / curvature /
-feature regime; pair them with `dualc_demo` (CLI) or, as a `mesh(path=…)` source, with
-`dualc_field_view` (interactive) for side-by-side visual QA. **Not generated** (hand-authored or downloaded, see
+feature regime; pair them, as a `mesh(path=…)` source, with `dualc_field`
+(CLI) or `dualc_field_view` (interactive) for side-by-side visual QA. **Not generated** (hand-authored or downloaded, see
 `THIRD_PARTY.md` § Demo mesh assets): `molde`, `foot`, `opA`/`opB`, `mesh-soup`
 (project-authored) and `bunny` (Stanford); recipes that name them need those files
 in place.
@@ -34,7 +34,7 @@ in place.
 
 Every generated mesh is **closed and wound outward** — positive signed volume, generalized
 winding number 1 inside — so every sign oracle reads it, the orientation-sensitive ones
-(`--pseudonormal`, `--gwn`, `--gwn-field`, the graph's `winding(…)`) included; the
+(`mesh(sign=pseudonormal)`, `mesh(sign=gwn)`, `winding(…)`) included; the
 `[orientation]` case in `tests/test_demo_meshes.cpp` pins it for all nine shapes.
 
 | Option | Default | Meaning |
@@ -57,10 +57,10 @@ $ dualc_gen_demo cube -o /nonexistent/x/cube.obj
 | # | Command | What it does |
 | --- | --- | --- |
 | G1 | `dualc_gen_demo all --dir ../../../data` | Regenerate every generated demo mesh in `data/` from the build output folder (`--dir data` from the repo root); the `.obj` files are gitignored, this is their source. |
-| G2 | `dualc_demo torus.obj torus_dc.obj --depth 6` | Re-mesh the torus; output stays genus 1 (χ = 0). |
-| G3 | `dualc_demo --sharp bracket.obj bracket_sharp.obj --depth 6` | Sharp-feature toggle: the reentrant edge stays crisp (drop `--sharp` to see it round). |
+| G2 | `dualc_field --expr "mesh(path=\"torus.obj\")" --depth 6 -o torus_dc.obj` | Re-mesh the torus; output stays genus 1 (χ = 0). |
+| G3 | `dualc_field --expr "mesh(path=\"bracket.obj\",normals=sharp)" --depth 6 -o bracket_sharp.obj` | Sharp-feature toggle: the reentrant edge stays crisp (drop `normals=sharp` to see it round). |
 | G4 | `dualc_field_view --expr "mesh(path=\"knot.obj\")"` | Inspect the trefoil knot interactively (its baked narrow-band SDF, sphere-traced). |
-| G5 | `dualc_demo --gwn-field bunny.obj bunny_sealed.obj --depth 7` | Seal the open Stanford bunny scan (hole in the base) into a watertight solid. |
+| G5 | `dualc_field --expr "winding(path=\"bunny.obj\")" --depth 7 -o bunny_sealed.obj` | Seal the open Stanford bunny scan (hole in the base) into a watertight solid. |
 
 ---
 

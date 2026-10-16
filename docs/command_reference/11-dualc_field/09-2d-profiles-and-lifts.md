@@ -2,9 +2,9 @@
 
 Part of [Tool 11: `dualc_field`](README.md). A **profile** is a 2D field drawn in a plane
 (`circle`, `rect`, `segment`, `polygon` — the library's `include/dualc/implicit2d.h`); a
-**lift** turns it into a 3D node. They are the graph form of
-[`dualc_lift`](../04-dualc_lift.md): the same profiles, the same defaults, and the same
-recipe writes a byte-identical mesh
+**lift** turns it into a 3D node. They replaced
+[`dualc_lift`](../04-dualc_lift.md), retired 2026-10-16: the same profiles, the same defaults,
+and the same recipe wrote a byte-identical mesh
 ([roadmap 21/05](../../roadmap/21-cli-consolidation/05-2d-profiles-and-lifts.md)).
 
 `dualc_field_view` previews the same graphs: the profile's scalars (`radius`) and the lift's
@@ -20,12 +20,12 @@ Each takes **exactly one child, and that child must be a profile**.
 | op | params | builds |
 | --- | --- | --- |
 | `revolve` | `offset`=1 | Spins the profile around the **y** axis: profile `x` = distance from the axis − `offset`, profile `y` = world `y`. A circle at the origin with `offset=2` is a torus of major radius 2. |
-| `extrude` | `height`=0.5 | Sweeps the profile (in the xy plane) along **z** by ± `height` — `height` is the **half**-height, as `dualc_lift --height`. Must be > 0. |
+| `extrude` | `height`=0.5 | Sweeps the profile (in the xy plane) along **z** by ± `height` — `height` is the **half**-height, as `dualc_lift --height` was. Must be > 0. |
 
 ## The four profiles
 
 Named keys, or the flat `params=[…]` order (also the shorthand's bare positionals). The
-defaults are `dualc_lift`'s.
+defaults are the retired `dualc_lift`'s.
 
 | op | named keys (defaults) | flat order |
 | --- | --- | --- |
@@ -45,7 +45,7 @@ defaults are `dualc_lift`'s.
   `points` back as rows.
 - Radii and half extents must be > 0, every value finite.
 
-**`dualc_lift`'s recipes, one by one.** Each graph writes the same bytes as the tool's line
+**`dualc_lift`'s recipes, one by one.** Each graph wrote the same bytes as the tool's line
 (defaults on both sides: `offset` 1, `height` 0.5, the profile defaults above); `-o` replaces
 the tool's `revolved.obj` / `extruded.obj` default, `--depth` / `--collapse` are the options.
 

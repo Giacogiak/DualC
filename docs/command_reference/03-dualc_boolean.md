@@ -16,7 +16,7 @@ dualc_boolean <op> a.obj b.obj [-o PATH] [--k K] [--depth N] [--collapse E] [--s
 | `--k K` | `0.25` | Blend radius of the three `smooth-*` ops, in world units; the hard ops ignore it. |
 | `--depth N` | `7` | Octree max depth; cell size ≈ root extent / `2^N`. |
 | `--collapse E` | `0` (off) | Adaptive cell-collapse threshold (QEF energy, length²) — [common options](README.md#common-options--which-tool-takes-which). |
-| `--sharp` | off | Record each crossing's geometric face normal instead of the smooth per-vertex blend ([Sharp vs. smooth normals](01-dualc_demo.md#sharp-vs-smooth-normals---sharp)). |
+| `--sharp` | off | Record each crossing's geometric face normal instead of the smooth per-vertex blend ([Sharp vs. smooth normals](11-dualc_field/11-mesh-in.md#sharp-vs-smooth-normals-normalssharp)). |
 | `--bake N` | off (direct) | Pre-sample each operand into an `N³` narrow-band signed-distance grid before combining. |
 
 ## The options in detail

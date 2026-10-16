@@ -1,9 +1,9 @@
 # The primitive catalogue (P1–P30), decorators and domain operators
 
 Part of [Tool 11: `dualc_field`](README.md). Every analytic primitive with its parameters and
-defaults, then the decorators and domain operators that wrap one, in graph syntax. It is the
-graph form of [`dualc_primitive`](../02-dualc_primitive.md), whose IDs it keeps: every row
-here, run as a bare graph, writes the same bytes as the tool's default command
+defaults, then the decorators and domain operators that wrap one, in graph syntax. It replaced
+[`dualc_primitive`](../02-dualc_primitive.md), retired 2026-10-16, whose IDs it keeps: every row
+here, run as a bare graph, wrote the same bytes as the tool's default command
 ([roadmap 21/07](../../roadmap/21-cli-consolidation/07-docs-migration.md)). The node tables of
 [01 § Op vocabulary](01-op-vocabulary.md#op-vocabulary) give the keys; this page gives the
 shapes.

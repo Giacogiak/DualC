@@ -2,7 +2,7 @@
 
 Part of [Tool 12: `dualc_field_view`](README.md). The single most common preview — one TPMS
 lattice, optionally shelled and normalised, clipped to an input mesh — written as a graph. It
-is what [`dualc_raymarch`](../10-dualc_raymarch.md) hard-coded; here it is one `--expr` (or
+is what [`dualc_raymarch`](../10-dualc_raymarch.md), retired 2026-10-16, hard-coded; here it is one `--expr` (or
 `.fld` file), and the same graph exports with [`dualc_field`](../11-dualc_field/README.md).
 The cost is per screen pixel, not per cell: no mesh is built and RAM is bounded by the window,
 so a `wavelength` that would run the contourer out of memory still renders. Only the mesh

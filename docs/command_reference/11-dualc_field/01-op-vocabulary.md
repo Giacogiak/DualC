@@ -93,7 +93,7 @@ vocabulary.
 | `sc` · `bcc` · `fcc` · `octet` | `center`:[x,y,z]=0, `wavelength`=1, `radius`=0.1 | **Strut lattices** (wireframe crystals): simple-cubic, body-centered, face-centered, octet truss. A unit cell of capsule struts tiled infinitely; `radius` is the metric strut thickness. Already a true SDF — no `normalize` needed. Infinite extent, so clip it: `intersection(mesh(…), bcc(…))` or `intersection(box(…), bcc(…))`, or set `--bounds` for an open-ended inspection view. |
 | `mesh` | `path` **or** `id` (exactly one), `sign` ∈ `parity`(def)/`pseudonormal`/`gwn`, `normals` ∈ `smooth`(def)/`sharp`, `bake`=off, `band`=3 bake cells (+ the margin above) | Signed distance to a mesh (BVH); `sign` picks only the inside test. `parity` and `pseudonormal` need closed input (`pseudonormal` also outward-wound); `gwn` (generalized winding number, `dualc_demo --gwn`) survives small gaps, self-intersections and soup, but a real hole stays a hole — the distance is still to the mesh. To **seal** an open shell or soup into a solid use `winding`, the sealing field, not a sign oracle. |
 | `winding` | `path` **or** `id` (exactly one), `bake`=off | Generalized-winding-number field: contours triangle **soup** / open shells / self-intersections into a watertight solid. Reads the winding: faces wound inside out give an empty field. |
-| 30 analytic primitives | grouped keys or flat `params:[…]` (see below) | `sphere`, `box`, `roundbox`, `torus`, … — full param order in [02-dualc_primitive.md](../02-dualc_primitive.md). |
+| 30 analytic primitives | grouped keys or flat `params:[…]` (see below) | `sphere`, `box`, `roundbox`, `torus`, … — full param order in [12](12-primitive-catalogue.md). |
 
 Mesh `path`s are resolved host-side by a caching resolver (each unique path is
 loaded once); the loaded meshes are owned for the field's lifetime. The `id` form
@@ -183,7 +183,7 @@ Core/common primitives accept **grouped semantic keys**:
 
 Every primitive (including these) also accepts a universal flat array
 `"params": [...]` that maps positionally onto the documented parameter order in
-[02-dualc_primitive.md](../02-dualc_primitive.md) (omitted trailing values fall back
+[12](12-primitive-catalogue.md) (omitted trailing values fall back
 to defaults). Use it for the long-tail primitives that have no grouped keys yet,
 e.g. `{ "op": "hexprism", "params": [0,0,0, 1, 1] }`.
 
@@ -216,7 +216,7 @@ value := number | '[' number (',' number)* ']' | '[' array (',' array)* ']' | ID
   a quoted string are literal, so Windows paths (`"D:\bracket.obj"`) survive.
 - **Positional params:** bare scalars and `[…]` arrays (not `key=value`) are
   concatenated, in order, into the universal flat `params:[…]` array — the same
-  positional primitive order as `--dump-json` / `dualc_primitive`. Example:
+  positional primitive order as `--dump-json` writes. Example:
   `sphere(0,0,0,0.5)` ≡ `sphere(params=[0,0,0,0.5])` ≡ `sphere(center=[0,0,0],radius=0.5)`.
 - **Arrays of arrays** nest one level, rows of one length — a polygon's
   `points=[[0,0],[1,0],[0,1]]`; JSON alike, and `--dump-json` keeps the rows.

@@ -37,7 +37,7 @@ tools' code deleted and every path they tested given a `dualc_field` twin (#60, 
 | #57 Per-node bake on the mesh nodes | [01](01-record.md#57-per-node-bake-on-the-mesh-nodes) | DONE 2026-10-15 — P02 T2; measured in [04](04-mesh-node-bake.md) |
 | #58 2D profiles and `revolve` / `extrude` in the graph | [01](01-record.md#58-2d-profiles-and-revolve--extrude-in-the-graph) | DONE 2026-10-15 — P03 T1 (CPU) + T2 (GPU); measured in [05](05-2d-profiles-and-lifts.md) |
 | #59 Slice any graph | [01](01-record.md#59-slice-any-graph) | DONE 2026-10-16 — P04 T1; measured in [06](06-slice-any-graph.md) |
-| #60 Retire the eight tools | [01](01-record.md#60-retire-the-eight-tools) | PLANNED — P05 landed 2026-10-16 ([07](07-docs-migration.md)); P06 T1 too ([08](08-retire-tools.md)), T2 next |
+| #60 Retire the eight tools | [01](01-record.md#60-retire-the-eight-tools) | DONE 2026-10-16 — seven retired (`dualc_boolean` kept, D-60): P05 docs ([07](07-docs-migration.md)), P06 code, tests, tombstones ([08](08-retire-tools.md)) |
 
 ---
 

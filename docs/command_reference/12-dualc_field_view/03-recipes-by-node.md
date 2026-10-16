@@ -21,7 +21,7 @@ family. All are `--expr` one-liners; on PowerShell put each on one line (the
 
 All 30 primitives render. The seven core primitives take grouped named keys,
 every other one its parameters positionally in the
-[`dualc_primitive`](../02-dualc_primitive.md) order, and a bare `op()` uses the
+[primitive catalogue](../11-dualc_field/12-primitive-catalogue.md)'s order, and a bare `op()` uses the
 registry defaults — [design/09 § Primitive parameters](../../design/09-conventions.md#primitive-parameters-grouped-keys-positional-fallback-one-registry).
 
 ```bash
@@ -29,7 +29,7 @@ registry defaults — [design/09 § Primitive parameters](../../design/09-conven
 dualc_field_view --expr "capsule(a=[-1,0,0],b=[1,0,0],radius=0.4)"
 dualc_field_view --expr "ellipsoid(center=[0,0,0],radii=[1.2,0.7,0.5])"
 
-# N3–N6 — positional (long-tail) primitives -- args follow the dualc_primitive page's order
+# N3–N6 — positional (long-tail) primitives -- args follow the primitive catalogue's order
 dualc_field_view --expr "octahedron(0,0,0,1.2)"            # cx cy cz size
 dualc_field_view --expr "hexprism(0,0,0,0.8,1.2)"          # cx cy cz radius halfLength
 dualc_field_view --expr "cappedtorus(0,0,0,2.0,1.0,0.3)"   # cx cy cz angleRad major minor

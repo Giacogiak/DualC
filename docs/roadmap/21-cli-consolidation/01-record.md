@@ -191,8 +191,8 @@ content checks; a new 11 child page with its flag table and recipes.
 
 ## #60 Retire the eight tools
 
-**PLANNED** — P05, P06 T1 landed 2026-10-16 ([07](07-docs-migration.md),
-[08](08-retire-tools.md)). The eight: `dualc_csg_demo`, `dualc_primitive`, `dualc_raymarch`,
+**DONE** 2026-10-16 — [07](07-docs-migration.md), [08](08-retire-tools.md); ctest
+358 → 344. The eight: `dualc_csg_demo`, `dualc_primitive`, `dualc_raymarch`,
 `dualc_lattice` (D-55), `dualc_demo` (D-56), `dualc_lift` (D-57), `dualc_slice` (D-58);
 `dualc_boolean` stays (D-60).
 

@@ -2,9 +2,9 @@
 
 Part of [Tool 11: `dualc_field`](README.md). A graph whose root is one `mesh` node re-meshes
 that mesh through the dual contourer; the same node with another `sign`, or the `winding`
-source in its place, decides how a clean, almost-clean or open input is read. This is the
-graph form of [`dualc_demo`](../01-dualc_demo.md): every one of its flags is a node parameter
-or one of `dualc_field`'s own options, and the same input writes the same bytes
+source in its place, decides how a clean, almost-clean or open input is read. It replaced
+[`dualc_demo`](../01-dualc_demo.md), retired 2026-10-16: every one of its flags is a node parameter
+or one of `dualc_field`'s own options, and the same input wrote the same bytes
 ([roadmap 21/07](../../roadmap/21-cli-consolidation/07-docs-migration.md)).
 
 ## The input
