@@ -134,8 +134,9 @@ or item the script verifies, with its citation:
 the noise of unchanged files P05 met too; the audited set **437 rows**, 391 of them on the
 eight pages (P05's run found 396 there; the tombstones keep a few of their words): **393 class
 A, 6 B, 36 C, 2 D — 0 untriaged**, every citation resolved, exit 0. Four minutes a run. The
-report — the audited set row by row, its counts, the scratch triage file — follows in
-`docs/raw/`, from the same run on this commit.
+report — the audited set row by row, its counts, the scratch triage file — is
+[`docs/raw/2026-10-16-loss-audit-2fcb6ee-p06.txt`](../../raw/2026-10-16-loss-audit-2fcb6ee-p06.txt),
+from the run on the committed rewrites (`0efb96e`; the scratch head gave the same counts).
 
 ---
 

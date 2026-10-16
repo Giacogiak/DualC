@@ -1,0 +1,1778 @@
+docs_loss_audit -- P06.2 of the CLI consolidation plan (roadmap 21/08 § The loss audit), 2026-10-16
+
+command:   python3 scripts/docs_loss_audit.py --base 2fcb6ee --head 0efb96e --scope docs/ --triage <the scratch triage file at the end>
+baseline:  the same command with --head 8b154e1 (this branch before P06.2) and an empty triage: 8,797 residual rows
+audited:   every row whose base source is one of the eight pages (command_reference 01-07, 10), and every row
+           not residual on the baseline run (matched by unit + key + source) -- the rows P06.2 can cause
+classes:   A superseded by its P05 home; B a recorded drop; C rewritten in place; D noise of quotation
+           (the rules are A; the items say their class in the quote or the note)
+
+docs_loss_audit  base=2fcb6ee12d3b375fc234e81e319d6d17cbb1f8cd  head=0efb96e7017dc094a7e9b32f09c95c86465249c9  audit=2fcb6ee
+scope: docs/  (162 base files)
+annex: docs/ARCHITECTURE.md
+tiers: a=138 b=15 c=31 code=161  excluded=4 (CORPUS_EXCLUDE)
+renames applied to base text: 1
+thresholds: CTX_MIN_HIT=2 CTX_WORDS=3 KEPT_SCK=0.6 K_LONG=8 K_SHORT=4 MIN_WORDS=6 PARTIAL_SC4=0.3 REWRITTEN_SC4=0.6 TOP_K_FILES=5
+
+== the audited set, row by row: unit | key | base source:line | bucket | verdict (rule) ==
+sentence | 2c749fa26889 | docs/command_reference/00-shared-behaviour.md:39 | rewritten | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: Every tool that exports through the shared writer (`dualc_field`, `dualc_primitive`, `dualc_boolean`, `dualc_lattice`, `dualc_lift`, `dualc_csg_demo`) prints th
+sentence | f01f71646175 | docs/command_reference/01-dualc_demo.md:3 | rewritten | superseded (A-01-sentence-rewritten)
+    text: Re-mesh a triangle mesh through the dual contourer.
+sentence | 032597276d90 | docs/command_reference/01-dualc_demo.md:11 | gone | superseded (A-01-sentence-gone)
+    text: `input.obj` ; `cube.obj` ; First positional: the mesh to re-contour (OBJ).
+sentence | 6692dc647fad | docs/command_reference/01-dualc_demo.md:12 | gone | superseded (A-01-sentence-gone)
+    text: `output.obj` ; `cube_dc.obj` ; Second positional: OBJ output (this tool writes OBJ only).
+sentence | 792283ce2551 | docs/command_reference/01-dualc_demo.md:13 | rewritten | superseded (A-01-sentence-rewritten)
+    text: `--depth N` / `--depth=N` ; `7` ; Octree max depth.
+sentence | e305d2e8c42b | docs/command_reference/01-dualc_demo.md:15 | gone | superseded (A-01-sentence-gone)
+    text: `--sharp` ; off ; Face normals instead of smooth vertex normals - keeps corners crisp.
+sentence | 2cc90f444956 | docs/command_reference/01-dualc_demo.md:16 | partial | superseded (A-01-sentence-partial)
+    text: `--no-manifold` ; off ; One QEF vertex per cell (pre-Manifold-DC reference).
+sentence | 82b9367b7e60 | docs/command_reference/01-dualc_demo.md:17 | gone | superseded (A-01-sentence-gone)
+    text: `--pseudonormal` ; off ; Pseudonormal sign oracle ([choosing one](#choosing-a-sign-oracle)).
+sentence | 598b13274f02 | docs/command_reference/01-dualc_demo.md:18 | gone | superseded (A-01-sentence-gone)
+    text: `--gwn` ; off ; Generalized-winding-number sign oracle ([choosing one](#choosing-a-sign-oracle)).
+sentence | df18698f77f7 | docs/command_reference/01-dualc_demo.md:19 | gone | superseded (A-01-sentence-gone)
+    text: `--gwn-field` ; off ; Contour the GWN 0.5-isosurface; overrides `--pseudonormal` and `--gwn`.
+sentence | 0a65d26cee3a | docs/command_reference/01-dualc_demo.md:25 | gone | superseded (A-01-sentence-gone)
+    text: D1 ; `dualc_demo` ; Re-mesh `cube.obj` -> `cube_dc.obj` with all defaults.
+sentence | 0ff99630443e | docs/command_reference/01-dualc_demo.md:26 | gone | superseded (A-01-sentence-gone)
+    text: D2 ; `dualc_demo --depth 7 cube.obj cube_dc.obj` ; Explicit depth + paths.
+sentence | 31f43cb0c935 | docs/command_reference/01-dualc_demo.md:27 | gone | superseded (A-01-sentence-gone)
+    text: D3 ; `dualc_demo --sharp cube.obj cube_sharp.obj` ; Face normals - keeps 90° corners crisp.
+sentence | fa942a4affb8 | docs/command_reference/01-dualc_demo.md:28 | gone | superseded (A-01-sentence-gone)
+    text: D4 ; `dualc_demo --collapse 1 molde.obj molde_dc.obj` ; Adaptive cell collapse.
+sentence | 5fba0a82e25a | docs/command_reference/01-dualc_demo.md:29 | gone | superseded (A-01-sentence-gone)
+    text: D5 ; `dualc_demo --depth 9 --collapse 100 molde.obj molde_d9.obj` ; High depth + aggressive collapse; bounded file size.
+sentence | 9bce07ad5e4a | docs/command_reference/01-dualc_demo.md:30 | gone | superseded (A-01-sentence-gone)
+    text: D6 ; `dualc_demo --no-manifold cube.obj cube_pre_mdc.obj` ; Disable manifold DC (one QEF vertex per cell - pre-MDC reference).
+sentence | 7cc82bf86ae2 | docs/command_reference/01-dualc_demo.md:31 | gone | superseded (A-01-sentence-gone)
+    text: D7 ; `dualc_demo --pseudonormal cube.obj cube_pn.obj` ; Pseudonormal sign oracle (fast; watertight + consistently oriented input only).
+sentence | 0ba1def7cdf5 | docs/command_reference/01-dualc_demo.md:32 | gone | superseded (A-01-sentence-gone)
+    text: D8 ; `dualc_demo --gwn molde.obj molde_gwn.obj` ; Generalized-winding-number sign oracle (robust where 3-ray parity coin-flips; edge crossings still from the me
+sentence | d9680fd17a50 | docs/command_reference/01-dualc_demo.md:33 | gone | intentional docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: D9 ; `dualc_demo --gwn-field open_shell.obj sealed.obj` ; Contour the GWN 0.5-isosurface - seals open shells / soup / self-intersecting input into a single wate
+sentence | 1d0ea0f06112 | docs/command_reference/01-dualc_demo.md:34 | gone | intentional docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: D10 ; `dualc_demo --gwn-field --depth 7 scene.obj sealed.obj` ; Same, on a multi-object OBJ - the disconnected components are summed by GWN; output is one water
+sentence | 1c5590ff427a | docs/command_reference/01-dualc_demo.md:36 | gone | superseded (A-01-sentence-gone)
+    text: Default is the 3-ray parity oracle (watertight input).
+sentence | 85a838bb6981 | docs/command_reference/01-dualc_demo.md:36 | gone | superseded (A-01-sentence-gone)
+    text: The three sign-oracle flags (`--pseudonormal`, `--gwn`, `--gwn-field`) are mutually exclusive in effect: `--gwn-field` overrides both, and `--gwn` overrides `--
+sentence | 1be2d9481726 | docs/command_reference/01-dualc_demo.md:43 | partial | superseded (A-01-sentence-partial)
+    text: The *sign oracle* is the inside/outside test the sampler runs at every octree corner.
+sentence | a1feb1013fca | docs/command_reference/01-dualc_demo.md:43 | rewritten | superseded (A-01-sentence-rewritten)
+    text: The edge-crossing **positions and normals** always come from the mesh triangles; the oracle only decides the sign - except `--gwn-field`, which derives *everyth
+sentence | a7526f39737f | docs/command_reference/01-dualc_demo.md:52 | gone | superseded (A-01-sentence-gone)
+    text: Closed & consistently oriented ; default (3-ray parity), or `--pseudonormal` for speed ; both require watertight, oriented input; the pseudonormal is one closes
+sentence | 75eaa3dc41fc | docs/command_reference/01-dualc_demo.md:53 | rewritten | superseded (A-01-sentence-rewritten)
+    text: Almost watertight - small gaps, self-intersections, non-manifold bits ; `--gwn` ; robust where parity coin-flips; edge crossings still come from the mesh, so a 
+sentence | 8c678c8212d9 | docs/command_reference/01-dualc_demo.md:54 | partial | superseded (A-01-sentence-partial)
+    text: Genuinely open - open shells, soup, holes you want sealed ; `--gwn-field` ; contours the 0.5-isosurface of the winding number itself: the hole gets a smooth cap
+sentence | 230825471c35 | docs/command_reference/01-dualc_demo.md:58 | partial | superseded (A-01-sentence-partial)
+    text: By default the sampler records a **barycentric blend of the mesh's per-vertex normals** (smooth shading); with `--sharp` it records the hit triangle's geometric
+sentence | 948da10936af | docs/command_reference/01-dualc_demo.md:58 | partial | superseded (A-01-sentence-partial)
+    text: Because the recorded normals steer QEF vertex placement, this changes the output *geometry*, not its topology (the triangle count is the same).
+sentence | b70ee4a8ae1c | docs/command_reference/01-dualc_demo.md:58 | rewritten | superseded (A-01-sentence-rewritten)
+    text: `--sharp` toggles the normal recorded at each Hermite edge-crossing.
+sentence | 43154d72b63a | docs/command_reference/01-dualc_demo.md:64 | partial | superseded (A-01-sentence-partial)
+    text: **Leave it off for organic meshes** - with `--sharp` they come out faceted at the cell scale, which is rarely what you want.
+sentence | c55417782dba | docs/command_reference/01-dualc_demo.md:64 | gone | superseded (A-01-sentence-gone)
+    text: The flag is orthogonal to the sign-oracle choice and combines with any of them.
+sentence | d013ffda3b89 | docs/command_reference/02-dualc_primitive.md:11 | gone | superseded (A-02-sentence-gone)
+    text: `<name> [params...]` ; (required) ; Primitive token and its positional parameters (tables below; omitted trailing params keep their defaults).
+sentence | 8fdc4d6bb31e | docs/command_reference/02-dualc_primitive.md:12 | partial | superseded (A-02-sentence-partial)
+    text: `-o PATH` ; `<name>.obj` ; Output; `.obj` / `.stl` / `.3mf` by extension ([export formats](README.md#export-formats--o-extension-dispatch)).
+sentence | bd141b1a9436 | docs/command_reference/02-dualc_primitive.md:13 | rewritten | superseded (A-02-sentence-rewritten)
+    text: `--depth N` ; `7` ; Octree max depth.
+sentence | 9cd317e2e1da | docs/command_reference/02-dualc_primitive.md:14 | rewritten | superseded (A-02-sentence-rewritten)
+    text: `--collapse E` ; `0` (off) ; Adaptive cell-collapse threshold.
+sentence | 973744c6db05 | docs/command_reference/02-dualc_primitive.md:15 | partial | superseded (A-02-sentence-partial)
+    text: `--bounds x0,y0,z0,x1,y1,z1` ; primitive AABB ; Explicit root box - required for the unbounded `plane` / `infinitecone`.
+sentence | e575b099e9e9 | docs/command_reference/02-dualc_primitive.md:16 | gone | superseded (A-02-sentence-gone)
+    text: `--list` ; - ; Print every primitive and its parameters, then exit.
+sentence | 4c739498a843 | docs/command_reference/02-dualc_primitive.md:17 | gone | superseded (A-02-sentence-gone)
+    text: post-op flags ; - ; Decorators and domain operators, applied left to right (sections below).
+sentence | 9801a21a730f | docs/command_reference/02-dualc_primitive.md:25 | rewritten | superseded (A-02-sentence-rewritten)
+    text: P1 ; `sphere` ; `dualc_primitive sphere` ; cx cy cz radius = 0 0 0 1
+sentence | 66a7993be69d | docs/command_reference/02-dualc_primitive.md:27 | partial | superseded (A-02-sentence-partial)
+    text: P3 ; `roundbox` ; `dualc_primitive roundbox` ; min/max + radius = -1 -1 -1 1 1 1 0.3
+sentence | c3629c28ffa3 | docs/command_reference/02-dualc_primitive.md:30 | rewritten | superseded (A-02-sentence-rewritten)
+    text: P6 ; `torus` ; `dualc_primitive torus` ; cx cy cz major minor = 0 0 0 1 0.3
+sentence | c022e179ecc5 | docs/command_reference/02-dualc_primitive.md:32 | partial | superseded (A-02-sentence-partial)
+    text: P8 ; `plane` ; `dualc_primitive plane --bounds -2,-2,-2,2,2,2` ; nx ny nz offset = 0 1 0 0 (infinite - needs `--bounds`)
+sentence | 8e20092b0ebe | docs/command_reference/02-dualc_primitive.md:38 | partial | superseded (A-02-sentence-partial)
+    text: P9 ; `boxframe` ; `dualc_primitive boxframe` ; min/max + edge = -1 -1 -1 1 1 1 0.1
+sentence | 056d059c83da | docs/command_reference/02-dualc_primitive.md:39 | rewritten | superseded (A-02-sentence-rewritten)
+    text: P10 ; `cone` ; `dualc_primitive cone` ; cx cy cz angleRad height = 0 1 0 0.5 2
+sentence | 3e4f349d1cd3 | docs/command_reference/02-dualc_primitive.md:42 | rewritten | superseded (A-02-sentence-rewritten)
+    text: P13 ; `hexprism` ; `dualc_primitive hexprism` ; cx cy cz radius halfLength = 0 0 0 1 1
+sentence | c086a21b3e86 | docs/command_reference/02-dualc_primitive.md:43 | rewritten | superseded (A-02-sentence-rewritten)
+    text: P14 ; `triprism` ; `dualc_primitive triprism` ; cx cy cz radius halfLength = 0 0 0 1 1
+sentence | c0c31f2b6116 | docs/command_reference/02-dualc_primitive.md:44 | rewritten | superseded (A-02-sentence-rewritten)
+    text: P15 ; `octahedron` ; `dualc_primitive octahedron` ; cx cy cz size = 0 0 0 1
+sentence | 5265767e555b | docs/command_reference/02-dualc_primitive.md:45 | rewritten | superseded (A-02-sentence-rewritten)
+    text: P16 ; `pyramid` ; `dualc_primitive pyramid` ; cx cy cz height = 0 0 0 1.5
+sentence | f384a823d2c9 | docs/command_reference/02-dualc_primitive.md:46 | rewritten | superseded (A-02-sentence-rewritten)
+    text: P17 ; `solidangle` ; `dualc_primitive solidangle` ; cx cy cz angleRad radius = 0 0 0 0.7 1.5
+sentence | 873b3a9ff7b1 | docs/command_reference/02-dualc_primitive.md:47 | rewritten | superseded (A-02-sentence-rewritten)
+    text: P18 ; `infinitecylinder` ; `dualc_primitive infinitecylinder --bounds -2,-3,-2,2,3,2` ; px py pz dx dy dz radius = 0 0 0 0 1 0 0.5 (infinite - needs `--bounds`)
+sentence | 6f1a3a84cc19 | docs/command_reference/02-dualc_primitive.md:55 | rewritten | superseded (A-02-sentence-rewritten)
+    text: P21 ; `cutsphere` ; `dualc_primitive cutsphere` ; cx cy cz radius cutHeight = 0 0 0 1 0.3
+sentence | 99bf010bc5db | docs/command_reference/02-dualc_primitive.md:60 | rewritten | superseded (A-02-sentence-rewritten)
+    text: P26 ; `verticalcapsule` ; `dualc_primitive verticalcapsule` ; cx cy cz height radius = 0 0 0 1.5 0.4
+sentence | 3903db11a864 | docs/command_reference/02-dualc_primitive.md:62 | partial | superseded (A-02-sentence-partial)
+    text: P28 ; `infinitecone` ; `dualc_primitive infinitecone --bounds -3,-3,-3,3,1,3` ; cx cy cz angleRad = 0 0 0 0.5 (infinite - needs `--bounds`)
+sentence | bc66fd5c4915 | docs/command_reference/02-dualc_primitive.md:63 | rewritten | superseded (A-02-sentence-rewritten)
+    text: P29 ; `triangle` ; `dualc_primitive triangle --onion 0.05` ; ax ay az bx by bz cx cy cz = 0 0 0 1 0 0 0 1 0 (open surface - needs `--onion`)
+sentence | a432c79a8a8d | docs/command_reference/02-dualc_primitive.md:64 | gone | superseded (A-02-sentence-gone)
+    text: P30 ; `quad` ; `dualc_primitive quad --onion 0.05` ; ax..dz (12 values) (open surface - needs `--onion`)
+sentence | a485a8b56067 | docs/command_reference/02-dualc_primitive.md:67 | gone | superseded (A-02-sentence-gone)
+    text: Any `--repeat` post-op makes the field infinite too.
+sentence | a7e686f4ba18 | docs/command_reference/02-dualc_primitive.md:67 | gone | superseded (A-02-sentence-gone)
+    text: `--bounds` takes six doubles `x0,y0,z0,x1,y1,z1`; omitting it on an unbounded field exits with `[dualc] error: ...` followed by `[dualc] hint: this field is unb
+sentence | efb935626957 | docs/command_reference/02-dualc_primitive.md:67 | gone | superseded (A-02-sentence-gone)
+    text: - `plane`, `infinitecylinder`, `infinitecone` are **unbounded** - they require an explicit `--bounds`.
+sentence | eec778bd5fa9 | docs/command_reference/02-dualc_primitive.md:68 | gone | superseded (A-02-sentence-gone)
+    text: - `triangle`, `quad` are **open surfaces** (unsigned distance, no inside) - they require `--onion T` to gain thickness.
+sentence | 4949be8af53e | docs/command_reference/02-dualc_primitive.md:69 | gone | superseded (A-02-sentence-gone)
+    text: `--displace` does not enlarge `bounds()`, so a box is needed once a bump pushes past the base shape - make it snug, not huge.
+sentence | 6f9f35f2d50e | docs/command_reference/02-dualc_primitive.md:69 | gone | superseded (A-02-sentence-gone)
+    text: - **Keep `--bounds` tight.** A root box much larger than the geometry wastes resolution on empty space and coarsens the cells.
+sentence | c31f365c40dc | docs/command_reference/02-dualc_primitive.md:71 | gone | superseded (A-02-sentence-gone)
+    text: Overriding parameters - supply positional doubles after the name (single tokens or `comma,groups`, negatives allowed): recipes C1-C3 in [Recipes](#recipes).
+sentence | ec9608fe7db4 | docs/command_reference/02-dualc_primitive.md:76 | gone | superseded (A-02-sentence-gone)
+    text: Appended as post-op flags after the primitive; applied left to right.
+sentence | a38c3568a2fc | docs/command_reference/02-dualc_primitive.md:80 | partial | superseded (A-02-sentence-partial)
+    text: D1 ; `--offset O` ; `dualc_primitive sphere --offset 0.3` ; Grow the surface outward by `O`.
+sentence | a1bbe96ac722 | docs/command_reference/02-dualc_primitive.md:81 | gone | superseded (A-02-sentence-gone)
+    text: D2 ; `--round O` ; `dualc_primitive sphere --round 0.3` ; Alias of `--offset`.
+sentence | 8695d43a985d | docs/command_reference/02-dualc_primitive.md:82 | gone | superseded (A-02-sentence-gone)
+    text: D3 ; `--onion T` ; `dualc_primitive box --onion 0.1` ; Hollow shell, wall thickness `T`.
+sentence | 815c8634f3e5 | docs/command_reference/02-dualc_primitive.md:83 | partial | superseded (A-02-sentence-partial)
+    text: D4 ; `--scale S` ; `dualc_primitive sphere --scale 2` ; Uniform scale about the origin.
+sentence | 7b3ca7d36ef7 | docs/command_reference/02-dualc_primitive.md:84 | partial | superseded (A-02-sentence-partial)
+    text: D5 ; `--elongate x,y,z` ; `dualc_primitive sphere --elongate 1,0,0` ; Stretch by a slab per axis.
+sentence | 200f3c3d3d81 | docs/command_reference/02-dualc_primitive.md:85 | partial | superseded (A-02-sentence-partial)
+    text: D6 ; `--translate x,y,z` ; `dualc_primitive box --translate 3,0,0` ; Rigid translation.
+sentence | c9cf463c00fd | docs/command_reference/02-dualc_primitive.md:86 | partial | superseded (A-02-sentence-partial)
+    text: D7 ; `--rotate x,y,z,deg` ; `dualc_primitive box --rotate 0,0,1,45` ; Rigid rotation: axis + degrees.
+sentence | 77b392a9f2f4 | docs/command_reference/02-dualc_primitive.md:88 | gone | superseded (A-02-sentence-gone)
+    text: (`--offset` and `--round` are the same decorator under two names - 6 distinct decorators.)
+sentence | 1b3da521694f | docs/command_reference/02-dualc_primitive.md:94 | gone | superseded (A-02-sentence-gone)
+    text: O1 ; `--twist k,axis` ; `dualc_primitive torus --twist 1.5,1` ; Twist about an axis (0=x,1=y,2=z).
+sentence | c80e68a3e8fc | docs/command_reference/02-dualc_primitive.md:95 | partial | superseded (A-02-sentence-partial)
+    text: O2 ; `--bend k,axis` ; `dualc_primitive box --bend 0.5,0` ; Bend about an axis.
+sentence | 3c3b3c98c0ee | docs/command_reference/02-dualc_primitive.md:96 | partial | superseded (A-02-sentence-partial)
+    text: O3 ; `--mirror x,y,z` ; `dualc_primitive sphere 0.6,0,0 0.6 --mirror 1,0,0` ; Mirror across a plane normal.
+sentence | d09124aa8ee2 | docs/command_reference/02-dualc_primitive.md:97 | partial | superseded (A-02-sentence-partial)
+    text: O4 ; `--repeat x,y,z` ; `dualc_primitive sphere --repeat 3,0,0 --bounds -7,-2,-2,7,2,2` ; Infinite tiling (needs `--bounds`).
+sentence | 3ea3045d2f48 | docs/command_reference/02-dualc_primitive.md:98 | partial | superseded (A-02-sentence-partial)
+    text: O5 ; `--repeat-limited x,y,z,nx,ny,nz` ; `dualc_primitive sphere --repeat-limited 3,0,0,4,1,1` ; Finite tiling: period + counts.
+sentence | e54c3c6d9b02 | docs/command_reference/02-dualc_primitive.md:99 | partial | superseded (A-02-sentence-partial)
+    text: O6 ; `--displace name,amp,freq` ; `dualc_primitive box --displace sine,0.1,6` ; Analytic surface bump.
+sentence | 8068b09721e0 | docs/command_reference/02-dualc_primitive.md:101 | rewritten | superseded (A-02-sentence-rewritten)
+    text: Twisting a body of revolution about *its own axis of symmetry* has no visible effect (e.g.
+sentence | d3d4949b155e | docs/command_reference/02-dualc_primitive.md:101 | partial | superseded (A-02-sentence-partial)
+    text: Twist such shapes about a different axis, or twist a non-symmetric shape (a box twists visibly about any axis).
+sentence | fd44aa86f2e7 | docs/command_reference/02-dualc_primitive.md:101 | gone | superseded (A-02-sentence-gone)
+    text: `torus --twist k,1` - a torus is invariant under rotation about y).
+sentence | e164d7db3266 | docs/command_reference/02-dualc_primitive.md:111 | gone | superseded (A-02-sentence-gone)
+    text: F1 ; `sine` ; `dualc_primitive box --displace sine,0.1,6`
+sentence | dfa635e2a566 | docs/command_reference/02-dualc_primitive.md:112 | gone | superseded (A-02-sentence-gone)
+    text: F2 ; `gyroid` ; `dualc_primitive box --displace gyroid,0.1,6`
+sentence | db827fd9ec98 | docs/command_reference/02-dualc_primitive.md:113 | gone | superseded (A-02-sentence-gone)
+    text: F3 ; `bumps` ; `dualc_primitive box --displace bumps,0.1,6`
+sentence | 452e50e9c5f3 | docs/command_reference/02-dualc_primitive.md:115 | partial | superseded (A-02-sentence-partial)
+    text: `amplitude` is the true peak surface displacement for all three - the functions are internally normalized, so `--displace bumps,0.15` and `--displace sine,0.15`
+sentence | 7480a597ecda | docs/command_reference/02-dualc_primitive.md:115 | gone | superseded (A-02-sentence-gone)
+    text: Each is parsed as `name,amplitude,frequency`.
+sentence | 791ac2107e31 | docs/command_reference/02-dualc_primitive.md:120 | gone | superseded (A-02-sentence-gone)
+    text: Strong displacement is fully supported, but the displaced surface gains fine detail the octree must resolve - keep `--bounds` tight around the shape and set `--
+sentence | e6e04eeacbd9 | docs/command_reference/02-dualc_primitive.md:120 | partial | superseded (A-02-sentence-partial)
+    text: If the output has holes, raise `--depth` and re-check - the trend is the diagnostic:
+sentence | 5c30b6c9c68d | docs/command_reference/02-dualc_primitive.md:126 | gone | superseded (A-02-sentence-gone)
+    text: - holes **shrink or vanish** -> it was under-resolution; keep the higher depth (or tighten `--bounds`).
+sentence | 0a425c73081e | docs/command_reference/02-dualc_primitive.md:128 | gone | superseded (A-02-sentence-gone)
+    text: - holes **persist or grow** (boundary-edge count stable or rising) -> the displacement is strong enough that the surface genuinely self-intersects.
+sentence | c7706434791f | docs/command_reference/02-dualc_primitive.md:128 | gone | superseded (A-02-sentence-gone)
+    text: That is a real property of `SDF + bump`, not a meshing artifact - reduce `amplitude`.
+sentence | c5ca6fc73844 | docs/command_reference/02-dualc_primitive.md:132 | partial | superseded (A-02-sentence-partial)
+    text: `gyroid` is the gyroid minimal-surface pattern; blended strongly onto a shape it genuinely grows handles and tunnels, so it self-intersects at a lower amplitude
+sentence | 2002819ccda1 | docs/command_reference/02-dualc_primitive.md:136 | gone | superseded (A-02-sentence-gone)
+    text: Clean strong examples (unit sphere, ±15 % / ±12 % displacement) are C4-C6.
+sentence | 6af46bdce0d2 | docs/command_reference/02-dualc_primitive.md:142 | partial | superseded (A-02-sentence-partial)
+    text: C1 ; `dualc_primitive sphere 0 0 0 2` ; Positional override: a radius-2 sphere.
+sentence | b5669371f151 | docs/command_reference/02-dualc_primitive.md:143 | partial | superseded (A-02-sentence-partial)
+    text: C2 ; `dualc_primitive torus 0 0 0 3 0.5` ; Positional override: major 3, minor 0.5.
+sentence | 34f2b263af84 | docs/command_reference/02-dualc_primitive.md:144 | gone | superseded (A-02-sentence-gone)
+    text: C3 ; `dualc_primitive box -2,-2,-2 2,2,2` ; Comma groups (negatives allowed): a 4-unit box.
+sentence | a875bc8318d7 | docs/command_reference/02-dualc_primitive.md:145 | gone | superseded (A-02-sentence-gone)
+    text: C4 ; `dualc_primitive sphere --displace sine,0.15,6 --bounds -1.4,-1.4,-1.4,1.4,1.4,1.4` ; Strong sine displacement, bounds snug around the bumps.
+sentence | 57375d31104a | docs/command_reference/02-dualc_primitive.md:146 | gone | superseded (A-02-sentence-gone)
+    text: C5 ; `dualc_primitive sphere --displace bumps,0.15,6 --bounds -1.4,-1.4,-1.4,1.4,1.4,1.4` ; Same amplitude with `bumps`.
+sentence | 6b7a1d698957 | docs/command_reference/02-dualc_primitive.md:147 | gone | superseded (A-02-sentence-gone)
+    text: C6 ; `dualc_primitive sphere --displace gyroid,0.12,6 --bounds -1.4,-1.4,-1.4,1.4,1.4,1.4` ; `gyroid` at the gentler amplitude it needs.
+sentence | 65c8f56c8329 | docs/command_reference/02-dualc_primitive.md:148 | gone | superseded (A-02-sentence-gone)
+    text: C7 ; `dualc_primitive torus 0 0 0 2 0.5 --onion 0.1 --twist 1.5,1 -o fancy_torus.obj` ; Composed post-ops, applied left to right: hollow, then twisted.
+sentence | 27bc0b1b1d73 | docs/command_reference/04-dualc_lift.md:3 | rewritten | superseded (A-04-sentence-rewritten)
+    text: Revolve or extrude a 2D profile into 3D.
+sentence | 59af7e8b4edc | docs/command_reference/04-dualc_lift.md:6 | gone | superseded (A-04-sentence-gone)
+    text: dualc_lift revolve <profile> [params...] --offset O [options]
+sentence | 53a90d0166c1 | docs/command_reference/04-dualc_lift.md:7 | gone | superseded (A-04-sentence-gone)
+    text: dualc_lift extrude <profile> [params...] --height H [options]
+sentence | b0c6a503eebb | docs/command_reference/04-dualc_lift.md:13 | gone | superseded (A-04-sentence-gone)
+    text: `<2d-primitive> [params...]` ; (required) ; `circle`, `box`, `segment` or `polygon` (points as `x,y` pairs).
+sentence | 6f9f62a30ca8 | docs/command_reference/04-dualc_lift.md:14 | gone | superseded (A-04-sentence-gone)
+    text: `--offset O` ; `1` ; Revolve only: profile `x` maps to `radius - O` (the ring radius - distance from the profile to the axis).
+sentence | 2df573f226ac | docs/command_reference/04-dualc_lift.md:15 | gone | superseded (A-04-sentence-gone)
+    text: `--height H` ; `0.5` ; Extrude only: half-height along `z`.
+sentence | ffb3cdab6b0c | docs/command_reference/04-dualc_lift.md:16 | partial | superseded (A-04-sentence-partial)
+    text: `-o PATH` ; `revolved.obj` / `extruded.obj` ; Output; `.obj` / `.stl` / `.3mf` by extension ([export formats](README.md#export-formats--o-extension-dispatch)).
+sentence | bd141b1a9436 | docs/command_reference/04-dualc_lift.md:17 | rewritten | superseded (A-04-sentence-rewritten)
+    text: `--depth N` ; `7` ; Octree max depth.
+sentence | 9cd317e2e1da | docs/command_reference/04-dualc_lift.md:18 | rewritten | superseded (A-04-sentence-rewritten)
+    text: `--collapse E` ; `0` (off) ; Adaptive cell-collapse threshold.
+sentence | a4c30f58f50d | docs/command_reference/04-dualc_lift.md:24 | gone | superseded (A-04-sentence-gone)
+    text: Q1 ; `circle` ; cx cy radius = 0 0 0.5
+sentence | 1916cef5a545 | docs/command_reference/04-dualc_lift.md:25 | gone | superseded (A-04-sentence-gone)
+    text: Q2 ; `box` ; cx cy halfx halfy = 0 0 1 0.5
+sentence | 0fc543b8e391 | docs/command_reference/04-dualc_lift.md:26 | gone | superseded (A-04-sentence-gone)
+    text: Q3 ; `segment` ; ax ay bx by radius = -1 0 1 0 0.3
+sentence | 4de6106e8830 | docs/command_reference/04-dualc_lift.md:27 | gone | superseded (A-04-sentence-gone)
+    text: Q4 ; `polygon` ; x1 y1 x2 y2 ... = unit triangle (>= 3 vertices, even-length list)
+sentence | c31d70ec5015 | docs/command_reference/04-dualc_lift.md:35 | gone | superseded (A-04-sentence-gone)
+    text: L1 ; `dualc_lift revolve circle --offset 2` ; Revolved circle -> torus.
+sentence | d6db91a9d76c | docs/command_reference/04-dualc_lift.md:36 | gone | superseded (A-04-sentence-gone)
+    text: L2 ; `dualc_lift revolve box --offset 2` ; Revolved box ring.
+sentence | 0e7a49c8e528 | docs/command_reference/04-dualc_lift.md:37 | gone | superseded (A-04-sentence-gone)
+    text: L3 ; `dualc_lift revolve segment --offset 2` ; Revolved capsule profile.
+sentence | 5fde408596e7 | docs/command_reference/04-dualc_lift.md:38 | rewritten | superseded (A-04-sentence-rewritten)
+    text: L4 ; `dualc_lift revolve polygon 0,0 1,0 1,1 0,1 --offset 2` ; Revolved polygon.
+sentence | 9fe5987d950d | docs/command_reference/04-dualc_lift.md:44 | gone | superseded (A-04-sentence-gone)
+    text: L5 ; `dualc_lift extrude circle --height 0.5` ; Extruded circle -> cylinder.
+sentence | ec6147c7281c | docs/command_reference/04-dualc_lift.md:45 | gone | superseded (A-04-sentence-gone)
+    text: L6 ; `dualc_lift extrude box --height 0.5` ; Extruded box -> box.
+sentence | f6d920f18eb5 | docs/command_reference/04-dualc_lift.md:46 | gone | superseded (A-04-sentence-gone)
+    text: L7 ; `dualc_lift extrude segment --height 0.5` ; Extruded capsule slab.
+sentence | 2d3d422584cd | docs/command_reference/05-dualc_csg_demo.md:3 | gone | superseded (A-05-sentence-gone)
+    text: Baked field-tree composition recipes - hand-built trees that showcase composition, mesh+primitive booleans, and the `displaced` operator (whose function argumen
+sentence | 685c7f2fdc80 | docs/command_reference/05-dualc_csg_demo.md:13 | gone | superseded (A-05-sentence-gone)
+    text: `--recipe=NAME` / `--recipe NAME` ; (required) ; One of the six recipes (R1-R6).
+sentence | fd7a5d542603 | docs/command_reference/05-dualc_csg_demo.md:14 | gone | superseded (A-05-sentence-gone)
+    text: `input.obj` ; - ; Positional; required by the three mesh recipes.
+sentence | d604ca9a6e81 | docs/command_reference/05-dualc_csg_demo.md:15 | partial | superseded (A-05-sentence-partial)
+    text: `-o PATH` ; `<recipe>.obj` ; Output; `.obj` / `.stl` / `.3mf` by extension ([export formats](README.md#export-formats--o-extension-dispatch)).
+sentence | bd141b1a9436 | docs/command_reference/05-dualc_csg_demo.md:16 | rewritten | superseded (A-05-sentence-rewritten)
+    text: `--depth N` ; `7` ; Octree max depth.
+sentence | 9cd317e2e1da | docs/command_reference/05-dualc_csg_demo.md:17 | rewritten | superseded (A-05-sentence-rewritten)
+    text: `--collapse E` ; `0` (off) ; Adaptive cell-collapse threshold.
+sentence | c620890014b5 | docs/command_reference/05-dualc_csg_demo.md:18 | gone | superseded (A-05-sentence-gone)
+    text: `--list` ; - ; Print all recipes, then exit.
+sentence | 10217b85db11 | docs/command_reference/05-dualc_csg_demo.md:22 | gone | superseded (A-05-sentence-gone)
+    text: # ; Recipe ; Default command ; Needs a mesh? ; What it builds
+sentence | bfe7b71ec3a1 | docs/command_reference/05-dualc_csg_demo.md:24 | gone | superseded (A-05-sentence-gone)
+    text: R1 ; `cube-minus-sphere` ; `dualc_csg_demo --recipe=cube-minus-sphere` ; no ; Hard difference of a box and a sphere.
+sentence | 357489fb57a6 | docs/command_reference/05-dualc_csg_demo.md:25 | gone | superseded (A-05-sentence-gone)
+    text: R2 ; `smooth-blend` ; `dualc_csg_demo --recipe=smooth-blend` ; no ; Smooth union of two spheres (visible fillet).
+sentence | fef8512659e5 | docs/command_reference/05-dualc_csg_demo.md:26 | gone | superseded (A-05-sentence-gone)
+    text: R3 ; `displaced-sphere` ; `dualc_csg_demo --recipe=displaced-sphere` ; no ; A sphere perturbed by a sinusoidal bump.
+sentence | 910f1b4dbf39 | docs/command_reference/05-dualc_csg_demo.md:27 | gone | superseded (A-05-sentence-gone)
+    text: R4 ; `mesh-shell` ; `dualc_csg_demo --recipe=mesh-shell cube.obj` ; yes ; `onionOf(mesh)` - hollow shell of the input.
+sentence | 9187ac7745cc | docs/command_reference/05-dualc_csg_demo.md:28 | gone | superseded (A-05-sentence-gone)
+    text: R5 ; `mesh-minus-sphere` ; `dualc_csg_demo --recipe=mesh-minus-sphere cube.obj` ; yes ; `differenceOf(mesh, sphere)` - carve the input.
+sentence | 48ae3e44e083 | docs/command_reference/05-dualc_csg_demo.md:29 | gone | superseded (A-05-sentence-gone)
+    text: R6 ; `twisted-mesh` ; `dualc_csg_demo --recipe=twisted-mesh cube.obj` ; yes ; `twisted(mesh)` - a domain warp on the input.
+sentence | 8fe8dfa8ef5b | docs/command_reference/06-dualc_lattice.md:3 | gone | superseded (A-06-sentence-gone)
+    text: TPMS lattice infill bounded by an input mesh.
+sentence | 306774f411bb | docs/command_reference/06-dualc_lattice.md:6 | gone | superseded (A-06-sentence-gone)
+    text: dualc_lattice <input.obj> [--type NAME] [--wavelength W] [--offset T]
+sentence | e97134ebd250 | docs/command_reference/06-dualc_lattice.md:8 | rewritten | superseded (A-06-sentence-rewritten)
+    text: [--bounds x0,y0,z0,x1,y1,z1] [-o output.obj|.stl|.3mf]
+sentence | 050468f88e55 | docs/command_reference/06-dualc_lattice.md:11 | gone | superseded (A-06-sentence-gone)
+    text: Takes an input mesh defining a closed volume, fills it with a periodic triply-periodic-minimal-surface (TPMS) lattice of the requested type, and dual-contours t
+sentence | 81bbbecc3364 | docs/command_reference/06-dualc_lattice.md:11 | gone | superseded (A-06-sentence-gone)
+    text: `--normalize-thickness` first-order SDF-normalises the field so `T` is metrically close to the true wall thickness (raw TPMS values are trigonometric, not metri
+sentence | 821c54fc31fe | docs/command_reference/06-dualc_lattice.md:11 | partial | superseded (A-06-sentence-partial)
+    text: `--offset 0` (default) emits the solid phase of the lattice clipped to the mesh; `--offset T > 0` emits the closed double-sheet thick-wall shell `|F|-T` clipped
+sentence | c94654647c98 | docs/command_reference/06-dualc_lattice.md:22 | gone | superseded (A-06-sentence-gone)
+    text: `<input.obj>` ; (required) ; Closed mesh whose interior clips the lattice.
+sentence | 7dbb1715ca8c | docs/command_reference/06-dualc_lattice.md:23 | partial | superseded (A-06-sentence-partial)
+    text: `--type NAME` ; `gyroid` ; TPMS family: `gyroid`, `schwarz-p`, `diamond`, `fischer-koch`, `lidinoid`, `neovius` (T1-T6).
+sentence | 1132c83f0232 | docs/command_reference/06-dualc_lattice.md:24 | gone | superseded (A-06-sentence-gone)
+    text: `--wavelength W` ; mesh AABB diagonal / 10 ; Unit-cell side, world units (the default gives ~10 cells across).
+sentence | 9260fa43fd39 | docs/command_reference/06-dualc_lattice.md:25 | gone | superseded (A-06-sentence-gone)
+    text: `--offset T` ; `0` ; `0`: the solid phase; `T > 0`: the closed double-sheet shell `|F|-T`. Must be `>= 0` (`[dualc_lattice] --offset must be >= 0`).
+sentence | 461d0549aae4 | docs/command_reference/06-dualc_lattice.md:26 | gone | superseded (A-06-sentence-gone)
+    text: `--normalize-thickness` ; off ; Normalise the TPMS by `1/|grad F|` before the offset, so `T` is close to the metric wall thickness.
+sentence | bd141b1a9436 | docs/command_reference/06-dualc_lattice.md:27 | rewritten | superseded (A-06-sentence-rewritten)
+    text: `--depth N` ; `7` ; Octree max depth.
+sentence | e853de9bc33f | docs/command_reference/06-dualc_lattice.md:28 | rewritten | superseded (A-06-sentence-rewritten)
+    text: `--collapse E` ; `0` (off) ; Adaptive cell-collapse threshold - [common options](README.md#common-options--which-tool-takes-which).
+sentence | c9e542088c37 | docs/command_reference/06-dualc_lattice.md:29 | gone | superseded (A-06-sentence-gone)
+    text: `--bounds x0,y0,z0,x1,y1,z1` ; input AABB + 5 % ; Explicit sampling region; the intersection clips to the mesh, so the box only needs to contain it.
+sentence | 48970b8a94d9 | docs/command_reference/06-dualc_lattice.md:30 | partial | superseded (A-06-sentence-partial)
+    text: `-o PATH` ; `<type>_lattice.obj` ; Output; `.obj` / `.stl` / `.3mf` by extension ([export formats](README.md#export-formats--o-extension-dispatch)).
+sentence | d3b7385d157a | docs/command_reference/06-dualc_lattice.md:32 | gone | superseded (A-06-sentence-gone)
+    text: > **Composing beyond a single clipped solid.** `dualc_lattice` always emits one > closed solid (lattice clipped to the mesh).
+sentence | fd5061395432 | docs/command_reference/06-dualc_lattice.md:32 | gone | superseded (A-06-sentence-gone)
+    text: To **isolate and inspect the open > lattice surface alone** (no welded volume skin), or to compose the lattice with > a thickened **skin** and further booleans 
+sentence | 1c1916f8fa2d | docs/command_reference/06-dualc_lattice.md:43 | rewritten | superseded (A-06-sentence-rewritten)
+    text: With **λ ≡ `--wavelength`** and **T ≡ `--offset`**, λ is the *period* - the side of one unit cell; a bigger λ rescales the same surface into fewer, larger cells
+sentence | 6e22d4859e5c | docs/command_reference/06-dualc_lattice.md:43 | partial | superseded (A-06-sentence-partial)
+    text: T changes the *topology*: the bare lattice contours `F = 0`, the offset version `|F| - T = 0`, the pair of level sets `F = ±T` glued into a tube - thin-walled a
+sentence | fdabc1b0ab28 | docs/command_reference/06-dualc_lattice.md:43 | partial | superseded (A-06-sentence-partial)
+    text: `--wavelength` and `--offset` are **orthogonal knobs**: one cannot be reproduced by tuning the other.
+sentence | 52157d4880f6 | docs/command_reference/06-dualc_lattice.md:54 | gone | superseded (A-06-sentence-gone)
+    text: Bare (T = 0) ; `F` ; `F = 0` ; ~50%
+sentence | 01afe09caba2 | docs/command_reference/06-dualc_lattice.md:55 | rewritten | superseded (A-06-sentence-rewritten)
+    text: Offset (T > 0) ; `|F| - T` ; `F = +T` and `F = -T` ; ~`2-T / λ` for small `T/λ` (thin-wall regime)
+sentence | a2546d0531f3 | docs/command_reference/06-dualc_lattice.md:56 | gone | superseded (A-06-sentence-gone)
+    text: Offset (T -> ∞) ; `|F| - T` ; covers everything ; -> 100% (solid block)
+sentence | 66336fb30866 | docs/command_reference/06-dualc_lattice.md:58 | partial | superseded (A-06-sentence-partial)
+    text: The `2-T / λ` estimate holds when T is a metric distance - use `--normalize-thickness`, which replaces the raw trig field by `F / max(|grad F|, ε)` so T becomes
+sentence | 20bbcdcea744 | docs/command_reference/06-dualc_lattice.md:63 | gone | superseded (A-06-sentence-gone)
+    text: For engineering parts set both: λ = the cell pitch (say 5-10 mm), T = the minimum manufacturable wall (1 mm for FDM, 0.4 mm for SLA), and `2-T / λ` is the volum
+sentence | 610130f00dea | docs/command_reference/06-dualc_lattice.md:63 | gone | superseded (A-06-sentence-gone)
+    text: Why λ alone cannot unlock the volume fraction, and how the CLI composes the field (`normalizedOf` -> `onionOf` -> `intersectionOf`): [roadmap 05 § 16](../roadma
+sentence | c0118cfe46c6 | docs/command_reference/06-dualc_lattice.md:63 | gone | superseded (A-06-sentence-gone)
+    text: The single-sheet Quilez shift `F - r` (a third axis, not a double wall) is not wired into this CLI; the field graph reaches it as `offset(gyroid(wavelength=...)
+sentence | c31cdcf5863f | docs/command_reference/06-dualc_lattice.md:63 | gone | superseded (A-06-sentence-gone)
+    text: **When to reach for each.** Tune **λ** for the cell count across the part (mechanical / aesthetic feel); tune **T** for the wall thickness, which dictates print
+sentence | dcbee4e1487f | docs/command_reference/06-dualc_lattice.md:76 | rewritten | superseded (A-06-sentence-rewritten)
+    text: With `kx = 2π(x - cx) / λ`, etc.
+sentence | ef62b9846be2 | docs/command_reference/06-dualc_lattice.md:76 | gone | superseded (A-06-sentence-gone)
+    text: (the `c` shift comes from the lattice being re-centred on the input-mesh AABB centre; pass your own via the C++ constructor if you need a specific phase).
+sentence | fd8cdfe38c38 | docs/command_reference/06-dualc_lattice.md:76 | rewritten | superseded (A-06-sentence-rewritten)
+    text: Formulas follow Schoen (1970, NASA TN D-5541) and Gandy et al.
+sentence | 9086f977355f | docs/command_reference/06-dualc_lattice.md:82 | rewritten | superseded (A-06-sentence-rewritten)
+    text: `--type` ; Field `F(x, y, z)`
+sentence | 2a8185ef1099 | docs/command_reference/06-dualc_lattice.md:85 | rewritten | superseded (A-06-sentence-rewritten)
+    text: `schwarz-p` ; `cos(kx) + cos(ky) + cos(kz)`
+sentence | 6b97b61b7b22 | docs/command_reference/06-dualc_lattice.md:91 | gone | superseded (A-06-sentence-gone)
+    text: The `+0.15` constant in the Lidinoid formula shifts the 0-isosurface to the Lidinoid proper (the minimal-surface convention used by Schoen / Lidin and matched b
+sentence | 4af4152a497a | docs/command_reference/06-dualc_lattice.md:97 | gone | superseded (A-06-sentence-gone)
+    text: The `--type` values, Y1-Y6 (the recipes keep their T numbers):
+sentence | 1af101977f0f | docs/command_reference/06-dualc_lattice.md:99 | gone | superseded (A-06-sentence-gone)
+    text: # ; Type ; Default command ; What it builds
+sentence | a5d523a056fd | docs/command_reference/06-dualc_lattice.md:101 | gone | superseded (A-06-sentence-gone)
+    text: Y1 ; `gyroid` ; `dualc_lattice cube.obj` ; Schoen G lattice (default) clipped to the cube.
+sentence | bf8b6d9751c0 | docs/command_reference/06-dualc_lattice.md:102 | gone | superseded (A-06-sentence-gone)
+    text: Y2 ; `schwarz-p` ; `dualc_lattice cube.obj --type schwarz-p` ; Schwarz P (primitive cubic) lattice clipped to the cube.
+sentence | 889c9eeb8c8e | docs/command_reference/06-dualc_lattice.md:103 | gone | superseded (A-06-sentence-gone)
+    text: Y3 ; `diamond` ; `dualc_lattice cube.obj --type diamond` ; Schwarz D (Diamond) lattice clipped to the cube.
+sentence | 985a7d3efc72 | docs/command_reference/06-dualc_lattice.md:104 | gone | superseded (A-06-sentence-gone)
+    text: Y4 ; `fischer-koch` ; `dualc_lattice cube.obj --type fischer-koch` ; Fischer-Koch S lattice clipped to the cube.
+sentence | f0557357b54d | docs/command_reference/06-dualc_lattice.md:105 | gone | superseded (A-06-sentence-gone)
+    text: Y5 ; `lidinoid` ; `dualc_lattice cube.obj --type lidinoid` ; Lidinoid (Lidin's surface) lattice clipped to the cube.
+sentence | 93daa0637fd2 | docs/command_reference/06-dualc_lattice.md:106 | gone | superseded (A-06-sentence-gone)
+    text: Y6 ; `neovius` ; `dualc_lattice cube.obj --type neovius` ; Neovius (Im-3m symmetry) lattice clipped to the cube.
+sentence | 81e8d0f720f8 | docs/command_reference/06-dualc_lattice.md:114 | gone | superseded (A-06-sentence-gone)
+    text: T7 ; `dualc_lattice cube.obj --type gyroid --wavelength 0.5` ; Solid phase of a 4-cells-across gyroid lattice.
+sentence | 1d66526490f8 | docs/command_reference/06-dualc_lattice.md:115 | gone | superseded (A-06-sentence-gone)
+    text: T8 ; `dualc_lattice cube.obj --type gyroid --wavelength 0.5 --offset 0.1` ; Thick-wall double-sheet shell of width `|F|-0.1` clipped to the cube.
+sentence | 79a40b0ff1d8 | docs/command_reference/06-dualc_lattice.md:116 | gone | superseded (A-06-sentence-gone)
+    text: T9 ; `dualc_lattice cube.obj --type schwarz-p --wavelength 0.4 --offset 0.05 --normalize-thickness` ; Schwarz-P shell with `T` ~ metric wall thickness via first
+sentence | cbf1c2a97af6 | docs/command_reference/06-dualc_lattice.md:117 | gone | superseded (A-06-sentence-gone)
+    text: T10 ; `dualc_lattice molde.obj --type gyroid --wavelength 8 --offset 1 --depth 8 -o gyroid_molde.obj` ; Real-mesh infill: gyroid solid lattice inside `molde.obj
+sentence | 351592ceb911 | docs/command_reference/06-dualc_lattice.md:118 | gone | superseded (A-06-sentence-gone)
+    text: T11 ; `dualc_lattice cube.obj --type neovius --depth 8 --collapse 1` ; High-resolution Neovius solid lattice with mild adaptive collapse for smaller output.
+sentence | e27e59d894b3 | docs/command_reference/06-dualc_lattice.md:119 | gone | superseded (A-06-sentence-gone)
+    text: T12 ; `dualc_lattice cube.obj --type gyroid --wavelength 0.5 --offset 0.1 -o part.stl` ; Same shell, written as a binary STL - printable directly.
+sentence | 4a7a895b0adf | docs/command_reference/06-dualc_lattice.md:120 | gone | superseded (A-06-sentence-gone)
+    text: T13 ; `dualc_lattice cube.obj --type gyroid --wavelength 0.5 --offset 0.1 -o part.3mf` ; Same shell as 3MF-mesh (`unit="millimeter"`; [export formats](README.md
+sentence | 0282d58b7fa7 | docs/command_reference/07-dualc_slice.md:3 | gone | superseded (A-07-sentence-gone)
+    text: Sample a field on a cutting plane -> PNG heatmap + SVG contour.
+sentence | 22c12d4ed63c | docs/command_reference/07-dualc_slice.md:6 | gone | superseded (A-07-sentence-gone)
+    text: dualc_slice <input.obj> [--type NAME] [--wavelength W] [--offset T]
+sentence | c0842b504889 | docs/command_reference/07-dualc_slice.md:7 | rewritten | superseded (A-07-sentence-rewritten)
+    text: [--normalize-thickness] [--plane AXIS=VALUE] [--res N]
+sentence | 158cdf7e4b7a | docs/command_reference/07-dualc_slice.md:8 | rewritten | superseded (A-07-sentence-rewritten)
+    text: [--bounds x0,y0,z0,x1,y1,z1] [-o base.png]
+sentence | dff41e945eee | docs/command_reference/07-dualc_slice.md:11 | partial | superseded (A-07-sentence-partial)
+    text: Cost is `O(res2)`, independent of lattice density, so it inspects (and previews the cross-section of) parts far too dense to mesh.
+sentence | e5c65e6f134c | docs/command_reference/07-dualc_slice.md:11 | partial | superseded (A-07-sentence-partial)
+    text: The marching-squares contour is kept separable as the kernel of future per-layer print-slicing.
+sentence | ff944c076584 | docs/command_reference/07-dualc_slice.md:11 | gone | superseded (A-07-sentence-gone)
+    text: Composes the **identical** lattice-in-mesh field as `dualc_lattice`, then - instead of contouring - samples the implicit field directly on an axis-aligned cutti
+sentence | 863cba5e87c2 | docs/command_reference/07-dualc_slice.md:18 | gone | superseded (A-07-sentence-gone)
+    text: There is **no `--depth`**: the tool samples the field, it does not dual-contour.
+sentence | 2dd0f2feabe6 | docs/command_reference/07-dualc_slice.md:22 | gone | superseded (A-07-sentence-gone)
+    text: `<input.obj>` ; (required) ; Mesh whose interior clips the lattice.
+sentence | 6c700bf860a6 | docs/command_reference/07-dualc_slice.md:23 | gone | superseded (A-07-sentence-gone)
+    text: `--type NAME` ; `gyroid` ; TPMS family (same six as `dualc_lattice`).
+sentence | 543c42725079 | docs/command_reference/07-dualc_slice.md:24 | gone | superseded (A-07-sentence-gone)
+    text: `--wavelength W` ; mesh-diag / 10 ; Unit-cell side (world units).
+sentence | a75e89f03bda | docs/command_reference/07-dualc_slice.md:25 | gone | superseded (A-07-sentence-gone)
+    text: `--offset T` ; `0` ; Thick-wall offset (`|F|-T`); `T >= 0`.
+sentence | 94dedf04a9ed | docs/command_reference/07-dualc_slice.md:26 | gone | superseded (A-07-sentence-gone)
+    text: `--normalize-thickness` ; off ; Normalise the TPMS by `1/|grad F|` before offset.
+sentence | 18bb85eb1957 | docs/command_reference/07-dualc_slice.md:27 | partial | superseded (A-07-sentence-partial)
+    text: `--plane AXIS=VALUE` ; `z` at bounds centre ; Cutting plane, e.g. `z=0`, `x=1.5` (AXIS ∈ x/y/z).
+sentence | fe917045f778 | docs/command_reference/07-dualc_slice.md:28 | rewritten | superseded (A-07-sentence-rewritten)
+    text: `--res N` ; `512` ; Grid resolution per side (max `4096`).
+sentence | 7c0eebcc8355 | docs/command_reference/07-dualc_slice.md:29 | partial | superseded (A-07-sentence-partial)
+    text: `--bounds x0,y0,z0,x1,y1,z1` ; input AABB + 5% ; Sampling region.
+sentence | 1f6bced22cd2 | docs/command_reference/07-dualc_slice.md:30 | gone | superseded (A-07-sentence-gone)
+    text: `-o PATH` ; `<type>_slice.png` ; Output base; `.png` **and** `.svg` are written (default is named after the TPMS type, not the input).
+sentence | 8b51c1806301 | docs/command_reference/07-dualc_slice.md:32 | partial | superseded (A-07-sentence-partial)
+    text: PNG row-0 = max-v and the SVG Y-flip keep both outputs in the same world-up orientation, so the SVG overlays the PNG exactly.
+sentence | 1dde26fe2923 | docs/command_reference/07-dualc_slice.md:39 | gone | superseded (A-07-sentence-gone)
+    text: `--plane z=0` is correct for an origin-centred mesh like `cube.obj`, but not for an off-origin one.
+sentence | 556f400d08d5 | docs/command_reference/07-dualc_slice.md:39 | gone | superseded (A-07-sentence-gone)
+    text: **The plane must lie inside the mesh.** `--plane AXIS=VALUE` is an **absolute world coordinate**, and real meshes are rarely centred on the origin (a foot or a 
+sentence | 6c453c1e59dc | docs/command_reference/07-dualc_slice.md:39 | gone | superseded (A-07-sentence-gone)
+    text: A plane outside the sampling bounds samples only empty space -> the field has a single sign -> an **empty slice** (blank PNG, no SVG segments), and the tool war
+sentence | c4fda0783f38 | docs/command_reference/07-dualc_slice.md:54 | gone | superseded (A-07-sentence-gone)
+    text: S1 ; `dualc_slice cube.obj --type gyroid --wavelength 0.5 --plane z=0` ; Mid-plane cross-section of a gyroid-in-cube -> `gyroid_slice.png` + `.svg`.
+sentence | cb054302c55a | docs/command_reference/07-dualc_slice.md:55 | gone | superseded (A-07-sentence-gone)
+    text: S2 ; `dualc_slice data/bunny.obj --offset 1.0 --normalize-thickness --plane y=0 --res 1024 -o bunny_y.png` ; High-res `y=0` slice of a 1 mm-wall gyroid shell in
+sentence | ed20d0120e09 | docs/command_reference/07-dualc_slice.md:56 | gone | superseded (A-07-sentence-gone)
+    text: S3 ; `dualc_slice cube.obj --type schwarz-p --wavelength 0.4 --offset 0.05 --plane x=0 -o cube_x.png` ; Schwarz-P shell cross-section on the `x=0` plane.
+sentence | 6aaa59b24874 | docs/command_reference/07-dualc_slice.md:57 | gone | superseded (A-07-sentence-gone)
+    text: S4 ; `dualc_slice data/foot.obj --wavelength 5 --offset 1 --normalize-thickness -o foot.png` ; Real-world mm-scale part (1 unit = 1 mm): 5 mm gyroid cells, 2 mm
+sentence | 5dc36a9b865f | docs/command_reference/08-dualc_view.md:15 | rewritten | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: Inspect a demo mesh through the contourer ; [`dualc_demo`](01-dualc_demo.md) to a file, then any mesh viewer.
+sentence | 3c972c058eaa | docs/command_reference/09-dualc_gen_demo.md:10 | partial | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: Each shape targets a distinct topology / curvature / feature regime; pair them with `dualc_demo` (CLI) or, as a `mesh(path=...)` source, with `dualc_field_view`
+sentence | a08c219acdc2 | docs/command_reference/09-dualc_gen_demo.md:55 | partial | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: G2 ; `dualc_demo torus.obj torus_dc.obj --depth 6` ; Re-mesh the torus; output stays genus 1 (χ = 0).
+sentence | 77fd7291b23f | docs/command_reference/09-dualc_gen_demo.md:56 | partial | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: G3 ; `dualc_demo --sharp bracket.obj bracket_sharp.obj --depth 6` ; Sharp-feature toggle: the reentrant edge stays crisp (drop `--sharp` to see it round).
+sentence | c5522d362ecd | docs/command_reference/09-dualc_gen_demo.md:58 | rewritten | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: G5 ; `dualc_demo --gwn-field bunny.obj bunny_sealed.obj --depth 7` ; Seal the open Stanford bunny scan (hole in the base) into a watertight solid.
+sentence | 845aecbeade0 | docs/command_reference/10-dualc_raymarch.md:3 | gone | superseded (A-10-sentence-gone)
+    text: Standalone GPU raymarch viewer - density-independent (opt-in build).
+sentence | b01668bc6fc1 | docs/command_reference/10-dualc_raymarch.md:6 | gone | superseded (A-10-sentence-gone)
+    text: dualc_raymarch [<input.obj>] [--type NAME] [--wavelength W] [--offset T]
+sentence | eb17a34f07fc | docs/command_reference/10-dualc_raymarch.md:7 | rewritten | superseded (A-10-sentence-rewritten)
+    text: [--normalize-thickness] [--bounds x0,y0,z0,x1,y1,z1]
+sentence | 0fe5af81567f | docs/command_reference/10-dualc_raymarch.md:11 | gone | superseded (A-10-sentence-gone)
+    text: Opens an interactive 3D window that **sphere-traces the analytic TPMS field once per screen pixel** - there is no mesh to build, so RAM is bounded by the window
+sentence | 1e34d2ba3b3b | docs/command_reference/10-dualc_raymarch.md:11 | gone | superseded (A-10-sentence-gone)
+    text: There is **no `--depth`** (nothing is contoured) and **no `-o`** (interactive only).
+sentence | 51de1a30ac6e | docs/command_reference/10-dualc_raymarch.md:11 | gone | superseded (A-10-sentence-gone)
+    text: Cost is per-pixel rather than per-cell (finer lattices cost somewhat more per frame as the conservative march step shrinks; a real GPU is interactive where a so
+sentence | 8ad3891740cf | docs/command_reference/10-dualc_raymarch.md:11 | gone | superseded (A-10-sentence-gone)
+    text: The lattice (TPMS + optional `|F|-T` offset + optional `1/|grad F|` normalisation) is evaluated directly in a GLSL fragment shader and needs no grid; only the *
+sentence | bdefc43f987a | docs/command_reference/10-dualc_raymarch.md:11 | gone | superseded (A-10-sentence-gone)
+    text: With no input mesh the bare lattice is shown in `--bounds`.
+sentence | 4a4408feeb8d | docs/command_reference/10-dualc_raymarch.md:25 | gone | superseded (A-10-sentence-gone)
+    text: **Opt-in build** (`-DDUALC_BUILD_RAYMARCH_VIEWER=ON`; GLFW is fetched at its pinned release and glad is vendored - the [build prelude](README.md#build-prelude))
+sentence | 7b5410720768 | docs/command_reference/10-dualc_raymarch.md:33 | gone | superseded (A-10-sentence-gone)
+    text: `<input.obj>` ; (none) ; With a mesh, the lattice is clipped to its interior; without, the bare TPMS is shown in `--bounds`.
+sentence | 6c700bf860a6 | docs/command_reference/10-dualc_raymarch.md:34 | gone | superseded (A-10-sentence-gone)
+    text: `--type NAME` ; `gyroid` ; TPMS family (same six as `dualc_lattice`).
+sentence | 24de07c11c9e | docs/command_reference/10-dualc_raymarch.md:35 | gone | superseded (A-10-sentence-gone)
+    text: `--wavelength W` ; mesh-diag / 10, or `0.25` with no mesh ; Unit-cell side (world units).
+sentence | a75e89f03bda | docs/command_reference/10-dualc_raymarch.md:36 | gone | superseded (A-10-sentence-gone)
+    text: `--offset T` ; `0` ; Thick-wall offset (`|F|-T`), `T >= 0`.
+sentence | 105f08771e03 | docs/command_reference/10-dualc_raymarch.md:37 | gone | superseded (A-10-sentence-gone)
+    text: `--normalize-thickness` ; off ; Normalise the TPMS by `1/|grad F|` before the offset.
+sentence | 24c8a85dda02 | docs/command_reference/10-dualc_raymarch.md:38 | gone | superseded (A-10-sentence-gone)
+    text: `--bounds x0,y0,z0,x1,y1,z1` ; input AABB + 5%, or unit cube ; Raymarch box. It is **also** the mesh-SDF bake region, so a box tighter than the mesh concentrate
+sentence | bcb481bf1318 | docs/command_reference/10-dualc_raymarch.md:39 | gone | superseded (A-10-sentence-gone)
+    text: `--grid-res N` ; `96` (max `256`) ; Mesh-SDF bake resolution per axis. Only the low-frequency clip is baked; the lattice stays analytic.
+sentence | dbbe3da26ca3 | docs/command_reference/10-dualc_raymarch.md:40 | partial | superseded (A-10-sentence-partial)
+    text: `--snapshot PATH` ; (off) ; Render one frame headless to a PNG and exit - no window. For scripted / visual verification.
+sentence | 24c0c0c92b1b | docs/command_reference/10-dualc_raymarch.md:48 | gone | superseded (A-10-sentence-gone)
+    text: `↓` / `↑` (or `[` / `]`) ; Wavelength x0.8 / x1.25 (finer / coarser cells)
+sentence | 2cc657aad316 | docs/command_reference/10-dualc_raymarch.md:49 | gone | superseded (A-10-sentence-gone)
+    text: `PgDn` / `PgUp` (or `-` / `=`) ; Offset down / up (thick-wall `|F|-T`)
+sentence | fc4dbf6e4faa | docs/command_reference/10-dualc_raymarch.md:52 | rewritten | superseded (A-10-sentence-rewritten)
+    text: `x` / `y` / `z` ; Toggle the **section plane** on that axis (and make it active)
+sentence | 16daaca84670 | docs/command_reference/10-dualc_raymarch.md:53 | partial | superseded (A-10-sentence-partial)
+    text: `<-` / `->` ; Slide the active section plane - / + (arrow keys, auto-repeat)
+sentence | 6c1243dfe8a1 | docs/command_reference/10-dualc_raymarch.md:59 | gone | superseded (A-10-sentence-gone)
+    text: Every key is layout-independent - values on the arrows and Page keys, letters matched by the printed character, `[`/`]` and `-`/`=` kept only as US alternates (
+sentence | cf14f65d04e7 | docs/command_reference/10-dualc_raymarch.md:59 | gone | superseded (A-10-sentence-gone)
+    text: The slice face is a solid warm-tinted cross-section (a true capped section), sliding is instant, and it is **visualization only** - a section never affects any 
+sentence | d3e5d1cbc9a7 | docs/command_reference/10-dualc_raymarch.md:59 | gone | superseded (A-10-sentence-gone)
+    text: **Section planes** cut the lattice with up to three axis-aligned planes so you can inspect the interior - `x`/`y`/`z` switch them on, `<-`/`->` slide the active
+sentence | 0a2a5ffc6664 | docs/command_reference/10-dualc_raymarch.md:69 | gone | intentional docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: Note: a very thin `--offset` shell (walls ≪ `--wavelength`) can show small holes - the sphere-trace step is capped at a fraction of the wavelength and may step 
+sentence | 900af680558a | docs/command_reference/10-dualc_raymarch.md:69 | gone | superseded (A-10-sentence-gone)
+    text: Changing wavelength / offset / type / normalisation is instant - they are shader uniforms, so no CPU re-work happens (the baked mesh texture is independent of t
+sentence | b4ec02464492 | docs/command_reference/10-dualc_raymarch.md:80 | gone | superseded (A-10-sentence-gone)
+    text: M1 ; `dualc_raymarch --type gyroid --wavelength 0.2` ; Bare gyroid in the unit cube - quick smoke test, no mesh needed.
+sentence | 884e1ed51230 | docs/command_reference/10-dualc_raymarch.md:81 | gone | superseded (A-10-sentence-gone)
+    text: M2 ; `dualc_raymarch --type gyroid --wavelength 0.02` ; A density that would OOM the mesher - still renders (no mesh built; per-pixel cost).
+sentence | 65ca2197584b | docs/command_reference/10-dualc_raymarch.md:82 | gone | superseded (A-10-sentence-gone)
+    text: M3 ; `dualc_raymarch cube.obj --type schwarz-p --wavelength 0.5 --offset 0.05` ; Schwarz-P thick-wall shell clipped to the cube.
+sentence | 1d2cb8a9cbf3 | docs/command_reference/10-dualc_raymarch.md:83 | gone | superseded (A-10-sentence-gone)
+    text: M4 ; `dualc_raymarch data/bunny.obj --type gyroid --offset 1.0 --normalize-thickness` ; 1-unit-wall gyroid lattice clipped to the bunny; orbit to inspect. (`bun
+sentence | 4122886affba | docs/command_reference/10-dualc_raymarch.md:84 | gone | superseded (A-10-sentence-gone)
+    text: M5 ; `dualc_raymarch data/foot.obj --wavelength 5 --offset 1 --normalize-thickness --grid-res 128` ; **Real-world mm-scale** (1 unit = 1 mm): 5 mm gyroid cells,
+sentence | 4421c87c9ec1 | docs/command_reference/10-dualc_raymarch.md:85 | gone | superseded (A-10-sentence-gone)
+    text: M6 ; `dualc_raymarch cube.obj --type gyroid --offset 0.1 --snapshot cube.png` ; Headless: write one PNG and exit (no window) for scripted checks.
+sentence | 0f45783bda9e | docs/command_reference/10-dualc_raymarch.md:86 | gone | superseded (A-10-sentence-gone)
+    text: M7 ; `dualc_raymarch --type gyroid --wavelength 0.15 --offset 0.04` then press `z`, then `->` / `<-` ; **Section a solid lattice:** the Z plane caps the gyroid 
+sentence | 8ca3dba26101 | docs/command_reference/10-dualc_raymarch.md:87 | gone | superseded (A-10-sentence-gone)
+    text: M8 ; `dualc_raymarch data/foot.obj --wavelength 14 --offset 2 --normalize-thickness --bounds -14,-34,41,14,-6,69` ; **Zoom the bake into a sub-region:** `--boun
+sentence | 02052757f2f9 | docs/command_reference/10-dualc_raymarch.md:89 | gone | intentional docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: A missing file exits with `[dualc_raymarch] cannot open mesh 'data/foot.obj': no such file (paths are relative to the current directory, not the executable)` be
+sentence | a57d68b1ad36 | docs/command_reference/10-dualc_raymarch.md:89 | gone | superseded (A-10-sentence-gone)
+    text: Other meshes - including `bunny.obj` and `foot.obj` - are **not** copied; pass a path that resolves from where you launch, such as `data/foot.obj` from the repo
+sentence | bc64b12b07ad | docs/command_reference/10-dualc_raymarch.md:89 | gone | superseded (A-10-sentence-gone)
+    text: **Mesh paths are relative to the current directory, not the executable.** The `dualc_gen_demo` palette (`cube.obj`, `sphere.obj`, `torus.obj`, ...) is copied ne
+sentence | 14d998168c17 | docs/command_reference/10-dualc_raymarch.md:98 | gone | superseded (A-10-sentence-gone)
+    text: This only holds if the input mesh is modelled in mm - a part exported in metres or inches must be rescaled first, host-side.
+sentence | 2d2d85e3eec8 | docs/command_reference/10-dualc_raymarch.md:98 | partial | superseded (A-10-sentence-partial)
+    text: **Millimetre workflow.** With 1 world unit = 1 mm ([design/09 § Units](../design/09-conventions.md#units-and-frames)), `--wavelength` is the cell size in mm and
+sentence | a57a5582971f | docs/command_reference/10-dualc_raymarch.md:98 | gone | superseded (A-10-sentence-gone)
+    text: `--type` defaults to `gyroid`; pass `--type schwarz-p|diamond|...` (or press `t` in the viewer) for another family.
+sentence | 4f17f56b1140 | docs/command_reference/10-dualc_raymarch.md:107 | partial | superseded (A-10-sentence-partial)
+    text: Export the same field with [`11-dualc_field/`](11-dualc_field/README.md).
+sentence | 536f6f55d53d | docs/command_reference/10-dualc_raymarch.md:107 | gone | superseded (A-10-sentence-gone)
+    text: For an **arbitrary composed field-graph** - any primitives/booleans/decorators/lattices/mesh sources, the same graph the exporter contours - use its general suc
+sentence | b8aeedbc4b24 | docs/command_reference/10-dualc_raymarch.md:107 | gone | superseded (A-10-sentence-gone)
+    text: `dualc_raymarch` is the tuned single-TPMS view.
+sentence | b453d884947a | docs/command_reference/11-dualc_field/04-workflow-open-surface.md:22 | rewritten | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: - `normalize` makes `thickness` first-order metric; confirm a critical wall on a [`dualc_slice`](../07-dualc_slice.md) section or the exported STL.
+sentence | 5522fdd3ac17 | docs/command_reference/11-dualc_field/README.md:130 | partial | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: A TPMS lattice clipped to an input volume - the field-level equivalent of `dualc_lattice`, and freely composable with further booleans:
+sentence | bba25ab6fa66 | docs/command_reference/11-dualc_field/README.md:169 | partial | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: `dualc_field` **generalises but does not replace** `dualc_lattice`, `dualc_boolean`, or `dualc_csg_demo` - those remain convenience shortcuts and the registries
+sentence | c411b938de6b | docs/command_reference/12-dualc_field_view/03-recipes-by-node.md:31 | partial | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: # N3-N6 - positional (long-tail) primitives -- args follow the dualc_primitive page's order
+sentence | 55675a115e37 | docs/command_reference/README.md:24 | partial | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: The GL viewers are opt-in, each `OFF` by default and none a dependency of `libdualc`: `-DDUALC_BUILD_RAYMARCH_VIEWER=ON` (tool 10), `-DDUALC_BUILD_FIELD_VIEW=ON
+sentence | 84d7d5398f93 | docs/command_reference/README.md:39 | partial | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: 1 ; `dualc_demo` ; Re-mesh a triangle mesh through the dual contourer. ; [01-dualc_demo.md](01-dualc_demo.md)
+sentence | dc143b3ebbc5 | docs/command_reference/README.md:40 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: 2 ; `dualc_primitive` ; Analytic primitives + decorators + domain operators. ; [02-dualc_primitive.md](02-dualc_primitive.md)
+sentence | 88a69f60404c | docs/command_reference/README.md:42 | partial | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: 4 ; `dualc_lift` ; Revolve or extrude a 2D profile into 3D. ; [04-dualc_lift.md](04-dualc_lift.md)
+sentence | 8e2d2e2752ed | docs/command_reference/README.md:44 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: 6 ; `dualc_lattice` ; TPMS lattice infill bounded by an input mesh. ; [06-dualc_lattice.md](06-dualc_lattice.md)
+sentence | fa01a5519f3b | docs/command_reference/README.md:45 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: 7 ; `dualc_slice` ; Sample a field on a cutting plane -> PNG heatmap + SVG contour. ; [07-dualc_slice.md](07-dualc_slice.md)
+sentence | b89c7f580298 | docs/command_reference/README.md:48 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: 10 ; `dualc_raymarch` ; Standalone GPU raymarch viewer - density-independent (opt-in build). ; [10-dualc_raymarch.md](10-dualc_raymarch.md)
+sentence | c54035dec0b3 | docs/command_reference/README.md:94 | rewritten | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: Both opt-in GPU viewers share an orbit camera and the **section-plane** controls (viewport-only cuts; never affect exported geometry).
+sentence | fd8ef6bed092 | docs/command_reference/README.md:94 | rewritten | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: Keys are layout-independent - letters matched by the printed character, values on the arrows and Page keys, the US-position keys kept as alternates ([design/09]
+sentence | b0041b994139 | docs/command_reference/README.md:106 | rewritten | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: **Section** - toggle plane X / Y / Z ; `x` / `y` / `z` ; `x` / `y` / `z`
+sentence | 1449fedd9cb7 | docs/command_reference/README.md:118 | partial | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: Per-tool detail (and the section-plane recipe): [10-dualc_raymarch.md](10-dualc_raymarch.md#live-controls) and [12-dualc_field_view/](12-dualc_field_view/01-con
+sentence | c39d7df298b7 | docs/command_reference/README.md:128 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: Option ; Meaning ; `demo` ; `primitive` ; `boolean` ; `lift` ; `csg_demo` ; `lattice` ; `slice` ; `view` ; `gen_demo` ; `raymarch` ; `field` ; `field_view`
+sentence | 6c801e4a7908 | docs/command_reference/README.md:130 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: `-o PATH` ; Output; format by extension ([below](#export-formats--o-extension-dispatch)). `dualc_demo` takes its output as the second positional; `dualc_gen_dem
+sentence | 3ca264db6714 | docs/command_reference/README.md:147 | partial | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: Every field-driven tool (`dualc_lattice`, `dualc_primitive`, `dualc_boolean`, `dualc_lift`, `dualc_csg_demo`, `dualc_field`) chooses its output format from the 
+sentence | 8ed51da569f3 | docs/command_reference/README.md:168 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: Tools (binaries) ; 11 ; `dualc_demo`, `dualc_primitive`, `dualc_boolean`, `dualc_lift`, `dualc_csg_demo`, `dualc_lattice`, `dualc_slice`, `dualc_gen_demo`, `dua
+sentence | 16e200a00f0d | docs/command_reference/README.md:174 | partial | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: Decorators, `dualc_primitive` post-op flags ; 6 (7 flags) ; `--offset` ≡ `--round`, `--onion`, `--scale`, `--elongate`, `--translate`, `--rotate`
+sentence | c38f9e47f766 | docs/command_reference/README.md:181 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: Baked recipes ; 6 ; `cube-minus-sphere`, `smooth-blend`, `displaced-sphere`, `mesh-shell`, `mesh-minus-sphere`, `twisted-mesh`
+sentence | 4ebdcfe96d5b | docs/decisions/README.md:33 | rewritten | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: D-14 ; `dualc_lattice --tile-depth` wiring (5a.3) - convenience parity only ; DEFERRED - trigger: a `dualc_lattice` user who cannot switch to `dualc_field` ; 20
+sentence | 588cfea76e6c | docs/design/09-conventions.md:102 | rewritten | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: The rule for every GL viewer (`dualc_raymarch`, `dualc_field_view`):
+sentence | 57c7cce38528 | docs/design/09-conventions.md:112 | partial | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: - A **value** control (nudge, slide, wavelength, offset) sits on the arrow and Page keys, which are identical on every layout.
+sentence | 774d7040d0fb | docs/roadmap/README.md:75 | partial | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: DEFERRED: per-tile locked-seam decimation (Approach B, [D-26](../decisions/README.md)) and `dualc_lattice --tile-depth` wiring ([D-14](../decisions/README.md)).
+evidence | c66d5a17fd98 | docs/command_reference/06-dualc_lattice.md:29 | token-only | superseded (A-06-evidence)
+    text: 5%  [aabb, explicit, input]
+evidence | fd4be7941947 | docs/command_reference/06-dualc_lattice.md:54 | unverifiable-context | superseded (A-06-evidence)
+    text: 50%  [bare]
+evidence | b4a6ebd2274e | docs/command_reference/06-dualc_lattice.md:56 | token-only | superseded (A-06-evidence)
+    text: 100%  [everything, solid, covers]
+evidence | f4f039847387 | docs/command_reference/06-dualc_lattice.md:63 | token-only | superseded (A-06-evidence)
+    text: 10mm  [say, minimum, pitch]
+evidence | ad0f2c45f0fc | docs/command_reference/06-dualc_lattice.md:117 | token-only | superseded (A-06-evidence)
+    text: 1mm  [across, walls, cells]
+evidence | 209ef133b4fe | docs/command_reference/07-dualc_slice.md:29 | token-only | superseded (A-07-evidence)
+    text: 5%  [aabb, sampling, input]
+evidence | 58b98d17be16 | docs/command_reference/07-dualc_slice.md:55 | token-only | superseded (A-07-evidence)
+    text: 1mm  [1024, slice, wall, high-res]
+evidence | ce7c7931f425 | docs/command_reference/07-dualc_slice.md:55 | token-only | superseded (A-07-evidence)
+    text: 1024  [1mm, res, bunny_y.png, plane]
+evidence | af136f97b3f8 | docs/command_reference/10-dualc_raymarch.md:38 | token-only | superseded (A-10-evidence)
+    text: 5%  [12/07, aabb, unit, input]
+evidence | 838069d2aa03 | docs/command_reference/10-dualc_raymarch.md:59 | token-only | superseded (A-10-evidence)
+    text: 12/03  [geometry, section, exported]
+evidence | 0fe69882b8c2 | docs/command_reference/10-dualc_raymarch.md:84 | token-only | superseded (A-10-evidence)
+    text: 1mm  [5mm, 2mm, unit, gyroid, mm-scale]
+evidence | 87c846011604 | docs/raw/2026-09-20-loss-audit-3d73220-3c0070f.txt:8 | token-only | noise
+    text: 10mm  [say, minimum, want]
+heading | 5195e3b0261d | docs/command_reference/01-dualc_demo.md:56 | gone | superseded (A-01-heading)
+    text: sharp-vs-smooth-normals---sharp  (Sharp vs. smooth normals (`--sharp`))
+heading | 18b4271a0e34 | docs/command_reference/02-dualc_primitive.md:19 | gone | superseded (A-02-heading)
+    text: the-30-analytic-3d-primitives---one-by-one  (The 30 analytic 3D primitives - one by one)
+heading | 3ad65ce14503 | docs/command_reference/02-dualc_primitive.md:21 | gone | superseded (A-02-heading)
+    text: tier-a---core-8  (Tier A - core 8)
+heading | eed75ab7f7ad | docs/command_reference/02-dualc_primitive.md:34 | gone | superseded (A-02-heading)
+    text: tier-b---common-10  (Tier B - common 10)
+heading | 061bc66e94fb | docs/command_reference/02-dualc_primitive.md:49 | gone | superseded (A-02-heading)
+    text: tier-c---long-tail-12  (Tier C - long tail 12)
+heading | b7dfc06194df | docs/command_reference/02-dualc_primitive.md:74 | gone | superseded (A-02-heading)
+    text: the-6-decorators---one-by-one  (The 6 decorators - one by one)
+heading | 6c531ea3467e | docs/command_reference/02-dualc_primitive.md:90 | gone | superseded (A-02-heading)
+    text: the-6-domain-operators---one-by-one  (The 6 domain operators - one by one)
+heading | 63731feefc5d | docs/command_reference/02-dualc_primitive.md:107 | gone | superseded (A-02-heading)
+    text: the-3-displace-functions-argument-to---displace  (The 3 displace functions (argument to `--displace`))
+heading | 801b3e36a157 | docs/command_reference/04-dualc_lift.md:20 | gone | superseded (A-04-heading)
+    text: the-4-2d-primitives-profiles  (The 4 2D primitives (profiles))
+heading | 0a81007a47b3 | docs/command_reference/04-dualc_lift.md:31 | gone | superseded (A-04-heading)
+    text: lift-1---revolve-the-4-profiles-one-by-one  (Lift 1 - `revolve` (the 4 profiles, one by one))
+heading | cf733a434bb0 | docs/command_reference/04-dualc_lift.md:40 | gone | superseded (A-04-heading)
+    text: lift-2---extrude-the-4-profiles-one-by-one  (Lift 2 - `extrude` (the 4 profiles, one by one))
+heading | 433847db1fc8 | docs/command_reference/06-dualc_lattice.md:41 | gone | superseded (A-06-heading)
+    text: wavelength-vs-offset---conceptual-guide  (Wavelength vs. offset - conceptual guide)
+heading | 1f2579bd6627 | docs/command_reference/06-dualc_lattice.md:74 | gone | superseded (A-06-heading)
+    text: tpms-formulas  (TPMS formulas)
+heading | d13e546f347b | docs/command_reference/06-dualc_lattice.md:95 | gone | superseded (A-06-heading)
+    text: the-6-tpms-types---one-by-one  (The 6 TPMS types - one by one)
+heading | b59885b07aeb | docs/command_reference/10-dualc_raymarch.md:42 | gone | superseded (A-10-heading)
+    text: live-controls  (Live controls)
+heading | c7589d129152 | docs/command_reference/10-dualc_raymarch.md:105 | gone | superseded (A-10-heading)
+    text: see-also  (See also)
+identifier | 5e0c1293296e | docs/command_reference/01-dualc_demo.md:13 | gone | superseded (A-01-identifier)
+    text: --depth=N
+identifier | cda7e3d880d7 | docs/command_reference/01-dualc_demo.md:14 | gone | superseded (A-01-identifier)
+    text: --collapse=E
+identifier | 89a6957b4198 | docs/command_reference/01-dualc_demo.md:26 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: dualc_demo --depth 7 cube.obj cube_dc.obj
+identifier | 10fc08080973 | docs/command_reference/01-dualc_demo.md:27 | gone | superseded (A-01-identifier)
+    text: dualc_demo --sharp cube.obj cube_sharp.obj
+identifier | aa90afa77076 | docs/command_reference/01-dualc_demo.md:28 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: dualc_demo --collapse 1 molde.obj molde_dc.obj
+identifier | 38bec511d97e | docs/command_reference/01-dualc_demo.md:29 | gone | superseded (A-01-identifier)
+    text: dualc_demo --depth 9 --collapse 100 molde.obj molde_d9.obj
+identifier | a5ca7b363aba | docs/command_reference/01-dualc_demo.md:30 | gone | superseded (A-01-identifier)
+    text: dualc_demo --no-manifold cube.obj cube_pre_mdc.obj
+identifier | 5923b44c8232 | docs/command_reference/01-dualc_demo.md:31 | gone | superseded (A-01-identifier)
+    text: dualc_demo --pseudonormal cube.obj cube_pn.obj
+identifier | 27abffbaf0e7 | docs/command_reference/01-dualc_demo.md:32 | gone | superseded (A-01-identifier)
+    text: dualc_demo --gwn molde.obj molde_gwn.obj
+identifier | 15b105fda602 | docs/command_reference/01-dualc_demo.md:33 | gone | intentional docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: dualc_demo --gwn-field open_shell.obj sealed.obj
+identifier | 46054a4c223b | docs/command_reference/01-dualc_demo.md:34 | gone | intentional docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: dualc_demo --gwn-field --depth 7 scene.obj sealed.obj
+identifier | 03cce75e3d21 | docs/command_reference/02-dualc_primitive.md:12 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: <name>.obj
+identifier | 13088ac8028f | docs/command_reference/02-dualc_primitive.md:25 | gone | superseded (A-02-identifier)
+    text: dualc_primitive sphere
+identifier | 6b64a9af0f31 | docs/command_reference/02-dualc_primitive.md:26 | gone | superseded (A-02-identifier)
+    text: dualc_primitive box
+identifier | 54a8c4248bbc | docs/command_reference/02-dualc_primitive.md:27 | gone | superseded (A-02-identifier)
+    text: dualc_primitive roundbox
+identifier | 276af46b91e5 | docs/command_reference/02-dualc_primitive.md:28 | gone | superseded (A-02-identifier)
+    text: dualc_primitive capsule
+identifier | 19dd8af56c37 | docs/command_reference/02-dualc_primitive.md:29 | gone | superseded (A-02-identifier)
+    text: dualc_primitive cappedcylinder
+identifier | f7a12b9682c5 | docs/command_reference/02-dualc_primitive.md:30 | raw-only | superseded (A-02-identifier)
+    text: dualc_primitive torus
+identifier | 8e8047707eae | docs/command_reference/02-dualc_primitive.md:31 | gone | superseded (A-02-identifier)
+    text: dualc_primitive ellipsoid
+identifier | 63fa6cbc8e72 | docs/command_reference/02-dualc_primitive.md:32 | gone | superseded (A-02-identifier)
+    text: dualc_primitive plane --bounds -2,-2,-2,2,2,2
+identifier | c567e3daff19 | docs/command_reference/02-dualc_primitive.md:38 | gone | superseded (A-02-identifier)
+    text: dualc_primitive boxframe
+identifier | 51fbb15acc01 | docs/command_reference/02-dualc_primitive.md:39 | gone | superseded (A-02-identifier)
+    text: dualc_primitive cone
+identifier | c8b7ff48b7d6 | docs/command_reference/02-dualc_primitive.md:40 | gone | superseded (A-02-identifier)
+    text: dualc_primitive cappedcone
+identifier | c9f396ebca97 | docs/command_reference/02-dualc_primitive.md:41 | gone | superseded (A-02-identifier)
+    text: dualc_primitive roundcone
+identifier | 71db6911dfbf | docs/command_reference/02-dualc_primitive.md:42 | gone | superseded (A-02-identifier)
+    text: dualc_primitive hexprism
+identifier | 7fd38b285340 | docs/command_reference/02-dualc_primitive.md:43 | gone | superseded (A-02-identifier)
+    text: dualc_primitive triprism
+identifier | 53029a9e8b5f | docs/command_reference/02-dualc_primitive.md:44 | gone | superseded (A-02-identifier)
+    text: dualc_primitive octahedron
+identifier | 2b0fb3741f16 | docs/command_reference/02-dualc_primitive.md:45 | gone | superseded (A-02-identifier)
+    text: dualc_primitive pyramid
+identifier | c9beef05ee50 | docs/command_reference/02-dualc_primitive.md:46 | gone | superseded (A-02-identifier)
+    text: dualc_primitive solidangle
+identifier | 9b1891bba7e8 | docs/command_reference/02-dualc_primitive.md:47 | gone | superseded (A-02-identifier)
+    text: dualc_primitive infinitecylinder --bounds -2,-3,-2,2,3,2
+identifier | 185ec0f7a5e6 | docs/command_reference/02-dualc_primitive.md:53 | gone | superseded (A-02-identifier)
+    text: dualc_primitive cappedtorus
+identifier | 1adfce48615a | docs/command_reference/02-dualc_primitive.md:54 | gone | superseded (A-02-identifier)
+    text: dualc_primitive link
+identifier | 40fdb9065b29 | docs/command_reference/02-dualc_primitive.md:55 | gone | superseded (A-02-identifier)
+    text: dualc_primitive cutsphere
+identifier | 100944202bc0 | docs/command_reference/02-dualc_primitive.md:56 | gone | superseded (A-02-identifier)
+    text: dualc_primitive cuthollowsphere
+identifier | c8089f9d6ab5 | docs/command_reference/02-dualc_primitive.md:57 | gone | superseded (A-02-identifier)
+    text: dualc_primitive deathstar
+identifier | 8e186598a838 | docs/command_reference/02-dualc_primitive.md:58 | gone | superseded (A-02-identifier)
+    text: dualc_primitive vesica
+identifier | 59099b684c3e | docs/command_reference/02-dualc_primitive.md:59 | gone | superseded (A-02-identifier)
+    text: dualc_primitive rhombus
+identifier | 47795abfe60c | docs/command_reference/02-dualc_primitive.md:60 | gone | superseded (A-02-identifier)
+    text: dualc_primitive verticalcapsule
+identifier | b0e078f44d3d | docs/command_reference/02-dualc_primitive.md:61 | gone | superseded (A-02-identifier)
+    text: dualc_primitive roundedcylinder
+identifier | 788440b27bcb | docs/command_reference/02-dualc_primitive.md:62 | gone | superseded (A-02-identifier)
+    text: dualc_primitive infinitecone --bounds -3,-3,-3,3,1,3
+identifier | 5de4c13d87a0 | docs/command_reference/02-dualc_primitive.md:63 | gone | superseded (A-02-identifier)
+    text: dualc_primitive triangle --onion 0.05
+identifier | 0664daa79822 | docs/command_reference/02-dualc_primitive.md:64 | gone | superseded (A-02-identifier)
+    text: dualc_primitive quad --onion 0.05
+identifier | 00dda1d2f9ec | docs/command_reference/02-dualc_primitive.md:68 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: --onion T
+identifier | 48b4954a3f08 | docs/command_reference/02-dualc_primitive.md:72 | gone | superseded (A-02-identifier)
+    text: comma,groups
+identifier | 7f28a2d6893c | docs/command_reference/02-dualc_primitive.md:80 | gone | superseded (A-02-identifier)
+    text: dualc_primitive sphere --offset 0.3
+identifier | 7d1a80d31eb1 | docs/command_reference/02-dualc_primitive.md:81 | gone | superseded (A-02-identifier)
+    text: --round O
+identifier | a515f4074e6e | docs/command_reference/02-dualc_primitive.md:81 | gone | superseded (A-02-identifier)
+    text: dualc_primitive sphere --round 0.3
+identifier | d1f94c8d3656 | docs/command_reference/02-dualc_primitive.md:82 | gone | superseded (A-02-identifier)
+    text: dualc_primitive box --onion 0.1
+identifier | 617d72ec3c35 | docs/command_reference/02-dualc_primitive.md:83 | gone | superseded (A-02-identifier)
+    text: --scale S
+identifier | ec935fea7575 | docs/command_reference/02-dualc_primitive.md:83 | gone | superseded (A-02-identifier)
+    text: dualc_primitive sphere --scale 2
+identifier | 02777ecf7d01 | docs/command_reference/02-dualc_primitive.md:84 | gone | superseded (A-02-identifier)
+    text: --elongate x,y,z
+identifier | c1d25740f046 | docs/command_reference/02-dualc_primitive.md:84 | gone | superseded (A-02-identifier)
+    text: dualc_primitive sphere --elongate 1,0,0
+identifier | d2af3d1f80a4 | docs/command_reference/02-dualc_primitive.md:85 | gone | superseded (A-02-identifier)
+    text: dualc_primitive box --translate 3,0,0
+identifier | e5a36d4a682f | docs/command_reference/02-dualc_primitive.md:85 | gone | superseded (A-02-identifier)
+    text: --translate x,y,z
+identifier | 03b3205b739d | docs/command_reference/02-dualc_primitive.md:86 | gone | superseded (A-02-identifier)
+    text: --rotate x,y,z,deg
+identifier | f1fe80d8c89e | docs/command_reference/02-dualc_primitive.md:86 | gone | superseded (A-02-identifier)
+    text: dualc_primitive box --rotate 0,0,1,45
+identifier | 4b6802a8fb72 | docs/command_reference/02-dualc_primitive.md:94 | gone | superseded (A-02-identifier)
+    text: --twist k,axis
+identifier | e3c7432ee952 | docs/command_reference/02-dualc_primitive.md:94 | gone | superseded (A-02-identifier)
+    text: dualc_primitive torus --twist 1.5,1
+identifier | b156daa71531 | docs/command_reference/02-dualc_primitive.md:95 | gone | superseded (A-02-identifier)
+    text: --bend k,axis
+identifier | b7ba02bdb5ab | docs/command_reference/02-dualc_primitive.md:95 | gone | superseded (A-02-identifier)
+    text: dualc_primitive box --bend 0.5,0
+identifier | 72fafed0568b | docs/command_reference/02-dualc_primitive.md:96 | gone | superseded (A-02-identifier)
+    text: dualc_primitive sphere 0.6,0,0 0.6 --mirror 1,0,0
+identifier | c4e7615927e4 | docs/command_reference/02-dualc_primitive.md:96 | gone | superseded (A-02-identifier)
+    text: --mirror x,y,z
+identifier | 7dee1e6b4dad | docs/command_reference/02-dualc_primitive.md:97 | gone | superseded (A-02-identifier)
+    text: dualc_primitive sphere --repeat 3,0,0 --bounds -7,-2,-2,7,2,2
+identifier | cd287f4c8ff7 | docs/command_reference/02-dualc_primitive.md:97 | gone | superseded (A-02-identifier)
+    text: --repeat x,y,z
+identifier | 4ce40027aac5 | docs/command_reference/02-dualc_primitive.md:98 | gone | superseded (A-02-identifier)
+    text: --repeat-limited x,y,z,nx,ny,nz
+identifier | 67f1d88cc24b | docs/command_reference/02-dualc_primitive.md:98 | gone | superseded (A-02-identifier)
+    text: dualc_primitive sphere --repeat-limited 3,0,0,4,1,1
+identifier | 03d63003e52b | docs/command_reference/02-dualc_primitive.md:99 | gone | superseded (A-02-identifier)
+    text: --displace name,amp,freq
+identifier | 823666a001c2 | docs/command_reference/02-dualc_primitive.md:99 | gone | superseded (A-02-identifier)
+    text: dualc_primitive box --displace sine,0.1,6
+identifier | cd8367be890b | docs/command_reference/02-dualc_primitive.md:112 | gone | superseded (A-02-identifier)
+    text: dualc_primitive box --displace gyroid,0.1,6
+identifier | 0edfcc5c0af5 | docs/command_reference/02-dualc_primitive.md:113 | gone | superseded (A-02-identifier)
+    text: dualc_primitive box --displace bumps,0.1,6
+identifier | 24f6f1d697e2 | docs/command_reference/02-dualc_primitive.md:117 | code-only | superseded (A-02-identifier)
+    text: --displace sine,0.15
+identifier | 8ea1f3a49cf6 | docs/command_reference/02-dualc_primitive.md:117 | code-only | superseded (A-02-identifier)
+    text: --displace bumps,0.15
+identifier | 470d4a1531f4 | docs/command_reference/02-dualc_primitive.md:142 | gone | superseded (A-02-identifier)
+    text: dualc_primitive sphere 0 0 0 2
+identifier | 690956ec3f9e | docs/command_reference/02-dualc_primitive.md:143 | gone | superseded (A-02-identifier)
+    text: dualc_primitive torus 0 0 0 3 0.5
+identifier | 871807160f0d | docs/command_reference/02-dualc_primitive.md:144 | gone | superseded (A-02-identifier)
+    text: dualc_primitive box -2,-2,-2 2,2,2
+identifier | 2c10cae8ea97 | docs/command_reference/02-dualc_primitive.md:148 | gone | superseded (A-02-identifier)
+    text: dualc_primitive torus 0 0 0 2 0.5 --onion 0.1 --twist 1.5,1 -o fancy_torus.obj
+identifier | c8f2f985d9de | docs/command_reference/04-dualc_lift.md:35 | gone | superseded (A-04-identifier)
+    text: dualc_lift revolve circle --offset 2
+identifier | 108019413722 | docs/command_reference/04-dualc_lift.md:36 | gone | superseded (A-04-identifier)
+    text: dualc_lift revolve box --offset 2
+identifier | 3be07bb48eb6 | docs/command_reference/04-dualc_lift.md:37 | gone | superseded (A-04-identifier)
+    text: dualc_lift revolve segment --offset 2
+identifier | 7780b71eac78 | docs/command_reference/04-dualc_lift.md:38 | gone | superseded (A-04-identifier)
+    text: dualc_lift revolve polygon 0,0 1,0 1,1 0,1 --offset 2
+identifier | 7c54f36a753d | docs/command_reference/04-dualc_lift.md:44 | gone | superseded (A-04-identifier)
+    text: dualc_lift extrude circle --height 0.5
+identifier | 4b3f8b0ffc15 | docs/command_reference/04-dualc_lift.md:45 | gone | superseded (A-04-identifier)
+    text: dualc_lift extrude box --height 0.5
+identifier | 992f541d4f81 | docs/command_reference/04-dualc_lift.md:46 | gone | superseded (A-04-identifier)
+    text: dualc_lift extrude segment --height 0.5
+identifier | b40553c18d08 | docs/command_reference/05-dualc_csg_demo.md:13 | gone | superseded (A-05-identifier)
+    text: --recipe NAME
+identifier | 67dd9d26402f | docs/command_reference/05-dualc_csg_demo.md:15 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: <recipe>.obj
+identifier | 6fad106b40ea | docs/command_reference/05-dualc_csg_demo.md:24 | raw-only | superseded (A-05-identifier)
+    text: dualc_csg_demo --recipe=cube-minus-sphere
+identifier | 297ee8d4b5ca | docs/command_reference/05-dualc_csg_demo.md:25 | raw-only | superseded (A-05-identifier)
+    text: dualc_csg_demo --recipe=smooth-blend
+identifier | bc268e7ad3b5 | docs/command_reference/05-dualc_csg_demo.md:26 | raw-only | superseded (A-05-identifier)
+    text: dualc_csg_demo --recipe=displaced-sphere
+identifier | c0e3af87b891 | docs/command_reference/05-dualc_csg_demo.md:27 | gone | superseded (A-05-identifier)
+    text: dualc_csg_demo --recipe=mesh-shell cube.obj
+identifier | bd41e57fb418 | docs/command_reference/05-dualc_csg_demo.md:28 | gone | superseded (A-05-identifier)
+    text: dualc_csg_demo --recipe=mesh-minus-sphere cube.obj
+identifier | ef6baa4d9974 | docs/command_reference/05-dualc_csg_demo.md:29 | gone | superseded (A-05-identifier)
+    text: dualc_csg_demo --recipe=twisted-mesh cube.obj
+identifier | f61979741dbf | docs/command_reference/06-dualc_lattice.md:102 | gone | superseded (A-06-identifier)
+    text: dualc_lattice cube.obj --type schwarz-p
+identifier | 355acb797725 | docs/command_reference/06-dualc_lattice.md:103 | gone | superseded (A-06-identifier)
+    text: dualc_lattice cube.obj --type diamond
+identifier | dc494f77edec | docs/command_reference/06-dualc_lattice.md:104 | gone | superseded (A-06-identifier)
+    text: dualc_lattice cube.obj --type fischer-koch
+identifier | c566bfd5602f | docs/command_reference/06-dualc_lattice.md:105 | gone | superseded (A-06-identifier)
+    text: dualc_lattice cube.obj --type lidinoid
+identifier | 0492d416dee3 | docs/command_reference/06-dualc_lattice.md:106 | gone | superseded (A-06-identifier)
+    text: dualc_lattice cube.obj --type neovius
+identifier | 8cb978e52c9d | docs/command_reference/06-dualc_lattice.md:114 | gone | superseded (A-06-identifier)
+    text: dualc_lattice cube.obj --type gyroid --wavelength 0.5
+identifier | 1a681de655f5 | docs/command_reference/06-dualc_lattice.md:115 | gone | superseded (A-06-identifier)
+    text: |F|-0.1
+identifier | 90c603064c8d | docs/command_reference/06-dualc_lattice.md:115 | gone | superseded (A-06-identifier)
+    text: dualc_lattice cube.obj --type gyroid --wavelength 0.5 --offset 0.1
+identifier | afb6b5a681e4 | docs/command_reference/06-dualc_lattice.md:118 | gone | superseded (A-06-identifier)
+    text: dualc_lattice cube.obj --type neovius --depth 8 --collapse 1
+identifier | faeb7bc29404 | docs/command_reference/06-dualc_lattice.md:119 | gone | superseded (A-06-identifier)
+    text: dualc_lattice cube.obj --type gyroid --wavelength 0.5 --offset 0.1 -o part.stl
+identifier | eee8269c5297 | docs/command_reference/06-dualc_lattice.md:120 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: dualc_lattice cube.obj --type gyroid --wavelength 0.5 --offset 0.1 -o part.3mf
+identifier | 9a92829b57ba | docs/command_reference/07-dualc_slice.md:33 | gone | superseded (A-07-identifier)
+    text: \|value\|
+identifier | 4201b89a0585 | docs/command_reference/07-dualc_slice.md:54 | gone | superseded (A-07-identifier)
+    text: dualc_slice cube.obj --type gyroid --wavelength 0.5 --plane z=0
+identifier | 4d14b5d3fd9a | docs/command_reference/07-dualc_slice.md:54 | gone | superseded (A-07-identifier)
+    text: gyroid_slice.png
+identifier | 61498dabea5f | docs/command_reference/09-dualc_gen_demo.md:55 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: dualc_demo torus.obj torus_dc.obj --depth 6
+identifier | e1983d42d47f | docs/command_reference/09-dualc_gen_demo.md:56 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: dualc_demo --sharp bracket.obj bracket_sharp.obj --depth 6
+identifier | fabf2ba7bfb2 | docs/command_reference/09-dualc_gen_demo.md:58 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: dualc_demo --gwn-field bunny.obj bunny_sealed.obj --depth 7
+identifier | 447602ca2a50 | docs/command_reference/10-dualc_raymarch.md:25 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: -DDUALC_BUILD_RAYMARCH_VIEWER=ON
+identifier | b756459e0856 | docs/command_reference/10-dualc_raymarch.md:80 | gone | superseded (A-10-identifier)
+    text: dualc_raymarch --type gyroid --wavelength 0.2
+identifier | 631efe42e819 | docs/command_reference/10-dualc_raymarch.md:81 | gone | superseded (A-10-identifier)
+    text: dualc_raymarch --type gyroid --wavelength 0.02
+identifier | 8efcf5fd973f | docs/command_reference/10-dualc_raymarch.md:82 | gone | superseded (A-10-identifier)
+    text: dualc_raymarch cube.obj --type schwarz-p --wavelength 0.5 --offset 0.05
+identifier | af11d1afd55b | docs/command_reference/10-dualc_raymarch.md:83 | gone | superseded (A-10-identifier)
+    text: dualc_raymarch data/bunny.obj --type gyroid --offset 1.0 --normalize-thickness
+identifier | 428d7a059187 | docs/command_reference/10-dualc_raymarch.md:85 | gone | superseded (A-10-identifier)
+    text: dualc_raymarch cube.obj --type gyroid --offset 0.1 --snapshot cube.png
+identifier | 1e746595f500 | docs/command_reference/10-dualc_raymarch.md:86 | gone | superseded (A-10-identifier)
+    text: dualc_raymarch --type gyroid --wavelength 0.15 --offset 0.04
+identifier | 2232e43f605e | docs/command_reference/10-dualc_raymarch.md:100 | gone | superseded (A-10-identifier)
+    text: --offset T --normalize-thickness
+identifier | 5b466d74724f | docs/command_reference/10-dualc_raymarch.md:103 | gone | superseded (A-10-identifier)
+    text: --type schwarz-p|diamond|
+identifier | 447602ca2a50 | docs/command_reference/README.md:25 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: -DDUALC_BUILD_RAYMARCH_VIEWER=ON
+identifier | 00dda1d2f9ec | docs/command_reference/README.md:78 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: --onion T
+identifier | 8a0e08da94f8 | docs/command_reference/README.md:78 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: --recipe=mesh-shell
+identifier | 66a1e999b8b5 | docs/command_reference/README.md:142 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: --onion 0.35
+identifier | 89a6957b4198 | docs/raw/2026-09-20-loss-audit-3d73220-3c0070f.txt:18 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: dualc_demo --depth 7 cube.obj cube_dc.obj
+identifier | aa90afa77076 | docs/raw/2026-09-20-loss-audit-3d73220-3c0070f.txt:20 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: dualc_demo --collapse 1 molde.obj molde_dc.obj
+identifier | 03cce75e3d21 | docs/raw/2026-09-20-loss-audit-3d73220-3c0070f.txt:56 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: <name>.obj
+identifier | 67dd9d26402f | docs/raw/2026-09-20-loss-audit-3d73220-3c0070f.txt:114 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: <recipe>.obj
+identifier | eee8269c5297 | docs/raw/2026-09-20-loss-audit-3d73220-3c0070f.txt:150 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: dualc_lattice cube.obj --type gyroid --wavelength 0.5 --offset 0.1 -o part.3mf
+identifier | 447602ca2a50 | docs/raw/2026-09-20-loss-audit-3d73220-3c0070f.txt:204 | gone | superseded docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit
+    text: -DDUALC_BUILD_RAYMARCH_VIEWER=ON
+identifier | 36d9f08a6756 | docs/roadmap/19-docs-layers/05-record-phase-6.md:18 | raw-only | noise
+    text: dualc_lift.cpp
+
+== the audited set ==
+evidence    noise                                 1
+evidence    superseded                           11
+heading     superseded                           16
+identifier  intentional                           2
+identifier  noise                                 1
+identifier  superseded                          125
+sentence    intentional                           4
+sentence    superseded                          277
+rows: 437 (on the eight pages 391)  untriaged: 0
+
+== the tree-wide summary, as the script printed it (exit 0, no problem lines) ==
+== summary ==
+unit              kept  rewritten    partial       gone   raw-only token-onlyunverif-ctx  code-only | intentional  superseded    restored       noise   untriaged
+sentence          7788        710        112        589       1707          0          0          0 |           4         277           0           0        2837
+evidence          3168          0          0       2612       1652        643         69          0 |           0          11           0           1        4964
+heading            828          0          0         20        145          0          0          0 |           0          16           0           0         149
+identifier       10609          0          0        162        778          0          0          8 |           2         125           0           1         820
+rules: A-01-heading=1  A-01-identifier=7  A-01-sentence-gone=18  A-01-sentence-partial=6  A-01-sentence-rewritten=5  A-02-heading=7  A-02-identifier=63  A-02-sentence-gone=31  A-02-sentence-partial=22  A-02-sentence-rewritten=15  A-04-heading=3  A-04-identifier=7  A-04-sentence-gone=15  A-04-sentence-partial=1  A-04-sentence-rewritten=4  A-05-identifier=7  A-05-sentence-gone=11  A-05-sentence-partial=1  A-05-sentence-rewritten=2  A-06-evidence=5  A-06-heading=3  A-06-identifier=10  A-06-sentence-gone=34  A-06-sentence-partial=6  A-06-sentence-rewritten=9  A-07-evidence=3  A-07-identifier=3  A-07-sentence-gone=17  A-07-sentence-partial=5  A-07-sentence-rewritten=3  A-10-evidence=3  A-10-heading=2  A-10-identifier=8  A-10-sentence-gone=35  A-10-sentence-partial=4  A-10-sentence-rewritten=2
+untriaged: 8770 (max 100000)  exit: 0
+
+== the scratch triage file ==
+{
+ "audits": {
+  "2fcb6ee": {
+   "_comment": "P06.2 scratch triage (roadmap 21/08 § The loss audit): classes A-D; the ceiling is the tree-wide noise of unchanged files, not this audit's set",
+   "base": "2fcb6ee12d3b375fc234e81e319d6d17cbb1f8cd",
+   "scope": [
+    "docs/"
+   ],
+   "annex": [],
+   "thresholds": {
+    "MIN_WORDS": 6,
+    "K_LONG": 8,
+    "K_SHORT": 4,
+    "KEPT_SCK": 0.6,
+    "REWRITTEN_SC4": 0.6,
+    "PARTIAL_SC4": 0.3,
+    "CTX_WORDS": 3,
+    "CTX_MIN_HIT": 2,
+    "TOP_K_FILES": 5
+   },
+   "untriaged_max": 100000,
+   "items": {
+    "0a2a5ffc6664": {
+     "unit": "sentence",
+     "source": "docs/command_reference/10-dualc_raymarch.md",
+     "text": "Note: a very thin `--offset` shell (walls ≪ `--wavelength`) can show small holes",
+     "verdict": "intentional",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class B — a recorded drop",
+     "note": "dualc_raymarch's thin-wall hole note: its own march constants (21/07)"
+    },
+    "02052757f2f9": {
+     "unit": "sentence",
+     "source": "docs/command_reference/10-dualc_raymarch.md",
+     "text": "A missing file exits with `[dualc_raymarch] cannot open mesh 'data/foot.obj': no",
+     "verdict": "intentional",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class B — a recorded drop",
+     "note": "dualc_raymarch's missing-mesh message: the tool is gone (21/07)"
+    },
+    "d9680fd17a50": {
+     "unit": "sentence",
+     "source": "docs/command_reference/01-dualc_demo.md",
+     "text": "D9 ; `dualc_demo --gwn-field open_shell.obj sealed.obj` ; Contour the GWN 0.5-is",
+     "verdict": "intentional",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class B — a recorded drop",
+     "note": "D9's open_shell.obj never existed; G9 runs on mesh-soup.obj (21/07)"
+    },
+    "1d0ea0f06112": {
+     "unit": "sentence",
+     "source": "docs/command_reference/01-dualc_demo.md",
+     "text": "D10 ; `dualc_demo --gwn-field --depth 7 scene.obj sealed.obj` ; Same, on a multi",
+     "verdict": "intentional",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class B — a recorded drop",
+     "note": "D10's scene.obj never existed; folded into G9 (21/07)"
+    },
+    "15b105fda602": {
+     "unit": "identifier",
+     "source": "docs/command_reference/01-dualc_demo.md",
+     "text": "dualc_demo --gwn-field open_shell.obj sealed.obj",
+     "verdict": "intentional",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class B — a recorded drop",
+     "note": "D9's command, a file that never existed (21/07)"
+    },
+    "46054a4c223b": {
+     "unit": "identifier",
+     "source": "docs/command_reference/01-dualc_demo.md",
+     "text": "dualc_demo --gwn-field --depth 7 scene.obj sealed.obj",
+     "verdict": "intentional",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class B — a recorded drop",
+     "note": "D10's command, a file that never existed (21/07)"
+    },
+    "2c749fa26889": {
+     "unit": "sentence",
+     "source": "docs/command_reference/00-shared-behaviour.md",
+     "text": "Every tool that exports through the shared writer (`dualc_field`, `dualc_primiti",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "5dc36a9b865f": {
+     "unit": "sentence",
+     "source": "docs/command_reference/08-dualc_view.md",
+     "text": "Inspect a demo mesh through the contourer ; [`dualc_demo`](01-dualc_demo.md) to ",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "3c972c058eaa": {
+     "unit": "sentence",
+     "source": "docs/command_reference/09-dualc_gen_demo.md",
+     "text": "Each shape targets a distinct topology / curvature / feature regime; pair them w",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "a08c219acdc2": {
+     "unit": "sentence",
+     "source": "docs/command_reference/09-dualc_gen_demo.md",
+     "text": "G2 ; `dualc_demo torus.obj torus_dc.obj --depth 6` ; Re-mesh the torus; output s",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "77fd7291b23f": {
+     "unit": "sentence",
+     "source": "docs/command_reference/09-dualc_gen_demo.md",
+     "text": "G3 ; `dualc_demo --sharp bracket.obj bracket_sharp.obj --depth 6` ; Sharp-featur",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "c5522d362ecd": {
+     "unit": "sentence",
+     "source": "docs/command_reference/09-dualc_gen_demo.md",
+     "text": "G5 ; `dualc_demo --gwn-field bunny.obj bunny_sealed.obj --depth 7` ; Seal the op",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "b453d884947a": {
+     "unit": "sentence",
+     "source": "docs/command_reference/11-dualc_field/04-workflow-open-surface.md",
+     "text": "- `normalize` makes `thickness` first-order metric; confirm a critical wall on a",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "5522fdd3ac17": {
+     "unit": "sentence",
+     "source": "docs/command_reference/11-dualc_field/README.md",
+     "text": "A TPMS lattice clipped to an input volume - the field-level equivalent of `dualc",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "bba25ab6fa66": {
+     "unit": "sentence",
+     "source": "docs/command_reference/11-dualc_field/README.md",
+     "text": "`dualc_field` **generalises but does not replace** `dualc_lattice`, `dualc_boole",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "c411b938de6b": {
+     "unit": "sentence",
+     "source": "docs/command_reference/12-dualc_field_view/03-recipes-by-node.md",
+     "text": "# N3-N6 - positional (long-tail) primitives -- args follow the dualc_primitive p",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "55675a115e37": {
+     "unit": "sentence",
+     "source": "docs/command_reference/README.md",
+     "text": "The GL viewers are opt-in, each `OFF` by default and none a dependency of `libdu",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "84d7d5398f93": {
+     "unit": "sentence",
+     "source": "docs/command_reference/README.md",
+     "text": "1 ; `dualc_demo` ; Re-mesh a triangle mesh through the dual contourer. ; [01-dua",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "dc143b3ebbc5": {
+     "unit": "sentence",
+     "source": "docs/command_reference/README.md",
+     "text": "2 ; `dualc_primitive` ; Analytic primitives + decorators + domain operators. ; [",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "88a69f60404c": {
+     "unit": "sentence",
+     "source": "docs/command_reference/README.md",
+     "text": "4 ; `dualc_lift` ; Revolve or extrude a 2D profile into 3D. ; [04-dualc_lift.md]",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "8e2d2e2752ed": {
+     "unit": "sentence",
+     "source": "docs/command_reference/README.md",
+     "text": "6 ; `dualc_lattice` ; TPMS lattice infill bounded by an input mesh. ; [06-dualc_",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "fa01a5519f3b": {
+     "unit": "sentence",
+     "source": "docs/command_reference/README.md",
+     "text": "7 ; `dualc_slice` ; Sample a field on a cutting plane -> PNG heatmap + SVG conto",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "b89c7f580298": {
+     "unit": "sentence",
+     "source": "docs/command_reference/README.md",
+     "text": "10 ; `dualc_raymarch` ; Standalone GPU raymarch viewer - density-independent (op",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "c54035dec0b3": {
+     "unit": "sentence",
+     "source": "docs/command_reference/README.md",
+     "text": "Both opt-in GPU viewers share an orbit camera and the **section-plane** controls",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "fd8ef6bed092": {
+     "unit": "sentence",
+     "source": "docs/command_reference/README.md",
+     "text": "Keys are layout-independent - letters matched by the printed character, values o",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "b0041b994139": {
+     "unit": "sentence",
+     "source": "docs/command_reference/README.md",
+     "text": "**Section** - toggle plane X / Y / Z ; `x` / `y` / `z` ; `x` / `y` / `z`",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "1449fedd9cb7": {
+     "unit": "sentence",
+     "source": "docs/command_reference/README.md",
+     "text": "Per-tool detail (and the section-plane recipe): [10-dualc_raymarch.md](10-dualc_",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "c39d7df298b7": {
+     "unit": "sentence",
+     "source": "docs/command_reference/README.md",
+     "text": "Option ; Meaning ; `demo` ; `primitive` ; `boolean` ; `lift` ; `csg_demo` ; `lat",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "6c801e4a7908": {
+     "unit": "sentence",
+     "source": "docs/command_reference/README.md",
+     "text": "`-o PATH` ; Output; format by extension ([below](#export-formats--o-extension-di",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "3ca264db6714": {
+     "unit": "sentence",
+     "source": "docs/command_reference/README.md",
+     "text": "Every field-driven tool (`dualc_lattice`, `dualc_primitive`, `dualc_boolean`, `d",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "8ed51da569f3": {
+     "unit": "sentence",
+     "source": "docs/command_reference/README.md",
+     "text": "Tools (binaries) ; 11 ; `dualc_demo`, `dualc_primitive`, `dualc_boolean`, `dualc",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "16e200a00f0d": {
+     "unit": "sentence",
+     "source": "docs/command_reference/README.md",
+     "text": "Decorators, `dualc_primitive` post-op flags ; 6 (7 flags) ; `--offset` ≡ `--roun",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "c38f9e47f766": {
+     "unit": "sentence",
+     "source": "docs/command_reference/README.md",
+     "text": "Baked recipes ; 6 ; `cube-minus-sphere`, `smooth-blend`, `displaced-sphere`, `me",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "4ebdcfe96d5b": {
+     "unit": "sentence",
+     "source": "docs/decisions/README.md",
+     "text": "D-14 ; `dualc_lattice --tile-depth` wiring (5a.3) - convenience parity only ; DE",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "588cfea76e6c": {
+     "unit": "sentence",
+     "source": "docs/design/09-conventions.md",
+     "text": "The rule for every GL viewer (`dualc_raymarch`, `dualc_field_view`):",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "57c7cce38528": {
+     "unit": "sentence",
+     "source": "docs/design/09-conventions.md",
+     "text": "- A **value** control (nudge, slide, wavelength, offset) sits on the arrow and P",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "774d7040d0fb": {
+     "unit": "sentence",
+     "source": "docs/roadmap/README.md",
+     "text": "DEFERRED: per-tile locked-seam decimation (Approach B, [D-26](../decisions/READM",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "87c846011604": {
+     "unit": "evidence",
+     "source": "docs/raw/2026-09-20-loss-audit-3d73220-3c0070f.txt",
+     "text": "10mm  [say, minimum, want]",
+     "verdict": "noise",
+     "note": "Class D: quotation-only page, unchanged; its only live echo was a retired page or a deleted source"
+    },
+    "61498dabea5f": {
+     "unit": "identifier",
+     "source": "docs/command_reference/09-dualc_gen_demo.md",
+     "text": "dualc_demo torus.obj torus_dc.obj --depth 6",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "e1983d42d47f": {
+     "unit": "identifier",
+     "source": "docs/command_reference/09-dualc_gen_demo.md",
+     "text": "dualc_demo --sharp bracket.obj bracket_sharp.obj --depth 6",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "fabf2ba7bfb2": {
+     "unit": "identifier",
+     "source": "docs/command_reference/09-dualc_gen_demo.md",
+     "text": "dualc_demo --gwn-field bunny.obj bunny_sealed.obj --depth 7",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "447602ca2a50": {
+     "unit": "identifier",
+     "source": "docs/command_reference/README.md",
+     "text": "-DDUALC_BUILD_RAYMARCH_VIEWER=ON",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "note": "Class A on the retired page; the same unit elsewhere is Class C or D"
+    },
+    "00dda1d2f9ec": {
+     "unit": "identifier",
+     "source": "docs/command_reference/README.md",
+     "text": "--onion T",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "note": "Class A on the retired page; the same unit elsewhere is Class C or D"
+    },
+    "8a0e08da94f8": {
+     "unit": "identifier",
+     "source": "docs/command_reference/README.md",
+     "text": "--recipe=mesh-shell",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "66a1e999b8b5": {
+     "unit": "identifier",
+     "source": "docs/command_reference/README.md",
+     "text": "--onion 0.35",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class C — rewritten in place",
+     "note": "Class C: the live page rewritten in place"
+    },
+    "89a6957b4198": {
+     "unit": "identifier",
+     "source": "docs/raw/2026-09-20-loss-audit-3d73220-3c0070f.txt",
+     "text": "dualc_demo --depth 7 cube.obj cube_dc.obj",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "note": "Class A on the retired page; the same unit elsewhere is Class C or D"
+    },
+    "aa90afa77076": {
+     "unit": "identifier",
+     "source": "docs/raw/2026-09-20-loss-audit-3d73220-3c0070f.txt",
+     "text": "dualc_demo --collapse 1 molde.obj molde_dc.obj",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "note": "Class A on the retired page; the same unit elsewhere is Class C or D"
+    },
+    "03cce75e3d21": {
+     "unit": "identifier",
+     "source": "docs/raw/2026-09-20-loss-audit-3d73220-3c0070f.txt",
+     "text": "<name>.obj",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "note": "Class A on the retired page; the same unit elsewhere is Class C or D"
+    },
+    "67dd9d26402f": {
+     "unit": "identifier",
+     "source": "docs/raw/2026-09-20-loss-audit-3d73220-3c0070f.txt",
+     "text": "<recipe>.obj",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "note": "Class A on the retired page; the same unit elsewhere is Class C or D"
+    },
+    "eee8269c5297": {
+     "unit": "identifier",
+     "source": "docs/raw/2026-09-20-loss-audit-3d73220-3c0070f.txt",
+     "text": "dualc_lattice cube.obj --type gyroid --wavelength 0.5 --offset 0.1 -o part.3mf",
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "note": "Class A on the retired page; the same unit elsewhere is Class C or D"
+    },
+    "36d9f08a6756": {
+     "unit": "identifier",
+     "source": "docs/roadmap/19-docs-layers/05-record-phase-6.md",
+     "text": "dualc_lift.cpp",
+     "verdict": "noise",
+     "note": "Class D: quotation-only page, unchanged; its only live echo was a retired page or a deleted source"
+    }
+   },
+   "rules": [
+    {
+     "id": "A-01-heading",
+     "unit": "heading",
+     "source": "docs/command_reference/01-dualc_demo.md",
+     "max_matches": 1,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A"
+    },
+    {
+     "id": "A-01-identifier",
+     "unit": "identifier",
+     "source": "docs/command_reference/01-dualc_demo.md",
+     "max_matches": 7,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A"
+    },
+    {
+     "id": "A-01-sentence-gone",
+     "unit": "sentence",
+     "source": "docs/command_reference/01-dualc_demo.md",
+     "max_matches": 18,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A",
+     "bucket": "gone"
+    },
+    {
+     "id": "A-01-sentence-partial",
+     "unit": "sentence",
+     "source": "docs/command_reference/01-dualc_demo.md",
+     "max_matches": 6,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A",
+     "bucket": "partial"
+    },
+    {
+     "id": "A-01-sentence-rewritten",
+     "unit": "sentence",
+     "source": "docs/command_reference/01-dualc_demo.md",
+     "max_matches": 5,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A",
+     "bucket": "rewritten"
+    },
+    {
+     "id": "A-02-heading",
+     "unit": "heading",
+     "source": "docs/command_reference/02-dualc_primitive.md",
+     "max_matches": 7,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A"
+    },
+    {
+     "id": "A-02-identifier",
+     "unit": "identifier",
+     "source": "docs/command_reference/02-dualc_primitive.md",
+     "max_matches": 63,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A"
+    },
+    {
+     "id": "A-02-sentence-gone",
+     "unit": "sentence",
+     "source": "docs/command_reference/02-dualc_primitive.md",
+     "max_matches": 31,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A",
+     "bucket": "gone"
+    },
+    {
+     "id": "A-02-sentence-partial",
+     "unit": "sentence",
+     "source": "docs/command_reference/02-dualc_primitive.md",
+     "max_matches": 22,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A",
+     "bucket": "partial"
+    },
+    {
+     "id": "A-02-sentence-rewritten",
+     "unit": "sentence",
+     "source": "docs/command_reference/02-dualc_primitive.md",
+     "max_matches": 15,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A",
+     "bucket": "rewritten"
+    },
+    {
+     "id": "A-04-heading",
+     "unit": "heading",
+     "source": "docs/command_reference/04-dualc_lift.md",
+     "max_matches": 3,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A"
+    },
+    {
+     "id": "A-04-identifier",
+     "unit": "identifier",
+     "source": "docs/command_reference/04-dualc_lift.md",
+     "max_matches": 7,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A"
+    },
+    {
+     "id": "A-04-sentence-gone",
+     "unit": "sentence",
+     "source": "docs/command_reference/04-dualc_lift.md",
+     "max_matches": 15,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A",
+     "bucket": "gone"
+    },
+    {
+     "id": "A-04-sentence-partial",
+     "unit": "sentence",
+     "source": "docs/command_reference/04-dualc_lift.md",
+     "max_matches": 1,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A",
+     "bucket": "partial"
+    },
+    {
+     "id": "A-04-sentence-rewritten",
+     "unit": "sentence",
+     "source": "docs/command_reference/04-dualc_lift.md",
+     "max_matches": 4,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A",
+     "bucket": "rewritten"
+    },
+    {
+     "id": "A-05-identifier",
+     "unit": "identifier",
+     "source": "docs/command_reference/05-dualc_csg_demo.md",
+     "max_matches": 7,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A"
+    },
+    {
+     "id": "A-05-sentence-gone",
+     "unit": "sentence",
+     "source": "docs/command_reference/05-dualc_csg_demo.md",
+     "max_matches": 11,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A",
+     "bucket": "gone"
+    },
+    {
+     "id": "A-05-sentence-partial",
+     "unit": "sentence",
+     "source": "docs/command_reference/05-dualc_csg_demo.md",
+     "max_matches": 1,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A",
+     "bucket": "partial"
+    },
+    {
+     "id": "A-05-sentence-rewritten",
+     "unit": "sentence",
+     "source": "docs/command_reference/05-dualc_csg_demo.md",
+     "max_matches": 2,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A",
+     "bucket": "rewritten"
+    },
+    {
+     "id": "A-06-evidence",
+     "unit": "evidence",
+     "source": "docs/command_reference/06-dualc_lattice.md",
+     "max_matches": 5,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A"
+    },
+    {
+     "id": "A-06-heading",
+     "unit": "heading",
+     "source": "docs/command_reference/06-dualc_lattice.md",
+     "max_matches": 3,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A"
+    },
+    {
+     "id": "A-06-identifier",
+     "unit": "identifier",
+     "source": "docs/command_reference/06-dualc_lattice.md",
+     "max_matches": 10,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A"
+    },
+    {
+     "id": "A-06-sentence-gone",
+     "unit": "sentence",
+     "source": "docs/command_reference/06-dualc_lattice.md",
+     "max_matches": 34,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A",
+     "bucket": "gone"
+    },
+    {
+     "id": "A-06-sentence-partial",
+     "unit": "sentence",
+     "source": "docs/command_reference/06-dualc_lattice.md",
+     "max_matches": 6,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A",
+     "bucket": "partial"
+    },
+    {
+     "id": "A-06-sentence-rewritten",
+     "unit": "sentence",
+     "source": "docs/command_reference/06-dualc_lattice.md",
+     "max_matches": 9,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A",
+     "bucket": "rewritten"
+    },
+    {
+     "id": "A-07-evidence",
+     "unit": "evidence",
+     "source": "docs/command_reference/07-dualc_slice.md",
+     "max_matches": 3,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A"
+    },
+    {
+     "id": "A-07-identifier",
+     "unit": "identifier",
+     "source": "docs/command_reference/07-dualc_slice.md",
+     "max_matches": 3,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A"
+    },
+    {
+     "id": "A-07-sentence-gone",
+     "unit": "sentence",
+     "source": "docs/command_reference/07-dualc_slice.md",
+     "max_matches": 17,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A",
+     "bucket": "gone"
+    },
+    {
+     "id": "A-07-sentence-partial",
+     "unit": "sentence",
+     "source": "docs/command_reference/07-dualc_slice.md",
+     "max_matches": 5,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A",
+     "bucket": "partial"
+    },
+    {
+     "id": "A-07-sentence-rewritten",
+     "unit": "sentence",
+     "source": "docs/command_reference/07-dualc_slice.md",
+     "max_matches": 3,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A",
+     "bucket": "rewritten"
+    },
+    {
+     "id": "A-10-evidence",
+     "unit": "evidence",
+     "source": "docs/command_reference/10-dualc_raymarch.md",
+     "max_matches": 3,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A"
+    },
+    {
+     "id": "A-10-heading",
+     "unit": "heading",
+     "source": "docs/command_reference/10-dualc_raymarch.md",
+     "max_matches": 2,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A"
+    },
+    {
+     "id": "A-10-identifier",
+     "unit": "identifier",
+     "source": "docs/command_reference/10-dualc_raymarch.md",
+     "max_matches": 8,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A"
+    },
+    {
+     "id": "A-10-sentence-gone",
+     "unit": "sentence",
+     "source": "docs/command_reference/10-dualc_raymarch.md",
+     "max_matches": 35,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A",
+     "bucket": "gone"
+    },
+    {
+     "id": "A-10-sentence-partial",
+     "unit": "sentence",
+     "source": "docs/command_reference/10-dualc_raymarch.md",
+     "max_matches": 4,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A",
+     "bucket": "partial"
+    },
+    {
+     "id": "A-10-sentence-rewritten",
+     "unit": "sentence",
+     "source": "docs/command_reference/10-dualc_raymarch.md",
+     "max_matches": 2,
+     "verdict": "superseded",
+     "record": "docs/roadmap/21-cli-consolidation/08-retire-tools.md#the-loss-audit",
+     "quote": "Class A — superseded by its P05 home",
+     "category": "A",
+     "bucket": "rewritten"
+    }
+   ]
+  }
+ }
+}
