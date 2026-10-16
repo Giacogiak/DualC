@@ -160,6 +160,13 @@ non-inheritable handle, rename — the bytes are identical to before (`cmp` on t
 cube slice), and a bad directory now exits 2 with `[dualc] error: cannot open '….png.part'`.
 D-40 and D-33 were re-deferred with new triggers (their rows); the other rows stay open.
 
+*2026-10-16, `plan/` deleted (D-51).* Loss audit before the commit:
+`docs_loss_audit.py --base 16d8c55 --head <scratch: the tree without plan/> --scope docs/ plan/
+--annex plan/`, scratch triage with no rules. `docs/` is byte-identical between the two, so its
+rows are scoring noise; of `plan/`, every file but `HANDOFF_P07_TASK1.md` was in P07's own audit
+above, and that handoff's rows each land in this page, the D-40 / D-33 rows, 19/08 run 07 or the
+PR's description. Nothing untriaged is lost; the dump is not kept (as 20/04).
+
 ---
 
 ← Back to [CLI consolidation](README.md) · the [Roadmap index](../README.md).
