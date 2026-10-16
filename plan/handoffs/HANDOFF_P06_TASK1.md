@@ -99,7 +99,7 @@ remote-run check reads that HEAD's run.
 
 ## Close
 
-`python3 scripts/check.py --docs --strict` after the last docs edit: 28 checks, 27 passed, 1 INFO (index-staleness, report only, the same 18 pre-existing rows), 0 failed. No `src/` or
+`python3 scripts/check.py --docs --strict` after the last docs edit: 28 checks, 27 passed, 1 INFO (index-staleness, report only, 17 pre-existing rows), 0 failed. No `src/` or
 `docs/design/` edit → no `/docs-semantic-lint` obligation. No docs file deleted → no loss-audit
 run owed by this unit (T2's is).
 
