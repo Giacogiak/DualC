@@ -20,6 +20,13 @@ compares field values, not shaded pixels, so it cannot catch them
 the tracer's step cap or miss threshold at grazing incidence (`examples/field_glsl.cpp`, the
 march loop) — a hypothesis, not yet looked at.
 
+**2026-10-16, a second renderer.** Block 21's P05 viewer recipe M6
+(`intersection(onion(gyroid(wavelength=0.1732),thickness=0.1),mesh(path="cube.obj"))`)
+renders clean under Mesa llvmpipe (`LIBGL_ALWAYS_SOFTWARE=1`, the renderer of CI's `gpu` job)
+and covered in blue 8×8-pixel blocks on this host's `NV92`, as does the old `dualc_raymarch`'s
+frame of the same recipe. The defect follows the renderer, not the graph: the likeliest home is
+the old GPU's driver, not the tracer. The trigger stands (a *second* renderer showing it).
+
 ---
 
 ← Back to the [topic README](README.md) · the [Roadmap index](../README.md).
