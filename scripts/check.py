@@ -791,9 +791,10 @@ def check_flag_table(ctx):
 
     The second direction (roadmap 19 Phase 6): every `--flag` a recipe uses is
     documented in a table of the page that owns the binary the recipe names --
-    a recipe on page 09 that runs `dualc_demo --sharp` is held to page 01's
-    tables, and a post-op flag of `dualc_primitive` to page 02's decorator
-    tables. A recipe flag the tool's parser does not know is reported too.
+    a recipe on any page that runs `dualc_boolean --sharp` is held to page 03's
+    tables. A recipe flag the tool's parser does not know is reported too. A
+    page whose tool has no `examples/<tool>.cpp` any more (a retired tool's
+    tombstone) is not a tool page.
     """
     exempt = set(ctx.data["flag_table_exempt"])
     bad, pages, flags = [], 0, 0
@@ -830,11 +831,7 @@ def check_flag_table(ctx):
             if flag not in page:
                 bad.append("docs/command_reference/%s:0: examples/%s.cpp parses `%s` "
                            "but the page never mentions it" % (name, tool, flag))
-    # Post-op flags are parsed by the shared registry, not by dualc_primitive.cpp.
-    common = ctx.text("examples/example_common.cpp") or ""
     known = {t: set(re.findall(r'"(--[a-z][a-z0-9-]*)', s)) for t, s in srcs.items()}
-    if "dualc_primitive" in known:
-        known["dualc_primitive"] |= set(re.findall(r'"(--[a-z][a-z0-9-]*)', common))
     documented = {}
     for tool, name in page_of.items():
         documented[tool] = set()

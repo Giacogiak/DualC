@@ -13,8 +13,9 @@
 #include <vector>
 
 // The slice core, moved here from dualc_slice.cpp unchanged in what it writes
-// (roadmap 21 #59): dualc_slice and dualc_field --slice both call
-// writeFieldSlice, so their PNG and SVG agree byte for byte on the same field.
+// (roadmap 21 #59); dualc_field --slice calls writeFieldSlice, and wrote the
+// same PNG and SVG bytes as dualc_slice on the same field until that tool
+// retired (#60).
 
 using dualc::Vector3;
 

@@ -1,9 +1,3 @@
-# --- mesh-in / mesh-out demo (v1) ---------------------------------------
-add_executable(dualc_demo dualc_demo.cpp)
-target_link_libraries(dualc_demo PRIVATE dualc::dualc)
-target_compile_features(dualc_demo PRIVATE cxx_std_17)
-dualc_target_options(dualc_demo)
-
 # --- v2 implicit-field CLI tools ----------------------------------------
 
 # Host-only file-I/O deps for the examples (PNG + 3MF/ZIP). These are vendored
@@ -14,7 +8,7 @@ dualc_target_options(dualc_demo)
 #                         writeField, so PUBLIC-linked into dualc_examples_common
 #                         (every CLI's -o .3mf path uses it).
 #   stb_image_write.h  -- Public Domain (PNG output). Used only by the slice
-#                         module (dualc_slice, dualc_field --slice) and the GL
+#                         module (dualc_field --slice) and the GL
 #                         plumbing's snapshot path, so it lives in its OWN lib
 #                         and is NOT pulled into dualc_examples_common: the
 #                         mesh-only CLIs never carry a PNG writer.
@@ -71,22 +65,20 @@ dualc_target_options(dualc_examples_common)
 target_include_directories(dualc_examples_common
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-foreach(tool dualc_primitive dualc_boolean dualc_lift dualc_csg_demo dualc_lattice dualc_slice)
-  add_executable(${tool} ${tool}.cpp)
-  target_link_libraries(${tool} PRIVATE dualc::dualc dualc_examples_common)
-  target_compile_features(${tool} PRIVATE cxx_std_17)
-  dualc_target_options(${tool})
-endforeach()
+# dualc_boolean: two meshes through one boolean (kept beside dualc_field, D-60).
+add_executable(dualc_boolean dualc_boolean.cpp)
+target_link_libraries(dualc_boolean PRIVATE dualc::dualc dualc_examples_common)
+target_compile_features(dualc_boolean PRIVATE cxx_std_17)
+dualc_target_options(dualc_boolean)
 
 # The slice module (field_slice.{h,cpp}, roadmap 21 #59): any field sampled on
 # a plane -> PNG heatmap + SVG contour. It is the only CLI code that writes PNG,
-# so it alone carries the stb impl; dualc_slice and dualc_field --slice share it.
+# so it alone carries the stb impl; dualc_field --slice is its caller.
 add_library(dualc_examples_slice STATIC field_slice.cpp)
 target_link_libraries(dualc_examples_slice
   PUBLIC dualc::dualc dualc_examples_common dualc_examples_img)
 target_compile_features(dualc_examples_slice PUBLIC cxx_std_17)
 dualc_target_options(dualc_examples_slice)
-target_link_libraries(dualc_slice PRIVATE dualc_examples_slice)
 
 # --- Field-graph parser/builder + the general dualc_field CLI ------------
 # field_graph.{h,cpp} parses the composable field-graph (canonical JSON) and
@@ -150,8 +142,8 @@ target_compile_features(dualc_gen_demo PRIVATE cxx_std_17)
 dualc_target_options(dualc_gen_demo)
 
 # --- GL targets (opt-in) -------------------------------------------------
-# The three GL targets below (dualc_raymarch, dualc_field_view, dualc_glsl_parity)
-# share one dependency pair, both permissive and both linked into these binaries
+# The two GL targets below (dualc_field_view, dualc_glsl_parity) share one
+# dependency pair, both permissive and both linked into these binaries
 # only -- libdualc is untouched:
 #   glad  -- the generated OpenGL 3.3 core loader (Public Domain), vendored under
 #            third_party/glad as its own lib: one C file + two headers, built
@@ -160,7 +152,7 @@ dualc_target_options(dualc_gen_demo)
 #            (an existing target, DUALC_GLFW_DIR, or the pinned FetchContent).
 # Each needs a GL window, so none has a CTest; dualc_field_view's --snapshot and
 # the parity harness's hidden window are the scripted paths.
-if(DUALC_BUILD_RAYMARCH_VIEWER OR DUALC_BUILD_FIELD_VIEW OR DUALC_BUILD_GLSL_PARITY)
+if(DUALC_BUILD_FIELD_VIEW OR DUALC_BUILD_GLSL_PARITY)
   add_library(dualc_examples_glad STATIC third_party/glad/src/glad.c)
   dualc_target_options(dualc_examples_glad VENDORED)
   target_include_directories(dualc_examples_glad
@@ -176,7 +168,7 @@ if(DUALC_BUILD_RAYMARCH_VIEWER OR DUALC_BUILD_FIELD_VIEW OR DUALC_BUILD_GLSL_PAR
   endif()
 
   # Shared GL plumbing (window/context, shader compile/link, uniform setters,
-  # orbit camera, headless PNG snapshot) for the GPU viewers and the parity
+  # orbit camera, headless PNG snapshot) for the GPU viewer and the parity
   # harness. PUBLIC-links glfw + glad + stb (the PNG writer, for the snapshot).
   add_library(dualc_examples_gl STATIC raymarch_gl.cpp)
   target_link_libraries(dualc_examples_gl
@@ -186,18 +178,9 @@ if(DUALC_BUILD_RAYMARCH_VIEWER OR DUALC_BUILD_FIELD_VIEW OR DUALC_BUILD_GLSL_PAR
   target_include_directories(dualc_examples_gl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
 
-# dualc_raymarch is the first GPU app: it sphere-traces the analytic TPMS field
-# per pixel, so cost is O(pixels) and independent of lattice density.
-if(DUALC_BUILD_RAYMARCH_VIEWER)
-  add_executable(dualc_raymarch dualc_raymarch.cpp)
-  target_link_libraries(dualc_raymarch PRIVATE dualc::dualc dualc_examples_common dualc_examples_gl)
-  target_compile_features(dualc_raymarch PRIVATE cxx_std_17)
-  dualc_target_options(dualc_raymarch)
-endif()
-
-# dualc_field_view generalises the raymarcher to ANY field-graph: it compiles the
-# graph to GLSL (dualc_examples_fieldglsl) and sphere-traces it, so the previewed
-# field is the exported field. Opt-in; needs a GL window (no CTest -- a hidden
+# dualc_field_view sphere-traces ANY field-graph per pixel (cost O(pixels),
+# independent of lattice density): it compiles the graph to GLSL
+# (dualc_examples_fieldglsl), so the previewed field is the exported field. Opt-in; needs a GL window (no CTest -- a hidden
 # --snapshot path renders one frame for scripted verification).
 if(DUALC_BUILD_FIELD_VIEW)
   add_executable(dualc_field_view dualc_field_view.cpp)
@@ -280,14 +263,9 @@ function(dualc_copy_demo_meshes target)
   endforeach()
 endfunction()
 
-foreach(bin dualc_demo dualc_primitive dualc_boolean dualc_lift dualc_csg_demo dualc_lattice dualc_slice dualc_field)
+foreach(bin dualc_boolean dualc_field)
   dualc_copy_demo_meshes(${bin})
 endforeach()
-
-# The raymarch viewer (gated) also reads demo meshes by bare filename.
-if(DUALC_BUILD_RAYMARCH_VIEWER)
-  dualc_copy_demo_meshes(dualc_raymarch)
-endif()
 
 # The field-graph viewer (gated) loads mesh sources + the sample field-graphs by
 # bare filename, so it gets both the demo meshes and the sample graphs next to it.
@@ -312,60 +290,43 @@ endif()
 
 # --- CLI smoke tests ------------------------------------------------------
 # Registered with ctest so the example binaries are exercised alongside the
-# unit tests. They cover one invocation per tool, including the post-op
-# chain, the infinite-bounds path, a mesh boolean, a 2D lift and a recipe.
-# Each test checks the exit code; the `<test>_content` tests registered after
-# them check what was written (check_cli_output.cmake, roadmap 17 #32).
+# unit tests. One invocation per path the retired single-purpose tools used to
+# cover (roadmap 21 #60), now through dualc_field: a mesh in (smooth, sharp,
+# the GWN sign, a soup through winding), a primitive + post-ops, an infinite
+# primitive with --bounds, a mesh boolean (plain and baked), both 2D lifts,
+# the six composition samples, a lattice to OBJ / STL / 3MF and a slice. Each
+# test checks the exit code; the `<test>_content` tests registered after them
+# check what was written (check_cli_output.cmake, roadmap 17 #32).
 if(DUALC_BUILD_TESTS)
-  # Exercises the post-op chain (onion decorator + twist domain op). Notes:
+  # A primitive through the post-op chain (onion decorator + twist domain op):
   #  - the onion wall (0.35) is kept comfortably thicker than the depth-6 cell
   #    so the shell resolves into a clean manifold (a thin wall under-resolved
   #    at low depth produces non-manifold junk -- one-crossing-per-edge limit);
-  #  - the twist is about x (axis 0), NOT the torus's y symmetry axis -- a
-  #    twist about a body-of-revolution's own axis is a no-op.
-  add_test(NAME cli_primitive
-    COMMAND dualc_primitive torus 0 0 0 2 0.5 --onion 0.35 --twist 0.4,0
-            --depth 6 -o cli_primitive.obj
-    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_primitive>)
-  add_test(NAME cli_primitive_infinite
-    COMMAND dualc_primitive plane 0 1 0 0 --bounds -2,-2,-2,2,2,2
-            --depth 4 -o cli_plane.obj
-    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_primitive>)
+  #  - the twist is about x, NOT the torus's y symmetry axis -- a twist about a
+  #    body-of-revolution's own axis is a no-op.
+  add_test(NAME cli_field_primitive
+    COMMAND dualc_field --expr "twist(onion(torus(0,0,0,2,0.5),thickness=0.35),radiansPerUnit=0.4,axis=x)"
+            --depth 6 -o cli_field_primitive.obj
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
+  # An unbounded primitive is contoured only inside an explicit --bounds box.
+  add_test(NAME cli_field_infinite
+    COMMAND dualc_field --expr "plane(0,1,0,0)" --bounds -2,-2,-2,2,2,2
+            --depth 4 -o cli_field_infinite.obj
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
   add_test(NAME cli_boolean
     COMMAND dualc_boolean smooth-union cube.obj cube.obj --k 0.3
             --depth 5 -o cli_boolean.obj
     WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_boolean>)
-  add_test(NAME cli_lift
-    COMMAND dualc_lift revolve circle 0 0 0.5 --offset 2
-            --depth 5 -o cli_lift.obj
-    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_lift>)
-  add_test(NAME cli_csg_demo
-    COMMAND dualc_csg_demo --recipe=smooth-blend --depth 5 -o cli_csg.obj
-    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_csg_demo>)
-  # Gyroid lattice infill inside the sample cube. Wavelength 0.5 = ~four
-  # cells across the 2-unit cube; offset 0.1 makes a thick double-sheet
-  # shell that comfortably resolves at depth 5.
-  add_test(NAME cli_lattice
-    COMMAND dualc_lattice cube.obj --type gyroid --wavelength 0.5
-            --offset 0.1 --depth 5 -o cli_lattice.obj
-    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_lattice>)
-  # Same lattice, exported through the extension-dispatched writer to the two
-  # manufacturing-facing formats (binary STL and 3MF-mesh). Their content
-  # checks hold both to cli_lattice.obj's face count.
-  add_test(NAME cli_lattice_stl
-    COMMAND dualc_lattice cube.obj --type gyroid --wavelength 0.5
-            --offset 0.1 --depth 5 -o cli_lattice.stl
-    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_lattice>)
-  add_test(NAME cli_lattice_3mf
-    COMMAND dualc_lattice cube.obj --type gyroid --wavelength 0.5
-            --offset 0.1 --depth 5 -o cli_lattice.3mf
-    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_lattice>)
-  # Field-on-plane sampler: a z=0 cross-section of the same gyroid-in-cube
-  # field, emitting a PNG heatmap + an SVG of the zero-isocontour.
-  add_test(NAME cli_slice
-    COMMAND dualc_slice cube.obj --type gyroid --wavelength 0.5 --offset 0.1
-            --plane z=0 --res 128 -o cli_slice.png
-    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_slice>)
+  # The same boolean as a graph; cli_field_boolean_same holds it byte-identical
+  # to cli_boolean's. The baked twin samples each operand from a 64^3 grid.
+  add_test(NAME cli_field_boolean
+    COMMAND dualc_field --expr "smooth-union(mesh(path=\"cube.obj\"),mesh(path=\"cube.obj\"),k=0.3)"
+            --depth 5 -o cli_field_boolean.obj
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
+  add_test(NAME cli_field_boolean_bake
+    COMMAND dualc_field --expr "smooth-union(mesh(path=\"cube.obj\",bake=64),mesh(path=\"cube.obj\",bake=64),k=0.3)"
+            --depth 5 -o cli_field_boolean_bake.obj
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
   # Field-graph CLI: an all-analytic composed graph (sphere carved out of a
   # box-bounded gyroid shell) to OBJ, the same to binary STL (exercises the -o
   # extension dispatch), and a graph with a mesh source (cube.obj) clipped by a
@@ -400,54 +361,54 @@ if(DUALC_BUILD_TESTS)
   add_test(NAME cli_field_strut
     COMMAND dualc_field --expr "intersection(mesh(path=\"cube.obj\"),octet(wavelength=0.5,radius=0.05))" --depth 5 -o cli_field_strut.obj
     WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
-  # The 2D layer in the graph (roadmap 21 #58): cli_lift's revolve as a graph.
-  # cli_field_lift_same holds the two outputs byte-identical (cmake -E
-  # compare_files), the equivalence that lets dualc_lift retire.
+  # The 2D layer in the graph (roadmap 21 #58): a circle revolved into a torus
+  # and a unit-square polygon extruded into a prism.
   add_test(NAME cli_field_lift
     COMMAND dualc_field --expr "revolve(circle(0,0,0.5),offset=2)" --depth 5 -o cli_field_lift.obj
     WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
-  # Any graph sliced (roadmap 21 #59): cli_slice's field as a graph, over the
-  # box dualc_slice samples (cube.obj's AABB padded 5% per axis).
-  # cli_field_slice_same holds both outputs byte-identical to cli_slice's, the
-  # equivalence that lets dualc_slice retire. cli_field_slice_refuse: --slice
-  # writes no mesh, so a mesh flag beside it is refused.
+  add_test(NAME cli_field_extrude
+    COMMAND dualc_field --expr "extrude(polygon(0,0,1,0,1,1,0,1),height=0.5)" --depth 5 -o cli_field_extrude.obj
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
+  # Any graph sliced (roadmap 21 #59): a gyroid shell clipped to cube.obj, over
+  # cube.obj's AABB padded 5% per axis. cli_field_slice_refuse: --slice writes
+  # no mesh, so a mesh flag beside it is refused.
   add_test(NAME cli_field_slice
     COMMAND dualc_field --expr "intersection(onion(gyroid(center=[0,0,0],wavelength=0.5),thickness=0.1),mesh(path=\"cube.obj\"))"
             --slice z=0 --res 128 --bounds -0.55,-0.55,-0.55,0.55,0.55,0.55
             -o cli_field_slice.png
     WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
-  # dualc_csg_demo's six recipes as committed graph files (roadmap 21 #60, P05):
-  # each sample against its recipe at the same depth, held byte-identical by
-  # cli_field_sample_<name>_same below. The mesh recipes read cube.obj.
-  set(DUALC_CSG_SAMPLES cube-minus-sphere smooth-blend displaced-sphere
-      mesh-shell mesh-minus-sphere twisted-mesh)
-  foreach(recipe ${DUALC_CSG_SAMPLES})
-    string(REPLACE "-" "_" sample ${recipe})
-    set(input "")
-    if(recipe MATCHES "mesh")
-      set(input cube.obj)
-    endif()
-    add_test(NAME cli_csg_sample_${sample}
-      COMMAND dualc_csg_demo --recipe=${recipe} ${input} --depth 5
-              -o cli_csg_${sample}.obj
-      WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
+  # The six composition samples (roadmap 21 #60, P05), committed graph files;
+  # the mesh ones read cube.obj.
+  set(DUALC_FIELD_SAMPLES cube_minus_sphere smooth_blend displaced_sphere
+      mesh_shell mesh_minus_sphere twisted_mesh)
+  foreach(sample ${DUALC_FIELD_SAMPLES})
     add_test(NAME cli_field_sample_${sample}
       COMMAND dualc_field ${sample}.json --depth 5 -o cli_field_${sample}.obj
       WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
   endforeach()
-  # cli_lattice's field as a graph (the defaults written out: on cube.obj the
-  # AABB centre is the origin and the auto-fit box is dualc_lattice's).
-  add_test(NAME cli_field_lattice
-    COMMAND dualc_field --expr "intersection(onion(gyroid(wavelength=0.5),thickness=0.1),mesh(path=\"cube.obj\"))"
-            --depth 5 -o cli_field_lattice.obj
-    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
+  # A gyroid lattice infill inside the sample cube (the wavelength-0.5 gyroid
+  # is ~four cells across the 2-unit cube; the 0.1 onion a thick double-sheet
+  # shell that resolves at depth 5), to OBJ and through the extension-dispatched
+  # writer to the two manufacturing-facing formats, binary STL and 3MF-mesh.
+  # Their content checks hold both to cli_field_lattice.obj's face count.
+  foreach(ext obj stl 3mf)
+    set(name cli_field_lattice_${ext})
+    if(ext STREQUAL "obj")
+      set(name cli_field_lattice)
+    endif()
+    add_test(NAME ${name}
+      COMMAND dualc_field --expr "intersection(onion(gyroid(wavelength=0.5),thickness=0.1),mesh(path=\"cube.obj\"))"
+              --depth 5 -o cli_field_lattice.${ext}
+      WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
+  endforeach()
   add_test(NAME cli_field_slice_refuse
     COMMAND dualc_field --expr "sphere(radius=1)" --slice z=0 --depth 5)
   set_tests_properties(cli_field_slice_refuse PROPERTIES
     PASS_REGULAR_EXPRESSION "--slice writes no mesh. it cannot be combined with --depth")
   # Demo-mesh generator + a few pipeline runs over the new meshes. The sphere
   # and torus exercise smooth/genus regimes; the bracket run exercises the
-  # sharp-feature toggle on a part with a reentrant edge.
+  # sharp-feature normals on a part with a reentrant edge; the sphere again
+  # under the generalized-winding-number sign oracle.
   # cli_gen_demo writes into a directory of its own: run in the tools' shared
   # output directory it rewrote cube.obj, sphere.obj, ... while the tests
   # above and below read them, a race under `ctest -j` (roadmap 17 #32).
@@ -455,15 +416,36 @@ if(DUALC_BUILD_TESTS)
   add_test(NAME cli_gen_demo
     COMMAND dualc_gen_demo all
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cli_gen_demo_out)
-  add_test(NAME cli_demo_sphere
-    COMMAND dualc_demo sphere.obj cli_sphere.obj --depth 6
-    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_demo>)
-  add_test(NAME cli_demo_torus
-    COMMAND dualc_demo torus.obj cli_torus.obj --depth 6
-    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_demo>)
-  add_test(NAME cli_demo_bracket_sharp
-    COMMAND dualc_demo --sharp bracket.obj cli_bracket.obj --depth 6
-    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_demo>)
+  add_test(NAME cli_field_mesh_sphere
+    COMMAND dualc_field --expr "mesh(path=\"sphere.obj\")" --depth 6 -o cli_field_mesh_sphere.obj
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
+  add_test(NAME cli_field_mesh_torus
+    COMMAND dualc_field --expr "mesh(path=\"torus.obj\")" --depth 6 -o cli_field_mesh_torus.obj
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
+  add_test(NAME cli_field_mesh_sharp
+    COMMAND dualc_field --expr "mesh(path=\"bracket.obj\",normals=sharp)" --depth 6
+            -o cli_field_mesh_sharp.obj
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
+  add_test(NAME cli_field_mesh_gwn
+    COMMAND dualc_field --expr "mesh(path=\"sphere.obj\",sign=gwn)" --depth 6 -o cli_field_mesh_gwn.obj
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
+  # The soup workflow: two overlapping boxes, each missing its +y face, sealed
+  # by the winding-number source into one closed solid -- a "not closed"
+  # warning fails the test. The soup is written here (`*.obj` is gitignored).
+  set(cli_soup ${CMAKE_CURRENT_BINARY_DIR}/cli_soup.obj)
+  file(WRITE ${cli_soup} "# two overlapping open boxes, each without its +y face
+v -1 -1 -1\nv 0.5 -1 -1\nv 0.5 0.5 -1\nv -1 0.5 -1
+v -1 -1 0.5\nv 0.5 -1 0.5\nv 0.5 0.5 0.5\nv -1 0.5 0.5
+v -0.5 -0.5 -0.5\nv 1 -0.5 -0.5\nv 1 1 -0.5\nv -0.5 1 -0.5
+v -0.5 -0.5 1\nv 1 -0.5 1\nv 1 1 1\nv -0.5 1 1
+f 1 3 2\nf 1 4 3\nf 5 6 7\nf 5 7 8\nf 1 2 6\nf 1 6 5\nf 2 3 7\nf 2 7 6\nf 4 1 5\nf 4 5 8
+f 9 11 10\nf 9 12 11\nf 13 14 15\nf 13 15 16\nf 9 10 14\nf 9 14 13
+f 10 11 15\nf 10 15 14\nf 12 9 13\nf 12 13 16
+")
+  add_test(NAME cli_field_winding
+    COMMAND dualc_field --expr "winding(path=\"${cli_soup}\")" --depth 6 -o cli_field_winding.obj
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
+  set_tests_properties(cli_field_winding PROPERTIES FAIL_REGULAR_EXPRESSION "not closed")
 
   # Content checks: a corrupt PNG or a truncated STL used to pass on its exit
   # code (audit C52). Each check reads one output of the test(s) it NEEDS,
@@ -483,69 +465,61 @@ if(DUALC_BUILD_TESTS)
     endif()
   endfunction()
 
-  foreach(pair
-      cli_primitive=cli_primitive.obj cli_primitive_infinite=cli_plane.obj
-      cli_boolean=cli_boolean.obj cli_lift=cli_lift.obj
-      cli_csg_demo=cli_csg.obj cli_lattice=cli_lattice.obj
-      cli_field=cli_field.obj cli_field_mesh=cli_field_mesh.obj
-      cli_field_expr=cli_field_expr.obj cli_field_strut=cli_field_strut.obj
-      cli_field_lift=cli_field_lift.obj cli_field_lattice=cli_field_lattice.obj
-      cli_demo_sphere=cli_sphere.obj cli_demo_torus=cli_torus.obj
-      cli_demo_bracket_sharp=cli_bracket.obj)
-    string(REPLACE "=" ";" pair "${pair}")
-    list(GET pair 0 producer)
-    list(GET pair 1 out)
-    dualc_cli_content(${producer}_content ${out} obj NEEDS ${producer})
+  # Each OBJ, and the least face count it must reach: about half of what Linux
+  # GCC Release wrote on 2026-10-16 (the retired tools wrote the same bytes), so
+  # an empty contour's placeholder triangle fails while another platform's
+  # rounding passes. The newer outputs keep the default floor of 1.
+  foreach(entry
+      cli_field_primitive=cli_field_primitive.obj=12000
+      cli_field_infinite=cli_field_infinite.obj=200
+      cli_boolean=cli_boolean.obj=2500
+      cli_field_boolean=cli_field_boolean.obj=2500
+      cli_field_boolean_bake=cli_field_boolean_bake.obj=1000
+      cli_field_lift=cli_field_lift.obj=4500
+      cli_field_extrude=cli_field_extrude.obj=5000
+      cli_field_lattice=cli_field_lattice.obj=8500
+      cli_field_mesh_sphere=cli_field_mesh_sphere.obj=15000
+      cli_field_mesh_torus=cli_field_mesh_torus.obj=20000
+      cli_field_mesh_sharp=cli_field_mesh_sharp.obj=17000
+      cli_field_mesh_gwn=cli_field_mesh_gwn.obj=15000
+      cli_field_winding=cli_field_winding.obj=10000
+      cli_field=cli_field.obj=1 cli_field_mesh=cli_field_mesh.obj=1
+      cli_field_expr=cli_field_expr.obj=1 cli_field_strut=cli_field_strut.obj=1)
+    string(REPLACE "=" ";" entry "${entry}")
+    list(GET entry 0 producer)
+    list(GET entry 1 out)
+    list(GET entry 2 floor)
+    dualc_cli_content(${producer}_content ${out} obj NEEDS ${producer}
+      OPTIONS -DMIN_FACES=${floor})
   endforeach()
+  set(DUALC_FIELD_SAMPLE_FLOORS 5000 1800 4000 8000 5000 4500)
+  foreach(i RANGE 5)
+    list(GET DUALC_FIELD_SAMPLES ${i} sample)
+    list(GET DUALC_FIELD_SAMPLE_FLOORS ${i} floor)
+    dualc_cli_content(cli_field_sample_${sample}_content
+      cli_field_${sample}.obj obj NEEDS cli_field_sample_${sample}
+      OPTIONS -DMIN_FACES=${floor})
+  endforeach()
+  add_test(NAME cli_field_boolean_same
+    COMMAND ${CMAKE_COMMAND} -E compare_files cli_boolean.obj cli_field_boolean.obj
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
+  set_tests_properties(cli_field_boolean_same PROPERTIES
+    FIXTURES_REQUIRED "cli_boolean;cli_field_boolean")
   # The same mesh in three formats: STL and 3MF must carry exactly the OBJ's
   # triangle count.
-  dualc_cli_content(cli_lattice_stl_content cli_lattice.stl stl
-    NEEDS cli_lattice_stl cli_lattice OPTIONS -DSAME_AS_OBJ=cli_lattice.obj)
-  dualc_cli_content(cli_lattice_3mf_content cli_lattice.3mf 3mf
-    NEEDS cli_lattice_3mf cli_lattice OPTIONS -DSAME_AS_OBJ=cli_lattice.obj)
+  foreach(ext stl 3mf)
+    dualc_cli_content(cli_field_lattice_${ext}_content cli_field_lattice.${ext} ${ext}
+      NEEDS cli_field_lattice_${ext} cli_field_lattice
+      OPTIONS -DSAME_AS_OBJ=cli_field_lattice.obj)
+  endforeach()
   dualc_cli_content(cli_field_stl_content cli_field.stl stl
     NEEDS cli_field_stl cli_field OPTIONS -DSAME_AS_OBJ=cli_field.obj)
   dualc_cli_content(cli_field_tiled_stl_content cli_field_tiled.stl stl
     NEEDS cli_field_tiled_stl)
-  dualc_cli_content(cli_slice_content cli_slice.png png
-    NEEDS cli_slice OPTIONS -DWIDTH=128 -DHEIGHT=128)
-  dualc_cli_content(cli_slice_svg_content cli_slice.svg svg
-    NEEDS cli_slice OPTIONS "-DCONTAINS=<line ")
   dualc_cli_content(cli_field_slice_content cli_field_slice.png png
     NEEDS cli_field_slice OPTIONS -DWIDTH=128 -DHEIGHT=128)
   dualc_cli_content(cli_field_slice_svg_content cli_field_slice.svg svg
     NEEDS cli_field_slice OPTIONS "-DCONTAINS=<line ")
-  foreach(ext png svg)
-    add_test(NAME cli_field_slice_same_${ext}
-      COMMAND ${CMAKE_COMMAND} -E compare_files cli_slice.${ext}
-              cli_field_slice.${ext}
-      WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
-    set_tests_properties(cli_field_slice_same_${ext} PROPERTIES
-      FIXTURES_REQUIRED "cli_slice;cli_field_slice")
-  endforeach()
-  add_test(NAME cli_field_lift_same
-    COMMAND ${CMAKE_COMMAND} -E compare_files cli_lift.obj cli_field_lift.obj
-    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
-  set_tests_properties(cli_field_lift_same PROPERTIES
-    FIXTURES_REQUIRED "cli_lift;cli_field_lift")
-  foreach(recipe ${DUALC_CSG_SAMPLES})
-    string(REPLACE "-" "_" sample ${recipe})
-    dualc_cli_content(cli_field_sample_${sample}_content
-      cli_field_${sample}.obj obj NEEDS cli_field_sample_${sample})
-    add_test(NAME cli_field_sample_${sample}_same
-      COMMAND ${CMAKE_COMMAND} -E compare_files cli_csg_${sample}.obj
-              cli_field_${sample}.obj
-      WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
-    set_tests_properties(cli_csg_sample_${sample} PROPERTIES
-      FIXTURES_SETUP cli_csg_sample_${sample})
-    set_tests_properties(cli_field_sample_${sample}_same PROPERTIES
-      FIXTURES_REQUIRED "cli_csg_sample_${sample};cli_field_sample_${sample}")
-  endforeach()
-  add_test(NAME cli_field_lattice_same
-    COMMAND ${CMAKE_COMMAND} -E compare_files cli_lattice.obj cli_field_lattice.obj
-    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
-  set_tests_properties(cli_field_lattice_same PROPERTIES
-    FIXTURES_REQUIRED "cli_lattice;cli_field_lattice")
   # --dump-json prints the graph: the check runs the tool itself.
   dualc_cli_content(cli_field_dump_json_content cli_field_dump.json json
     OPTIONS -DJSON_ROOT_OP=difference

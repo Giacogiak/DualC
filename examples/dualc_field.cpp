@@ -21,8 +21,8 @@
 // The parser/builder lives in field_graph.{h,cpp} (shared with the future
 // raymarch side-car and C ABI). The op vocabulary is the example_common
 // registry vocabulary; the schema is docs/roadmap/12-field-graph-and-app/01-field-graph.md.
-// --slice samples the built field on a plane instead (field_slice.{h,cpp}, the
-// core dualc_slice uses): a PNG heatmap + an SVG contour, no mesh.
+// --slice samples the built field on a plane instead (field_slice.{h,cpp}): a
+// PNG heatmap + an SVG contour, no mesh.
 
 namespace {
 
@@ -175,9 +175,9 @@ void printVocabulary() {
                "e.g. crystal\n"
                "                     transitions (unaligned struts stub at the "
                "seam)\n";
-  // The post-op tokens are the parsePostOp/tryMakePostOp set minus the leading
-  // "--"; this is a hand-maintained mirror of that registry (kept in sync with
-  // isPostOpFlag in example_common.cpp).
+  // The post-op tokens are the field-graph's post-op ops (tryMakePostOp in
+  // field_graph.cpp, over example_common's PostOpKind); this is a
+  // hand-maintained mirror of that registry.
   struct OpHint { const char* op; const char* hint; };
   const OpHint postOps[] = {
       {"offset", "grow/shrink (r)"},

@@ -864,9 +864,10 @@ NodeBake readNodeBake(const GraphNode& n, bool readBand) {
 // The 2D layer. A profile reads like a primitive -- grouped keys fill slices of
 // a default vector, `params=[...]` (or shorthand positionals) overrides it from
 // the front -- but in 2D, and it is built only through a lift (buildProfile).
-// The defaults are dualc_lift's, so `extrude(circle)` is `dualc_lift extrude
-// circle`. A flat list longer than the profile's arity is refused, as
-// dualc_lift refuses it; the polygon takes any even count for >= 3 vertices.
+// The defaults are the retired dualc_lift's, so `extrude(circle)` writes what
+// `dualc_lift extrude circle` wrote. A flat list longer than the profile's
+// arity is refused, as dualc_lift refused it; the polygon takes any even count
+// for >= 3 vertices.
 // ---------------------------------------------------------------------------
 struct ProfileLayout {
   std::vector<double> defaults;

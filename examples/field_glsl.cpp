@@ -470,8 +470,8 @@ void main() {
 )GLSL";
 
 // The fixed sphere-trace framework (camera, FD normals, shading). Calls the
-// generated sceneSDF(); the step is scaled by the graph-level uStepScale. Kept
-// in lock-step with dualc_raymarch.cpp's hand-written loop.
+// generated sceneSDF(); the step is scaled by the graph-level uStepScale. It
+// began as the hand-written loop of dualc_raymarch (retired, roadmap 21 #60).
 const char* kTraceFramework = R"GLSL(
 in  vec2 vUV;
 out vec4 fragColor;
@@ -1456,8 +1456,8 @@ int emitNodeImpl(const GraphNode& n, Ctx& c) {
     // same quantity the marcher feeds uHmem (min(diag*0.002, feat*0.003)), where
     // feat is the child subtree's characteristic length -- so the normalize
     // gradient is sampled over a float32-safe baseline that scales with the
-    // lattice. This matches dualc_raymarch's clean result exactly (its tpmsGradMag
-    // uses uHmem too). The eps floor stays 1e-9 to mirror NormalizedField::kEps;
+    // lattice. This matched the retired dualc_raymarch's clean result exactly
+    // (its tpmsGradMag used uHmem too). The eps floor stays 1e-9 to mirror NormalizedField::kEps;
     // the resulting preview-vs-export divergence is FD-tier and is gated by
     // dualc_glsl_parity.
     const double diag = c.bounds.isValid() ? c.bounds.extent().norm() : 1.0;

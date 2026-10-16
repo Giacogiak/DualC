@@ -18,8 +18,8 @@
 //     authoritative cross-section geometry, and the seed of future per-layer
 //     direct print-slicing.
 //
-// Shared by dualc_slice (a TPMS-in-mesh field from flags) and dualc_field
-// --slice (any field graph), so the two write the same bytes for the same field.
+// Called by dualc_field --slice (any field graph); the retired dualc_slice
+// (a TPMS-in-mesh field from flags) shared it and wrote the same bytes.
 
 namespace dce {
 

@@ -223,7 +223,7 @@ bool isLiftOp(const std::string& op);
 std::vector<double> readProfile(const GraphNode& profile, const std::string& lift);
 // A lift's own key ("offset" for revolve, "height" for extrude) and its value
 // checked as the builder checks it: `value` null means the key is absent (the
-// default, dualc_lift's, is returned). Each TU reads the key itself, so its
+// default, the retired dualc_lift's, is returned). Each TU reads the key itself, so its
 // unread-key check sees it.
 const char* liftParamKey(const std::string& lift);
 double checkLiftParam(const GraphNode& lift, const double* value);

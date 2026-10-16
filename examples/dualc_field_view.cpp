@@ -23,8 +23,7 @@
 // dualc_field_view -- a standalone GPU raymarch viewer for an arbitrary
 // composed field-graph (roadmap docs/roadmap/12 §D).
 //
-// Where dualc_raymarch hand-codes one TPMS-in-mesh field, this compiles ANY
-// field-graph (the same .fld/.json the dualc_field exporter consumes) to GLSL
+// It compiles ANY field-graph (the same .fld/.json the dualc_field exporter consumes) to GLSL
 // via field_glsl.h and sphere-traces it. So the field you contour to STL/3MF is
 // the field you preview -- one source of truth, no mesh round-trip. RAM is
 // bounded by the window, not the lattice, so it renders densities that OOM the
@@ -462,9 +461,9 @@ int main(int argc, char** argv) {
     dce::gl::setU3(prog, "uLightDir", light);
     // March constants scale to the finest feature present (recomputed each frame
     // so a reload tracks it): a dense lattice in large bounds needs a
-    // wavelength-relative FD step + step cap (the factors dualc_raymarch uses),
-    // or diag*0.001 would be too coarse to resolve a wall and the trace would
-    // step over it. Fall back to the diagonal for an all-analytic graph.
+    // wavelength-relative FD step + step cap (the factors the retired
+    // dualc_raymarch used), or diag*0.001 would be too coarse to resolve a
+    // wall and the trace would step over it. Fall back to the diagonal for an all-analytic graph.
     const double feat = scene.featureScale > 0.0
                             ? std::min(double(scene.featureScale), diag)
                             : diag;
