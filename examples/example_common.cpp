@@ -1962,6 +1962,26 @@ int pickTileDepthForBudget(const dualc::ImplicitField& field,
 
 } // namespace
 
+int writeBytesAtomic(const std::string& path, const std::string& bytes) {
+  g_lastError.clear();
+  AtomicOutput out(path);
+  FILE* f = openOutputFile(out.tmp(), true);
+  if (f == nullptr) {
+    reportError("cannot open '" + out.tmp() + "' for writing: " + errnoText());
+    return 2;
+  }
+  const bool wrote = bytes.empty() ||
+      std::fwrite(bytes.data(), 1, bytes.size(), f) == bytes.size();
+  // Close before commit() or the destructor touches the temp: Windows cannot
+  // rename or unlink an open file.
+  const bool closed = std::fclose(f) == 0;
+  if (!wrote || !closed) {
+    reportError("failed writing '" + out.tmp() + "': " + errnoText());
+    return 2;
+  }
+  return out.commit() ? 0 : 2;
+}
+
 namespace {
 
 // The body of writeField. The contour runs before any file is opened, so a

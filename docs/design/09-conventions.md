@@ -55,10 +55,11 @@ Streaming export (`--tile-depth`) writes `.stl` or `.3mf` only: a tiled OBJ woul
 and share no vertices, so it is refused rather than written badly. The user-facing table — extension, format, one-line note — is the command reference's
 [Export formats](../command_reference/README.md#export-formats--o-extension-dispatch).
 `dualc_field --slice` writes no mesh: `-o` is a base name (a trailing `.png` / `.svg` is
-stripped, any other suffix kept), and it always writes `<base>.png` and `<base>.svg`, in
-place, without the temp below (`stripSliceExt`, `writeFieldSlice` in `examples/field_slice.cpp`).
+stripped, any other suffix kept), and it always writes `<base>.png` and `<base>.svg`, each
+encoded in memory and then written through the same temp as below (`stripSliceExt`,
+`writeFieldSlice` in `examples/field_slice.cpp`; `writeBytesAtomic` in `example_common.cpp`).
 
-Every mesh writer targets `path + ".part"`, not `path`: the driver (`writeField`, the tiled
+Every writer targets `path + ".part"`, not `path`: the driver (`writeField`, the tiled
 driver behind both `writeFieldTiled*`) holds an `AtomicOutput` that renames the temp over
 `path` with `std::filesystem::rename` — which replaces an existing file on every platform —
 only after the writer's `finish()` succeeded, and removes the temp on any other exit. The

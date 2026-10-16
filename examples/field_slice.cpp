@@ -1,5 +1,7 @@
 #include "field_slice.h"
 
+#include "example_common.h"
+
 #include "stb_image_write.h"  // declarations only; impl in third_party/stb_impl.cpp
 
 #include <algorithm>
@@ -7,8 +9,8 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
-#include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -123,11 +125,19 @@ int writeHeatmapPng(const std::vector<float>& values, int res,
       else { rgb[o] = cr; rgb[o + 1] = cg; rgb[o + 2] = cb; }
     }
   }
-  if (stbi_write_png(path.c_str(), res, res, 3, rgb.data(), res * 3) == 0) {
-    std::cerr << "[" << tag << "] error: failed to write PNG '" << path << "'\n";
+  // Encoded in memory, then written through the `.part` convention like every
+  // other export (writeBytesAtomic): a failed or killed run never leaves a
+  // truncated PNG, and the handle is non-inheritable (roadmap 17 #52).
+  std::string png;
+  auto append = [](void* ctx, void* data, int size) {
+    static_cast<std::string*>(ctx)->append(static_cast<const char*>(data),
+                                           static_cast<std::size_t>(size));
+  };
+  if (stbi_write_png_to_func(append, &png, res, res, 3, rgb.data(), res * 3) == 0) {
+    std::cerr << "[" << tag << "] error: failed to encode PNG '" << path << "'\n";
     return 2;
   }
-  return 0;
+  return dce::writeBytesAtomic(path, png);
 }
 
 // Linear edge interpolation: where does the zero crossing sit between corner
@@ -198,11 +208,9 @@ std::vector<Seg2> marchingSquaresZero(const std::vector<float>& values, int res,
 int writeContourSvg(const std::vector<Seg2>& segs, double uMin, double uMax,
                     double vMin, double vMax, const std::string& path,
                     const std::string& tag) {
-  std::ofstream os(path);
-  if (!os) {
-    std::cerr << "[" << tag << "] error: cannot open '" << path << "'\n";
-    return 2;
-  }
+  // Built in memory and written like every export (writeBytesAtomic: the
+  // `.part` convention, a non-inheritable handle).
+  std::ostringstream os;
   const double w = uMax - uMin, h = vMax - vMin;
   const double sw = 0.0015 * std::max(w, h);  // stroke width ~ 0.15% of extent
   auto fy = [&](double v) { return vMin + vMax - v; };
@@ -216,11 +224,8 @@ int writeContourSvg(const std::vector<Seg2>& segs, double uMin, double uMax,
        << "\" y2=\"" << fy(s.y1) << "\"/>\n";
   }
   os << "</g>\n</svg>\n";
-  if (!os) {
-    std::cerr << "[" << tag << "] error: failed writing SVG '" << path << "'\n";
-    return 2;
-  }
-  return 0;
+  (void)tag;  // errors are reported by writeBytesAtomic as `[dualc] error:`
+  return dce::writeBytesAtomic(path, os.str());
 }
 
 }  // namespace

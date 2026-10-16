@@ -151,6 +151,15 @@ errors (216 samples inside), as `mesh-straddle`; `mesh-bake` max error 2.72e-4 a
 - **`plan/` is not deleted here.** The driver still reads the manifest and this unit's
   handoff. The deletion (D-51) is one commit after the driver marks P07 done.
 
+*2026-10-16, after the run (the `/plan-run` hand-back), Giacomo's answers to the close.*
+Two rows of the table above are done on the branch: the parity comments in
+`include/dualc/types.h` and `src/internal/sign_oracle.cpp` now say *closed, either winding*
+(and the GWN comments say it needs an outward winding), and `--slice` writes its PNG / SVG
+through `writeBytesAtomic` (`examples/example_common.cpp`): encoded in memory, then `.part`,
+non-inheritable handle, rename — the bytes are identical to before (`cmp` on the X-recipe
+cube slice), and a bad directory now exits 2 with `[dualc] error: cannot open '….png.part'`.
+D-40 and D-33 were re-deferred with new triggers (their rows); the other rows stay open.
+
 ---
 
 ← Back to [CLI consolidation](README.md) · the [Roadmap index](../README.md).

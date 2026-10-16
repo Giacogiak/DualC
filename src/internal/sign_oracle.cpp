@@ -42,13 +42,15 @@ bool SignOracle::isInside(const Vector3& p) const {
   if (method_ == SignMethod::GENERALIZED_WINDING_NUMBER) {
     // Hierarchically accelerated generalized winding number. w(p) ~ 1 inside
     // and ~0 outside; the 0.5 threshold recovers a robust inside/outside even
-    // on non-watertight input (open shells, soup, self-intersections).
+    // on non-watertight input (open shells, soup, self-intersections). It
+    // needs an outward winding: an inside-out mesh reads ~-1 inside.
     return bvh_.windingNumberFast(p) > 0.5;
   }
 
-  // WINDING_NUMBER: 3-ray majority parity. Correct for closed/oriented
-  // meshes; robust against single-ray degeneracies (grazing edges,
-  // coplanar near-misses). For broken input prefer GENERALIZED_WINDING_NUMBER.
+  // WINDING_NUMBER: 3-ray majority parity. Correct for closed meshes of
+  // either winding (a hit count ignores facing); robust against single-ray
+  // degeneracies (grazing edges, coplanar near-misses). For broken input
+  // prefer GENERALIZED_WINDING_NUMBER.
   int votes = 0;
   for (const Vector3& d : kProbeDirs) {
     if ((bvh_.countRayHits(p, d) & 1) != 0) ++votes;

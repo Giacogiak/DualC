@@ -50,6 +50,13 @@ struct DecimateOpts {
 // entry. Per thread, because several exports may run at once in one process.
 const std::string& lastError();
 
+// Write `bytes` to `path` the way every export does: through `path + ".part"`,
+// opened non-inheritable, renamed over `path` only once the bytes are written
+// and the file closed. Errors print as `[dualc] error:` and reach lastError().
+// Returns 0 on success, 2 on an open / write / rename failure. For outputs
+// built in memory (the slice PNG and SVG).
+int writeBytesAtomic(const std::string& path, const std::string& bytes);
+
 // Sample `field`, contour it once, and write `path` in the format chosen by
 // its extension: `.obj` (per-vertex normals), `.stl` (binary), or `.3mf`
 // (3MF-mesh, 1 world unit = 1 mm). When `dec.mode != None`, a global QEM

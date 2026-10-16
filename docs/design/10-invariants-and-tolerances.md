@@ -42,13 +42,12 @@ of these links here rather than restating the number.
 - **Fallbacks are reported, never silent when asked.** An invalid root box and an empty
   contour each degrade to a defined placeholder and set a `Diagnostics` flag
   ([§ 9](07-limitations.md#behavioural-notes-worth-knowing)).
-- **A destination file only ever appears complete.** Every mesh export writes `path + ".part"`
+- **A destination file only ever appears complete.** Every export writes `path + ".part"`
   and renames it over `path` after a successful finish (`AtomicOutput` in
   `examples/example_common.cpp`); a cancel, a writer failure, an unbounded-field error or a
   killed process leaves at most the `.part`, and a file already at `path` survives a failed
   re-export. The hooks below are what make "cancel" reach a writer; the convention holds
   with or without them ([09 § Export-format dispatch](09-conventions.md#export-format-dispatch)).
-  The `--slice` PNG / SVG are written in place.
 
 ## Hooks: cancellation and progress
 
