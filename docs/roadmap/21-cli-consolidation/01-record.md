@@ -191,10 +191,10 @@ content checks; a new 11 child page with its flag table and recipes.
 
 ## #60 Retire the eight tools
 
-**PLANNED** — opened 2026-10-14; P05 T1 landed 2026-10-16 ([07](07-docs-migration.md)), P06
-next. The eight: `dualc_csg_demo`, `dualc_primitive`, `dualc_raymarch`, `dualc_lattice`
-(D-55), `dualc_demo` (D-56), `dualc_lift` (D-57), `dualc_slice` (D-58); `dualc_boolean` stays
-(D-60).
+**PLANNED** — P05, P06 T1 landed 2026-10-16 ([07](07-docs-migration.md),
+[08](08-retire-tools.md)). The eight: `dualc_csg_demo`, `dualc_primitive`, `dualc_raymarch`,
+`dualc_lattice` (D-55), `dualc_demo` (D-56), `dualc_lift` (D-57), `dualc_slice` (D-58);
+`dualc_boolean` stays (D-60).
 
 *Acceptance:* before anything is deleted, everything a retiring page teaches has a home under
 `11-dualc_field/` or `12-dualc_field_view/` — the primitive catalogue and the decorator /

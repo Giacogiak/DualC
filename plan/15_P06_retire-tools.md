@@ -30,6 +30,9 @@ Branch `feat/cli-consolidation`.
 
 - `python3 scripts/check.py --clean` green (a clean configure proves no stale option),
   `--gpu --build-dir build-gl` green; `python3 plan/remote_run_check.py` exits 0.
+  *Corrected by P06.1:* `--clean` re-runs configure in the existing tree (the cache and the
+  objects stay, so the warnings scan sees 0 TUs); the clean proof is a fresh tree,
+  `python3 scripts/check.py --build-dir <new dir>`.
 
 ### T2. Tombstones, indexes, the loss audit
 
