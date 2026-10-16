@@ -1,6 +1,7 @@
 # Tool 2: `dualc_primitive`
 
 Analytic primitives + decorators + domain operators.
+The same catalogue in graph syntax, byte-identical, is [11/12](11-dualc_field/12-primitive-catalogue.md).
 
 ```
 dualc_primitive <name> [params...] [post-ops...] [options]

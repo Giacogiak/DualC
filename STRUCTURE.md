@@ -112,7 +112,9 @@ DualC/
 │   ├── dualc_io_stress.cpp    OPT-IN concurrent-export I/O harness (17 #52): N exports at once to the temp dir, every
 │   │                            `.part` rename must land; keeps each `[dualc] error` line, probes the rename again,
 │   │                            `--force-hold` (Windows) pins the sharing-violation case (no CTest; `check.py --io-stress`)
-│   ├── samples/              Ready-to-run field-graphs (gyroid_box.json, mesh_lattice.json) copied next to dualc_field
+│   ├── samples/              Ready-to-run field-graphs (gyroid_box.json, mesh_lattice.json) copied next to dualc_field,
+│   │                            with dualc_csg_demo's six recipes as graphs (cube_minus_sphere.json, smooth_blend.json,
+│   │                            displaced_sphere.json, mesh_shell.json, mesh_minus_sphere.json, twisted_mesh.json)
 │   └── third_party/          Host-only I/O deps (never linked into libdualc)
 │       ├── miniz.{c,h}          ZIP/deflate for 3MF export (MIT)
 │       ├── miniz_LICENSE.txt

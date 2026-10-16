@@ -63,7 +63,7 @@ export for free. They are documented inside the `dualc_field` pages:
 | --- | --- | --- |
 | **Strut lattices** (wireframe crystals) | `sc` · `bcc` · `fcc` · `octet` | [11-dualc_field/ § Strut lattices](11-dualc_field/02-strut-lattices.md#strut-lattices-wireframe-crystals) (params, clipping, recipes S1–S17); live preview in [12-dualc_field_view/](12-dualc_field_view/README.md) |
 | **Graded strut radius** (spatially-varying thickness) | `graded-offset` | [11-dualc_field/ § Graded shell & graded inflation](11-dualc_field/03-graded-and-morph.md#graded-shell--graded-inflation-two-children-base-control) |
-| **TPMS surfaces** | `gyroid` · `schwarz-p` · `diamond` · `fischer-koch` · `lidinoid` · `neovius` | [11-dualc_field/](11-dualc_field/README.md); mesh-bounded infill also has the standalone [06-dualc_lattice.md](06-dualc_lattice.md) |
+| **TPMS surfaces** | `gyroid` · `schwarz-p` · `diamond` · `fischer-koch` · `lidinoid` · `neovius` | [11-dualc_field/](11-dualc_field/README.md); mesh-bounded infill: [11/14](11-dualc_field/14-tpms-in-mesh.md) |
 | **Graded shell thickness** | `graded-onion` | [11-dualc_field/ § Graded shell & graded inflation](11-dualc_field/03-graded-and-morph.md#graded-shell--graded-inflation-two-children-base-control) |
 | **Crystal morph / spatial blend** (three children) | `mix` | [11-dualc_field/ § Spatial morph](11-dualc_field/03-graded-and-morph.md#spatial-morph-three-children-a-b-control) |
 
@@ -73,10 +73,13 @@ Design rationale and status: [roadmap 05 §17 / §17b](../roadmap/05-tpms-lattic
 
 | Feature | Flags / nodes | Page |
 | --- | --- | --- |
-| Seal an open shell, soup or self-intersecting mesh into one watertight solid | `--gwn-field` (`dualc_demo`); the `winding` node (`dualc_field`) | [01 § Choosing a sign oracle](01-dualc_demo.md#choosing-a-sign-oracle); [11/01 § Sources](11-dualc_field/01-op-vocabulary.md#sources) |
-| Sign oracles for a clean or almost-clean mesh | `--pseudonormal`, `--gwn`; `mesh(sign=…)` | [01](01-dualc_demo.md#choosing-a-sign-oracle); [11/01](11-dualc_field/01-op-vocabulary.md#sources) |
-| Hollow a mesh into a shell | `--recipe=mesh-shell`; `--onion T`; `onion(mesh(…))` | [05](05-dualc_csg_demo.md#recipes) R4; [02](02-dualc_primitive.md#the-6-decorators--one-by-one) D3; [11/04](11-dualc_field/04-workflow-open-surface.md#recipes) W5 |
-| Accelerate a huge mesh boolean by baking | `--bake N` | [03](03-dualc_boolean.md#the-options-in-detail) |
+| Re-mesh a mesh; seal an open shell, soup or self-intersecting mesh into one watertight solid | `mesh(path=…)`; the `winding` node (was `dualc_demo --gwn-field`) | [11/11](11-dualc_field/11-mesh-in.md) G1, G9 |
+| Sign oracles for a clean or almost-clean mesh | `mesh(sign=…)` (was `--pseudonormal`, `--gwn`) | [11/11 § Choosing a sign oracle](11-dualc_field/11-mesh-in.md#choosing-a-sign-oracle) |
+| The 30 primitives, decorators, domain operators, displace functions | `sphere(…)`, `onion(…)`, `twist(…)`, … (was `dualc_primitive`) | [11/12](11-dualc_field/12-primitive-catalogue.md) |
+| Composition samples (boolean, blend, displace, mesh shell / carve / twist) | `examples/samples/*.json` (was `dualc_csg_demo`) | [11/13](11-dualc_field/13-composition-samples.md) |
+| A TPMS lattice inside a mesh, its defaults written out | `intersection(TPMS(…), mesh(…))` (was `dualc_lattice`) | [11/14](11-dualc_field/14-tpms-in-mesh.md); preview: [12/05](12-dualc_field_view/05-tpms-in-mesh-preview.md) |
+| Hollow a mesh into a shell | `onion(mesh(…))` | [11/13](11-dualc_field/13-composition-samples.md) K4; [11/04](11-dualc_field/04-workflow-open-surface.md#recipes) W5 |
+| Accelerate a huge mesh boolean by baking | `bake=N` on the node; `dualc_boolean --bake N` | [11/01 § Sources](11-dualc_field/01-op-vocabulary.md#sources); [03](03-dualc_boolean.md#the-options-in-detail) |
 | Text shorthand, underscore aliases, positional params | `--expr` | [11/01 § Text shorthand](11-dualc_field/01-op-vocabulary.md#text-shorthand) |
 | Graph input forms: JSON file, `.fld` shorthand file, stdin `-`, canonicalise, list the vocabulary | `--dump-json`, `--list` | [11/README § Synopsis](11-dualc_field/README.md#synopsis); [11/01](11-dualc_field/01-op-vocabulary.md#choosing-an-input-form-json-file-vs---expr-vs-stdin) |
 | Quote a mesh path inside `--expr` on Windows PowerShell 5.1 | `mesh(path=\"…\")` | [11/01 § `--expr` and shell quoting](11-dualc_field/01-op-vocabulary.md#--expr-and-shell-quoting); the rule: [design/09](../design/09-conventions.md#windows-powershell-51-quoting) |
@@ -85,10 +88,10 @@ Design rationale and status: [roadmap 05 §17 / §17b](../roadmap/05-tpms-lattic
 | Streaming / tiled export at one-tile RAM | `--tile-depth` | [11/06](11-dualc_field/06-streaming-tiled-export.md) |
 | Pick the tile depth from a RAM budget | `--mem` | [11/07](11-dualc_field/07-mem-budget.md) |
 | Slicer-native 3MF and a globally welded object | `-o .3mf`, `--weld` | [11/08](11-dualc_field/08-3mf-and-weld.md) |
-| Revolve or extrude a 2D profile | `dualc_lift`; `revolve(…)` / `extrude(…)` | [04](04-dualc_lift.md); [11/09](11-dualc_field/09-2d-profiles-and-lifts.md) |
+| Revolve or extrude a 2D profile | `revolve(…)` / `extrude(…)` (was `dualc_lift`) | [11/09](11-dualc_field/09-2d-profiles-and-lifts.md) |
 | Headless PNG of a field graph; smooth orbit on a weak GPU; the WebGL2 shader | `--snapshot`, `--preview-scale`, `--es` | [12/README](12-dualc_field_view/README.md#cli-flags) |
 | Inspect a lattice membrane without the volume's skin | `intersection(onion(normalize(tpms)), volume)` | [12/04](12-dualc_field_view/04-open-surface-preview.md); export it: [11/04](11-dualc_field/04-workflow-open-surface.md) |
-| Cross-section of a field on a plane | `--plane`, `--res`; `--slice` (any graph) | [07](07-dualc_slice.md); [11/10](11-dualc_field/10-slice.md) |
+| Cross-section of a field on a plane | `--slice`, `--res` (was `dualc_slice --plane`) | [11/10](11-dualc_field/10-slice.md) |
 
 ## GPU viewer keyboard map (`dualc_raymarch` & `dualc_field_view`)
 

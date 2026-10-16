@@ -1,0 +1,3 @@
+{ "version": 1, "units": "mm",
+  "root": { "op": "twist", "radiansPerUnit": 2, "axis": "y", "in": [
+    { "op": "mesh", "path": "cube.obj" } ] } }

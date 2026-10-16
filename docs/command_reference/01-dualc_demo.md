@@ -1,6 +1,7 @@
 # Tool 1: `dualc_demo` (mesh in → mesh out)
 
 Re-mesh a triangle mesh through the dual contourer.
+The graph form, flag by flag and byte-identical, is [11/11](11-dualc_field/11-mesh-in.md).
 
 ```
 dualc_demo [options] [input.obj] [output.obj]

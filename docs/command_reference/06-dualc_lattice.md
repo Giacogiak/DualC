@@ -1,6 +1,7 @@
 # Tool 6: `dualc_lattice` (TPMS infill bounded by a mesh)
 
 TPMS lattice infill bounded by an input mesh.
+The same graph with its defaults written out, byte-identical, is [11/14](11-dualc_field/14-tpms-in-mesh.md).
 
 ```
 dualc_lattice <input.obj> [--type NAME] [--wavelength W] [--offset T]

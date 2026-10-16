@@ -1,0 +1,4 @@
+{ "version": 1, "units": "mm",
+  "root": { "op": "smooth-union", "k": 0.5, "in": [
+    { "op": "sphere", "center": [-0.6,0,0], "radius": 0.8 },
+    { "op": "sphere", "center": [0.6,0,0], "radius": 0.8 } ] } }

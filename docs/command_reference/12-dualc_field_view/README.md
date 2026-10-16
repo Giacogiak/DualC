@@ -85,6 +85,7 @@ the resolution model.
 | [Supported nodes and worked examples](02-nodes-and-examples.md) | The node vocabulary (the same as `dualc_field`'s) and recipes P1–P16: composed CSG, mesh sources, graded and tapered lattices, dense previews, headless snapshots. |
 | [Recipes by node category (the full vocabulary)](03-recipes-by-node.md) | One ready-to-run preview per node family, N1–N21: the primitive parameter forms, the domain operators, `winding` soups, the 2D profiles under the lifts, DAG dedup. |
 | [Isolating a TPMS surface inside a volume (meshless preview)](04-open-surface-preview.md) | The thin-shell recipe `intersection(onion(normalize(tpms)), volume)` that shows a lattice membrane without the volume's skin, O1–O5. |
+| [Previewing a TPMS lattice inside a mesh](05-tpms-in-mesh-preview.md) | The density-independent lattice-in-mesh preview `dualc_raymarch` hard-codes: its defaults written into the graph, what replaces its lattice hotkeys, recipes M1–M8. |
 
 ## Verifying preview == export
 

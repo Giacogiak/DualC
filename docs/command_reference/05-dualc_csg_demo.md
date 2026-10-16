@@ -3,6 +3,7 @@
 Baked field-tree composition recipes — hand-built trees that showcase
 composition, mesh+primitive booleans, and the `displaced` operator (whose
 function argument has no plain CLI form).
+The six recipes as graph files in `examples/samples/`, byte-identical, are [11/13](11-dualc_field/13-composition-samples.md).
 
 ```
 dualc_csg_demo --recipe=NAME [input.obj] [options]

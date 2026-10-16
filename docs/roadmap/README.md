@@ -24,7 +24,7 @@ a side tool holds moves into the graph, and so within the C ABI's reach, and the
 ([D-55 … D-59](../decisions/01-settled.md); `dualc_boolean` stays,
 [D-60](../decisions/01-settled.md)). It runs as the
 [consolidation plan](../raw/2026-10-14-cli-consolidation-plan.md) on branch
-`feat/cli-consolidation`; #55–#59 are DONE; **NEXT** is #60, the tools' retirement. Before it the engine
+`feat/cli-consolidation`; #55–#59 are DONE; **NEXT** is #60 — docs migrated (P05), tools next. Before it the engine
 track drew on the 2026-08-19 audit's ledger ([17](17-code-audit-and-hardening/README.md))
 through the hosted-CI plan, run closed 2026-10-07 ([20/04](20-public-delivery/04-hosted-ci-plan-run.md));
 the rest of **#34** resumes after block 21. The docs restructuring ([19](19-docs-layers/README.md))
@@ -60,7 +60,7 @@ row (cited by ID).
 1. **CLI consolidation** ([21](21-cli-consolidation/README.md)) — the side CLIs folded into
    `dualc_field` + `dualc_field_view`; the one status table is
    [21 § The pages of this block](21-cli-consolidation/README.md#the-pages-of-this-block).
-   **NEXT:** #60, the docs migrated, then the tools retired (P05, P06).
+   **NEXT:** #60 — the docs migrated 2026-10-16 (P05, 21/07); the tools retired next (P06).
 2. **Engine hardening — the audit's open findings**
    ([17](17-code-audit-and-hardening/README.md)) — a standing ledger, not a phase; the
    one status table is [17 § Tracked items](17-code-audit-and-hardening/README.md#tracked-items--status-at-a-glance).

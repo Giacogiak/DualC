@@ -1,6 +1,7 @@
 # Tool 10: `dualc_raymarch` (GPU raymarch viewer)
 
 Standalone GPU raymarch viewer — density-independent (opt-in build).
+The same preview as a `dualc_field_view` graph, and what replaces its lattice keys, is [12/05](12-dualc_field_view/05-tpms-in-mesh-preview.md).
 
 ```
 dualc_raymarch [<input.obj>] [--type NAME] [--wavelength W] [--offset T]

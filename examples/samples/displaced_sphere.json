@@ -1,0 +1,3 @@
+{ "version": 1, "units": "mm",
+  "root": { "op": "displace", "fn": "sine", "amplitude": 0.08, "frequency": 8, "in": [
+    { "op": "sphere", "center": [0,0,0], "radius": 1 } ] } }

@@ -93,6 +93,10 @@ own and links back here for the options table.
 | [The 3MF path and `--weld`](08-3mf-and-weld.md) | Streaming to a slicer-native 3MF (per-tile objects, `1 unit = 1 mm`), `--weld` for a single globally-manifold object, and the tiled/welded recipes. |
 | [2D profiles and lifts (`revolve` · `extrude`)](09-2d-profiles-and-lifts.md) | The profiles `circle`, `rect`, `segment`, `polygon` and the two lifts that make them 3D — the graph form of `dualc_lift`: keys and defaults, the typing rule, recipes. |
 | [Slicing a graph (`--slice`)](10-slice.md) | Any graph sampled on an axis plane → PNG heatmap + SVG contour, no mesh — the graph form of `dualc_slice`: options and defaults, the refused mesh flags, the region, recipes. |
+| [Mesh in → mesh out](11-mesh-in.md) | Re-meshing a mesh, choosing a sign oracle, sharp normals, sealing soup with `winding` — the graph form of `dualc_demo`, flag by flag. |
+| [The primitive catalogue](12-primitive-catalogue.md) | P1–P30 with their defaults, the decorators D1–D7, the domain operators O1–O6 and the displace functions — `dualc_primitive`'s catalogue in graph syntax. |
+| [Six composition samples](13-composition-samples.md) | The six `examples/samples/` graphs that were `dualc_csg_demo`'s recipes, each byte-identical. |
+| [A TPMS lattice inside a mesh](14-tpms-in-mesh.md) | The graph `dualc_lattice` composed, its three mesh-derived defaults written out, wavelength vs. thickness, the six TPMS formulas. |
 
 ## Diagnostics
 
@@ -152,8 +156,8 @@ dualc_field mesh_lattice.json --depth 7 -o bracket_infill.stl
 cat graph.json | dualc_field - -o out.obj
 ```
 
-Two ready-to-run samples ship next to the binary:
-`gyroid_box.json` and `mesh_lattice.json` (sources in `examples/samples/`).
+Eight ready-to-run samples ship next to the binary (sources in `examples/samples/`):
+`gyroid_box.json`, `mesh_lattice.json` and the six of [13](13-composition-samples.md).
 
 ## Recipes
 
@@ -170,8 +174,12 @@ Two ready-to-run samples ship next to the binary:
 | T1–T2 | Tiled STL / 3MF at one-tile RAM | [06](06-streaming-tiled-export.md#recipes) |
 | U1–U5 | `--mem` budgets | [07](07-mem-budget.md#recipes) |
 | Z1–Z4 | Tiled and welded 3MF | [08](08-3mf-and-weld.md#recipes) |
-| R1–R4 | 2D profiles revolved and extruded, `dualc_lift`'s recipes as graphs | [09](09-2d-profiles-and-lifts.md#recipes) |
-| X1–X5 | Slices: a TPMS section, a shell's wall, a lattice layer, `dualc_slice`'s S1 as a graph | [10](10-slice.md#recipes) |
+| R1–R4, L1–L8 | 2D profiles revolved and extruded, `dualc_lift`'s recipes as graphs | [09](09-2d-profiles-and-lifts.md#recipes) |
+| X1–X8 | Slices: a TPMS section, a shell's wall, a lattice layer, `dualc_slice`'s S1–S4 as graphs | [10](10-slice.md#recipes) |
+| G1–G9, H1–H2 | Re-mesh, sharp normals, collapse, the three oracles, the soup sealed to STL; mesh booleans | [11](11-mesh-in.md#recipes) |
+| C1–C7 | Primitives overridden, displaced, composed | [12](12-primitive-catalogue.md#recipes) |
+| K1–K6 | The six composition samples | [13](13-composition-samples.md#recipes) |
+| Y1, T7–T14 | Lattices in a mesh: the six types, shells, real-mesh infill, the defaults computed | [14](14-tpms-in-mesh.md#recipes) |
 
 ## Scope
 

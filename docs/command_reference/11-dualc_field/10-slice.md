@@ -65,6 +65,9 @@ exit 1 (as its contour); a graph error is reported as for any build, with its lo
 | X3 | A lattice-in-mesh layer: one print layer of a gyroid infill inside the bracket, at 1024² |
 | X4 | `dualc_slice`'s S1 as a graph — byte-identical PNG and SVG |
 | X5 | The shipped sample `mesh_lattice.json`, cut at `x=0` |
+| X6 | `dualc_slice`'s S2 corrected: a thin gyroid shell in the bunny, cut through its middle at 1024² |
+| X7 | `dualc_slice`'s S3: a Schwarz-P shell in the cube on `x=0` |
+| X8 | `dualc_slice`'s S4: millimetre scale — 5 mm gyroid cells, 2 mm walls, through the foot's centre |
 
 ```bash
 # X1 — the gyroid's z=0 section over a 4-unit box → gyroid_z.png + gyroid_z.svg:
@@ -83,7 +86,23 @@ dualc_field --expr "intersection(onion(gyroid(center=[0,0,0],wavelength=0.5),thi
 
 # X5 — a graph file:
 dualc_field mesh_lattice.json --slice x=0 -o mesh_lattice_x
+
+# X6–X8 — the lattice-in-mesh graph of 14, with dualc_slice's defaults written in
+# (C = the mesh's AABB centre, W = its diagonal / 10, the plane = the region's centre):
+dualc_field --expr 'intersection(onion(normalize(gyroid(center=[-0.0168,0.1102,-0.0015],wavelength=0.025)),thickness=0.002),mesh(path="data/bunny.obj"))' --slice y=0.11 --res 1024 -o bunny_y
+dualc_field --expr 'intersection(onion(schwarz_p(wavelength=0.4),thickness=0.05),mesh(path="cube.obj"))' --slice x=0 -o cube_x
+dualc_field --expr 'intersection(onion(normalize(gyroid(center=[0,0,44.5],wavelength=5)),thickness=1),mesh(path="data/foot.obj"))' --slice z=44.5 -o foot
 ```
+
+- **`dualc_slice`'s defaults.** Its plane defaulted to `z` at the region's centre; `--slice`
+  has no default — read the centre off the mesh's box (the foot spans z 0 … 89, so `z=44.5`).
+  Its lattice was always the graph of [14](14-tpms-in-mesh.md#the-graph-and-its-defaults),
+  with that page's defaults (`wavelength` = the AABB diagonal / 10, `center` = the AABB
+  centre); its `-o` replaced any extension, and defaulted to `<type>_slice`.
+- **X6 corrects S2**, which cut `y=0` — below the bunny, whose box starts at `y ≈ 0.025`
+  (the tool warned *plane y=0 is outside the sampling bounds*) — and with a 1-unit wall, which
+  is thicker than the bunny (≈ 0.15 across) and fills every cell
+  ([12/05](../12-dualc_field_view/05-tpms-in-mesh-preview.md#recipes) M4 shows it).
 
 - **X4 and the region.** `dualc_slice` pads the mesh's box by 5 % **per axis**; `--slice`
   without `--bounds` pads by 5 % of the **largest** extent. On a cube they agree (X4 without

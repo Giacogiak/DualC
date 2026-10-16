@@ -45,6 +45,21 @@ defaults are `dualc_lift`'s.
   `points` back as rows.
 - Radii and half extents must be > 0, every value finite.
 
+**`dualc_lift`'s recipes, one by one.** Each graph writes the same bytes as the tool's line
+(defaults on both sides: `offset` 1, `height` 0.5, the profile defaults above); `-o` replaces
+the tool's `revolved.obj` / `extruded.obj` default, `--depth` / `--collapse` are the options.
+
+| # | `dualc_lift` | Graph |
+| --- | --- | --- |
+| L1 | `revolve circle --offset 2` | `revolve(circle,offset=2)` — a torus |
+| L2 | `revolve box --offset 2` | `revolve(rect,offset=2)` — a box-section ring |
+| L3 | `revolve segment --offset 2` | `revolve(segment,offset=2)` — a capsule-section ring |
+| L4 | `revolve polygon 0,0 1,0 1,1 0,1 --offset 2` | `revolve(polygon(0,0,1,0,1,1,0,1),offset=2)` |
+| L5 | `extrude circle --height 0.5` | `extrude(circle,height=0.5)` — a cylinder |
+| L6 | `extrude box --height 0.5` | `extrude(rect,height=0.5)` — a box |
+| L7 | `extrude segment --height 0.5` | `extrude(segment,height=0.5)` — a capsule slab |
+| L8 | `extrude polygon 0,0 1,0 1,1 0,1 --height 0.5` | `extrude(polygon(0,0,1,0,1,1,0,1),height=0.5)` — a prism |
+
 ## Typing errors
 
 Located on the offending node, like every graph error:

@@ -124,7 +124,9 @@ dualc_target_options(dualc_examples_fieldglsl)
 
 # Copy the sample field-graphs next to dualc_field so the smoke tests (and a
 # curious user) can run them by bare filename.
-set(FIELD_GRAPH_SAMPLES gyroid_box.json mesh_lattice.json)
+set(FIELD_GRAPH_SAMPLES gyroid_box.json mesh_lattice.json
+    cube_minus_sphere.json smooth_blend.json displaced_sphere.json
+    mesh_shell.json mesh_minus_sphere.json twisted_mesh.json)
 foreach(sample ${FIELD_GRAPH_SAMPLES})
   add_custom_command(TARGET dualc_field POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -414,6 +416,31 @@ if(DUALC_BUILD_TESTS)
             --slice z=0 --res 128 --bounds -0.55,-0.55,-0.55,0.55,0.55,0.55
             -o cli_field_slice.png
     WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
+  # dualc_csg_demo's six recipes as committed graph files (roadmap 21 #60, P05):
+  # each sample against its recipe at the same depth, held byte-identical by
+  # cli_field_sample_<name>_same below. The mesh recipes read cube.obj.
+  set(DUALC_CSG_SAMPLES cube-minus-sphere smooth-blend displaced-sphere
+      mesh-shell mesh-minus-sphere twisted-mesh)
+  foreach(recipe ${DUALC_CSG_SAMPLES})
+    string(REPLACE "-" "_" sample ${recipe})
+    set(input "")
+    if(recipe MATCHES "mesh")
+      set(input cube.obj)
+    endif()
+    add_test(NAME cli_csg_sample_${sample}
+      COMMAND dualc_csg_demo --recipe=${recipe} ${input} --depth 5
+              -o cli_csg_${sample}.obj
+      WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
+    add_test(NAME cli_field_sample_${sample}
+      COMMAND dualc_field ${sample}.json --depth 5 -o cli_field_${sample}.obj
+      WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
+  endforeach()
+  # cli_lattice's field as a graph (the defaults written out: on cube.obj the
+  # AABB centre is the origin and the auto-fit box is dualc_lattice's).
+  add_test(NAME cli_field_lattice
+    COMMAND dualc_field --expr "intersection(onion(gyroid(wavelength=0.5),thickness=0.1),mesh(path=\"cube.obj\"))"
+            --depth 5 -o cli_field_lattice.obj
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
   add_test(NAME cli_field_slice_refuse
     COMMAND dualc_field --expr "sphere(radius=1)" --slice z=0 --depth 5)
   set_tests_properties(cli_field_slice_refuse PROPERTIES
@@ -462,7 +489,7 @@ if(DUALC_BUILD_TESTS)
       cli_csg_demo=cli_csg.obj cli_lattice=cli_lattice.obj
       cli_field=cli_field.obj cli_field_mesh=cli_field_mesh.obj
       cli_field_expr=cli_field_expr.obj cli_field_strut=cli_field_strut.obj
-      cli_field_lift=cli_field_lift.obj
+      cli_field_lift=cli_field_lift.obj cli_field_lattice=cli_field_lattice.obj
       cli_demo_sphere=cli_sphere.obj cli_demo_torus=cli_torus.obj
       cli_demo_bracket_sharp=cli_bracket.obj)
     string(REPLACE "=" ";" pair "${pair}")
@@ -501,6 +528,24 @@ if(DUALC_BUILD_TESTS)
     WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
   set_tests_properties(cli_field_lift_same PROPERTIES
     FIXTURES_REQUIRED "cli_lift;cli_field_lift")
+  foreach(recipe ${DUALC_CSG_SAMPLES})
+    string(REPLACE "-" "_" sample ${recipe})
+    dualc_cli_content(cli_field_sample_${sample}_content
+      cli_field_${sample}.obj obj NEEDS cli_field_sample_${sample})
+    add_test(NAME cli_field_sample_${sample}_same
+      COMMAND ${CMAKE_COMMAND} -E compare_files cli_csg_${sample}.obj
+              cli_field_${sample}.obj
+      WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
+    set_tests_properties(cli_csg_sample_${sample} PROPERTIES
+      FIXTURES_SETUP cli_csg_sample_${sample})
+    set_tests_properties(cli_field_sample_${sample}_same PROPERTIES
+      FIXTURES_REQUIRED "cli_csg_sample_${sample};cli_field_sample_${sample}")
+  endforeach()
+  add_test(NAME cli_field_lattice_same
+    COMMAND ${CMAKE_COMMAND} -E compare_files cli_lattice.obj cli_field_lattice.obj
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
+  set_tests_properties(cli_field_lattice_same PROPERTIES
+    FIXTURES_REQUIRED "cli_lattice;cli_field_lattice")
   # --dump-json prints the graph: the check runs the tool itself.
   dualc_cli_content(cli_field_dump_json_content cli_field_dump.json json
     OPTIONS -DJSON_ROOT_OP=difference
