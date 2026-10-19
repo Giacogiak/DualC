@@ -47,6 +47,29 @@ is a regression gate, not a bug fix.
 **DONE (2026-08-31, 2026-09-01, 2026-09-10; the rest 2026-10-06 in [14](14-build-hardening-ci.md))** —
 the scope and what was not taken are on the [04 entry](04-engineering-quality.md#33-build--tooling-hardening).
 
+**The audit's full original scope** *(moved here verbatim from 04 on 2026-10-19, when #34
+and #35's dated entries for the [hygiene + editor run](../../raw/2026-10-19-hygiene-and-editor-plan.md)
+did not fit that page)*. **Chosen in-run (pending owner review):** this move, not D-37's
+folder split of 04 — the split would break three anchored links in the immutable
+[2026-10-05 CI plan](../../raw/2026-10-05-hosted-ci-plan.md) and push the audit README over
+the cap; the precedent is the 2026-10-07 move into this page, when #32's close did not fit 04.
+The scope:
+Global C++ dialect flags are set before the third-party `add_subdirectory`
+calls and leak into geometry-central and polyscope. The sibling probes use
+`CMAKE_SOURCE_DIR`, so DualC cannot be `add_subdirectory`'d into a larger tree without
+overriding cache variables — despite that being the only supported consumption mode.
+Transitive dependencies (Eigen, nanort, nanoflann, happly) are inherited by comment; nanort
+is structurally load-bearing but undeclared. Catch2 is pinned by mutable git tag rather than
+SHA, with no shallow clone and no offline fallback. `DUALC_BUILD_TESTS` and
+`DUALC_BUILD_EXAMPLES` default ON, so any subproject consumer triggers a network fetch and 21
+test translation units unasked (`PROJECT_IS_TOP_LEVEL` is the fix). No sanitizer option, no
+`-Werror` / `/WX` switch, no `clang-tidy`, no `CMAKE_EXPORT_COMPILE_COMMANDS`, no coverage —
+ASan/UBSan are flagged as high-value and near-free given the raw-pointer octree, hand-written
+BVH and vendored float SVD. The third-party layering rule (host-only deps never link into
+`libdualc`) is enforced by comments only; a CI assertion on `LINK_LIBRARIES` would make it
+real. And a clean clone does not build: the demo `.obj` meshes are gitignored and the
+`copy_if_different` POST_BUILD step fails against a missing source.
+
 **Delivered (2026-08-31).** Four one-liners, all verified by a clean configure + full build:
 - the sibling probes resolve against `CMAKE_CURRENT_SOURCE_DIR`, not `CMAKE_SOURCE_DIR`
   (`CMakeLists.txt:48`, `:60`), so they still point next to DualC under `add_subdirectory`;

@@ -113,22 +113,7 @@ symmetric strut cells. Comment restated, seam points added ([15](15-test-coverag
 ## #33 Build & tooling hardening
 **DONE (2026-10-06).** The last four sub-items landed as CMake options and CI jobs
 ([14](14-build-hardening-ci.md)); `clang-tidy` is left out and coverage moves to #32 — see
-*Still open* below. What follows is the full original scope.
-Global C++ dialect flags are set before the third-party `add_subdirectory`
-calls and leak into geometry-central and polyscope. The sibling probes use
-`CMAKE_SOURCE_DIR`, so DualC cannot be `add_subdirectory`'d into a larger tree without
-overriding cache variables — despite that being the only supported consumption mode.
-Transitive dependencies (Eigen, nanort, nanoflann, happly) are inherited by comment; nanort
-is structurally load-bearing but undeclared. Catch2 is pinned by mutable git tag rather than
-SHA, with no shallow clone and no offline fallback. `DUALC_BUILD_TESTS` and
-`DUALC_BUILD_EXAMPLES` default ON, so any subproject consumer triggers a network fetch and 21
-test translation units unasked (`PROJECT_IS_TOP_LEVEL` is the fix). No sanitizer option, no
-`-Werror` / `/WX` switch, no `clang-tidy`, no `CMAKE_EXPORT_COMPILE_COMMANDS`, no coverage —
-ASan/UBSan are flagged as high-value and near-free given the raw-pointer octree, hand-written
-BVH and vendored float SVD. The third-party layering rule (host-only deps never link into
-`libdualc`) is enforced by comments only; a CI assertion on `LINK_LIBRARIES` would make it
-real. And a clean clone does not build: the demo `.obj` meshes are gitignored and the
-`copy_if_different` POST_BUILD step fails against a missing source.
+*Still open* below. The full original scope was moved verbatim to [12 § #33](12-engineering-quality-records.md#33--build-hardening-three-batches) on 2026-10-19.
 
 The `install()` / export-set / `dualcConfig.cmake` half of the audit's rank-13 item is
 already tracked as [10 #8](../10-infrastructure-and-integration.md); only the
@@ -184,6 +169,9 @@ the size cap; [19 Phase 5](../19-docs-layers/README.md).)*
 `docs/raw/study/A5-implicit-field-algebra.md:239-245,376-382`,
 `docs/raw/study/B3-memory-ownership-performance.md:236-237`, `docs/raw/study/B4-concurrency.md:173`,
 `docs/raw/study/A2-sampling-octree-oracles.md:385-391`.
+*2026-10-19:* the [hygiene + editor run](../../raw/2026-10-19-hygiene-and-editor-plan.md) takes up the three open bullets — the
+`gradientAt` contract, the contourer thread count, the `GridField` normal — by the owner's
+decision (raw plan § 1); the contract stays a unit direction, [D-65](../../decisions/01-settled.md).
 
 ## #35 `RepeatField` neighbour-set optimisation
 **PLANNED.** [#34](#34-api-hygiene-batch)'s `RepeatField` fix costs **2.3×** on strut
@@ -207,6 +195,9 @@ lattices back on the single-fold fast path by construction rather than by optimi
 the single fold was already exact ([15](15-test-coverage-batches.md#the-strut-lattice-oracle-certified-what-it-claimed)).
 A symmetry flag on the cell is a fourth lever. Open: why the fix moves root-box vertices
 ([20/04](../20-public-delivery/04-hosted-ci-plan-run.md)).
+*2026-10-19:* implemented ahead of its trigger by the owner's decision (raw plan § 1) in the
+[hygiene + editor run](../../raw/2026-10-19-hygiene-and-editor-plan.md): measured, with the levers in the plan's order, and the
+output must stay byte-identical.
 
 ---
 
