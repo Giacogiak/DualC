@@ -53,10 +53,10 @@ Content bytes against the 15,360 cap (`scripts/check_data.json` `size_caps`), at
 | `roadmap/README.md` | 15,123 | 15,123 (same length cell) |
 
 `python3 scripts/check.py --docs --strict`: 28 checks, 27 OK + 1 INFO (`index-staleness`, 18
-pre-existing entries from earlier sessions, report-only), exit 0. The full `check.py`
-(configure/build/ctest) was started but had not finished when the session was closed; the
-change is docs-only (no source, test, CMake or `check_data.json` byte changed) and the driver
-re-runs the full gate.
+pre-existing entries from earlier sessions, report-only), exit 0. Full `python3 scripts/check.py`
+on the same docs content (finished just after the commit `95fcc94`): 32 checks, 29 passed, 0
+failed, 2 skipped (configure: already configured; warnings: incremental build, 0 TUs
+compiled), **ctest 344 / 344**, exit 0 — Linux, GCC, Ninja, Release, `build/`.
 
 Loss audit: `scripts/docs_loss_audit.py --base HEAD --head ece6830 --scope docs/` (`ece6830` a
 scratch commit of the tree, never on the branch) was started before the commit but had **not
