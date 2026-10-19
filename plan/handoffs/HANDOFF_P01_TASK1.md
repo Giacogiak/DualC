@@ -58,13 +58,15 @@ on the same docs content (finished just after the commit `95fcc94`): 32 checks, 
 failed, 2 skipped (configure: already configured; warnings: incremental build, 0 TUs
 compiled), **ctest 344 / 344**, exit 0 — Linux, GCC, Ninja, Release, `build/`.
 
-Loss audit: `scripts/docs_loss_audit.py --base HEAD --head ece6830 --scope docs/` (`ece6830` a
-scratch commit of the tree, never on the branch) was started before the commit but had **not
-finished** (over 3 minutes on all of `docs/`) when the session was closed. In its place, a
-mechanical check: the 15 lines removed from 04 are byte-identical to the 15 lines added to
-12 (`diff` of the two hunks, empty). The only other removed text is 04's one lead sentence
-("What follows is the full original scope."), rewritten to point at 12, and the old
-`#53 PLANNED` cell. **Owner: re-run the audit at P08** (it covers this unit's base anyway).
+Loss audit: `scripts/docs_loss_audit.py --base 02f95a3 --head 95fcc94 --scope docs/` with a
+scratch, empty triage file in `/tmp` (the repo's `docs_loss_audit.json` has no entry for this
+base and was not edited). Rows whose source is a page this unit touched (17/04, 17/12,
+`decisions/01-settled.md`, `roadmap/README.md`): **one `gone` row**, 04:114 "What follows is
+the full original scope." — intentional, the sentence was rewritten to point at 12, where the
+scope now sits. Every other row on those pages is `rewritten` at 0.000/1.000 or `raw-only`,
+the untriaged-baseline noise the tool reports for unchanged text across the whole tree (9,979
+rows in all, on every page, touched or not). The moved 15 lines are also byte-identical in
+both places (`diff` of the two hunks, empty). P08's audit covers this unit's base anyway.
 
 ## What I got wrong on the way
 
