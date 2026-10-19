@@ -1,10 +1,12 @@
 #include "demo_meshes.h"
 
+#include "dualc/implicit.h"
 #include "dualc/pipeline.h"
 
 #include "geometrycentral/surface/surface_mesh.h"
 #include "geometrycentral/surface/vertex_position_geometry.h"
 
+#include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include <cstdint>
@@ -12,6 +14,7 @@
 #include <sstream>
 #include <string>
 #include <tuple>
+#include <vector>
 
 using namespace dualc;
 
@@ -109,6 +112,60 @@ TEST_CASE("Hex prism + bore contours preserving genus 1 (chi=0)", "[demo]") {
   const auto t = contourTopology(dce::makeHexPrismBore(), 6);
   REQUIRE(t.boundaryEdges == 0);
   REQUIRE(t.chi == 0);
+}
+
+// ===========================================================================
+// Orientation: every generated mesh winds outward
+// ===========================================================================
+//
+// The default 3-ray parity oracle ignores orientation, so the topology cases
+// above passed while six generators wound inside-out (roadmap 21, #55). The
+// oracles that read the winding -- GWN sign, the GWN field, the pseudonormal
+// -- then saw an empty or inverted solid. Pin it twice: the signed volume is
+// positive, and the generalized winding number at a point inside the solid
+// (inside the tube for the torus, knot and genus 2) is 1, not -1.
+
+namespace {
+
+// Signed volume of a closed mesh: sum over a fan of each face of the signed
+// tetrahedron volume against the origin. Exact for planar polygons, convex
+// or not, so the cylinder's n-gon caps need no triangulation.
+double signedVolume(geometrycentral::surface::SurfaceMesh& m,
+                    geometrycentral::surface::VertexPositionGeometry& g) {
+  double vol = 0.0;
+  for (auto f : m.faces()) {
+    std::vector<geometrycentral::Vector3> p;
+    for (auto v : f.adjacentVertices()) p.push_back(g.vertexPositions[v]);
+    for (std::size_t i = 1; i + 1 < p.size(); ++i)
+      vol += dot(p[0], cross(p[i], p[i + 1])) / 6.0;
+  }
+  return vol;
+}
+
+void checkOutward(const std::string& name, dce::MeshAndGeom mg,
+                  const Vector3& interior) {
+  auto& [mesh, geom] = mg;
+  INFO(name);
+  CHECK(signedVolume(*mesh, *geom) > 0.0);
+  // valueAt = 0.5 - w, so w = 0.5 - valueAt. The field uses the first-order
+  // far-field GWN (beta 2): 1.066 at the icosphere centre, so the margin only
+  // separates +1 from -1 and from the -0.31 of a mixed winding.
+  WindingNumberField wf(*mesh, *geom);
+  CHECK(0.5 - wf.valueAt(interior) == Catch::Approx(1.0).margin(0.1));
+}
+
+} // namespace
+
+TEST_CASE("Every generated demo mesh winds outward", "[demo][orientation]") {
+  checkOutward("icosphere", dce::makeIcosphere(), {0, 0, 0});
+  checkOutward("uvsphere",  dce::makeUvSphere(),  {0, 0, 0});
+  checkOutward("torus",     dce::makeTorus(),     {1, 0, 0});    // tube centre
+  checkOutward("knot",      dce::makeTrefoilKnot(), {3, 0, 0});  // centerline(0)
+  checkOutward("genus2",    dce::makeGenus2(6),   {-2.2, 0, 0}); // left tube
+  checkOutward("cube",      dce::makeCube(),      {0, 0, 0});
+  checkOutward("cylinder",  dce::makeCylinder(),  {0, 0, 0});
+  checkOutward("bracket",   dce::makeLBracket(),  {-0.3, -0.3, 0}); // corner block
+  checkOutward("hexbore",   dce::makeHexPrismBore(), {0.65, 0, 0}); // in the wall
 }
 
 // ===========================================================================

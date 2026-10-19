@@ -12,6 +12,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 // Field-graph -> GLSL codegen. See field_glsl.h for the contract. The walk
@@ -358,6 +359,28 @@ float sdInfiniteCone(vec3 p, vec3 c, float ang) {
   return d * ((qx * co - qy * si < 0.0) ? -1.0 : 1.0);
 }
 
+// ---- 2D profiles (src/implicit/field2d.cpp) and lifts (lift.cpp) ----------
+// A profile is a `float fN(vec2 p)`; its lift maps the 3D point into the
+// profile plane. The polygon is emitted per node (a constant vertex array).
+float sd2Circle(vec2 p, vec2 c, float r) { return length(p - c) - r; }
+float sd2Rect(vec2 p, vec2 c, vec2 h) {
+  vec2 q = abs(p - c) - h;
+  return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0);
+}
+float sd2Segment(vec2 p, vec2 a, vec2 b, float r) {
+  vec2 pa = p - a, ba = b - a;
+  float bb = dot(ba, ba);
+  float h = bb > 1e-30 ? clamp(dot(pa, ba) / bb, 0.0, 1.0) : 0.0;
+  return length(pa - ba * h) - r;
+}
+// revolve around y: profile x = distance from the axis - offset, y = world y.
+vec2 dcRevolveQ(vec3 p, float o) { return vec2(length(vec2(p.x, p.z)) - o, p.y); }
+// extrude along z by +/- h, the profile in xy.
+float dcExtrude(float d, float z, float h) {
+  float w = abs(z) - h;
+  return min(max(d, w), 0.0) + length(max(vec2(d, w), 0.0));
+}
+
 // ---- TPMS (src/implicit/primitives_tpms.cpp); k = 2*pi/wavelength ---------
 vec3 dcTpmsQ(vec3 p, vec3 c, float wl) { return (p - c) * (2.0 * DC_PI / wl); }
 
@@ -447,8 +470,8 @@ void main() {
 )GLSL";
 
 // The fixed sphere-trace framework (camera, FD normals, shading). Calls the
-// generated sceneSDF(); the step is scaled by the graph-level uStepScale. Kept
-// in lock-step with dualc_raymarch.cpp's hand-written loop.
+// generated sceneSDF(); the step is scaled by the graph-level uStepScale. It
+// began as the hand-written loop of dualc_raymarch (retired, roadmap 21 #60).
 const char* kTraceFramework = R"GLSL(
 in  vec2 vUV;
 out vec4 fragColor;
@@ -691,6 +714,17 @@ std::string strParam(const GraphNode& n, const std::string& key,
   return p->str;
 }
 
+// A mesh / winding node's `bake` / `band`, read as field_graph.cpp reads them;
+// the validation and the bake itself are the builder's (checkNodeBake,
+// bakeMeshNode, bakeWindingNode), so a baked node's texture is its export grid.
+NodeBake readNodeBake(const GraphNode& n, bool readBand) {
+  const bool hasBake = findParam(n, "bake") != nullptr;
+  const double bake = numParam(n, "bake", 0.0);
+  const bool hasBand = readBand && findParam(n, "band") != nullptr;
+  const double band = readBand ? numParam(n, "band", 0.0) : 0.0;
+  return checkNodeBake(n, hasBake ? &bake : nullptr, hasBand ? &band : nullptr);
+}
+
 int axisIndex(const GraphNode& n, const std::string& s) {
   if (s == "x" || s == "0") return 0;
   if (s == "y" || s == "1") return 1;
@@ -770,6 +804,10 @@ struct Ctx {
   int counter = 0;
   std::map<std::string, int> memo;  // structural key -> emitted node index, so a
                                     // repeated subtree (DAG dedup) reuses its fN.
+  // The emit path, root first, each node with the bake margin its ancestors
+  // handed it (childBakeMargin) -- a baked mesh / winding bakes with its own,
+  // exactly as FieldGraph::build does.
+  std::vector<std::pair<const GraphNode*, double>> path;
 };
 
 std::string fname(int idx) { return "f" + std::to_string(idx); }
@@ -781,6 +819,14 @@ std::string declScalar(Ctx& c, int idx, const std::string& key, double v,
   const std::string name = "u_n" + std::to_string(idx) + "_" + key;
   c.decls << "uniform float " << name << ";\n";
   c.bindings.push_back({name, "float", {float(v)}, n.pointer, key});
+  return name;
+}
+
+std::string declVec2(Ctx& c, int idx, const std::string& key, double x,
+                     double y, const GraphNode& n) {
+  const std::string name = "u_n" + std::to_string(idx) + "_" + key;
+  c.decls << "uniform vec2 " << name << ";\n";
+  c.bindings.push_back({name, "vec2", {float(x), float(y)}, n.pointer, key});
   return name;
 }
 
@@ -1081,6 +1127,95 @@ int emitStrut(const GraphNode& n, Ctx& c) {
   return idx;
 }
 
+// A GLSL float literal that round-trips the float the C++ value rounds to.
+std::string glslLit(double v) {
+  std::ostringstream o;
+  o.precision(9);
+  o << v;
+  std::string s = o.str();
+  if (s.find_first_of(".e") == std::string::npos) s += ".0";
+  return s;
+}
+
+// A 2D profile under `lift` -> `float fN(vec2 p)`. The values come from
+// field_graph's readProfile -- the builder's own reader and checks -- so the
+// preview cannot read a profile differently from the export. Scalars are
+// uniforms (nudgeable), 2D points vec2 uniforms; the polygon's vertices are a
+// constant array (a vertex edit recompiles), capped at kMaxGlslPolygonVertices.
+// Memoized under its own key space, so a profile shared by two lifts emits once.
+int emitProfile(const GraphNode& n, const std::string& lift, Ctx& c) {
+  const std::vector<double> p = readProfile(n, lift);
+  const std::string key = "2d|" + nodeKey(n);
+  auto it = c.memo.find(key);
+  if (it != c.memo.end()) return it->second;
+  const int idx = c.counter++;
+  std::ostringstream b;
+  b << "float " << fname(idx) << "(vec2 p){";
+  if (n.op == "circle") {
+    std::string ctr = declVec2(c, idx, "center", p[0], p[1], n);
+    std::string r = declScalar(c, idx, "radius", p[2], n);
+    b << " return sd2Circle(p, " << ctr << ", " << r << "); }\n";
+  } else if (n.op == "rect") {
+    std::string ctr = declVec2(c, idx, "center", p[0], p[1], n);
+    std::string h = declVec2(c, idx, "half", p[2], p[3], n);
+    b << " return sd2Rect(p, " << ctr << ", " << h << "); }\n";
+  } else if (n.op == "segment") {
+    std::string a = declVec2(c, idx, "a", p[0], p[1], n);
+    std::string bb = declVec2(c, idx, "b", p[2], p[3], n);
+    std::string r = declScalar(c, idx, "radius", p[4], n);
+    b << " return sd2Segment(p, " << a << ", " << bb << ", " << r << "); }\n";
+  } else {  // polygon: Polygon2D::valueAt, the crossing-count sign included
+    const std::size_t nv = p.size() / 2;
+    if (nv > std::size_t(kMaxGlslPolygonVertices))
+      throw GraphError("'polygon' has " + std::to_string(nv) +
+                           " vertices; the GLSL preview takes at most " +
+                           std::to_string(kMaxGlslPolygonVertices) +
+                           " (the export path has no ceiling)",
+                       n.pointer);
+    const std::string N = std::to_string(nv);
+    b << "\n  const vec2 v[" << N << "] = vec2[" << N << "](";
+    for (std::size_t i = 0; i < nv; ++i)
+      b << (i ? ", " : "") << "vec2(" << glslLit(p[2 * i]) << ", "
+        << glslLit(p[2 * i + 1]) << ")";
+    b << ");\n"
+      << "  float d = dot(p - v[0], p - v[0]);\n"
+      << "  float s = 1.0;\n"
+      << "  for (int i = 0; i < " << N << "; ++i) {\n"
+      << "    int j = i == 0 ? " << nv - 1 << " : i - 1;\n"
+      << "    vec2 e = v[j] - v[i];\n"
+      << "    vec2 w = p - v[i];\n"
+      << "    vec2 q = w - e * clamp(dot(w, e) / dot(e, e), 0.0, 1.0);\n"
+      << "    d = min(d, dot(q, q));\n"
+      << "    bool c1 = p.y >= v[i].y;\n"
+      << "    bool c2 = p.y < v[j].y;\n"
+      << "    bool c3 = e.x * w.y > e.y * w.x;\n"
+      << "    if ((c1 && c2 && c3) || (!c1 && !c2 && !c3)) s = -s;\n"
+      << "  }\n"
+      << "  return s * sqrt(d);\n}\n";
+  }
+  c.funcs << b.str();
+  c.memo[key] = idx;
+  return idx;
+}
+
+// revolve / extrude: one profile child, the lift's own value a uniform.
+int emitLift(const GraphNode& n, Ctx& c) {
+  requireChildren(n, 1);
+  const char* key = liftParamKey(n.op);
+  const bool has = findParam(n, key) != nullptr;
+  const double v = numParam(n, key, 0.0);
+  const double amount = checkLiftParam(n, has ? &v : nullptr);
+  const int prof = emitProfile(n.in[0], n.op, c);
+  const int idx = c.counter++;
+  std::string u = declScalar(c, idx, key, amount, n);
+  c.funcs << "float " << fname(idx) << "(vec3 p){ return ";
+  if (n.op == "revolve")
+    c.funcs << fname(prof) << "(dcRevolveQ(p, " << u << ")); }\n";
+  else
+    c.funcs << "dcExtrude(" << fname(prof) << "(p.xy), p.z, " << u << "); }\n";
+  return idx;
+}
+
 // Shared tail for the mesh/winding sources: a baked GridField -> one sampler3D
 // (a MeshTexture the app uploads) + the texture()-as-SDF lookup function. Both
 // emitMesh and emitWinding feed their bake through here so the dedup memo, the
@@ -1113,24 +1248,32 @@ int emitMesh(const GraphNode& n, Ctx& c) {
   dualc::SignMethod sm;
   if (sign == "parity") sm = dualc::SignMethod::WINDING_NUMBER;
   else if (sign == "pseudonormal") sm = dualc::SignMethod::PSEUDONORMAL;
-  else if (sign == "gwn")
-    throw GraphError("mesh sign 'gwn' is not supported by 'mesh'; a 'winding' "
-                     "node is not yet supported by the GLSL codegen",
+  else if (sign == "gwn") sm = dualc::SignMethod::GENERALIZED_WINDING_NUMBER;
+  else
+    throw GraphError("mesh sign must be 'parity', 'pseudonormal' or 'gwn'",
                      n.pointer);
-  else throw GraphError("mesh sign must be 'parity' or 'pseudonormal'", n.pointer);
   std::string normals = strParam(n, "normals", "smooth");
   bool interp;
   if (normals == "smooth") interp = true;
   else if (normals == "sharp") interp = false;
   else throw GraphError("mesh normals must be 'smooth' or 'sharp'", n.pointer);
 
+  const NodeBake nb = readNodeBake(n, true);
+
   MeshHandle h = c.resolver->resolve(path);
   dualc::MeshSource src(*h.mesh, *h.geom, interp, sm);
-  const dualc::Vector3 e = c.bounds.extent();
-  const double maxCell =
-      std::max({e.x, e.y, e.z}) / std::max(c.gridRes - 1, 1);
-  dualc::FieldPtr gridPtr = src.bakeToGrid(
-      c.bounds, dualc::Vector3i{c.gridRes, c.gridRes, c.gridRes}, 3.0 * maxCell);
+  // A node with its own bake (#57) uploads exactly the export's grid; only an
+  // unbaked node is baked here, over the trace box at --grid-res.
+  dualc::FieldPtr gridPtr;
+  if (nb.res > 0) {
+    gridPtr = bakeMeshNode(src, nb, c.path.back().second);
+  } else {
+    const dualc::Vector3 e = c.bounds.extent();
+    const double maxCell =
+        std::max({e.x, e.y, e.z}) / std::max(c.gridRes - 1, 1);
+    gridPtr = src.bakeToGrid(
+        c.bounds, dualc::Vector3i{c.gridRes, c.gridRes, c.gridRes}, 3.0 * maxCell);
+  }
   auto* grid = dynamic_cast<const dualc::GridField*>(gridPtr.get());
   if (!grid)
     throw GraphError("internal: mesh bake did not return a GridField", n.pointer);
@@ -1141,17 +1284,21 @@ int emitMesh(const GraphNode& n, Ctx& c) {
 // NOT a metric SDF and has no narrow band, so it bakes via the generic
 // full-lattice bakeToGrid(field, ...) rather than MeshSource's banded one. The
 // field's sign convention (negative inside) matches MeshSource, so the baked grid
-// feeds the same texture()-as-SDF emission with no sign flip.
+// feeds the same texture()-as-SDF emission with no sign flip. With its own
+// bake=N it uploads the builder's grid over its own box, as emitMesh does.
 int emitWinding(const GraphNode& n, Ctx& c) {
   std::string path = strParam(n, "path", "");
   if (path.empty())
     throw GraphError("'winding' requires a 'path'; id-based in-memory sources are "
                      "not supported by the GLSL preview (use a file path)",
                      n.pointer);
+  const NodeBake nb = readNodeBake(n, false);
   MeshHandle h = c.resolver->resolve(path);
   dualc::FieldPtr wf = dualc::windingNumberField(*h.mesh, *h.geom);
-  dualc::FieldPtr gridPtr = dualc::bakeToGrid(
-      *wf, c.bounds, dualc::Vector3i{c.gridRes, c.gridRes, c.gridRes});
+  dualc::FieldPtr gridPtr =
+      nb.res > 0 ? bakeWindingNode(*wf, nb, c.path.back().second)
+                 : dualc::bakeToGrid(*wf, c.bounds,
+                                     dualc::Vector3i{c.gridRes, c.gridRes, c.gridRes});
   auto* grid = dynamic_cast<const dualc::GridField*>(gridPtr.get());
   if (!grid)
     throw GraphError("internal: winding bake did not return a GridField",
@@ -1238,12 +1385,36 @@ int emitBoolean(const GraphNode& n, Ctx& c, BoolOp op) {
 // to the un-deduped walk, it just drops duplicate functions / uniforms (and, for
 // meshes, duplicate bakes + sampler3D textures via emitMesh).
 int emitNode(const GraphNode& n, Ctx& c) {
-  const std::string key = nodeKey(n);
+  // The margin this node is handed: its parent's, through childBakeMargin.
+  double margin = 0.0;
+  if (!c.path.empty()) {
+    const GraphNode& parent = *c.path.back().first;
+    margin = c.path.back().second;
+    for (std::size_t i = 0; i < parent.in.size(); ++i)
+      if (&parent.in[i] == &n) {
+        margin = childBakeMargin(parent, i, margin);
+        break;
+      }
+  }
+  // A subtree holding a baked node bakes differently under a different margin,
+  // so the margin joins its key; every other key is the structural one.
+  std::string key = nodeKey(n);
+  if (margin > 0.0 && hasBakedNode(n)) {
+    std::ostringstream m;
+    m.precision(17);
+    m << "|margin=" << margin;
+    key += m.str();
+  }
   auto it = c.memo.find(key);
   if (it != c.memo.end()) return it->second;
   // The unread-key check runs only on this, the real emission path: a memo hit
   // above is a value-identical node whose params were already validated.
   ReadScope scope{n};
+  c.path.push_back({&n, margin});
+  struct PathPop {
+    Ctx& c;
+    ~PathPop() { c.path.pop_back(); }
+  } pop{c};
   const int idx = emitNodeImpl(n, c);
   rejectUnreadParams(n);
   c.memo[key] = idx;
@@ -1267,6 +1438,11 @@ int emitNodeImpl(const GraphNode& n, Ctx& c) {
   if (op == "mesh") return emitMesh(n, c);
   if (op == "winding") return emitWinding(n, c);
 
+  // 3b. The lifts, each over one 2D profile; a profile anywhere else is the
+  // builder's typing error.
+  if (isLiftOp(op)) return emitLift(n, c);
+  if (isProfileOp(op)) throwProfileOutsideLift(n);
+
   // 4. Decorators not in the PostOp set (one child).
   if (op == "normalize") {
     requireChildren(n, 1);
@@ -1280,8 +1456,8 @@ int emitNodeImpl(const GraphNode& n, Ctx& c) {
     // same quantity the marcher feeds uHmem (min(diag*0.002, feat*0.003)), where
     // feat is the child subtree's characteristic length -- so the normalize
     // gradient is sampled over a float32-safe baseline that scales with the
-    // lattice. This matches dualc_raymarch's clean result exactly (its tpmsGradMag
-    // uses uHmem too). The eps floor stays 1e-9 to mirror NormalizedField::kEps;
+    // lattice. This matched the retired dualc_raymarch's clean result exactly
+    // (its tpmsGradMag used uHmem too). The eps floor stays 1e-9 to mirror NormalizedField::kEps;
     // the resulting preview-vs-export divergence is FD-tier and is gated by
     // dualc_glsl_parity.
     const double diag = c.bounds.isValid() ? c.bounds.extent().norm() : 1.0;

@@ -95,9 +95,11 @@ helper libraries:
   <https://github.com/richgel999/miniz> (v3.0.2 release amalgamation). Full
   license retained at `examples/third_party/miniz_LICENSE.txt`.
 - **`stb_image_write.h`** (Public Domain / MIT — Sean Barrett) — PNG output for
-  the `dualc_slice` heatmap; compiled into a separate `dualc_examples_img`
-  library linked **only** into `dualc_slice` and the GL plumbing's snapshot
-  path (kept out of the shared lib so the mesh-only CLIs carry no PNG writer).
+  the slice heatmap (`examples/field_slice.cpp`, behind
+  `dualc_field --slice`); compiled into a separate `dualc_examples_img` library
+  linked **only** into the slice module's `dualc_examples_slice` and the GL
+  plumbing's snapshot path (kept out of the shared lib so the mesh-only CLIs
+  carry no PNG writer).
   Origin: <https://github.com/nothings/stb>. `stb_impl.cpp` beside it is **our
   own** one-line translation unit (it defines `STB_IMAGE_WRITE_IMPLEMENTATION`
   and includes the header), not vendored code — it is MIT with the rest of DualC.
@@ -119,7 +121,7 @@ helper libraries:
 
 ## Opt-in GL-target dependencies (`examples/third_party/glad/`, GLFW fetched)
 
-Linked only into the opt-in GL binaries (`dualc_raymarch`, `dualc_field_view`,
+Linked only into the opt-in GL binaries (`dualc_field_view`,
 `dualc_glsl_parity`) — never into `libdualc`. Both permissive:
 
 - **glad** (Public Domain — generated output of <https://github.com/Dav1dde/glad>,

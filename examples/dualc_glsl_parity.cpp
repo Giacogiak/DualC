@@ -116,6 +116,7 @@ bool runCase(const Case& c, GLuint fbo) {
     const GLint loc = glGetUniformLocation(prog, b.name.c_str());
     if (loc < 0) continue;
     if (b.glslType == "float") glUniform1f(loc, b.value[0]);
+    else if (b.glslType == "vec2") glUniform2f(loc, b.value[0], b.value[1]);
     else if (b.glslType == "vec3") glUniform3f(loc, b.value[0], b.value[1], b.value[2]);
     else if (b.glslType == "mat4") glUniformMatrix4fv(loc, 1, GL_TRUE, b.value.data());
   }
@@ -291,6 +292,19 @@ int main() {
       {"elongate", "elongate(sphere(radius=0.5),h=[0.5,0,0])", box(-2, 2), A, R},
       {"translate", "translate(sphere(radius=1),by=[0.5,0.2,0])", box(-2, 2), A, R},
       {"rotate", "rotate(box(min=[-1,-0.3,-0.3],max=[1,0.3,0.3]),axis=[0,0,1],degrees=30)", box(-2, 2), A, R},
+      // 2D profiles under the lifts (#58): exact SDFs, tight tier. Every
+      // profile under extrude; revolve over a circle (a torus) and over a
+      // concave polygon, whose sign comes from the crossing count.
+      {"extrude-circle", "extrude(circle(center=[0.2,-0.1],radius=0.7),height=0.6)", box(-2, 2), A, R},
+      {"extrude-rect", "extrude(rect(center=[0,0.1],half=[0.8,0.5]),height=0.4)", box(-2, 2), A, R},
+      {"extrude-segment", "extrude(segment(a=[-1,-0.3],b=[0.8,0.5],radius=0.25),height=0.5)", box(-2, 2), A, R},
+      {"extrude-polygon",
+       "extrude(polygon(points=[[-1,-1],[1,-1],[1,-0.2],[-0.2,-0.2],[-0.2,1],[-1,1]]),height=0.5)",
+       box(-2, 2), A, R},
+      {"revolve-circle", "revolve(circle(radius=0.4),offset=1.2)", box(-2, 2), A, R},
+      {"revolve-polygon",
+       "revolve(polygon(points=[[0,-0.6],[0.6,-0.6],[0.6,0.6],[0.3,0],[0,0.6]]),offset=0.5)",
+       box(-2, 2), A, R},
       // finite-difference tier (looser tol)
       {"normalize", "normalize(gyroid(wavelength=1))", box(-1, 1), FA, FR},
       // realistic graded shell on a normalized gyroid (inherits normalize's FD tier).
@@ -377,6 +391,32 @@ int main() {
     //     round-trip) rather than the bake. Tolerance is filter precision.
     runList.push_back({"mesh-texture", meshExpr, box(-2, 2), 2e-3, 2e-3,
                        Ref::BakedGrid});
+    // (d) SIGN parity with the GWN oracle inside the bake (#56): the straddle
+    //     region of (b), baked through MeshSource with sign="gwn". On the
+    //     closed cube GWN and parity agree, so this gates that the codegen
+    //     accepts the sign and carries it into the bake, not that it differs.
+    runList.push_back({"mesh-gwn",
+                       "mesh(path=\"" + cubePath + "\",sign=\"gwn\")",
+                       dualc::BBox{{-0.2, -0.2, -0.2}, {1.5, 1.5, 1.5}}, A, R,
+                       Ref::CpuSignOnly});
+    // (e) Preview == export for a node with its own bake (#57): the GPU reads
+    //     the node's GridField, so it is compared against the BUILT CPU field
+    //     (not a re-read texture) at filter precision. The region is wider than
+    //     the bake's own [-0.6,0.6]^3, so the edge clamp is compared too, and
+    //     bake=24 differs from the codegen's --grid-res default: a codegen that
+    //     re-baked the node over the trace box would miss by far more than tol.
+    runList.push_back({"mesh-bake",
+                       "mesh(path=\"" + cubePath + "\",bake=24)", box(-1, 1),
+                       2e-3, 2e-3});
+    // (f) The handed-down margin (#57, decision (b)): the baked node sits under
+    //     a translate inside a smooth-union, so it bakes with band and region
+    //     widened by k on both paths. Compared against the built CPU field, a
+    //     codegen that handed down a different margin than the builder would
+    //     upload a different grid and miss by more than tol.
+    runList.push_back({"mesh-bake-smooth",
+                       "smooth-union(translate(mesh(path=\"" + cubePath +
+                           "\",bake=24),by=[0.3,0,0]),sphere(radius=0.4),k=0.5)",
+                       box(-1.2, 1.2), 2e-3, 2e-3});
   }
   if (!cubePath.empty()) {
     // winding bakes 0.5 - windingNumber over the full lattice (no band): same

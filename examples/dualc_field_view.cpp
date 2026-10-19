@@ -14,15 +14,16 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <set>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 // dualc_field_view -- a standalone GPU raymarch viewer for an arbitrary
 // composed field-graph (roadmap docs/roadmap/12 §D).
 //
-// Where dualc_raymarch hand-codes one TPMS-in-mesh field, this compiles ANY
-// field-graph (the same .fld/.json the dualc_field exporter consumes) to GLSL
+// It compiles ANY field-graph (the same .fld/.json the dualc_field exporter consumes) to GLSL
 // via field_glsl.h and sphere-traces it. So the field you contour to STL/3MF is
 // the field you preview -- one source of truth, no mesh round-trip. RAM is
 // bounded by the window, not the lattice, so it renders densities that OOM the
@@ -63,7 +64,8 @@ void printUsage() {
     "                    infinite field -- plane/repeat -- requires this).\n"
     "  --grid-res N      Mesh-source bake resolution per axis (default 96,\n"
     "                    max 256). The bake covers the raymarch box, so it\n"
-    "                    composes with --bounds.\n"
+    "                    composes with --bounds. A node with its own bake=N\n"
+    "                    is uploaded as baked; this does not apply to it.\n"
     "  --preview-scale S Resolution factor while orbiting / editing a param\n"
     "                    (default 0.5). The raymarch renders at S x the window\n"
     "                    while the view moves, then snaps to full-res when it\n"
@@ -111,6 +113,7 @@ void setBinding(GLuint prog, const dce::fieldgraph::UniformBinding& b) {
   const GLint loc = glGetUniformLocation(prog, b.name.c_str());
   if (loc < 0) return;
   if (b.glslType == "float") glUniform1f(loc, b.value[0]);
+  else if (b.glslType == "vec2") glUniform2f(loc, b.value[0], b.value[1]);
   else if (b.glslType == "vec3") glUniform3f(loc, b.value[0], b.value[1], b.value[2]);
   else if (b.glslType == "mat4") glUniformMatrix4fv(loc, 1, GL_TRUE, b.value.data());
 }
@@ -226,15 +229,21 @@ int main(int argc, char** argv) {
   std::cout << "[dualc_field_view] compiled " << scene.nodeCount << " nodes, "
             << scene.bindings.size() << " params, " << scene.meshes.size()
             << " mesh texture(s)";
-  // Report the bake resolution AND its world cell size once (every mesh node
-  // bakes at the same resolution over the same box). --grid-res went unnoticed
-  // as a no-op precisely because the render never changed with it.
-  if (!scene.meshes.empty()) {
-    const auto& mt = scene.meshes.front();
-    const dualc::Vector3 e = mt.region.extent();
-    const double cell = std::max({e.x, e.y, e.z}) /
-                        std::max(mt.resolution.x - 1, 1);
-    std::cout << " @ " << mt.resolution.x << "^3 (cell " << cell << ")";
+  // Report each distinct bake resolution AND its world cell size: an unbaked
+  // mesh node bakes at --grid-res over the trace box, a node with its own
+  // bake=N over its own box (#57). --grid-res went unnoticed as a no-op
+  // precisely because the render never changed with it.
+  {
+    std::set<std::pair<int, double>> seen;
+    const char* sep = " @ ";
+    for (const auto& mt : scene.meshes) {
+      const dualc::Vector3 e = mt.region.extent();
+      const double cell = std::max({e.x, e.y, e.z}) /
+                          std::max(mt.resolution.x - 1, 1);
+      if (!seen.insert({mt.resolution.x, cell}).second) continue;
+      std::cout << sep << mt.resolution.x << "^3 (cell " << cell << ")";
+      sep = ", ";
+    }
   }
   std::cout << ", stepScale " << scene.stepScale << "\n";
 
@@ -452,9 +461,9 @@ int main(int argc, char** argv) {
     dce::gl::setU3(prog, "uLightDir", light);
     // March constants scale to the finest feature present (recomputed each frame
     // so a reload tracks it): a dense lattice in large bounds needs a
-    // wavelength-relative FD step + step cap (the factors dualc_raymarch uses),
-    // or diag*0.001 would be too coarse to resolve a wall and the trace would
-    // step over it. Fall back to the diagonal for an all-analytic graph.
+    // wavelength-relative FD step + step cap (the factors the retired
+    // dualc_raymarch used), or diag*0.001 would be too coarse to resolve a
+    // wall and the trace would step over it. Fall back to the diagonal for an all-analytic graph.
     const double feat = scene.featureScale > 0.0
                             ? std::min(double(scene.featureScale), diag)
                             : diag;

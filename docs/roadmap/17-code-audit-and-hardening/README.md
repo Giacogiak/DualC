@@ -43,6 +43,8 @@ status and trigger, and links to both.
   criteria fixed before the runs, the five samples' evidence, the verdict (an inherited
   handle, not a scanner) and what shipped (non-inheritable output handles, the bounded
   retry, the error line in the ABI, 0.5.1).
+- [`17-viewer-silhouette-specks.md`](17-viewer-silhouette-specks.md) — **#61**, dark specks on
+  `dualc_field_view`'s grazing silhouettes (DEFERRED, one renderer seen).
 - [`07-repeat-tiling-fix.md`](07-repeat-tiling-fix.md) — the full record for #34's first
   item: `repeat` read only the folded tile, which put wrong geometry in shipped strut
   lattices; the conditional fix, its measured 2.3× cost, and the oracle test it showed to
@@ -154,6 +156,7 @@ three runs in a row (2026-10-07, Linux, [15](15-test-coverage-batches.md)).
 | [#35](04-engineering-quality.md#35-repeatfield-neighbour-set-optimisation) | `RepeatField` neighbour-set optimisation | PLANNED — born from #34's fix on 2026-09-10, no ledger finding behind it |
 | [#46](03-correctness-and-robustness/02-precision-and-celloverlaps.md#46-offsetfield-does-not-forward-celloverlaps) | `OffsetField` does not forward `cellOverlaps` | **DONE** 2026-09-21 — opened 2026-09-20 from the first semantic lint ([19/08/01](../19-docs-layers/08-semantic-lint/01-2026-09-20-first-run.md)), no ledger finding behind it |
 | [#52](16-windows-rename-race/README.md#52-windows-export-io-flake--the-part-rename-under-an-on-access-scanner) | Windows export I/O flake — the `.part` rename under an on-access scanner | **DONE** 2026-10-07 — opened the same day from Boletus's ask, no ledger finding behind it; the holder was an inherited handle, not a scanner |
+| [#61](17-viewer-silhouette-specks.md#61-dark-specks-on-grazing-silhouettes-in-dualc_field_view) | Dark specks on grazing silhouettes in `dualc_field_view` | DEFERRED — opened 2026-10-16 at block 21's P03.2 check, no ledger finding behind it |
 
 ---
 

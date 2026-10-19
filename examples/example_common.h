@@ -9,7 +9,7 @@
 
 // Shared glue for the DualC example executables: argument parsing helpers, a
 // small analytic-bump library for the `displaced` operator, and the
-// field-to-OBJ writer extracted from dualc_demo.
+// field-to-mesh writers (OBJ / STL / 3MF, monolithic and tiled).
 
 namespace geometrycentral {
 namespace surface {
@@ -23,16 +23,8 @@ namespace dce {
 // Parse a comma-separated list of doubles ("1,2,3"). False on malformed input.
 bool parseDoubles(const std::string& s, std::vector<double>& out);
 
-// Parse "x,y,z" into a Vector3 / "x,y" into a Vector2. False on bad input.
-bool parseVec3(const std::string& s, dualc::Vector3& out);
-bool parseVec2(const std::string& s, dualc::Vector2& out);
-
 // Parse "x0,y0,z0,x1,y1,z1" into a BBox. False on bad input.
 bool parseBounds(const std::string& s, dualc::BBox& out);
-
-// True if `token` is a numeric literal or comma-separated number list (so a
-// leading '-' on a negative number is not mistaken for a flag).
-bool isNumberToken(const std::string& token);
 
 // Build a bump function for the `displaced` operator from a spec string
 // "name,amplitude,frequency"; name is one of sine | gyroid | bumps. An
@@ -57,6 +49,13 @@ struct DecimateOpts {
 // C ABI, a host plugin) reads it back here; every writeField* clears it on
 // entry. Per thread, because several exports may run at once in one process.
 const std::string& lastError();
+
+// Write `bytes` to `path` the way every export does: through `path + ".part"`,
+// opened non-inheritable, renamed over `path` only once the bytes are written
+// and the file closed. Errors print as `[dualc] error:` and reach lastError().
+// Returns 0 on success, 2 on an open / write / rename failure. For outputs
+// built in memory (the slice PNG and SVG).
+int writeBytesAtomic(const std::string& path, const std::string& bytes);
 
 // Sample `field`, contour it once, and write `path` in the format chosen by
 // its extension: `.obj` (per-vertex normals), `.stl` (binary), or `.3mf`
@@ -164,7 +163,7 @@ int chooseTileDepthForBudget(const dualc::ImplicitField& field,
                              std::uint64_t budgetBytes);
 
 // Named TPMS family + a one-line description, shared by every example that
-// exposes a TPMS picker (dualc_lattice, dualc_view, ...).
+// names a TPMS (the field-graph builder, its GLSL codegen, dualc_field --list).
 struct TpmsKind {
   std::string name;
   std::string blurb;
@@ -220,11 +219,11 @@ dualc::FieldPtr makeStrutLattice(const std::string& kind,
                                  double nodeRadius = -1.0);
 
 // ===========================================================================
-// Shared builder registries (primitives, post-ops, booleans, CSG recipes).
+// Shared builder registries (primitives, post-ops, booleans).
 //
-// Hosted here so both the CLI tools (dualc_primitive / dualc_boolean /
-// dualc_csg_demo) and the interactive viewer (dualc_view) drive ONE source of
-// truth, instead of each owning a private copy that can drift.
+// The field-graph's vocabulary: hosted here so the graph builder, its GLSL
+// codegen, dualc_field and dualc_boolean drive ONE source of truth, instead of
+// each owning a private copy that can drift.
 // ===========================================================================
 
 // One analytic primitive: a name, a human-readable parameter signature, the
@@ -247,10 +246,6 @@ const PrimEntry* findPrimitive(const std::string& name);
 dualc::FieldPtr buildPrimitive(const std::string& name,
                                const std::vector<double>& params);
 
-// Split a primitive/recipe signature into per-parameter labels, stopping at a
-// trailing "[...]" note. Used to label generic parameter widgets in the viewer.
-std::vector<std::string> paramNames(const std::string& signature);
-
 // --- Post-operators (decorators + domain warps) ----------------------------
 enum class PostOpKind {
   Offset, Round, Onion, Scale, Elongate, Translate, Rotate,
@@ -258,15 +253,9 @@ enum class PostOpKind {
 };
 struct PostOp {
   PostOpKind kind;
-  std::vector<double> params;   // numeric arguments (see parsePostOp)
+  std::vector<double> params;   // numeric arguments, per kind (applyPostOps)
   std::string bumpSpec;         // Displace only: "name,amp,freq"
 };
-// True if `flag` (e.g. "--twist") names a post-op.
-bool isPostOpFlag(const std::string& flag);
-// Parse one "--flag value" pair into a PostOp. False (with `err` set) on a
-// malformed value or an unknown flag.
-bool parsePostOp(const std::string& flag, const std::string& val,
-                 PostOp& out, std::string& err);
 // Apply a post-op stack to `f`, left to right. An op with the wrong parameter
 // count is skipped (treated as a no-op).
 dualc::FieldPtr applyPostOps(dualc::FieldPtr f, const std::vector<PostOp>& ops);
@@ -281,25 +270,5 @@ bool        parseBoolOp(const std::string& s, BoolOp& out);
 bool        boolOpIsSmooth(BoolOp op);
 dualc::FieldPtr applyBoolOp(BoolOp op, dualc::FieldPtr a, dualc::FieldPtr b,
                             double k);
-
-// --- CSG recipes (parametric: each baked constant is a tunable parameter) ---
-struct RecipeEntry {
-  std::string name;
-  std::string blurb;
-  bool needsMesh = false;
-  std::string signature;          // parameter labels (may be empty)
-  std::vector<double> defaults;   // defaults reproduce the original recipe
-};
-const std::vector<RecipeEntry>& csgRecipes();
-const RecipeEntry* findRecipe(const std::string& name);
-
-// Build a recipe; `params` is merged over its defaults (empty => all defaults,
-// reproducing the original baked recipe). `mesh`/`geom` may be null for recipes
-// whose needsMesh is false. Returns nullptr for an unknown name or a
-// missing-but-required mesh.
-dualc::FieldPtr buildRecipe(
-    const std::string& name, const std::vector<double>& params,
-    geometrycentral::surface::SurfaceMesh* mesh,
-    geometrycentral::surface::VertexPositionGeometry* geom);
 
 } // namespace dce

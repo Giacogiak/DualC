@@ -1,32 +1,18 @@
 # Tool 5: `dualc_csg_demo` (the 6 baked recipes)
 
-Baked field-tree composition recipes — hand-built trees that showcase
-composition, mesh+primitive booleans, and the `displaced` operator (whose
-function argument has no plain CLI form).
+**Retired 2026-10-16.** `dualc_csg_demo`, the CLI that built one of six hand-coded field trees
+by name, was removed as-is: each recipe is now a graph file the build copies next to the
+framework CLIs (D-55 in [the settled decisions](../decisions/01-settled.md)); tool number 5 is never reused. The record
+of the retirement is [roadmap 21/08](../roadmap/21-cli-consolidation/08-retire-tools.md) ([#60](../roadmap/21-cli-consolidation/01-record.md#60-retire-the-eight-tools)).
 
-```
-dualc_csg_demo --recipe=NAME [input.obj] [options]
-```
+The six recipes, as `examples/samples/*.json`, are [11/13](11-dualc_field/13-composition-samples.md)
+— the same bytes for the same recipe:
 
-| Flag | Default | Meaning |
-| --- | --- | --- |
-| `--recipe=NAME` / `--recipe NAME` | (required) | One of the six recipes (R1–R6). |
-| `input.obj` | — | Positional; required by the three mesh recipes. |
-| `-o PATH` | `<recipe>.obj` | Output; `.obj` / `.stl` / `.3mf` by extension ([export formats](README.md#export-formats--o-extension-dispatch)). |
-| `--depth N` | `7` | Octree max depth. |
-| `--collapse E` | `0` (off) | Adaptive cell-collapse threshold. |
-| `--list` | — | Print all recipes, then exit. |
-
-## Recipes
-
-| # | Recipe | Default command | Needs a mesh? | What it builds |
-| --- | --- | --- | --- | --- |
-| R1 | `cube-minus-sphere` | `dualc_csg_demo --recipe=cube-minus-sphere` | no | Hard difference of a box and a sphere. |
-| R2 | `smooth-blend` | `dualc_csg_demo --recipe=smooth-blend` | no | Smooth union of two spheres (visible fillet). |
-| R3 | `displaced-sphere` | `dualc_csg_demo --recipe=displaced-sphere` | no | A sphere perturbed by a sinusoidal bump. |
-| R4 | `mesh-shell` | `dualc_csg_demo --recipe=mesh-shell cube.obj` | yes | `onionOf(mesh)` — hollow shell of the input. |
-| R5 | `mesh-minus-sphere` | `dualc_csg_demo --recipe=mesh-minus-sphere cube.obj` | yes | `differenceOf(mesh, sphere)` — carve the input. |
-| R6 | `twisted-mesh` | `dualc_csg_demo --recipe=twisted-mesh cube.obj` | yes | `twisted(mesh)` — a domain warp on the input. |
+| Was | Now |
+| --- | --- |
+| `dualc_csg_demo --recipe=NAME` | `dualc_field NAME.json -o out.obj` (the dashes in NAME become underscores) ([11/13 § The samples](11-dualc_field/13-composition-samples.md#the-samples)) |
+| The mesh as the positional argument (`mesh-shell`, `mesh-minus-sphere`, `twisted-mesh`) | a copy of the sample with another `path`, or the graph inline (K5's variant) |
+| Recipes R1–R6 | K1–K6 ([11/13 § Recipes](11-dualc_field/13-composition-samples.md#recipes)) |
 
 ---
 

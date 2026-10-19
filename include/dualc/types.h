@@ -19,14 +19,16 @@ struct Vector3i {
 enum class SignMethod {
   PSEUDONORMAL,    // Bærentzen-Aanæs angle-weighted pseudonormal sign.
                    // Assumes watertight, oriented input.
-  WINDING_NUMBER,  // 3-ray majority parity vote. Correct for closed,
-                   // oriented meshes; robust against single-ray grazing.
+  WINDING_NUMBER,  // 3-ray majority parity vote. Correct for closed
+                   // meshes, whatever their winding (a hit count ignores
+                   // facing); robust against single-ray grazing.
                    // NOT a winding number despite the name -- kept for
                    // backwards compatibility.
   GENERALIZED_WINDING_NUMBER
                    // Jacobson generalized winding number, hierarchically
                    // accelerated. Tolerates non-watertight input: open
-                   // shells, triangle soup, self-intersections.
+                   // shells, triangle soup, self-intersections; needs a
+                   // consistent outward winding (inside-out reads -1).
 };
 
 struct BBox {

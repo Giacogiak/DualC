@@ -12,7 +12,7 @@ What replaces each of its uses:
 | --- | --- |
 | Live-tune a lattice, primitive, boolean or CSG recipe and watch the contour | [`dualc_field_view`](12-dualc_field_view/README.md): write the same thing as a field-graph expression, edit the file, the viewer recompiles on save — no re-contour, so it stays live at any density. |
 | Produce the mesh you tuned | [`dualc_field`](11-dualc_field/README.md) on the same expression (`-o`). |
-| Inspect a demo mesh through the contourer | [`dualc_demo`](01-dualc_demo.md) to a file, then any mesh viewer. |
+| Inspect a demo mesh through the contourer | [`dualc_field`](11-dualc_field/11-mesh-in.md) on `mesh(path=…)` to a file, then any mesh viewer (`dualc_demo` did it until its own retirement, 2026-10-16). |
 | Octree-leaf, Hermite-crossing and sign-oracle overlays | No replacement: they drew the contourer's internals, and `dualc_field_view` never contours. |
 
 Its four modes map to expressions `dualc_field_view` takes directly

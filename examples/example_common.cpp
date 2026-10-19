@@ -183,34 +183,12 @@ bool parseDoubles(const std::string& s, std::vector<double>& out) {
   return !out.empty();
 }
 
-bool parseVec3(const std::string& s, dualc::Vector3& out) {
-  std::vector<double> v;
-  if (!parseDoubles(s, v) || v.size() != 3) return false;
-  out = dualc::Vector3{v[0], v[1], v[2]};
-  return true;
-}
-
-bool parseVec2(const std::string& s, dualc::Vector2& out) {
-  std::vector<double> v;
-  if (!parseDoubles(s, v) || v.size() != 2) return false;
-  out = dualc::Vector2{v[0], v[1]};
-  return true;
-}
-
 bool parseBounds(const std::string& s, dualc::BBox& out) {
   std::vector<double> v;
   if (!parseDoubles(s, v) || v.size() != 6) return false;
   out.min = dualc::Vector3{v[0], v[1], v[2]};
   out.max = dualc::Vector3{v[3], v[4], v[5]};
   return true;
-}
-
-bool isNumberToken(const std::string& token) {
-  if (token.empty()) return false;
-  std::size_t i = 0;
-  if (token[i] == '-' || token[i] == '+') ++i;
-  if (i >= token.size()) return false;
-  return std::isdigit(static_cast<unsigned char>(token[i])) || token[i] == '.';
 }
 
 std::function<double(const dualc::Vector3&)> namedBump(const std::string& spec) {
@@ -577,59 +555,7 @@ dualc::FieldPtr buildPrimitive(const std::string& name,
   return e->build(p);
 }
 
-std::vector<std::string> paramNames(const std::string& signature) {
-  std::vector<std::string> names;
-  std::istringstream ss(signature);
-  std::string tok;
-  while (ss >> tok) {
-    if (!tok.empty() && tok[0] == '[') break;  // start of a "[...]" note
-    names.push_back(tok);
-  }
-  return names;
-}
-
 // --- Post-operators ---------------------------------------------------------
-
-bool isPostOpFlag(const std::string& f) {
-  return f == "--offset" || f == "--round" || f == "--onion" ||
-         f == "--scale" || f == "--elongate" || f == "--translate" ||
-         f == "--rotate" || f == "--twist" || f == "--bend" ||
-         f == "--mirror" || f == "--repeat" || f == "--repeat-limited" ||
-         f == "--displace";
-}
-
-bool parsePostOp(const std::string& flag, const std::string& val, PostOp& out,
-                 std::string& err) {
-  std::vector<double> n;
-  auto bad = [&](const char* what) {
-    err = "bad value for " + flag + ": '" + val + "' (" + what + ")";
-    return false;
-  };
-  auto nums = [&](std::size_t want, const char* what, PostOpKind kind) {
-    if (!parseDoubles(val, n) || n.size() != want) return bad(what);
-    out = PostOp{kind, n, {}};
-    return true;
-  };
-  if (flag == "--offset") return nums(1, "expect R", PostOpKind::Offset);
-  if (flag == "--round") return nums(1, "expect R", PostOpKind::Round);
-  if (flag == "--onion") return nums(1, "expect T", PostOpKind::Onion);
-  if (flag == "--scale") return nums(1, "expect S", PostOpKind::Scale);
-  if (flag == "--elongate") return nums(3, "expect hx,hy,hz", PostOpKind::Elongate);
-  if (flag == "--translate") return nums(3, "expect dx,dy,dz", PostOpKind::Translate);
-  if (flag == "--rotate") return nums(4, "expect ax,ay,az,deg", PostOpKind::Rotate);
-  if (flag == "--twist") return nums(2, "expect k,axis", PostOpKind::Twist);
-  if (flag == "--bend") return nums(2, "expect k,axis", PostOpKind::Bend);
-  if (flag == "--mirror") return nums(3, "expect nx,ny,nz", PostOpKind::Mirror);
-  if (flag == "--repeat") return nums(3, "expect px,py,pz", PostOpKind::Repeat);
-  if (flag == "--repeat-limited")
-    return nums(6, "expect px,py,pz,nx,ny,nz", PostOpKind::RepeatLimited);
-  if (flag == "--displace") {
-    out = PostOp{PostOpKind::Displace, {}, val};
-    return true;
-  }
-  err = "unknown post-op flag: " + flag;
-  return false;
-}
 
 dualc::FieldPtr applyPostOps(dualc::FieldPtr f, const std::vector<PostOp>& ops) {
   using namespace dualc;
@@ -722,78 +648,6 @@ dualc::FieldPtr applyBoolOp(BoolOp op, dualc::FieldPtr a, dualc::FieldPtr b,
     case BoolOp::SmoothDifference:   return smoothDifferenceOf(a, b, k);
   }
   return unionOf(a, b);
-}
-
-// --- CSG recipes ------------------------------------------------------------
-
-const std::vector<RecipeEntry>& csgRecipes() {
-  static const std::vector<RecipeEntry> r = {
-      {"cube-minus-sphere", "hard difference of a box and a sphere", false,
-       "boxHalf sphereCx sphereCy sphereCz sphereR", {1, 1, 1, 1, 1.2}},
-      {"smooth-blend", "smooth union of two spheres (visible fillet)", false,
-       "separation radius blendK", {0.6, 0.8, 0.5}},
-      {"displaced-sphere", "a sphere perturbed by a sinusoidal bump", false,
-       "radius amplitude frequency", {1.0, 0.08, 8.0}},
-      {"mesh-shell", "onionOf(mesh): a hollow shell of the input", true,
-       "thickness", {0.05}},
-      {"mesh-minus-sphere", "differenceOf(mesh, sphere): carve the input", true,
-       "sphereCx sphereCy sphereCz sphereR", {0.5, 0.5, 0.5, 0.5}},
-      {"twisted-mesh", "twisted(mesh): a domain warp on the input", true,
-       "radPerUnit axis", {2.0, 1}},
-  };
-  return r;
-}
-
-const RecipeEntry* findRecipe(const std::string& name) {
-  for (const RecipeEntry& r : csgRecipes())
-    if (r.name == name) return &r;
-  return nullptr;
-}
-
-dualc::FieldPtr buildRecipe(
-    const std::string& name, const std::vector<double>& params,
-    geometrycentral::surface::SurfaceMesh* mesh,
-    geometrycentral::surface::VertexPositionGeometry* geom) {
-  using namespace dualc;
-  const RecipeEntry* e = findRecipe(name);
-  if (e == nullptr) return nullptr;
-  if (e->needsMesh && (mesh == nullptr || geom == nullptr)) return nullptr;
-  std::vector<double> p = e->defaults;
-  for (std::size_t i = 0; i < params.size() && i < p.size(); ++i) p[i] = params[i];
-
-  if (name == "cube-minus-sphere") {
-    auto box = std::make_shared<BoxField>(Vector3{-p[0], -p[0], -p[0]},
-                                          Vector3{p[0], p[0], p[0]});
-    auto sph = std::make_shared<SphereField>(Vector3{p[1], p[2], p[3]}, p[4]);
-    return differenceOf(box, sph);
-  }
-  if (name == "smooth-blend") {
-    auto a = std::make_shared<SphereField>(Vector3{-p[0], 0, 0}, p[1]);
-    auto b = std::make_shared<SphereField>(Vector3{p[0], 0, 0}, p[1]);
-    return smoothUnionOf(a, b, p[2]);
-  }
-  if (name == "displaced-sphere") {
-    auto sph = std::make_shared<SphereField>(Vector3{0, 0, 0}, p[0]);
-    const double amp = p[1], freq = p[2];
-    return displaced(sph, [amp, freq](const Vector3& q) {
-      return amp * std::sin(freq * q.x) * std::sin(freq * q.y) *
-             std::sin(freq * q.z);
-    });
-  }
-  if (name == "mesh-shell") {
-    auto src = std::make_shared<MeshSource>(*mesh, *geom);
-    return onionOf(src, p[0]);
-  }
-  if (name == "mesh-minus-sphere") {
-    auto src = std::make_shared<MeshSource>(*mesh, *geom);
-    auto sph = std::make_shared<SphereField>(Vector3{p[0], p[1], p[2]}, p[3]);
-    return differenceOf(src, sph);
-  }
-  if (name == "twisted-mesh") {
-    auto src = std::make_shared<MeshSource>(*mesh, *geom);
-    return twisted(src, p[0], static_cast<int>(p[1]));
-  }
-  return nullptr;
 }
 
 namespace {
@@ -2107,6 +1961,26 @@ int pickTileDepthForBudget(const dualc::ImplicitField& field,
 }
 
 } // namespace
+
+int writeBytesAtomic(const std::string& path, const std::string& bytes) {
+  g_lastError.clear();
+  AtomicOutput out(path);
+  FILE* f = openOutputFile(out.tmp(), true);
+  if (f == nullptr) {
+    reportError("cannot open '" + out.tmp() + "' for writing: " + errnoText());
+    return 2;
+  }
+  const bool wrote = bytes.empty() ||
+      std::fwrite(bytes.data(), 1, bytes.size(), f) == bytes.size();
+  // Close before commit() or the destructor touches the temp: Windows cannot
+  // rename or unlink an open file.
+  const bool closed = std::fclose(f) == 0;
+  if (!wrote || !closed) {
+    reportError("failed writing '" + out.tmp() + "': " + errnoText());
+    return 2;
+  }
+  return out.commit() ? 0 : 2;
+}
 
 namespace {
 

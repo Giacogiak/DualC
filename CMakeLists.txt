@@ -16,9 +16,6 @@ endif()
 # silently inherit a Catch2 network fetch and 21 extra test translation units.
 option(DUALC_BUILD_TESTS    "Build DualC unit tests"       ${DUALC_IS_TOP_LEVEL})
 option(DUALC_BUILD_EXAMPLES "Build DualC example programs" ${DUALC_IS_TOP_LEVEL})
-option(DUALC_BUILD_RAYMARCH_VIEWER
-       "Build the standalone GPU raymarch viewer (dualc_raymarch). Needs GLFW (fetched at its pinned tag unless DUALC_GLFW_DIR names a tree) + the vendored glad."
-       OFF)
 option(DUALC_BUILD_FIELD_VIEW
        "Build the standalone field-graph GPU viewer (dualc_field_view): compiles any field-graph to GLSL and raymarches it. Needs GLFW (fetched at its pinned tag unless DUALC_GLFW_DIR names a tree) + the vendored glad."
        OFF)
@@ -133,9 +130,9 @@ if(NOT dualc_gc_from_parent)
   dualc_target_sanitize(geometry-central)
 endif()
 
-# GLFW, for the opt-in GL targets only (dualc_raymarch, dualc_field_view,
-# dualc_glsl_parity). Resolved like geometry-central, three rungs, first match
-# wins: an existing `glfw` target from an enclosing project; a local tree via
+# GLFW, for the opt-in GL targets only (dualc_field_view, dualc_glsl_parity).
+# Resolved like geometry-central, three rungs, first match wins: an existing
+# `glfw` target from an enclosing project; a local tree via
 # -DDUALC_GLFW_DIR; else FetchContent of upstream glfw/glfw at the pinned 3.4
 # release commit. The GL loader those targets pair it with is the vendored
 # glad under examples/third_party/glad (see THIRD_PARTY.md); nothing here
@@ -146,7 +143,7 @@ endif()
 set(DUALC_GLFW_DIR "" CACHE PATH
     "Path to a local GLFW source tree; empty = fetch the pinned upstream release")
 set(DUALC_GLFW_GIT_TAG 7b6aead9fb88b3623e3b3725ebb42670cbe4c579)  # 3.4
-if(DUALC_BUILD_RAYMARCH_VIEWER OR DUALC_BUILD_FIELD_VIEW OR DUALC_BUILD_GLSL_PARITY)
+if(DUALC_BUILD_FIELD_VIEW OR DUALC_BUILD_GLSL_PARITY)
   set(GLFW_BUILD_DOCS     OFF CACHE BOOL "" FORCE)
   set(GLFW_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
   set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)

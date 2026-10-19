@@ -3,8 +3,9 @@
 Part of [Tool 11: `dualc_field`](README.md). How to hand the tool a graph (JSON file,
 `--expr`, stdin — and shell quoting), then every node `dualc_field` (and
 `dualc_field_view`) accepts — sources, booleans, decorators, domain operators, the
-primitive parameter forms — and the `--expr` text grammar. Strut and graded lattices
-have their own pages ([02](02-strut-lattices.md), [03](03-graded-and-morph.md)).
+primitive parameter forms — and the `--expr` text grammar. Strut and graded lattices,
+2D profiles and lifts have their own pages ([02](02-strut-lattices.md),
+[03](03-graded-and-morph.md), [09](09-2d-profiles-and-lifts.md)).
 
 ## Choosing an input form (JSON file vs `--expr` vs stdin)
 
@@ -90,9 +91,9 @@ vocabulary.
 | --- | --- | --- |
 | `gyroid` · `schwarz-p` · `diamond` · `fischer-koch` · `lidinoid` · `neovius` | `center`:[x,y,z]=0, `wavelength`=1 | TPMS. Raw value is non-metric — wrap in `normalize` before a metric `onion`/smooth boolean. |
 | `sc` · `bcc` · `fcc` · `octet` | `center`:[x,y,z]=0, `wavelength`=1, `radius`=0.1 | **Strut lattices** (wireframe crystals): simple-cubic, body-centered, face-centered, octet truss. A unit cell of capsule struts tiled infinitely; `radius` is the metric strut thickness. Already a true SDF — no `normalize` needed. Infinite extent, so clip it: `intersection(mesh(…), bcc(…))` or `intersection(box(…), bcc(…))`, or set `--bounds` for an open-ended inspection view. |
-| `mesh` | `path` **or** `id` (exactly one), `sign` ∈ `parity`(def)/`pseudonormal`, `normals` ∈ `smooth`(def)/`sharp` | Signed distance to a watertight mesh (BVH). `sign:"gwn"` is **not** accepted here — use `winding`. |
-| `winding` | `path` **or** `id` (exactly one) | Generalized-winding-number field: contours triangle **soup** / open shells / self-intersections into a watertight solid. |
-| 30 analytic primitives | grouped keys or flat `params:[…]` (see below) | `sphere`, `box`, `roundbox`, `torus`, … — full param order in [02-dualc_primitive.md](../02-dualc_primitive.md). |
+| `mesh` | `path` **or** `id` (exactly one), `sign` ∈ `parity`(def)/`pseudonormal`/`gwn`, `normals` ∈ `smooth`(def)/`sharp`, `bake`=off, `band`=3 bake cells (+ the margin above) | Signed distance to a mesh (BVH); `sign` picks only the inside test. `parity` and `pseudonormal` need closed input (`pseudonormal` also outward-wound); `gwn` (generalized winding number) survives small gaps, self-intersections and soup, but a real hole stays a hole — the distance is still to the mesh. To **seal** an open shell or soup into a solid use `winding`, the sealing field, not a sign oracle. |
+| `winding` | `path` **or** `id` (exactly one), `bake`=off | Generalized-winding-number field: contours triangle **soup** / open shells / self-intersections into a watertight solid. Reads the winding: faces wound inside out give an empty field. |
+| 30 analytic primitives | grouped keys or flat `params:[…]` (see below) | `sphere`, `box`, `roundbox`, `torus`, … — full param order in [12](12-primitive-catalogue.md). |
 
 Mesh `path`s are resolved host-side by a caching resolver (each unique path is
 loaded once); the loaded meshes are owned for the field's lifetime. The `id` form
@@ -101,6 +102,39 @@ buffer and is **C-ABI-only** — it has no meaning on the `dualc_field` CLI (whi
 registers no buffers and will error), and exists for the C ABI's
 `dualc_field_create_from_{json,expr}_with_meshes` calls (see
 [`docs/roadmap/14-c-abi/`](../../roadmap/14-c-abi/README.md)).
+
+**Baking a mesh node — `bake=N[, band=W]`.** Off by default: the node is queried exactly
+(BVH distance, sharp features kept). `bake=N` (an integer, 2–512) samples it **once** into an
+N³ grid over its own bounding box padded by 10 % of its largest extent, and every later query
+is a trilinear lookup — a speed/exactness trade for large meshes: on a 550 mm, 8.4k-face pair
+at depth 7 the difference ran in 6.2 s / 0.5 GB instead of 25.8 s / 2.0 GB, its vertices
+within one bake cell of the exact surface but sub-cell sharp edges rounded
+([roadmap 21/04](../../roadmap/21-cli-consolidation/04-mesh-node-bake.md)). On `mesh`, `band`
+is the shell (world units, default 3 bake cells) kept at the exact distance; beyond it the
+distance is a monotone over-estimate. `winding` bakes its full lattice and takes no `band`.
+
+Outside its box a grid repeats its face value, so anything above the node that reads the field
+further out — a smooth op's `k`, an `offset` / `round` / `onion` / `displace` amount — would
+make material out of that constant. The graph handles it: each ancestor hands the baked node
+that distance (the largest smooth `k` above it plus the offsets on the way, divided by `s`
+through a `scale`), and the node widens its box by it and keeps its exact band at least that
+plus 3 cells — `dualc_boolean --bake`'s rule (pad `k`, band `k` + 3 cells), per node; the
+rule, op by op, is [design/12](../../design/12-field-graph.md#per-node-bake). A `band`
+larger than that wins. One consequence remains yours: a baked field's bounds are its padded
+box, so at the same `--depth` the cells are coarser than the exact run's unless `--bounds`
+pins the root box. `dualc_boolean --bake N`'s single box around both operands is not
+reproduced: a node never sees its sibling.
+
+```bash
+dualc_field --expr 'smooth-union(mesh(path="torus.obj",bake=64),mesh(path="cube.obj",bake=64),k=1)' --depth 6 -o su_baked.obj
+```
+
+### 2D profiles and lifts
+
+`revolve(profile, offset=1)` and `extrude(profile, height=0.5)` lift one 2D profile —
+`circle`, `rect`, `segment`, `polygon` — into a 3D node; a profile is legal nowhere else.
+Keys, defaults, typing errors and recipes: [09](09-2d-profiles-and-lifts.md); the viewer
+previews them (a `polygon` up to 64 vertices).
 
 ### Booleans (two children)
 
@@ -150,7 +184,7 @@ Core/common primitives accept **grouped semantic keys**:
 
 Every primitive (including these) also accepts a universal flat array
 `"params": [...]` that maps positionally onto the documented parameter order in
-[02-dualc_primitive.md](../02-dualc_primitive.md) (omitted trailing values fall back
+[12](12-primitive-catalogue.md) (omitted trailing values fall back
 to defaults). Use it for the long-tail primitives that have no grouped keys yet,
 e.g. `{ "op": "hexprism", "params": [0,0,0, 1, 1] }`.
 
@@ -169,7 +203,7 @@ args  := arg (',' arg)*
 arg   := node                  # nested op-call → a child (appended to "in", in order)
        | key '=' value         # named param → params[key]
        | number | '[' … ']'    # bare positional scalar/array → flat params (see below)
-value := number | '[' number (',' number)* ']' | IDENT | "string"
+value := number | '[' number (',' number)* ']' | '[' array (',' array)* ']' | IDENT | "string"
 ```
 
 - **Children vs. params interleave freely** — `onion(normalize(gyroid()),thickness=0.3)`
@@ -183,8 +217,10 @@ value := number | '[' number (',' number)* ']' | IDENT | "string"
   a quoted string are literal, so Windows paths (`"D:\bracket.obj"`) survive.
 - **Positional params:** bare scalars and `[…]` arrays (not `key=value`) are
   concatenated, in order, into the universal flat `params:[…]` array — the same
-  positional primitive order as `--dump-json` / `dualc_primitive`. Example:
+  positional primitive order as `--dump-json` writes. Example:
   `sphere(0,0,0,0.5)` ≡ `sphere(params=[0,0,0,0.5])` ≡ `sphere(center=[0,0,0],radius=0.5)`.
+- **Arrays of arrays** nest one level, rows of one length — a polygon's
+  `points=[[0,0],[1,0],[0,1]]`; JSON alike, and `--dump-json` keeps the rows.
 
 **Underscore aliases** — because shell tokens dislike hyphens, the *op token*
 accepts an underscore form of each hyphenated registry token (only at op
