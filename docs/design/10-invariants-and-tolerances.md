@@ -19,9 +19,9 @@ of these links here rather than restating the number.
   `Diagnostics::outputBoundaryEdges` / `outputNonManifoldEdges` / `outputWatertight`, and the
   CLIs print a warning when the mesh is not closed
   ([17/05](../roadmap/17-code-audit-and-hardening/05-diagnostics-channel.md)).
-- **The output is bit-identical regardless of the thread count.** Every worker owns a
-  disjoint subtree and no result depends on scheduling
-  ([§ 3.2](01-sampler.md#32-parallel-octree-build)). A consequence worth knowing when adding
+- **The output is bit-identical regardless of the thread count.** Every worker owns its
+  subtree, leaf solve ([§ 4](03-contourer-recursion.md)) or bake voxel; no result
+  depends on scheduling ([§ 3.2](01-sampler.md#32-parallel-octree-build)). A consequence worth knowing when adding
   a diagnostic: nothing on the field may count per-probe events from worker threads, because
   the count would be scheduling-dependent.
 - **The mesh path is the field path.** `dualContourMesh` builds a `MeshSource` and runs the

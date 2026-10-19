@@ -42,7 +42,7 @@ param structs exactly as `dualc_field`'s CLI flags do:
 |---|---|---|
 | `maxDepth` | `dualc::SamplerParams::maxDepth` | proxy lever; `--depth` |
 | `minDepth` | `dualc::SamplerParams::minDepth` | |
-| `numThreads` | `dualc::SamplerParams::numThreads` | 0 = all cores |
+| `numThreads` | `dualc::SamplerParams::numThreads` and, since 0.5.2, `dualc::ContourerParams::numThreads` | 0 = all cores; `--threads`. The create calls' per-node bakes are not covered ([17 #34](../17-code-audit-and-hardening/18-contourer-threads.md)) |
 | `hasBounds`,`boundsMin`,`boundsMax` | `dualc::SamplerParams::rootBounds` (`std::optional<BBox>`) | only set when `hasBounds!=0`; `--bounds` |
 | `collapse` | `dualc::ContourerParams::simplificationError` | `--collapse`; 0 = off |
 | `manifold` | `dualc::ContourerParams::manifoldDC` | `--no-manifold` ⇒ 0 |

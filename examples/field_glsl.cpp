@@ -801,6 +801,7 @@ struct Ctx {
   MeshResolver* resolver = nullptr;
   dualc::BBox bounds;
   int gridRes = kDefaultMeshGridRes;
+  unsigned threads = 0;  // bake workers; 0 = all hardware threads
   int counter = 0;
   std::map<std::string, int> memo;  // structural key -> emitted node index, so a
                                     // repeated subtree (DAG dedup) reuses its fN.
@@ -1266,13 +1267,14 @@ int emitMesh(const GraphNode& n, Ctx& c) {
   // unbaked node is baked here, over the trace box at --grid-res.
   dualc::FieldPtr gridPtr;
   if (nb.res > 0) {
-    gridPtr = bakeMeshNode(src, nb, c.path.back().second);
+    gridPtr = bakeMeshNode(src, nb, c.path.back().second, c.threads);
   } else {
     const dualc::Vector3 e = c.bounds.extent();
     const double maxCell =
         std::max({e.x, e.y, e.z}) / std::max(c.gridRes - 1, 1);
     gridPtr = src.bakeToGrid(
-        c.bounds, dualc::Vector3i{c.gridRes, c.gridRes, c.gridRes}, 3.0 * maxCell);
+        c.bounds, dualc::Vector3i{c.gridRes, c.gridRes, c.gridRes}, 3.0 * maxCell,
+        c.threads);
   }
   auto* grid = dynamic_cast<const dualc::GridField*>(gridPtr.get());
   if (!grid)
@@ -1296,9 +1298,10 @@ int emitWinding(const GraphNode& n, Ctx& c) {
   MeshHandle h = c.resolver->resolve(path);
   dualc::FieldPtr wf = dualc::windingNumberField(*h.mesh, *h.geom);
   dualc::FieldPtr gridPtr =
-      nb.res > 0 ? bakeWindingNode(*wf, nb, c.path.back().second)
+      nb.res > 0 ? bakeWindingNode(*wf, nb, c.path.back().second, c.threads)
                  : dualc::bakeToGrid(*wf, c.bounds,
-                                     dualc::Vector3i{c.gridRes, c.gridRes, c.gridRes});
+                                     dualc::Vector3i{c.gridRes, c.gridRes, c.gridRes},
+                                     c.threads);
   auto* grid = dynamic_cast<const dualc::GridField*>(gridPtr.get());
   if (!grid)
     throw GraphError("internal: winding bake did not return a GridField",
@@ -1724,10 +1727,12 @@ float nodeFeatureScale(const GraphNode& n) {
 }  // namespace
 
 GlslScene compileToGlsl(const GraphNode& root, MeshResolver& meshes,
-                        const dualc::BBox& bounds, int gridRes) {
+                        const dualc::BBox& bounds, int gridRes,
+                        unsigned bakeThreads) {
   Ctx c;
   c.resolver = &meshes;
   c.bounds = bounds;
+  c.threads = bakeThreads;
   // Clamp here too: a bad programmatic value must not reach GridField's throw.
   c.gridRes = std::max(2, std::min(gridRes, kMaxMeshGridRes));
   const int rootIdx = emitNode(root, c);

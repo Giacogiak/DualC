@@ -151,7 +151,7 @@ BBox GridField::bounds() const { return impl_->region; }
 // ===========================================================================
 
 FieldPtr bakeToGrid(const ImplicitField& src, const BBox& region,
-                    const Vector3i& resolution) {
+                    const Vector3i& resolution, unsigned numThreads) {
   if (resolution.x < 2 || resolution.y < 2 || resolution.z < 2) {
     throw std::invalid_argument(
         "bakeToGrid: resolution must be >= 2 on every axis");
@@ -167,9 +167,9 @@ FieldPtr bakeToGrid(const ImplicitField& src, const BBox& region,
 
   // Sample the field on the lattice. Each z-slab is independent, so the bake
   // -- the only place the expensive source field is touched -- parallelises
-  // trivially across hardware threads.
+  // trivially across `numThreads` workers.
   internal::parallelFor(
-      static_cast<std::size_t>(rz), internal::resolveThreadCount(0),
+      static_cast<std::size_t>(rz), numThreads,
       [&](std::size_t izu) {
         const int iz = static_cast<int>(izu);
         const double z = region.min.z + cell.z * iz;
@@ -189,8 +189,9 @@ FieldPtr bakeToGrid(const ImplicitField& src, const BBox& region,
 }
 
 FieldPtr bakeToGrid(const ImplicitField& src, const BBox& region,
-                    int resolution) {
-  return bakeToGrid(src, region, Vector3i{resolution, resolution, resolution});
+                    int resolution, unsigned numThreads) {
+  return bakeToGrid(src, region, Vector3i{resolution, resolution, resolution},
+                    numThreads);
 }
 
 } // namespace dualc

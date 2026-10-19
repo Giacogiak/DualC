@@ -151,7 +151,9 @@ public:
   // bakeToGrid() for a mesh -- the expensive BVH SDF query runs only on the
   // band, not the whole res^3 lattice. `bandWidth` is raised to a safe floor
   // (1.5x the largest cell) if smaller; pick it >= the boolean blend radius so
-  // a later smooth blend stays exact.
+  // a later smooth blend stays exact. `numThreads` workers sample the band
+  // (0 = all hardware threads); every voxel is written by one worker only, so
+  // the grid is bit-identical regardless of it.
   //
   // `region` may be ANY box: padded around the mesh, flush with its AABB, only
   // partly overlapping it, or strictly inside the solid. (It did once have to
@@ -167,7 +169,7 @@ public:
   // consumer that needs a conservative (never-overshooting) distance -- a sphere
   // tracer -- must not step by this field unnormalized.
   FieldPtr bakeToGrid(const BBox& region, const Vector3i& resolution,
-                      double bandWidth) const;
+                      double bandWidth, unsigned numThreads = 0) const;
 
   // Facts about the input mesh, measured once at construction and free to
   // read (the edge counts fall out of the pseudonormal topology pass). They
@@ -270,15 +272,17 @@ private:
 // Sample `src` once into a dense SDF grid covering `region` and return it as
 // a GridField. The grid has `resolution` samples along each axis (>= 2). Bake
 // cost is resolution.x*y*z `src.valueAt` calls, paid once and parallelised
-// across hardware threads; every later query is an O(1) trilinear lookup.
+// across `numThreads` workers (0 = all hardware threads; the grid is
+// bit-identical regardless of it); every later query is an O(1) trilinear
+// lookup.
 //
 // Memory: 4 * rx * ry * rz bytes (float storage) -- e.g. 129^3 ~= 8 MB.
 FieldPtr bakeToGrid(const ImplicitField& src, const BBox& region,
-                    const Vector3i& resolution);
+                    const Vector3i& resolution, unsigned numThreads = 0);
 
 // Cubic-resolution convenience overload (`resolution` samples on every axis).
 FieldPtr bakeToGrid(const ImplicitField& src, const BBox& region,
-                    int resolution);
+                    int resolution, unsigned numThreads = 0);
 
 // --- Boolean combinators -------------------------------------------------
 //

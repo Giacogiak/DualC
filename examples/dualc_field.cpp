@@ -75,6 +75,9 @@ void printUsage() {
       "                 of E world units (mm) instead of a ratio. Mutually\n"
       "                 exclusive with --decimate; monolithic only.\n"
       "  --no-manifold  Disable Manifold Dual Contouring (one vertex per cell).\n"
+      "  --threads N    Worker threads for the per-node bakes, the octree build\n"
+      "                 and the contourer's QEF solves (default 0 = all hardware\n"
+      "                 threads). The output is byte-identical at every N.\n"
       "  --slice AXIS=VALUE\n"
       "                 Sample the field on an axis-aligned plane (e.g. z=0,\n"
       "                 x=1.5) instead of contouring it: writes BASE.png (heatmap,\n"
@@ -347,6 +350,17 @@ int main(int argc, char** argv) {
         return 2;
       }
       dec = {dce::DecimateOpts::Mode::Error, e};
+    } else if (a == "--threads") {
+      const char* v = needValue("--threads");
+      if (!v) return 2;
+      unsigned t = 0;
+      if (!dce::parseThreadCount(v, t)) {
+        std::cerr << "[dualc_field] --threads expects a whole number 0.."
+                  << dce::kMaxThreadCount << " (0 = all hardware threads)\n";
+        return 2;
+      }
+      sp.numThreads = t;
+      cp.numThreads = t;
     } else if (a == "--no-manifold") {
       cp.manifoldDC = false;
       meshFlags.push_back(a);
@@ -452,7 +466,7 @@ int main(int argc, char** argv) {
     }
 
     dce::fieldgraph::FieldGraph graph =
-        dce::fieldgraph::FieldGraph::build(root, meshes);
+        dce::fieldgraph::FieldGraph::build(root, meshes, sp.numThreads);
 
     if (haveSlice) {
       // The region: --bounds verbatim, else the graph's bounds padded the way

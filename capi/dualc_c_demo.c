@@ -25,7 +25,12 @@
  *                        to the older calls; a live callback sees every stage
  *                        end at done == total. Cancelling from inside the
  *                        callback is legal (it runs on the calling thread) and
- *                        deterministic, so no threads are needed. */
+ *                        deterministic, so no threads are needed.
+ *   "threads"          : numThreads reaches the contourer (0.5.2) -- at
+ *                        numThreads = 1 the CONTOUR stage's first half reports
+ *                        every max(1, n/64) leaves (the serial path's poll
+ *                        cadence; the threaded path polls on a 100 ms timer),
+ *                        and 1, 2 and 0 threads give a BYTE-IDENTICAL mesh. */
 
 #include "dualc_c.h"
 
@@ -489,12 +494,111 @@ static int runCancel(const char* outPath) {
   return 0;
 }
 
+/* --- the "threads" mode ---------------------------------------------------- */
+
+typedef struct {
+  uint32_t total;          /* CONTOUR stage total (2 x leaves) */
+  uint32_t serialPolls;    /* reports with 0 < done < leaves on the serial cadence */
+  uint32_t otherPolls;     /* reports with 0 < done < leaves off that cadence */
+  uint32_t lastDone;
+} ThreadLog;
+
+static void onContourProgress(void* user, int stage, uint32_t done,
+                              uint32_t total) {
+  ThreadLog* log = (ThreadLog*)user;
+  uint32_t n, every;
+  if (stage != DUALC_STAGE_CONTOUR) return;
+  log->total = total;
+  n = total / 2;
+  every = (n / 64 == 0) ? 1 : n / 64;
+  if (done > 0 && done < n) {
+    if (done % every == 0 && done == log->lastDone + every) log->serialPolls++;
+    else log->otherPolls++;
+    log->lastDone = done;
+  }
+}
+
+static int contourAt(DualcField* field, unsigned threads, DualcMesh* out,
+                     ThreadLog* log) {
+  char err[512];
+  DualcContourParams params;
+  int rc;
+  dualc_default_params(&params);
+  params.maxDepth = 6;
+  params.numThreads = threads;
+  rc = dualc_field_contour_with_progress(field, &params, out, NULL, NULL,
+                                         log ? onContourProgress : NULL, log,
+                                         err, (int)sizeof(err));
+  if (rc != DUALC_OK)
+    fprintf(stderr, "contour at %u threads failed (rc=%d): %s\n", threads, rc,
+            err);
+  return rc;
+}
+
+static int sameMesh(const DualcMesh* a, const DualcMesh* b) {
+  uint32_t i;
+  if (a->vertexCount != b->vertexCount || a->triangleCount != b->triangleCount)
+    return 0;
+  for (i = 0; i < a->vertexCount * 3; ++i)
+    if (a->positions[i] != b->positions[i] || a->normals[i] != b->normals[i])
+      return 0;
+  for (i = 0; i < a->triangleCount * 3; ++i)
+    if (a->indices[i] != b->indices[i]) return 0;
+  return 1;
+}
+
+static int runThreads(void) {
+  char err[512];
+  DualcField* field = NULL;
+  DualcMesh serial, two, all;
+  ThreadLog log;
+  uint32_t n, expected;
+  int ok;
+  memset(&log, 0, sizeof(log));
+  if (dualc_field_create_from_expr(DUALC_DEMO_EXPR_ANALYTIC, &field, err,
+                                   (int)sizeof(err)) != DUALC_OK) {
+    fprintf(stderr, "create failed: %s\n", err);
+    return 1;
+  }
+  if (contourAt(field, 1, &serial, &log) != DUALC_OK) {
+    dualc_field_destroy(field);
+    return 1;
+  }
+  n = log.total / 2;
+  expected = (n / 64 == 0) ? n - 1 : (n - 1) / (n / 64);
+  printf("numThreads=1: %u leaves, %u serial-cadence polls (expected %u), %u "
+         "other\n", n, log.serialPolls, expected, log.otherPolls);
+  ok = n >= 128 && log.otherPolls == 0 && log.serialPolls == expected;
+  if (!ok) fprintf(stderr, "the contourer did not run serially at numThreads=1\n");
+  if (ok && (contourAt(field, 2, &two, NULL) != DUALC_OK)) ok = 0;
+  else if (ok) {
+    if (contourAt(field, 0, &all, NULL) != DUALC_OK) {
+      ok = 0;
+    } else {
+      if (!sameMesh(&serial, &two) || !sameMesh(&serial, &all)) {
+        fprintf(stderr, "MISMATCH: the mesh depends on numThreads\n");
+        ok = 0;
+      } else {
+        printf("1, 2 and 0 threads: %u verts, %u tris, BYTE-IDENTICAL\n",
+               serial.vertexCount, serial.triangleCount);
+      }
+      dualc_mesh_release(&all);
+    }
+    dualc_mesh_release(&two);
+  }
+  dualc_mesh_release(&serial);
+  dualc_field_destroy(field);
+  if (ok) printf("OK\n");
+  return ok ? 0 : 1;
+}
+
 int main(int argc, char** argv) {
   const char* outPath = (argc > 1) ? argv[1] : "c_abi_demo.stl";
   const char* mode = (argc > 2) ? argv[2] : "";
   const int meshMode = (mode[0] == 'm');  /* "mesh" */
   const int inmemMode = (mode[0] == 'i'); /* "inmem" */
   const int cancelMode = (mode[0] == 'c'); /* "cancel" */
+  const int threadsMode = (mode[0] == 't'); /* "threads" */
   const char* expr = meshMode ? DUALC_DEMO_EXPR_MESH : DUALC_DEMO_EXPR_ANALYTIC;
   char err[512];
   int rc;
@@ -508,6 +612,7 @@ int main(int argc, char** argv) {
 
   if (inmemMode) return runInmemParity(outPath);
   if (cancelMode) return runCancel(outPath);
+  if (threadsMode) return runThreads();
 
   rc = dualc_field_create_from_expr(expr, &field, err, (int)sizeof(err));
   if (rc != DUALC_OK) {

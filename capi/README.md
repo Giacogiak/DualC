@@ -105,6 +105,11 @@ loaded via `mesh(path=…)` (see `cli_c_abi_mesh_inmem`). `path=` still works.
   signatures: the three original calls still exist as forwarders passing `NULL`,
   so a host built against 0.3.0 is unaffected in source and in binary. Details:
   [roadmap 17 #26](../docs/roadmap/17-code-audit-and-hardening/05-diagnostics-channel.md).
+- **`numThreads` bounds the whole job (0.5.2).** `DualcContourParams.numThreads`
+  (0 = all hardware threads) sets the sampler's and, since 0.5.2, the contourer's
+  worker count; the mesh is byte-identical at every value. A graph's `bake=N` nodes
+  are baked in the create call, which takes no parameters, so they still use every
+  hardware thread ([roadmap 17 #34](../docs/roadmap/17-code-audit-and-hardening/18-contourer-threads.md)).
 - **Proxy vs export** is just the `maxDepth` you pass to `contour`/`export` — there
   is no separate proxy call. A coarse-depth proxy of a *lattice* is inherently
   lossy (under-resolved walls drop out); use `dualc_field_view` for true live

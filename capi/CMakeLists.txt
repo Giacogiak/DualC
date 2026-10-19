@@ -72,4 +72,10 @@ if(DUALC_BUILD_TESTS)
   add_test(NAME cli_c_abi_cancel
     COMMAND dualc_c_demo c_abi_cancel.stl cancel
     WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_c_demo>)
+  # 0.5.2: DualcContourParams.numThreads reaches the contourer -- at 1 thread
+  # its leaf solves report on the serial path's cadence, and 1, 2 and 0
+  # threads give a byte-identical mesh (roadmap 17 #34).
+  add_test(NAME cli_c_abi_threads
+    COMMAND dualc_c_demo unused.stl threads
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_c_demo>)
 endif()

@@ -130,7 +130,7 @@ How each sub-item closed, dated: [12 § #33](12-engineering-quality-records.md#3
 `docs/raw/study/T-unit-testing.md:462-463`.
 
 ## #34 API hygiene batch
-**PARTIAL: DONE (2026-09-01, 2026-09-10); the rest PLANNED.** Two of the bullets have
+**PARTIAL: DONE (2026-09-01, 2026-09-10, 2026-10-19); the rest PLANNED.** Two of the bullets have
 landed — `FieldPtr` const-ness, and the `RepeatField` fold below, which turned out not to
 be hygiene at all but the only wrong-**geometry** defect in the batch. Every claim in this
 entry was re-verified against `ebe929a` before any of it was scoped, after
@@ -156,8 +156,10 @@ found one of the audit's claims had never been true: **all of #34's held**. The 
 - **found while adding those guards: `scaled(f, s)` with negative `s` returned the
   complement of the solid** — fixed rather than rejected (a negative factor is a legitimate
   point reflection); record: [08](08-argument-validation.md);
-- `ContourerParams` has no thread-count knob, so a caller restricting the sampler still gets
-  all hardware threads in the contourer;
+- ~~`ContourerParams` has no thread-count knob, so a caller restricting the sampler still gets
+  all hardware threads in the contourer~~ — **DONE 2026-10-19**: `numThreads` on it and on both
+  bakes, through the C ABI (0.5.2) and `dualc_field --threads`, byte-identical at 1/2/all,
+  proven red — record: [18](18-contourer-threads.md);
 - `GridField::gradientAt` returns a normalised direction that is discontinuous across cell
   boundaries, which callers assuming a true gradient magnitude (such as
   `closestSurfacePoint`'s Newton step) silently rely on.

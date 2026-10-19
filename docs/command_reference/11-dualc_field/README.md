@@ -48,6 +48,7 @@ lives in `examples/field_graph.{h,cpp}`, a separate translation unit that
 | `--weld` | off | With `--tile-depth` and `.3mf` output, weld across-tile seam vertices into a **single globally-manifold, shared-vertex** object (topology-identical to the monolithic mesh) — for consumers that need connectivity (re-booleans, FEA, decimation). Bounded to a 2D seam-vertex hash, not one tile. See [The 3MF path](08-3mf-and-weld.md#the-3mf-path--o-3mf). |
 | `--mem BUDGET` | off | **Auto-pick `--tile-depth`** from a RAM budget (`4G`, `512M`, `2048K`, or a byte count) instead of choosing `D` by hand: a cheap coarse probe estimates the busiest tile and selects the **largest `D` that fits**. `.stl` or `.3mf` output. Conservative (errs to a smaller `D`, never OOMs); an explicit `--tile-depth` overrides it. See [Auto-budget](07-mem-budget.md#auto-budget---mem-budget). |
 | `--no-manifold` | off | Disable Manifold Dual Contouring (one vertex per cell instead of per surface component). |
+| `--threads N` | `0` | Worker threads for the per-node `bake=N` grids, the octree build and the contourer's QEF solves; `0` = all hardware threads, at most `1024`. The output is byte-identical at every `N`, so `--threads 1` only makes a timing reproducible ([F4](#examples)). |
 | `--slice AXIS=VALUE` | off | Sample the field on an axis plane instead of contouring: `BASE.png` heatmap + `BASE.svg` contour; refuses the mesh flags. See [Slicing a graph](10-slice.md#options). |
 | `--res N` | `512` | With `--slice` only: grid resolution per side, clamped to `2 … 4096`. |
 | `--expr S` | — | Build from a terse [text shorthand](01-op-vocabulary.md#text-shorthand) string instead of a file/stdin. |
@@ -59,7 +60,7 @@ lives in `examples/field_graph.{h,cpp}`, a separate translation unit that
 file is shorthand; otherwise the first non-whitespace character decides (`{` ⇒
 JSON, anything else ⇒ shorthand). `--expr` is always shorthand.
 
-`--depth`/`--collapse`/`--bounds`/`--no-manifold` are properties of the
+`--depth`/`--collapse`/`--bounds`/`--no-manifold`/`--threads` are properties of the
 *invocation*, not the graph — the graph is a pure field description. Per-`mesh`
 sign/normals modes live **in** the graph ([Document & node shape](#document--node-shape)), not as global flags.
 
@@ -97,25 +98,11 @@ own and links back here for the options table.
 | [The primitive catalogue](12-primitive-catalogue.md) | P1–P30 with their defaults, the decorators D1–D7, the domain operators O1–O6 and the displace functions — `dualc_primitive`'s catalogue in graph syntax. |
 | [Six composition samples](13-composition-samples.md) | The six `examples/samples/` graphs that were `dualc_csg_demo`'s recipes, each byte-identical. |
 | [A TPMS lattice inside a mesh](14-tpms-in-mesh.md) | The graph `dualc_lattice` composed, its three mesh-derived defaults written out, wavelength vs. thickness, the six TPMS formulas. |
+| [Diagnostics](15-diagnostics.md) | The located graph errors, the cases caught, the runtime warnings. |
 
 ## Diagnostics
 
-Errors are reported with the offending node's **JSON pointer**:
-
-```
-[dualc_field] field-graph error at /root/in/0/in/1: unknown op 'frobnicate'
-```
-
-Caught cases: invalid JSON, unknown op, wrong boolean arity, missing required
-param, bad `mesh` sign/normals (the message lists the accepted values), a `bake` outside
-[2, 512] or a `band` without `bake` on `mesh`/`winding`, a 2D profile outside a lift or a
-3D child under one ([09](09-2d-profiles-and-lifts.md#typing-errors)), mesh-not-found.
-An **unbounded** graph contoured without `--bounds` prints the sampler's
-`--bounds` hint and exits non-zero.
-
-Runtime **`[dualc] warning:` lines** (empty contour, bounds fallback, sampling
-past a baked grid, a non-closed output) are documented once for every tool in
-[Shared behaviour § Diagnostics warnings](../00-shared-behaviour.md#diagnostics-warnings-every-exporting-tool).
+Moved verbatim to [15 § Diagnostics](15-diagnostics.md#diagnostics) on 2026-10-19.
 
 ## Examples
 
@@ -154,6 +141,8 @@ A TPMS lattice clipped to an input volume — what the retired `dualc_lattice` m
 dualc_field mesh_lattice.json --depth 7 -o bracket_infill.stl
 # F3 — or stream a graph in from another tool / Grasshopper:
 cat graph.json | dualc_field - -o out.obj
+# F4 — a reproducible timing (prefix it with `time`): one thread, the same mesh as F1
+dualc_field gyroid_box.json --depth 7 --threads 1 -o part.3mf
 ```
 
 Eight ready-to-run samples ship next to the binary (sources in `examples/samples/`):
@@ -166,6 +155,7 @@ Eight ready-to-run samples ship next to the binary (sources in `examples/samples
 | F1 | Export the gyroid-box graph print-ready (`.3mf`) | above |
 | F2 | Export a mesh-clipped lattice (`.stl`) | above |
 | F3 | Stream a graph in on stdin | above |
+| F4 | Time a run reproducibly on one thread | above |
 | E1–E3 | Shorthand one-liners: the gyroid box as `--expr`, a smooth union, canonicalise a `.fld` | [01](01-op-vocabulary.md#recipes) |
 | S1–S17 | Strut lattices: infill, blends, hollow, graded and tapered struts | [02](02-strut-lattices.md#recipes) |
 | J1–J2 | Graft two different crystals into one body | [03](03-graded-and-morph.md#recipes) |

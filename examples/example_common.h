@@ -26,6 +26,11 @@ bool parseDoubles(const std::string& s, std::vector<double>& out);
 // Parse "x0,y0,z0,x1,y1,z1" into a BBox. False on bad input.
 bool parseBounds(const std::string& s, dualc::BBox& out);
 
+// Parse a `--threads` value: a whole number in [0, kMaxThreadCount], 0 meaning
+// all hardware threads. False on anything else (a sign, a fraction, a suffix).
+inline constexpr unsigned kMaxThreadCount = 1024;
+bool parseThreadCount(const std::string& s, unsigned& out);
+
 // Build a bump function for the `displaced` operator from a spec string
 // "name,amplitude,frequency"; name is one of sine | gyroid | bumps. An
 // unknown name yields a zero bump.

@@ -27,7 +27,8 @@ ceiling), and `band` exists only with `bake`, on `mesh` only.
   max(`band`, margin) (`nodeBakeRegion`) — not the sibling's, not the root box.
 - **The band** (a mesh's exact narrow band, `MeshSource::bakeToGrid`) defaults to 3 bake
   cells and is never below margin + 3 cells; an explicit larger `band` wins. A `winding` node
-  bakes the full lattice (`bakeToGrid`).
+  bakes the full lattice (`bakeToGrid`). Both run on `FieldGraph::build`'s `bakeThreads`
+  workers (`--threads`; 0 = all), the grid identical at any count.
 - **The margin** is what the ancestors read below the surface. Outside its region a grid
   clamps to its face value, which never grows, so a parent that reads the field further out —
   a smooth blend, an offset — would turn the clamp into material. `childBakeMargin(parent,

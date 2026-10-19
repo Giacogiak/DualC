@@ -129,7 +129,9 @@ typedef struct {
   double   boundsMin[3];   /* root box lower corner (when hasBounds)          */
   double   boundsMax[3];   /* root box upper corner (when hasBounds)          */
   int      manifold;       /* 1 = manifold dual contouring (default), 0 = off */
-  unsigned numThreads;     /* 0 = all hardware threads                        */
+  unsigned numThreads;     /* worker threads for the sampler AND (since 0.5.2)
+                              the contourer; 0 = all hardware threads. The mesh
+                              is byte-identical at every value.               */
 } DualcContourParams;
 
 /* An ABI-owned flat triangle mesh. Faces are fan-triangulated. Release with
@@ -192,7 +194,7 @@ typedef struct {
   int      anyIssue;                /* any degradation above fired          */
 } DualcDiagnostics;
 
-/* Library / ABI version string, e.g. "dualc 0.5.1". Never NULL. */
+/* Library / ABI version string, e.g. "dualc 0.5.2". Never NULL. */
 DUALC_CAPI_EXPORT const char* dualc_version(void);
 
 /* Fill `out` with the library default sampling/contour settings (maxDepth 7,

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(dualc VERSION 0.5.1 LANGUAGES CXX)
+project(dualc VERSION 0.5.2 LANGUAGES CXX)
 
 # Is DualC the top-level project, or is it being add_subdirectory'd into one?
 # PROJECT_IS_TOP_LEVEL would say so directly but needs CMake 3.21; this project

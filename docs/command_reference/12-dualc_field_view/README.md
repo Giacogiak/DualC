@@ -5,7 +5,8 @@ sphere-traces it** — the general successor to `dualc_raymarch`, retired 2026-1
 
 ```
 dualc_field_view <graph.fld|graph.json|-> [--bounds x0,y0,z0,x1,y1,z1]
-                 [--grid-res N] [--preview-scale S] [--es] [--snapshot PATH]
+                 [--grid-res N] [--preview-scale S] [--threads N] [--es]
+                 [--snapshot PATH]
 dualc_field_view --expr "onion(gyroid(wavelength=0.3),thickness=0.05)" [...]
 ```
 
@@ -37,6 +38,7 @@ so it has no CTest — `--snapshot` renders one frame headless for scripted chec
 | `--bounds x0,y0,z0,x1,y1,z1` | the field's own `bounds()` + 5% | Raymarch box. An **infinite** field (`plane`, `repeat`, …) has no finite bounds and **requires** this. |
 | `--grid-res N` | `96` (max 256) | Mesh-source bake resolution per axis (the `sampler3D` clip). The bake region **is** the raymarch box, so this composes with `--bounds`: zooming in concentrates the same grid on the region you are inspecting instead of spreading it over the whole mesh AABB. `256³` R32F is 64 MB per unique mesh node. It does **not** apply to a node with its own `bake=N` ([11/01](../11-dualc_field/01-op-vocabulary.md#sources)): that node uploads the grid `dualc_field` contours, over its own padded box, so its preview is its export. The compile line reports each distinct resolution *and* its world cell size. |
 | `--preview-scale S` | `0.5` (range `0.1`–`1.0`) | **Adaptive resolution** while the view is moving (see below). `1.0` disables it (always full-res). |
+| `--threads N` | `0` | Worker threads for the mesh / winding bakes (the `--grid-res` textures and every node's own `bake=N`); `0` = all hardware threads, at most `1024`. The grids — so the picture — are identical at every `N`; `--threads 1` leaves the other cores free while a heavy bake runs. |
 | `--es` | off | Emit a `#version 300 es` shader (the WebGL2-portable subset) instead of desktop `330 core`. A portability check; the shader body is identical, only the version/precision header differs. |
 | `--snapshot PATH` | — | Render one frame headless to a PNG and exit (no window). |
 | `--help`, `-h` | — | Usage. |
