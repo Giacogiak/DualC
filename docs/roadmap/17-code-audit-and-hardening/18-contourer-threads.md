@@ -42,6 +42,8 @@ refused instead of spawning one thread per work item); and the C ABI's create ca
 bake a graph's `bake=N` nodes on all hardware threads — they take no parameters, and
 `DualcContourParams` arrives only at contour time. Honouring it there needs a new create
 twin, an ABI minor rather than this patch, so it is left for a host that asks.
+*Reviewed 2026-10-20 by Giacomo:* both accepted; the create-time bakes are tracked as
+[#62](../14-c-abi/04-abi-0-4-0.md#62-create-time-bakes-ignore-the-hosts-thread-count), DEFERRED.
 
 ## Evidence
 
