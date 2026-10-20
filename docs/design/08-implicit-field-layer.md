@@ -26,6 +26,19 @@ class ImplicitField {
 };
 ```
 
+**`gradientAt` is a unit outward direction, not ∇f.** On the surface it is the outward
+normal, and that is all its callers use it for: `edgeHit` and `QefSolver::add` re-normalise
+it anyway. Its length is 1, except where a node blends directions — the smooth booleans and
+`mix` lerp their operands' unit vectors, `elongated` zeroes the components of its flat band —
+and there it may be shorter, never longer. Where the direction is undefined (the gradient
+vanishes: a sphere's centre, a flat FD stencil) it is `(0,0,1)`. It says nothing about the
+magnitude, which differs from 1 for every non-metric field (a TPMS, a winding number, a
+lerp); a caller that needs |∇f| cannot get it here — `NormalizedField` takes it by a central
+difference of its child's `valueAt`, and the default `closestSurfacePoint` below assumes it
+is 1. The census of the ~30 overrides against this contract is
+[17/19](../roadmap/17-code-audit-and-hardening/19-gradient-contract.md); one of them,
+`WindingNumberField`, breaks it: it returns its raw finite difference.
+
 Only `valueAt` / `gradientAt` / `bounds` are mandatory. Fields compose through `FieldPtr`
 (`std::shared_ptr<const ImplicitField>`) into an immutable expression tree — the `const`
 in the alias is the type system enforcing it (every evaluation method is `const`; a
@@ -61,8 +74,9 @@ Three defaults deserve calling out:
   on a box that contains the child's image of the cell. The limitation this leaves, and its
   fix, are [§ 9](07-limitations.md).
 - **`closestSurfacePoint` is one Newton step** — `q - g·(f/|g|)`, then a gradient
-  re-evaluation at the projected point. Exact for a true SDF, arbitrarily wrong for a
-  non-metric field. It returns `false` only when the gradient is degenerate. `MeshSource`
+  re-evaluation at the projected point. With `g` a unit direction the step length is `f`
+  itself, so it is exact for a true SDF (|∇f| = 1) and arbitrarily wrong for a non-metric
+  field. It returns `false` only when the gradient is degenerate. `MeshSource`
   overrides it with a direct BVH closest-point query.
 
 ## 10.3 Sharp features

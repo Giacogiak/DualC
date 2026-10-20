@@ -174,6 +174,7 @@ the size cap; [19 Phase 5](../19-docs-layers/README.md).)*
 *2026-10-19:* the [hygiene + editor run](../../raw/2026-10-19-hygiene-and-editor-plan.md) takes up the three open bullets — the
 `gradientAt` contract, the contourer thread count, the `GridField` normal — by the owner's
 decision (raw plan § 1); the contract stays a unit direction, [D-65](../../decisions/01-settled.md).
+*2026-10-20:* the contract is written (header, design § 10.1) and the 30 overrides censused — [19](19-gradient-contract.md).
 
 ## #35 `RepeatField` neighbour-set optimisation
 **PLANNED.** [#34](#34-api-hygiene-batch)'s `RepeatField` fix costs **2.3×** on strut

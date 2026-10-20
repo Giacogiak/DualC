@@ -38,14 +38,13 @@ status and trigger, and links to both.
   a working directory per test case, the serial-`ctest` decision) and Batch B (the missing
   tests, the CLI content checks, coverage measured once, the strut-oracle correction).
 - [`16-windows-rename-race/README.md`](16-windows-rename-race/README.md) — the record of **#52**, the
-  Windows export I/O flake Boletus reported: the rc 2 sites ranked, the alternative
-  hypotheses, the `dualc_io_stress` instrument and its experiment workflow, the decision
-  criteria fixed before the runs, the five samples' evidence, the verdict (an inherited
-  handle, not a scanner) and what shipped (non-inheritable output handles, the bounded
-  retry, the error line in the ABI, 0.5.1).
+  Windows export I/O flake Boletus reported: the desk analysis fixed before the runs, the
+  `dualc_io_stress` experiment's five samples, the verdict (an inherited handle, not a
+  scanner) and what shipped (non-inheritable output handles, the bounded retry, ABI 0.5.1).
 - [`17-viewer-silhouette-specks.md`](17-viewer-silhouette-specks.md) — **#61**, dark specks on
   `dualc_field_view`'s grazing silhouettes (DEFERRED, one renderer seen).
 - [`18-contourer-threads.md`](18-contourer-threads.md) — #34's thread-count delivery record.
+- [`19-gradient-contract.md`](19-gradient-contract.md) — #34's `gradientAt` contract: the census of the 30 overrides.
 - [`07-repeat-tiling-fix.md`](07-repeat-tiling-fix.md) — the full record for #34's first
   item: `repeat` read only the folded tile, which put wrong geometry in shipped strut
   lattices; the conditional fix, its measured 2.3× cost, and the oracle test it showed to

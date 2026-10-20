@@ -46,8 +46,15 @@ public:
   // Field value at p (negative inside, positive outside, zero on surface).
   virtual double valueAt(const Vector3& p) const = 0;
 
-  // Field gradient at p. Normalized, this is the outward surface normal
-  // where valueAt == 0.
+  // The unit outward direction of increasing value at p: on the surface
+  // (valueAt == 0) it is the outward normal. Its length is 1, except inside
+  // smooth blends, `mix` and `elongated`'s flat band, where it is a lerp (or
+  // a projection) of unit vectors and may be shorter, never longer. Where the
+  // direction is undefined (the gradient vanishes) it is (0,0,1).
+  //
+  // It is NOT the gradient's magnitude: a non-metric field (a TPMS, a
+  // winding number, a lerp) has |grad f| != 1 and this does not say so. A
+  // caller that needs |grad f| uses trueGradientAt().
   virtual Vector3 gradientAt(const Vector3& p) const = 0;
 
   // Conservative axis-aligned extent of the surface. May be invalid (an
@@ -233,7 +240,9 @@ FieldPtr windingNumberField(
 
 // An ImplicitField backed by a dense 3D signed-distance grid. `valueAt` is a
 // trilinear interpolation (O(1), a few dozen flops); `gradientAt` is the
-// analytic gradient of that interpolant. A baked SDF stays ~Lipschitz-1, so
+// direction of that interpolant's analytic gradient, normalised to unit
+// length ((0,0,1) where it vanishes) -- not its magnitude, which is
+// trueGradientAt()'s. A baked SDF stays ~Lipschitz-1, so
 // the default cellOverlaps / edgeHit behave well on it.
 //
 // This exists so an *expensive* field -- notably a MeshSource, or a whole
