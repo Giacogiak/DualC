@@ -44,7 +44,7 @@ BBox paddedMeshAABB(geometrycentral::surface::SurfaceMesh& mesh,
 struct WindingNumberField::Impl {
   internal::MeshBVH bvh;
   BBox              aabb;
-  double            fdEps;  // finite-difference step for gradientAt
+  double            fdEps;  // finite-difference step for trueGradientAt
 
   Impl(geometrycentral::surface::SurfaceMesh& mesh,
        geometrycentral::surface::VertexPositionGeometry& geometry)
@@ -73,7 +73,7 @@ bool WindingNumberField::isInside(const Vector3& p) const {
   return impl_->bvh.windingNumberFast(p) > 0.5;
 }
 
-Vector3 WindingNumberField::gradientAt(const Vector3& p) const {
+Vector3 WindingNumberField::trueGradientAt(const Vector3& p) const {
   // Straddle-aware central finite difference. The winding number jumps by 1
   // across the input triangles, so a central difference that spans real
   // geometry is garbage; when the two probes disagree by more than the 0.5
@@ -94,6 +94,15 @@ Vector3 WindingNumberField::gradientAt(const Vector3& p) const {
   return Vector3{partial(Vector3{e, 0.0, 0.0}),
                  partial(Vector3{0.0, e, 0.0}),
                  partial(Vector3{0.0, 0.0, e})};
+}
+
+Vector3 WindingNumberField::gradientAt(const Vector3& p) const {
+  // The contract's unit direction. The raw FD's magnitude is |grad w|, which
+  // swings by orders of magnitude between the cap and the far field; edgeHit
+  // and the QEF only ever wanted its direction.
+  const Vector3 g = trueGradientAt(p);
+  const double n = g.norm();
+  return (n > 1e-12) ? g * (1.0 / n) : Vector3{0.0, 0.0, 1.0};
 }
 
 bool WindingNumberField::edgeHit(const Vector3& a, const Vector3& b,

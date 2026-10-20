@@ -77,6 +77,7 @@ DualC/
 │       ├── cube_components.{h,cpp} Union-find component labeling for Manifold DC
 │       ├── contourer_internals.h Contouring algorithm internals (header-only)
 │       ├── distance_grid.h       Distance-grid helper struct (header-only)
+│       ├── fd_gradient.h         The one central-difference stencil: default trueGradientAt + the FD gradientAt of twist/bend/displace and the lifts (header-only)
 │       └── parallel.h            Threading helpers (header-only)
 │
 ├── examples/                  CLI tools + host-side glue (linked to geometry-central, NOT into libdualc)
@@ -147,6 +148,7 @@ DualC/
 │   ├── test_contourer.cpp     Octree contouring; the per-leaf ContourerParams knobs
 │   ├── test_pipeline.cpp      Full dualContourMesh pipeline
 │   ├── test_implicit.cpp      v2 field module
+│   ├── test_gradient.cpp      The gradient contract (17 #34): trueGradientAt vs FD per node, normalizedOf + the Newton step use it, every field type's gradientAt is unit
 │   ├── test_grid_field.cpp    Voxel grid field
 │   ├── test_combinators.cpp   Boolean combinators
 │   ├── test_primitives.cpp    Primitive generation

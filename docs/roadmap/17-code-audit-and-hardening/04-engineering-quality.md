@@ -130,7 +130,7 @@ How each sub-item closed, dated: [12 § #33](12-engineering-quality-records.md#3
 `docs/raw/study/T-unit-testing.md:462-463`.
 
 ## #34 API hygiene batch
-**PARTIAL: DONE (2026-09-01, 2026-09-10, 2026-10-19); the rest PLANNED.** Two of the bullets have
+**PARTIAL: DONE (2026-09-01, 2026-09-10, 2026-10-19, 2026-10-20); the rest PLANNED.** Two of the bullets have
 landed — `FieldPtr` const-ness, and the `RepeatField` fold below, which turned out not to
 be hygiene at all but the only wrong-**geometry** defect in the batch. Every claim in this
 entry was re-verified against `ebe929a` before any of it was scoped, after
@@ -140,8 +140,10 @@ found one of the audit's claims had never been true: **all of #34's held**. The 
 - ~~`FieldPtr` is `shared_ptr<ImplicitField>`, not `shared_ptr<const ImplicitField>`~~ —
   **DONE 2026-09-01**; the audit's "compiles unchanged" did **not** hold (four host-side
   `dynamic_cast` sites) — record: [08 § `FieldPtr`](08-argument-validation.md#the-earlier-batch-fieldptr-const-ness);
-- `gradientAt` is documented as a gradient and returns a **unit direction**, which is why
-  `NormalizedField` has to recompute the magnitude by finite differences — still open;
+- ~~`gradientAt` is documented as a gradient and returns a **unit direction**, which is why
+  `NormalizedField` has to recompute the magnitude by finite differences~~ — **DONE
+  2026-10-20**: the unit direction is the contract; `trueGradientAt` carries |∇f| for
+  `normalizedOf` and the Newton step — record: [19](19-gradient-contract.md);
 - ~~no argument validation anywhere~~ — **DONE 2026-09-10**: `std::invalid_argument` at
   construction, reported by `dualc_field` with the node's locator; three deliberate
   non-rejections and the full record: [**08**](08-argument-validation.md);
@@ -161,8 +163,8 @@ found one of the audit's claims had never been true: **all of #34's held**. The 
   bakes, through the C ABI (0.5.2) and `dualc_field --threads`, byte-identical at 1/2/all,
   proven red — record: [18](18-contourer-threads.md);
 - `GridField::gradientAt` returns a normalised direction that is discontinuous across cell
-  boundaries, which callers assuming a true gradient magnitude (such as
-  `closestSurfacePoint`'s Newton step) silently rely on.
+  boundaries, which `closestSurfacePoint`'s Newton step relied on until it moved to
+  `trueGradientAt` (2026-10-20) — next, P04 of the run.
 
 *(2026-09-18: the landed bullets are condensed to one line + link each — the removed
 text is verbatim in 07 and 08, the `FieldPtr` paragraph in 08 — to bring this page under

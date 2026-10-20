@@ -57,6 +57,16 @@ public:
   // caller that needs |grad f| uses trueGradientAt().
   virtual Vector3 gradientAt(const Vector3& p) const = 0;
 
+  // The gradient of valueAt at p, magnitude kept: |trueGradientAt| is the
+  // rate the value changes per world unit (1 on a metric SDF, k on a TPMS of
+  // wavenumber k). For the callers that need |grad f| -- normalizedOf and the
+  // Newton step of closestSurfacePoint. Default: a central difference of
+  // valueAt (step 1e-4, six valueAt calls); overridden where it is exact and
+  // cheap (sphere, plane, GridField) and forwarded, chain rule applied, by
+  // the nodes that pass their child's value through. Zero where the field is
+  // flat; no fallback direction.
+  virtual Vector3 trueGradientAt(const Vector3& p) const;
+
   // Conservative axis-aligned extent of the surface. May be invalid (an
   // empty field); the sampler then falls back to a unit root box.
   virtual BBox bounds() const = 0;
@@ -94,9 +104,11 @@ public:
   // Closest point on the surface to q, with the field's normal there. Used
   // by the Hermite sampler as a fallback when `edgeHit` misses a known
   // crossing (single-precision grazing on a thin feature). Default impl
-  // does one Newton step via valueAt / gradientAt -- good enough on a
-  // Lipschitz-1 SDF; MeshSource overrides with a direct BVH closest-point
-  // query. Returns false on a degenerate / empty field.
+  // does one Newton step, q - f * G / |G|^2 with G = trueGradientAt(q) --
+  // exact on a plane, first-order on any field, metric or not -- and takes
+  // the normal at the result from gradientAt; MeshSource overrides with a
+  // direct BVH closest-point query. Returns false on a degenerate / empty
+  // field (G vanishes or is not finite).
   virtual bool closestSurfacePoint(const Vector3& q,
                                    Vector3& outP, Vector3& outN) const;
 };
@@ -221,7 +233,13 @@ public:
   WindingNumberField& operator=(const WindingNumberField&) = delete;
 
   double  valueAt(const Vector3& p)    const override;
+  // The unit direction of trueGradientAt, (0,0,1) where it vanishes (far
+  // from the mesh, where w is flat to the FD's resolution).
   Vector3 gradientAt(const Vector3& p) const override;
+  // Straddle-aware finite difference of 0.5 - w, magnitude kept: central
+  // where w is smooth, one-sided where the stencil would cross a triangle
+  // (w jumps by 1 there). Step 1e-4 of the padded AABB's diagonal.
+  Vector3 trueGradientAt(const Vector3& p) const override;
   BBox    bounds() const override;
   bool    isInside(const Vector3& p)   const override;
   bool    edgeHit(const Vector3& a, const Vector3& b,
@@ -263,6 +281,8 @@ public:
 
   double  valueAt(const Vector3& p)    const override;
   Vector3 gradientAt(const Vector3& p) const override;
+  // The trilinear interpolant's analytic gradient, unnormalised.
+  Vector3 trueGradientAt(const Vector3& p) const override;
   BBox    bounds() const override;
 
   // Read-only access to the baked grid, for handing it to a GPU 3D texture or

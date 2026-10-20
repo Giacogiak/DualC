@@ -33,6 +33,7 @@ add_executable(dualc_tests
   test_contourer.cpp
   test_pipeline.cpp
   test_implicit.cpp
+  test_gradient.cpp
   test_grid_field.cpp
   test_combinators.cpp
   test_primitives.cpp

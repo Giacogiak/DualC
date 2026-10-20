@@ -48,6 +48,7 @@ public:
   SphereField(const Vector3& center, double radius);
   double  valueAt(const Vector3& p) const override;
   Vector3 gradientAt(const Vector3& p) const override;
+  Vector3 trueGradientAt(const Vector3& p) const override;
   BBox    bounds() const override;
 
 private:
@@ -89,6 +90,7 @@ public:
   PlaneField(const Vector3& normal, double offset);
   double  valueAt(const Vector3& p) const override;
   Vector3 gradientAt(const Vector3& p) const override;
+  Vector3 trueGradientAt(const Vector3& p) const override;
   BBox    bounds() const override;
 
 private:

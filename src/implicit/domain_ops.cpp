@@ -1,5 +1,7 @@
 #include "dualc/implicit.h"
 
+#include "internal/fd_gradient.h"
+
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -10,22 +12,6 @@
 namespace dualc {
 
 namespace {
-
-// Central-difference gradient of a field's own valueAt -- the fallback used
-// by the distorted (twist/bend/displace) operators, where the warp has no
-// cheap closed-form Jacobian.
-Vector3 fdGradient(const ImplicitField& f, const Vector3& p) {
-  constexpr double e = 1e-4;
-  const double dx = f.valueAt(Vector3{p.x + e, p.y, p.z}) -
-                    f.valueAt(Vector3{p.x - e, p.y, p.z});
-  const double dy = f.valueAt(Vector3{p.x, p.y + e, p.z}) -
-                    f.valueAt(Vector3{p.x, p.y - e, p.z});
-  const double dz = f.valueAt(Vector3{p.x, p.y, p.z + e}) -
-                    f.valueAt(Vector3{p.x, p.y, p.z - e});
-  const Vector3 g{dx, dy, dz};
-  const double n = g.norm();
-  return (n > 1e-12) ? g * (1.0 / n) : Vector3{0.0, 0.0, 1.0};
-}
 
 double sgn(double x) { return x < 0.0 ? -1.0 : (x > 0.0 ? 1.0 : 0.0); }
 
@@ -115,6 +101,13 @@ public:
     }
     return child_->gradientAt(p);
   }
+  Vector3 trueGradientAt(const Vector3& p) const override {
+    if (dot(p, n_) < 0.0) {
+      const Vector3 g = child_->trueGradientAt(fold(p));
+      return g - n_ * (2.0 * dot(g, n_));
+    }
+    return child_->trueGradientAt(p);
+  }
   BBox bounds() const override {
     const BBox cb = child_->bounds();
     if (!cb.isValid() || cb.isInfinite()) return cb;
@@ -195,6 +188,13 @@ public:
     Vector3 local;
     nearestCopy(p, local, /*wantGrad=*/true);
     return child_->gradientAt(local);
+  }
+  Vector3 trueGradientAt(const Vector3& p) const override {
+    // A translated copy: the active copy's gradient, unchanged.
+    if (foldExact_) return child_->trueGradientAt(tileLocal(p));
+    Vector3 local;
+    nearestCopy(p, local, /*wantGrad=*/true);
+    return child_->trueGradientAt(local);
   }
   BBox bounds() const override {
     if (s_.x > 0.0 || s_.y > 0.0 || s_.z > 0.0) return BBox::infinite();
@@ -348,6 +348,11 @@ public:
     evaluate(p, local, /*wantGrad=*/true);
     return child_->gradientAt(local);
   }
+  Vector3 trueGradientAt(const Vector3& p) const override {
+    Vector3 local;
+    evaluate(p, local, /*wantGrad=*/true);
+    return child_->trueGradientAt(local);
+  }
   BBox bounds() const override {
     const BBox cb = child_->bounds();
     if (!cb.isValid() || cb.isInfinite()) return cb;
@@ -465,7 +470,7 @@ public:
     return child_->valueAt(warp(p));
   }
   Vector3 gradientAt(const Vector3& p) const override {
-    return fdGradient(*this, p);
+    return internal::fdGradientDirection(*this, p);
   }
   BBox bounds() const override {
     const BBox cb = child_->bounds();
@@ -528,7 +533,7 @@ public:
     return child_->valueAt(warp(p));
   }
   Vector3 gradientAt(const Vector3& p) const override {
-    return fdGradient(*this, p);
+    return internal::fdGradientDirection(*this, p);
   }
   BBox bounds() const override {
     const BBox cb = child_->bounds();
@@ -589,7 +594,7 @@ public:
     return child_->valueAt(p) + bump_(p);
   }
   Vector3 gradientAt(const Vector3& p) const override {
-    return fdGradient(*this, p);
+    return internal::fdGradientDirection(*this, p);
   }
   BBox bounds() const override { return child_->bounds(); }
   // Displacement adds to the VALUE, it does not warp the domain, so the child

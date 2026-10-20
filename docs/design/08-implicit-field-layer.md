@@ -11,13 +11,14 @@ place ([§ 1](README.md#1-pipeline-at-a-glance)); the data flow is
 ## 10.1 `ImplicitField`
 
 Defined in [`include/dualc/implicit.h`](../../include/dualc/implicit.h). It is **3 mandatory
-+ 4 overridable** virtuals (plus the virtual destructor):
++ 5 overridable** virtuals (plus the virtual destructor):
 
 ```cpp
 class ImplicitField {
   virtual double  valueAt(const Vector3& p)    const = 0;  // SDF: < 0 inside
   virtual Vector3 gradientAt(const Vector3& p) const = 0;
   virtual BBox    bounds() const = 0;
+  virtual Vector3 trueGradientAt(const Vector3& p) const;  // ∇f, magnitude kept
   // derived, overridable for closed-form fast paths:
   virtual bool isInside(const Vector3&) const;             // default valueAt < 0
   virtual bool edgeHit(...) const;                         // default: Illinois regula falsi
@@ -33,11 +34,21 @@ it anyway. Its length is 1, except where a node blends directions — the smooth
 and there it may be shorter, never longer. Where the direction is undefined (the gradient
 vanishes: a sphere's centre, a flat FD stencil) it is `(0,0,1)`. It says nothing about the
 magnitude, which differs from 1 for every non-metric field (a TPMS, a winding number, a
-lerp); a caller that needs |∇f| cannot get it here — `NormalizedField` takes it by a central
-difference of its child's `valueAt`, and the default `closestSurfacePoint` below assumes it
-is 1. The census of the ~30 overrides against this contract is
-[17/19](../roadmap/17-code-audit-and-hardening/19-gradient-contract.md); one of them,
-`WindingNumberField`, breaks it: it returns its raw finite difference.
+lerp). The census of the ~30 overrides against this contract is
+[17/19](../roadmap/17-code-audit-and-hardening/19-gradient-contract.md).
+
+**`trueGradientAt` is ∇f with its magnitude**, for the two callers that need |∇f|:
+`NormalizedField::valueAt` divides by its child's, and the default `closestSurfacePoint`
+steps by it. Its default is a central difference of `valueAt` (step 1e-4, 6 calls — the
+stencil shared with the distorted operators, `src/internal/fd_gradient.h`). Sphere, plane
+and `GridField` (the trilinear gradient before normalisation) override it exactly;
+`WindingNumberField`'s is its straddle-aware finite difference, whose unit direction is its
+`gradientAt`. The nodes that pass a child's value through forward it, chain rule applied:
+offset, onion, `transformed` (rotated), `scaled` (sign of `s`), mirror, both repeats, the
+four hard booleans. Everything else — the smooth booleans, `mix`, the graded decorators
+(whose `gradientAt` drops ∇t), `elongated`, `normalizedOf`, the distortions, the lifts,
+`MeshSource` — takes the default. Where the field is flat it is zero, with no fallback
+direction.
 
 Only `valueAt` / `gradientAt` / `bounds` are mandatory. Fields compose through `FieldPtr`
 (`std::shared_ptr<const ImplicitField>`) into an immutable expression tree — the `const`
@@ -73,11 +84,14 @@ Three defaults deserve calling out:
   six in `domain_ops.cpp` plus `TransformField`, `ScaleField` and `ElongateField`) forwards
   on a box that contains the child's image of the cell. The limitation this leaves, and its
   fix, are [§ 9](07-limitations.md).
-- **`closestSurfacePoint` is one Newton step** — `q - g·(f/|g|)`, then a gradient
-  re-evaluation at the projected point. With `g` a unit direction the step length is `f`
-  itself, so it is exact for a true SDF (|∇f| = 1) and arbitrarily wrong for a non-metric
-  field. It returns `false` only when the gradient is degenerate. `MeshSource`
-  overrides it with a direct BVH closest-point query.
+- **`closestSurfacePoint` is one Newton step** — `q - G·f/|G|²` with `G =
+  trueGradientAt(q)`, then the normal from `gradientAt` at the projected point. The step
+  length is `f/|∇f|`, so it is first-order on any field, metric or not. A step of `f` along
+  the unit direction is the same step only where |∇f| = 1; on a gyroid Newton lands ~1000×
+  closer, on a winding field's cap 17–60× where |∇w| is 0.25 or 4, and near |∇w| = 1 the
+  two nearly coincide ([17/19](../roadmap/17-code-audit-and-hardening/19-gradient-contract.md)).
+  It returns `false` when `G` vanishes or `f`, `G` are not finite. `MeshSource` overrides it
+  with a direct BVH closest-point query.
 
 ## 10.3 Sharp features
 

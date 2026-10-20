@@ -105,7 +105,7 @@ double GridField::valueAt(const Vector3& p) const {
   return c0 + (c1 - c0) * fz;
 }
 
-Vector3 GridField::gradientAt(const Vector3& p) const {
+Vector3 GridField::trueGradientAt(const Vector3& p) const {
   const Impl& m = *impl_;
   int ix, iy, iz;
   double fx, fy, fz;
@@ -139,7 +139,12 @@ Vector3 GridField::gradientAt(const Vector3& p) const {
   const double dfz = bilerp(c001 - c000, c101 - c100,
                             c011 - c010, c111 - c110, fx, fy);
 
-  Vector3 g{dfx * m.inv.x, dfy * m.inv.y, dfz * m.inv.z};
+  return Vector3{dfx * m.inv.x, dfy * m.inv.y, dfz * m.inv.z};
+}
+
+Vector3 GridField::gradientAt(const Vector3& p) const {
+  // The contract's unit direction of the same interpolant gradient.
+  const Vector3 g = trueGradientAt(p);
   const double n = g.norm();
   return (n > 1e-12) ? (g / n) : Vector3{0.0, 0.0, 1.0};
 }
