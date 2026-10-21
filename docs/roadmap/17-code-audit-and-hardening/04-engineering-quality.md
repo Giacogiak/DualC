@@ -179,19 +179,14 @@ decision (raw plan § 1); the contract stays a unit direction, [D-65](../../deci
 *2026-10-20:* the contract is written (header, design § 10.1) and the 30 overrides censused — [19](19-gradient-contract.md).
 
 ## #35 `RepeatField` neighbour-set optimisation
-**PLANNED.** [#34](#34-api-hygiene-batch)'s `RepeatField` fix costs **2.3×** on strut
+**DONE** 2026-10-21 ([21](21-repeat-pruning.md)). [#34](#34-api-hygiene-batch)'s `RepeatField` fix costs **2.3×** on strut
 lattices (39 s → 91 s, octet at depth 7) because a child that overhangs its period takes
 eight child evaluations instead of one. The cost was accepted deliberately — correctness
 first, with the number recorded rather than left for a user to discover — and this item is
 the follow-up.
 
-Two candidate levers, neither yet tried:
-- **Per-axis neighbours.** Visit offsets only on axes where the child actually overhangs.
-  Cheap and exact, but no help for the case that motivated it: a strut cell has corner caps
-  and so overhangs on all three axes.
-- **Early-out on the home copy.** Skip a neighbour when the home copy's value is already
-  smaller than the closest the neighbour's translated box could possibly be. This is where
-  the win would come from, since most points are nowhere near a seam.
+Two candidate levers, per-axis neighbours and an early-out on the home copy (the text is
+verbatim in [21](21-repeat-pruning.md#the-levers-as-04-planned-them), with what became of each).
 
 A third, larger option is to make the *cells* fit their period, which would put strut
 lattices back on the single-fold fast path by construction rather than by optimisation.
@@ -203,6 +198,8 @@ A symmetry flag on the cell is a fourth lever. Open: why the fix moves root-box 
 *2026-10-19:* implemented ahead of its trigger by the owner's decision (raw plan § 1) in the
 [hygiene + editor run](../../raw/2026-10-19-hygiene-and-editor-plan.md): measured, with the levers in the plan's order, and the
 output must stay byte-identical.
+*2026-10-21:* DONE — every copy that cannot win the minimum is skipped, so the output is bit
+for bit the 8-neighbour minimum; 2.7–2.9× → 1.2–1.3× the single fold (octet, depth 7, two sessions) — [21](21-repeat-pruning.md).
 
 ---
 

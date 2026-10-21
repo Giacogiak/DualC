@@ -19,7 +19,7 @@ status and trigger, and links to both.
   **B1–B5** (architecture, API and type design, memory and performance, concurrency,
   build and licensing).
 - [`06-findings-ledger-testing.md`](06-findings-ledger-testing.md) — the 13 findings **C42–C54** from
-  **T** (testing). (All finding ids are the ledger's, assigned 2026-08-31; the study has none.) Split out of `02` on 2026-09-10 at the 15 KB size limit.
+  **T** (testing). (Finding ids are the ledger's, 2026-08-31; the study has none.) Split out of `02` 2026-09-10 at the 15 KB cap.
 - [`03-correctness-and-robustness/`](03-correctness-and-robustness/README.md) — tracked items
   **#22–#26** and **#46**: the findings that can make DualC produce a wrong answer or abort.
 - [`04-engineering-quality.md`](04-engineering-quality.md) — tracked items **#27–#35**:
@@ -134,7 +134,7 @@ merge of #52 over #32 — two writer cases run everywhere, two more only on Wind
 `gpu` job — [13](13-parity-gate-binding.md)); the same 270 pass under ASan + UBSan in CI's
 `sanitize` job (2026-10-06, [14](14-build-hardening-ci.md)); the same 270 pass under `ctest -j 8`,
 three runs in a row (2026-10-07, Linux, [15](15-test-coverage-batches.md)). Local, branch
-`feat/hygiene-and-editor`, not yet in CI: ctest **367**, C ABI in (2026-10-21, Linux, [14](../14-c-abi/06-linux-shared-library.md)), parity
+`feat/hygiene-and-editor`, not yet in CI: ctest **369**, C ABI in (2026-10-21, Linux, [21](21-repeat-pruning.md#gates)), parity
 **82/82** ([19](19-gradient-contract.md#gates)).
 
 | Item | Title | Status |
@@ -152,7 +152,7 @@ three runs in a row (2026-10-07, Linux, [15](15-test-coverage-batches.md)). Loca
 | [#32](04-engineering-quality.md#32-test-coverage-ledger) | Test-coverage ledger | **DONE** 2026-10-07 — Batch A and Batch B ([15](15-test-coverage-batches.md)) |
 | [#33](04-engineering-quality.md#33-build--tooling-hardening) | Build & tooling hardening | **DONE** 2026-10-06 ([14](14-build-hardening-ci.md)); batches 2026-08-31, 09-01, 09-10; nanort + clean-clone 2026-09-21 by [20 #47](../20-public-delivery/01-pin-geometry-central.md) |
 | [#34](04-engineering-quality.md#34-api-hygiene-batch) | API hygiene batch | **PARTIAL** 2026-10-21 — E12 reopened, [20](20-gridfield-normal.md); batches [18](18-contourer-threads.md), [19](19-gradient-contract.md) |
-| [#35](04-engineering-quality.md#35-repeatfield-neighbour-set-optimisation) | `RepeatField` neighbour-set optimisation | PLANNED — born from #34's fix on 2026-09-10, no ledger finding behind it |
+| [#35](04-engineering-quality.md#35-repeatfield-neighbour-set-optimisation) | `RepeatField` neighbour-set optimisation | **DONE** 2026-10-21 — ~1.3× the fold, exact ([21](21-repeat-pruning.md)); born from #34's fix, no ledger finding |
 | [#46](03-correctness-and-robustness/02-precision-and-celloverlaps.md#46-offsetfield-does-not-forward-celloverlaps) | `OffsetField` does not forward `cellOverlaps` | **DONE** 2026-09-21 — opened 2026-09-20 from the first semantic lint ([19/08/01](../19-docs-layers/08-semantic-lint/01-2026-09-20-first-run.md)), no ledger finding behind it |
 | [#52](16-windows-rename-race/README.md#52-windows-export-io-flake--the-part-rename-under-an-on-access-scanner) | Windows export I/O flake — the `.part` rename under an on-access scanner | **DONE** 2026-10-07 — opened the same day from Boletus's ask, no ledger finding behind it; the holder was an inherited handle, not a scanner |
 | [#61](17-viewer-silhouette-specks.md#61-dark-specks-on-grazing-silhouettes-in-dualc_field_view) | Dark specks on grazing silhouettes in `dualc_field_view` | DEFERRED — opened 2026-10-16 at block 21's P03.2 check, no ledger finding behind it |

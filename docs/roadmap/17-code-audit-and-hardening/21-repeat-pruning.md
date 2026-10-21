@@ -75,12 +75,25 @@ reads all 8 copies: the values are the same, and parity is **82/82**
 | (a) neighbours only on axes the child overhangs | **not kept as written**: on an axis the child fits, the neighbour copy can still hold the smaller value off the surface (a sphere at `(0.4, 0.15, 0)`, `r = 0.3`, periods `(1, 1, 0)`: at `y = −0.45` the home copy reads 0.30, the `−y` copy 0.10), so the minimum would change. What (a) is exact for is what (b) skips anyway. |
 | (b) skip a copy whose box lower bound ≥ the best | **kept**, behind the new claim. The plan's `lipschitzBound()` does not exist, and Lipschitz-1 is the wrong property: it bounds how fast the value changes, not how small it is far away. |
 | — home tile first in `cellOverlaps`, repeats skipped | **kept**; found by counting, not in the plan. |
-| (c) a symmetry flag restoring the single fold | **not taken**: (a)+(b) leave 1.23×, under the plan's 1.3× bar. It could not be taken anyway, since the fold's mesh is not byte-identical (above). |
+| (c) a symmetry flag restoring the single fold | **not taken**: (a)+(b) leave 1.23× (P06.1's timing) to 1.30× (T2's, [below](#the-speed-up)), at the plan's "about 1.3×" bar. It could not be taken anyway, since the fold's mesh is not byte-identical (above). |
 
 **Chosen in-run (pending owner review):** lever (b) needs a property no field had, so it is
 a new public virtual, opt-in, defaulting to the safe answer. The alternatives were an
 internal type check on known primitives in `domain_ops.cpp` (fragile across wrappers), or
 no lever (b) at all (≈ 2.9× left).
+
+## The levers as 04 planned them
+
+Moved here verbatim from [04 § #35](04-engineering-quality.md#35-repeatfield-neighbour-set-optimisation)
+on 2026-10-21 for its size cap; the table above is what became of each.
+
+> Two candidate levers, neither yet tried:
+> - **Per-axis neighbours.** Visit offsets only on axes where the child actually overhangs.
+>   Cheap and exact, but no help for the case that motivated it: a strut cell has corner caps
+>   and so overhangs on all three axes.
+> - **Early-out on the home copy.** Skip a neighbour when the home copy's value is already
+>   smaller than the closest the neighbour's translated box could possibly be. This is where
+>   the win would come from, since most points are nowhere near a seam.
 
 ## Measured after
 
@@ -94,7 +107,53 @@ Same host, command and thread count as the baseline:
 All five other reference meshes come out byte-identical (`cmp`). Ctest's new
 `boundsBoundValue claims hold outside the box` (`tests/test_primitives.cpp`) checks every
 claim against its definition over 4,000 points around the box, and the cases that withhold
-it. The field-level pruned-vs-unpruned test and the closing table are P06 T2's.
+it. The field-level pruned-vs-unpruned test and the closing table are P06 T2's (below).
+
+## Byte-identity, proven
+
+P06 T2, 2026-10-21, on the committed code (`6a231c7`):
+
+- **The meshes.** All six reference cases were re-run from the committed binary and compared
+  with `cmp` to the `db50b2e` files: **all six identical**, so their SHA-256 matches the table above (the octet, bcc, tapered octet, the two seam spheres and the limited repeat); the 8-neighbour binary re-run gave the octet reference again.
+- **The field.** `Pruned repeats equal the 8-neighbour minimum bit for bit`
+  (`tests/test_domain_ops.cpp`) builds each repeat twice over the same child, through a
+  pass-through probe that forwards the claim and one that withholds it, and compares both
+  with `==` to a hand-written copy of `db50b2e`'s 8-copy loop (no skip at all): `valueAt`,
+  `gradientAt` and `trueGradientAt`, at 15,625 grid points on multiples of period / 8
+  (tile centres and seams, where the repeat skip fires) plus 4,000 pseudo-random ones. Seven
+  cases: the seam sphere on one and two axes, the octet cell in capsules and in round cones,
+  a `RoundBoxField` (no claim: only the repeat skip), and `repeatedLimited` over the sphere
+  and the octet cell. On every claimant the probe counts fewer child reads with the claim
+  than without, so the box skip fired; without a claim the counts are equal.
+- **The superset test** (`Domain wrappers ask their child about a superset of what they
+  read`) is untouched and green.
+
+## The speed-up
+
+Same host, command and `--threads 4` as the baseline; the three builds re-timed back to back
+in one session, three runs each (load average 2.1–2.7 before and after, from the desktop and other sessions; nothing else heavy):
+
+| build | runs (s) | median | vs fold |
+| --- | --- | --- | --- |
+| 8-neighbour (`db50b2e`) | 114.7 · 125.2 · 129.5 | 125.2 | 2.73× |
+| single fold (scratch, as above) | 46.0 · 45.8 · 45.8 | 45.8 | 1 |
+| **pruned (`6a231c7`, committed)** | 59.7 · 60.0 · 60.2 | 60.0 | **1.31×** |
+| fold, interleaved with the next row | 45.0 · 45.5 · 46.1 | 45.5 | 1 |
+| pruned, interleaved | 59.4 · 59.4 · 59.2 | 59.4 | **1.30×** |
+
+The pruned repeat is **2.09× faster** than the 8-neighbour one (125.2 s → 60.0 s) and costs **1.30× the single fold**, down from 2.73×; peak memory is the 8-neighbour code's 3.35 GB (the fold peaks at 3.56 GB). The 2026-10-21 P06.1 runs above
+(132.3 / 46.2 / 56.9 s) give the same ratios within the host's drift: 2.86× and 1.23× then; the same pruned binary ran 5 % slower today against an unchanged fold, which is why the interleaved rows were taken.
+
+**Chosen in-run (pending owner review):** T2's 1.30× sits on the plan's "more than about
+1.3×" bar for lever (c), not clearly under it as P06.1's 1.23× did. Lever (c) is still not
+taken: the fold's octet mesh differs from the 8-neighbour one (above), so it cannot meet the
+run's byte-identity rule, whatever the timing. Taking it would mean accepting its 3,452
+differing OBJ lines as the new reference — the owner's call.
+
+## Gates
+
+`python3 scripts/check.py` green with ctest **@@CTEST@@** (C ABI in); `--docs --strict` green.
+The GPU tier is P06.1's, **82/82**: T2 changed no field node or codegen.
 
 ---
 

@@ -65,7 +65,7 @@ row (cited by ID).
 2. **Engine hardening — the audit's open findings**
    ([17](17-code-audit-and-hardening/README.md)) — a standing ledger, not a phase; the
    one status table is [17 § Tracked items](17-code-audit-and-hardening/README.md#tracked-items--status-at-a-glance).
-   #34 PARTIAL 2026-10-21 (E12 reopened); **NEXT:** #35 on its trigger; **#53** (Linux `.so`, [14/06](14-c-abi/06-linux-shared-library.md))
+   #34 PARTIAL 2026-10-21 (E12 reopened); #35 DONE 2026-10-21; **NEXT:** **#53** (Linux `.so`, [14/06](14-c-abi/06-linux-shared-library.md))
    PARTIAL (libraries landed with #52; CI proof owed).
 3. **TPMS / lattice capability** ([05](05-tpms-lattices/README.md)) — **#17 strut
    lattices** and their Phases 3–5 DONE; **#18 tight Lipschitz `cellOverlaps`**
