@@ -105,7 +105,7 @@ gradient of a cell on one side saw only that face. **Owner review (P08):** the p
 this method, and it is kept. The alternatives are a one-sided or limited node stencil near
 large differences (untested), or the old cell gradient, which reopens E12.
 *Reviewed 2026-10-21 by Giacomo:* keep continuity, but limit the node stencil at creases.
-That is unit P04b of the run (`plan/13_P04b_limited-stencil.md`), which must bring A's mean back
+That is unit P04b of the run, which must bring A's mean back
 to ≤ old while B and D keep their gains, or else restore the cell gradient and set #34 back to PARTIAL.
 
 ## The Newton step

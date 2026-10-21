@@ -172,8 +172,6 @@ DualC/
 ├── cmake/
 │   └── DualCWarnings.cmake    dualc_target_options(): C++17 dialect, warning level, DUALC_WERROR, DUALC_SANITIZE — per DualC target, never global (17 #33)
 │
-├── plan/                      plan-run's split of docs/raw/2026-10-19-hygiene-and-editor-plan.md: one file per phase, run.manifest.json (written by /plan-run-setup), handoffs/ (one per unit); the run state .plan-run/ is gitignored; transient (D-51)
-│
 ├── scripts/
 │   ├── check.py               THE GATE — every check in one command; hosted CI (.github/workflows/gate.yml) runs exactly this.
 │   │                            `--fast` = docs/hygiene, ~1s; default adds configure+build+ctest; `--gpu` opt-in

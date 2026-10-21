@@ -161,8 +161,8 @@ None blocks the PR; each has its home.
   DualC-origin warnings, build 248 s, ctest **369 / 369** (152 s). `cmake --build build-gl -j
   && check.py --gpu --strict --build-dir build-gl`: parity **82 / 82**. `check.py --docs
   --strict` green.
-- **`plan/` is not deleted here.** The driver still reads the manifest and this unit's
-  handoff. The deletion (D-51) is one commit after the driver marks P08 done.
+- **`plan/` deleted 2026-10-21** (D-51), one commit after P08 was marked done; P08's
+  handoff audited first: its facts are here, in 19/08/09 and the PR.
 
 ---
 
