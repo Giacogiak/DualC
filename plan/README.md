@@ -15,6 +15,7 @@ The folder is transient: it is deleted at the plan's close (D-51).
 | [11_P02_contourer-threads.md](11_P02_contourer-threads.md) | P02 — `ContourerParams::numThreads`, the C ABI, `dualc_field --threads` | #34 |
 | [12_P03_gradient-contract.md](12_P03_gradient-contract.md) | P03 — the unit-direction contract, the true-gradient path | #34 |
 | [13_P04_gridfield-normal.md](13_P04_gridfield-normal.md) | P04 — a continuous `GridField` normal; #34 closed | #34 |
+| [13_P04b_limited-stencil.md](13_P04b_limited-stencil.md) | P04b: a crease-aware node stencil (added 2026-10-21 by the owner's review of P04.1's +35 % on the CAD pair) | #34 |
 | [14_P05_linux-so-ci.md](14_P05_linux-so-ci.md) | P05 — the gate builds the C ABI | #53 |
 | [15_P06_repeat-pruning.md](15_P06_repeat-pruning.md) | P06 — `RepeatField` neighbour pruning, byte-identical | #35 |
 | [16_P07_editor-acknowledgement.md](16_P07_editor-acknowledgement.md) | P07 — DualCEditor owns the standalone UI (hand-off block) | Track 2 |
