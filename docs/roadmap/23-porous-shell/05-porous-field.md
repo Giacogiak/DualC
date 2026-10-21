@@ -43,22 +43,21 @@ builds it in `dualc_field`.
   Threading one through would change `FieldGraph::build`'s signature and the ABI's, a
   question for #67.
 
-**The node, as the graph reads it** (the raw plan's signature; the library checks the rest):
+**What the graph checks.** The keys and defaults are the raw plan's signature
+([§ 3](../../raw/2026-10-19-porous-shell-plan.md#the-node-as-designed-the-defaults-every-unit-follows-unless-p01-changes-them)),
+unchanged; `dualc_field --list` prints them, and #67 writes their command-reference page.
+The graph adds these checks before the library's own:
 
-| Key | Default | Checked by the graph |
-| --- | --- | --- |
-| children | volume[, control] | 1 or 2 |
-| `cells` | `voronoi` | `voronoi` \| `delaunay` |
-| `mode` | `walls` | `walls` \| `struts` |
-| `dist` | `poisson` | `poisson` \| `jitter` \| `random` |
-| `spacing` | required | finite, > 0 |
-| `spacing2` | `= spacing` | finite, > 0; a different value needs the control |
-| `d0`, `d1` | 0, — | `d1` required when `spacing2` ≠ `spacing` |
-| `ramp` | `linear` | `linear` \| `smooth` \| `gaussian` |
-| `relax` | 0 | a whole number in [0, 50] |
-| `seed` | 0 | a whole number in [0, 2⁵³] (a JSON number is a double) |
-| `smooth` | 0 | library: finite, ≥ 0, < `B` for struts |
-| `jitter` | 1 | library: ≥ 0 |
+| Key | Checked by the graph |
+| --- | --- |
+| children | 1 or 2 (volume[, control]) |
+| `cells`, `mode`, `dist`, `ramp` | one of the names of the signature |
+| `spacing` | required, finite, > 0 |
+| `spacing2` | finite, > 0; a value ≠ `spacing` needs the control |
+| `d1` | required when `spacing2` ≠ `spacing` |
+| `relax` | a whole number in [0, 50] |
+| `seed` | a whole number in [0, 2⁵³] (a JSON number is a double) |
+| `smooth`, `jitter` | left to the library: `smooth` finite, ≥ 0, < `B` for struts; `jitter` ≥ 0 |
 
 ## The in-run choices
 
