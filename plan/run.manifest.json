@@ -89,7 +89,7 @@
 			"phaseEnd": true,
 			"gate": "auto",
 			"gateReason": "no stop rule matched",
-			"handoff": "HANDOFF_P01_TASK1.md",
+			"handoff": "plan/handoffs/HANDOFF_P01_TASK1.md",
 			"verify": [
 				"tree-clean",
 				"new-commit",
@@ -106,7 +106,7 @@
 			"phaseEnd": true,
 			"gate": "auto",
 			"gateReason": "no stop rule matched",
-			"handoff": "HANDOFF_P02_TASK1.md",
+			"handoff": "plan/handoffs/HANDOFF_P02_TASK1.md",
 			"verify": [
 				"tree-clean",
 				"new-commit",
@@ -122,7 +122,7 @@
 			"convention": "subheadings",
 			"gate": "auto",
 			"gateReason": "no stop rule matched",
-			"handoff": "HANDOFF_P03_TASK1.md",
+			"handoff": "plan/handoffs/HANDOFF_P03_TASK1.md",
 			"verify": [
 				"tree-clean",
 				"new-commit",
@@ -139,7 +139,7 @@
 			"phaseEnd": true,
 			"gate": "auto",
 			"gateReason": "no stop rule matched",
-			"handoff": "HANDOFF_P03_TASK2.md",
+			"handoff": "plan/handoffs/HANDOFF_P03_TASK2.md",
 			"verify": [
 				"tree-clean",
 				"new-commit",
@@ -155,7 +155,7 @@
 			"convention": "subheadings",
 			"gate": "auto",
 			"gateReason": "no stop rule matched",
-			"handoff": "HANDOFF_P04_TASK1.md",
+			"handoff": "plan/handoffs/HANDOFF_P04_TASK1.md",
 			"verify": [
 				"tree-clean",
 				"new-commit",
@@ -172,7 +172,7 @@
 			"phaseEnd": true,
 			"gate": "auto",
 			"gateReason": "no stop rule matched",
-			"handoff": "HANDOFF_P04_TASK2.md",
+			"handoff": "plan/handoffs/HANDOFF_P04_TASK2.md",
 			"verify": [
 				"tree-clean",
 				"new-commit",
@@ -188,7 +188,7 @@
 			"convention": "subheadings",
 			"gate": "auto",
 			"gateReason": "no stop rule matched",
-			"handoff": "HANDOFF_P05_TASK1.md",
+			"handoff": "plan/handoffs/HANDOFF_P05_TASK1.md",
 			"verify": [
 				"tree-clean",
 				"new-commit",
@@ -205,7 +205,7 @@
 			"phaseEnd": true,
 			"gate": "auto",
 			"gateReason": "no stop rule matched",
-			"handoff": "HANDOFF_P05_TASK2.md",
+			"handoff": "plan/handoffs/HANDOFF_P05_TASK2.md",
 			"verify": [
 				"tree-clean",
 				"new-commit",
@@ -222,7 +222,7 @@
 			"phaseEnd": true,
 			"gate": "auto",
 			"gateReason": "no stop rule matched",
-			"handoff": "HANDOFF_P06_TASK1.md",
+			"handoff": "plan/handoffs/HANDOFF_P06_TASK1.md",
 			"verify": [
 				"tree-clean",
 				"new-commit",
@@ -239,7 +239,7 @@
 			"phaseEnd": true,
 			"gate": "auto",
 			"gateReason": "no stop rule matched",
-			"handoff": "HANDOFF_P07_TASK1.md",
+			"handoff": "plan/handoffs/HANDOFF_P07_TASK1.md",
 			"verify": [
 				"tree-clean",
 				"new-commit",
@@ -255,7 +255,7 @@
 			"convention": "subheadings",
 			"gate": "auto",
 			"gateReason": "no stop rule matched",
-			"handoff": "HANDOFF_P08_TASK1.md",
+			"handoff": "plan/handoffs/HANDOFF_P08_TASK1.md",
 			"verify": [
 				"tree-clean",
 				"new-commit",
@@ -272,7 +272,7 @@
 			"phaseEnd": true,
 			"gate": "auto",
 			"gateReason": "no stop rule matched",
-			"handoff": "HANDOFF_P08_TASK2.md",
+			"handoff": "plan/handoffs/HANDOFF_P08_TASK2.md",
 			"verify": [
 				"tree-clean",
 				"new-commit",
