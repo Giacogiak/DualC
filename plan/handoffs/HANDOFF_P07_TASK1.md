@@ -111,7 +111,7 @@ Newer, or corrected:
 
 - `python3 scripts/check.py --docs --strict`: **PASS**, 28 checks. Index-staleness lists the
   usual report-only rows.
-- `python3 scripts/check.py`: still running when this unit was committed (docs-only change, no code touched); the driver re-runs it. The docs tier, `--docs --strict`, passes after the heading fix
+- `python3 scripts/check.py`: **PASS** after the commit was made, exit 0: 32 checks, 29 passed, 0 failed, 2 skipped (configure reused, warnings incremental). ctest **369 / 369**. The run started before the archive's 08-heading fix, so its docs tier saw an earlier tree; `--docs --strict` was re-run on the committed tree and passes
 - No GPU tier: no field node, `field_graph.cpp`, `field_glsl.cpp` or `parity_expected_cases`
   moved.
 
