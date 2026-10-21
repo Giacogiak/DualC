@@ -36,6 +36,11 @@ CTest 4 output — [20 #49](../../20-public-delivery/02-linux-build-host.md#49-l
 *(2026-10-07: a second opt-in tier, `--io-stress` → `io-stress`, runs the concurrent-export
 harness and passes `--io-stress-args` through; an experiment measuring a flake, never in the
 default gate or `--all` — [15 #52](../16-windows-rename-race/README.md#52-windows-export-io-flake--the-part-rename-under-an-on-access-scanner).)*
+*(2026-10-21: `configure` sets `DUALC_BUILD_TESTS`, `_EXAMPLES` and now `_C_ABI` ON
+(`GATE_OPTIONS`), so every gate run and every CI build and `sanitize` job links
+`libdualc_capi` and runs the `cli_c_abi*` cases; a build dir whose cache lacks one of them is
+re-configured in place, not skipped. The CMake defaults stay OFF —
+[14 #53](../../14-c-abi/06-linux-shared-library.md#53-libdualc_capiso-links-on-linux-without-a-caller-supplied--fpic).)*
 
 ### The semantic half
 

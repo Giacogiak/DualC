@@ -127,14 +127,14 @@ full entries, with evidence and triggers, live in two files:
 audit, is on its own page, [`15`](16-windows-rename-race/README.md).
 
 **Latest verification** (the one home of the counts; every other page links here):
-`ctest` **302** on Linux and macOS and **304** on Windows (306 locally with the C ABI's four) (2026-10-07, CI's three `build` jobs on the
+`ctest` **302** on Linux and macOS and **304** on Windows (306 locally with the C ABI) (2026-10-07, CI's three `build` jobs on the
 merge of #52 over #32 — two writer cases run everywhere, two more only on Windows, [16](16-windows-rename-race/README.md);
 300 earlier that day, [15](15-test-coverage-batches.md); 270 on 2026-10-06; 256 on 2026-09-17, [19/01](../19-docs-layers/01-record-phases-0-2.md)); `dualc_glsl_parity` **73/73**
 (2026-10-06, asserted by `check.py --gpu` against `parity_expected_cases` in CI's required
 `gpu` job — [13](13-parity-gate-binding.md)); the same 270 pass under ASan + UBSan in CI's
 `sanitize` job (2026-10-06, [14](14-build-hardening-ci.md)); the same 270 pass under `ctest -j 8`,
 three runs in a row (2026-10-07, Linux, [15](15-test-coverage-batches.md)). Local, branch
-`feat/hygiene-and-editor`, not yet in CI: ctest **362** (2026-10-21, Linux, [20](20-gridfield-normal.md)), parity
+`feat/hygiene-and-editor`, not yet in CI: ctest **367**, C ABI in (2026-10-21, Linux, [14](../14-c-abi/06-linux-shared-library.md)), parity
 **82/82** ([19](19-gradient-contract.md#gates)).
 
 | Item | Title | Status |

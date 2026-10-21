@@ -40,6 +40,11 @@ owed is listed in `docs/roadmap/14-c-abi/06-linux-shared-library.md`. Branch
      (`git push -u origin feat/hygiene-and-editor`) and which jobs' `cli_c_abi*` lines to read.
    - Leave #53 **PARTIAL** until someone reads the remote run. P08 or the owner flips it.
 
+*Correction (P05.1, 2026-10-21): there are **five** `cli_c_abi*` cases, not four:
+`cli_c_abi_threads` came with ABI 0.5.2 (17 #34, P02). Step 1's sanitize command is run with
+its own `--build-dir`, which is CI's `sanitize` command. Without one, it re-configures
+`build/` itself.*
+
 #### Acceptance criteria
 
 - `python3 scripts/check.py` builds `dualc_capi` and runs the four `cli_c_abi*` cases, all green.
