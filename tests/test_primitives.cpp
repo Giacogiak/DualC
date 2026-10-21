@@ -8,9 +8,11 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <algorithm>
 #include <cmath>
 #include <memory>
 #include <stdexcept>
+#include <vector>
 
 using namespace dualc;
 using Catch::Approx;
@@ -214,6 +216,76 @@ TEST_CASE("RoundConeField is a sphere-capped taper", "[primitives]") {
   REQUIRE(rc.valueAt(Vector3{0.0, 0.0, 0.0}) < 0.0);            // inside
   REQUIRE(rc.valueAt(Vector3{0.0, -4.0, 0.0}) == Approx(0.0).margin(1e-12));  // bottom sphere
   REQUIRE(rc.valueAt(Vector3{0.0, 3.0, 0.0}) == Approx(0.0).margin(1e-12));   // top sphere
+}
+
+// Roadmap 17 #35: repeated / repeatedLimited skip a neighbour copy when the
+// child claims boundsBoundValue() and the point is farther from that copy's
+// box than the best value so far. A false claim would change their output,
+// so every claim is checked here against the definition: outside bounds(),
+// valueAt >= the distance to bounds(). Points are a fixed pseudo-random cloud
+// in a shell one unit around the box.
+TEST_CASE("boundsBoundValue claims hold outside the box", "[primitives]") {
+  auto claimHolds = [](const ImplicitField& f) {
+    const BBox b = f.bounds();
+    REQUIRE(b.isValid());
+    unsigned state = 12345u;
+    auto next = [&state] {
+      state = state * 1664525u + 1013904223u;
+      return static_cast<double>(state >> 8) / 16777216.0;  // [0, 1)
+    };
+    int outside = 0;
+    for (int n = 0; n < 4000; ++n) {
+      Vector3 p;
+      double d2 = 0.0;
+      for (int a = 0; a < 3; ++a) {
+        p[a] = b.min[a] - 1.0 + (b.max[a] - b.min[a] + 2.0) * next();
+        const double e = std::max({b.min[a] - p[a], p[a] - b.max[a], 0.0});
+        d2 += e * e;
+      }
+      if (d2 == 0.0) continue;
+      ++outside;
+      if (f.valueAt(p) < std::sqrt(d2) - 1e-12) return false;
+    }
+    REQUIRE(outside > 1000);
+    return true;
+  };
+
+  const SphereField sphere(Vector3{0.4, -0.2, 0.1}, 0.3);
+  const BoxField box(Vector3{-0.5, 0.0, 0.2}, Vector3{0.3, 0.4, 1.0});
+  const CapsuleField capsule(Vector3{-0.2, -0.2, 0.0}, Vector3{0.2, 0.3, 0.4},
+                             0.05);
+  const RoundConeField cone(Vector3{0.0, -0.5, 0.0}, Vector3{0.3, 0.5, 0.2},
+                            0.3, 0.1);
+  const std::vector<const ImplicitField*> claimants = {&sphere, &box, &capsule,
+                                                       &cone};
+  for (const ImplicitField* f : claimants) {
+    REQUIRE(f->boundsBoundValue());
+    CHECK(claimHolds(*f));
+  }
+
+  // A hard union of claimants claims it too, over the hull of their boxes.
+  auto pair = unionOf(std::make_shared<CapsuleField>(capsule),
+                      std::make_shared<SphereField>(sphere));
+  REQUIRE(pair->boundsBoundValue());
+  CHECK(claimHolds(*pair));
+
+  // Withheld where it is not certain: a round cone whose big cap swallows the
+  // small one, a negative radius, a union with an unbounded or non-claiming
+  // operand, and every field that does not opt in.
+  CHECK_FALSE(RoundConeField(Vector3{0.0, 0.0, 0.0}, Vector3{0.0, 0.5, 0.0},
+                             1.0, 0.1)
+                  .boundsBoundValue());
+  CHECK_FALSE(CapsuleField(Vector3{0.0, 0.0, 0.0}, Vector3{1.0, 0.0, 0.0}, -0.1)
+                  .boundsBoundValue());
+  CHECK_FALSE(unionOf(std::make_shared<SphereField>(sphere),
+                      std::make_shared<PlaneField>(Vector3{0, 1, 0}, 0.0))
+                  ->boundsBoundValue());
+  CHECK_FALSE(unionOf(std::make_shared<SphereField>(sphere),
+                      std::make_shared<TorusField>(Vector3{0, 0, 0}, 1.0, 0.2))
+                  ->boundsBoundValue());
+  CHECK_FALSE(smoothUnionOf(std::make_shared<SphereField>(sphere),
+                            std::make_shared<CapsuleField>(capsule), 0.1)
+                  ->boundsBoundValue());
 }
 
 TEST_CASE("InfiniteCylinderField is unbounded", "[primitives]") {

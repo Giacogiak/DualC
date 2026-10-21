@@ -84,6 +84,11 @@ double BoxField::valueAt(const Vector3& p) const {
 
 BBox BoxField::bounds() const { return boxMinMax(c_ - h_, c_ + h_); }
 
+// Exact outside: the distance to the box itself, which is its bounds.
+bool BoxField::boundsBoundValue() const {
+  return h_.x >= 0.0 && h_.y >= 0.0 && h_.z >= 0.0;
+}
+
 // ---- Round box ----------------------------------------------------------
 
 RoundBoxField::RoundBoxField(const Vector3& min, const Vector3& max,

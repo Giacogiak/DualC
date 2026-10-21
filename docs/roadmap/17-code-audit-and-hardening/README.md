@@ -46,11 +46,11 @@ status and trigger, and links to both.
 - [`18-contourer-threads.md`](18-contourer-threads.md) — #34's thread-count delivery record.
 - [`19-gradient-contract.md`](19-gradient-contract.md) — #34's `gradientAt` contract, 30-override census, `trueGradientAt`.
 - [`20-gridfield-normal.md`](20-gridfield-normal.md) — #34's `GridField` normal: stencils measured, E12 open.
-- [`07-repeat-tiling-fix.md`](07-repeat-tiling-fix.md) — the full record for #34's first
-  item: `repeat` read only the folded tile, which put wrong geometry in shipped strut
-  lattices; the conditional fix, its measured 2.3× cost, and the oracle test it showed to
-  be certifying less than it claims. Both strut-lattice claims are corrected by measurement in
-  [15](15-test-coverage-batches.md#the-strut-lattice-oracle-certified-what-it-claimed).
+- [`21-repeat-pruning.md`](21-repeat-pruning.md) — #35: `repeat`'s neighbours pruned, byte-identical.
+- [`07-repeat-tiling-fix.md`](07-repeat-tiling-fix.md) — #34's first item: `repeat` read
+  only the folded tile; the conditional fix, its 2.3× cost, the oracle test it showed to
+  certify less than it claims (both strut-lattice claims corrected in
+  [15](15-test-coverage-batches.md#the-strut-lattice-oracle-certified-what-it-claimed)).
 - [`08-argument-validation.md`](08-argument-validation.md) — #34's second batch: fail-fast
   argument validation across the field layer, the `BBox{}` sentinel that was invisible to
   `isValid()`, and the negative-`scaled()` complement bug the guards exposed.

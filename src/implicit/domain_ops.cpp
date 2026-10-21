@@ -23,6 +23,79 @@ BBox boxMinMax(const Vector3& lo, const Vector3& hi) {
 }
 
 // ---------------------------------------------------------------------------
+// Neighbour pruning for the repetition operators (roadmap 17 #35)
+// ---------------------------------------------------------------------------
+//
+// Both operators keep the smallest of up to 8 copies, comparing with a strict
+// `<`, so a copy whose value cannot be below the current best changes nothing
+// -- neither the value nor which copy the gradient is read from. Skipping it
+// is exact, not an approximation. Two such copies are provable without
+// evaluating the child:
+//  - a repeat of one already read (a zero offset, an axis with period 0, or
+//    an id clamped back onto the home id) -- the same point, the same value;
+//  - a copy the point lies outside of, when the child certifies
+//    boundsBoundValue(): its value is at least the distance to its box.
+// The cellOverlaps of both operators still ask about the full 8-neighbour
+// set, a superset of what is now read, so the octree is unchanged too.
+struct CopyPruner {
+  bool   on = false;  // the child certifies boundsBoundValue() on a real box
+  BBox   box;         // the child's bounds, cached
+  double tol = 0.0;   // headroom for the rounding of the two values compared
+
+  CopyPruner() = default;
+  CopyPruner(const ImplicitField& child, const Vector3& period) {
+    box = child.bounds();
+    on = child.boundsBoundValue() && box.isValid();
+    if (!on) return;
+    double scale = 1.0;
+    for (int a = 0; a < 3; ++a)
+      scale = std::max({scale, std::abs(box.min[a]), std::abs(box.max[a]),
+                        std::abs(period[a])});
+    tol = 1e-9 * scale;
+  }
+
+  // True when the child read at r cannot come out below `best`.
+  bool skip(const Vector3& r, double best) const {
+    if (!on) return false;
+    double d2 = 0.0;
+    for (int a = 0; a < 3; ++a) {
+      const double e = std::max({box.min[a] - r[a], r[a] - box.max[a], 0.0});
+      d2 += e * e;
+    }
+    // Inside the box the claim says nothing; outside, value >= distance.
+    return d2 > 0.0 && std::sqrt(d2) >= best + tol;
+  }
+};
+
+// The OR both repeats' cellOverlaps take over the cell translated by each
+// tile id in [idLo, idHi]. The child's cellOverlaps is a pure predicate, so
+// the order is free and the answer is the same in any order; the tile the
+// cell's centre falls in goes first because that is where an overlap usually
+// is (#35: it settles most cells with one child call instead of ~16).
+bool anyTileOverlaps(const ImplicitField& child, const BBox& cell,
+                     const Vector3& s, const double idLo[3],
+                     const double idHi[3]) {
+  double home[3];
+  const Vector3 c = cell.center();
+  for (int a = 0; a < 3; ++a) {
+    home[a] = (s[a] > 0.0) ? std::round(c[a] / s[a]) : 0.0;
+    home[a] = std::min(std::max(home[a], idLo[a]), idHi[a]);
+  }
+  auto overlapsAt = [&](double ix, double iy, double iz) {
+    const Vector3 off{s.x * ix, s.y * iy, s.z * iz};
+    return child.cellOverlaps(boxMinMax(cell.min - off, cell.max - off));
+  };
+  if (overlapsAt(home[0], home[1], home[2])) return true;
+  for (double iz = idLo[2]; iz <= idHi[2]; iz += 1.0)
+    for (double iy = idLo[1]; iy <= idHi[1]; iy += 1.0)
+      for (double ix = idLo[0]; ix <= idHi[0]; ix += 1.0) {
+        if (ix == home[0] && iy == home[1] && iz == home[2]) continue;
+        if (overlapsAt(ix, iy, iz)) return true;
+      }
+  return false;
+}
+
+// ---------------------------------------------------------------------------
 // Conservative cell mapping for cellOverlaps
 // ---------------------------------------------------------------------------
 //
@@ -176,7 +249,8 @@ class RepeatField : public ImplicitField {
 public:
   RepeatField(FieldPtr child, const Vector3& period)
       : child_(std::move(child)), s_(period),
-        foldExact_(childFitsOnePeriod(*child_, period)) {}
+        foldExact_(childFitsOnePeriod(*child_, period)),
+        pruner_(*child_, period) {}
 
   double valueAt(const Vector3& p) const override {
     if (foldExact_) return child_->valueAt(tileLocal(p));
@@ -252,14 +326,7 @@ public:
       return child_->cellOverlaps(boxMinMax(lo, hi));
     }
 
-    for (double iz = idLo[2]; iz <= idHi[2]; iz += 1.0)
-      for (double iy = idLo[1]; iy <= idHi[1]; iy += 1.0)
-        for (double ix = idLo[0]; ix <= idHi[0]; ix += 1.0) {
-          const Vector3 off{s_.x * ix, s_.y * iy, s_.z * iz};
-          if (child_->cellOverlaps(boxMinMax(cell.min - off, cell.max - off)))
-            return true;
-        }
-    return false;
+    return anyTileOverlaps(*child_, cell, s_, idLo, idHi);
   }
 
 private:
@@ -299,6 +366,9 @@ private:
   // carries Hermite data -- changed topology, not a nudged vertex. Guarded by
   // foldExact_ so a child that provably fits in one period keeps paying for
   // exactly one child evaluation.
+  //
+  // Copies that provably cannot win are skipped (CopyPruner, above): the
+  // result is the full 8-neighbour minimum, bit for bit.
   double nearestCopy(const Vector3& p, Vector3& bestLocal,
                      bool wantGrad) const {
     auto idOf = [](double v, double s) {
@@ -308,13 +378,23 @@ private:
     const Vector3 o{sgn(p.x - s_.x * id.x), sgn(p.y - s_.y * id.y),
                     sgn(p.z - s_.z * id.z)};
 
+    // A neighbour on an axis with a zero offset, or on an axis that is not
+    // repeated (period 0), is read at the same point as the home copy.
+    const bool sameX = o.x == 0.0 || !(s_.x > 0.0);
+    const bool sameY = o.y == 0.0 || !(s_.y > 0.0);
+    const bool sameZ = o.z == 0.0 || !(s_.z > 0.0);
+
     double best = std::numeric_limits<double>::infinity();
     for (int k = 0; k < 2; ++k) {
+      if (k && sameZ) continue;  // the copy k = 0 already read
       for (int j = 0; j < 2; ++j) {
+        if (j && sameY) continue;
         for (int i = 0; i < 2; ++i) {
+          if (i && sameX) continue;
           const Vector3 rid{id.x + i * o.x, id.y + j * o.y, id.z + k * o.z};
           const Vector3 r{p.x - s_.x * rid.x, p.y - s_.y * rid.y,
                           p.z - s_.z * rid.z};
+          if (pruner_.skip(r, best)) continue;
           const double d = child_->valueAt(r);
           if (d < best) {
             best = d;
@@ -326,9 +406,10 @@ private:
     return best;
   }
 
-  FieldPtr child_;
-  Vector3  s_;
-  bool     foldExact_;
+  FieldPtr   child_;
+  Vector3    s_;
+  bool       foldExact_;
+  CopyPruner pruner_;
 };
 
 // ---- Finite repetition --------------------------------------------------
@@ -337,7 +418,8 @@ class RepeatLimitedField : public ImplicitField {
 public:
   RepeatLimitedField(FieldPtr child, const Vector3& period,
                      const Vector3i& count)
-      : child_(std::move(child)), s_(period), n_(count) {}
+      : child_(std::move(child)), s_(period), n_(count),
+        pruner_(*child_, period) {}
 
   double valueAt(const Vector3& p) const override {
     Vector3 ignored;
@@ -377,9 +459,10 @@ public:
   // rather than about one box spanning them all: the union of the per-id boxes
   // is the set the child is actually read on, whereas their bounding box is
   // roughly two periods wider than the cell and makes the child report an
-  // overlap almost everywhere. The id range is normally one or two per axis
-  // (a cell at any useful depth is smaller than a tile), so this is a handful
-  // of calls; only the shallowest cells span more, and those refine anyway.
+  // overlap almost everywhere. The id range is normally three per axis (a
+  // cell at any useful depth is smaller than a tile, plus the -1/+1), up to
+  // 27 boxes; the home tile's goes first (anyTileOverlaps), and only the
+  // shallowest cells span more, and those refine anyway.
   bool cellOverlaps(const BBox& cell) const override {
     double idLo[3], idHi[3];
     double span = 1.0;
@@ -404,22 +487,13 @@ public:
       return child_->cellOverlaps(boxMinMax(lo, hi));
     }
 
-    for (double iz = idLo[2]; iz <= idHi[2]; iz += 1.0) {
-      for (double iy = idLo[1]; iy <= idHi[1]; iy += 1.0) {
-        for (double ix = idLo[0]; ix <= idHi[0]; ix += 1.0) {
-          const Vector3 off{s_.x * ix, s_.y * iy, s_.z * iz};
-          if (child_->cellOverlaps(boxMinMax(cell.min - off, cell.max - off))) {
-            return true;
-          }
-        }
-      }
-    }
-    return false;
+    return anyTileOverlaps(*child_, cell, s_, idLo, idHi);
   }
 
 private:
   // Quilez's limited repetition: test the home tile and the 7 nearest
   // neighbours, clamping each id into [0, count-1]; keep the closest copy.
+  // Copies that provably cannot win are skipped (CopyPruner, above).
   double evaluate(const Vector3& p, Vector3& bestLocal, bool wantGrad) const {
     auto idOf = [](double v, double s) {
       return (s > 0.0) ? std::round(v / s) : 0.0;
@@ -427,17 +501,27 @@ private:
     const Vector3 id{idOf(p.x, s_.x), idOf(p.y, s_.y), idOf(p.z, s_.z)};
     const Vector3 o{sgn(p.x - s_.x * id.x), sgn(p.y - s_.y * id.y),
                     sgn(p.z - s_.z * id.z)};
+    const Vector3 home{clampId(id.x, n_.x), clampId(id.y, n_.y),
+                       clampId(id.z, n_.z)};
+    const Vector3 next{clampId(id.x + o.x, n_.x), clampId(id.y + o.y, n_.y),
+                       clampId(id.z + o.z, n_.z)};
+    // As in RepeatField::nearestCopy, plus the id that clamps back home.
+    const bool sameX = next.x == home.x || !(s_.x > 0.0);
+    const bool sameY = next.y == home.y || !(s_.y > 0.0);
+    const bool sameZ = next.z == home.z || !(s_.z > 0.0);
 
     double best = std::numeric_limits<double>::infinity();
     for (int k = 0; k < 2; ++k) {
+      if (k && sameZ) continue;  // the copy k = 0 already read
       for (int j = 0; j < 2; ++j) {
+        if (j && sameY) continue;
         for (int i = 0; i < 2; ++i) {
-          Vector3 rid{id.x + i * o.x, id.y + j * o.y, id.z + k * o.z};
-          rid.x = clampId(rid.x, n_.x);
-          rid.y = clampId(rid.y, n_.y);
-          rid.z = clampId(rid.z, n_.z);
+          if (i && sameX) continue;
+          const Vector3 rid{i ? next.x : home.x, j ? next.y : home.y,
+                            k ? next.z : home.z};
           const Vector3 r{p.x - s_.x * rid.x, p.y - s_.y * rid.y,
                           p.z - s_.z * rid.z};
+          if (pruner_.skip(r, best)) continue;
           const double d = child_->valueAt(r);
           if (d < best) {
             best = d;
@@ -454,9 +538,10 @@ private:
     return v < 0.0 ? 0.0 : (v > hi ? hi : v);
   }
 
-  FieldPtr  child_;
-  Vector3   s_;
-  Vector3i  n_;
+  FieldPtr   child_;
+  Vector3    s_;
+  Vector3i   n_;
+  CopyPruner pruner_;
 };
 
 // ---- Twist --------------------------------------------------------------

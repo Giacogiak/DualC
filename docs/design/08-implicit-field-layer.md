@@ -11,7 +11,7 @@ place ([§ 1](README.md#1-pipeline-at-a-glance)); the data flow is
 ## 10.1 `ImplicitField`
 
 Defined in [`include/dualc/implicit.h`](../../include/dualc/implicit.h). It is **3 mandatory
-+ 5 overridable** virtuals (plus the virtual destructor):
++ 6 overridable** virtuals (plus the virtual destructor):
 
 ```cpp
 class ImplicitField {
@@ -19,6 +19,7 @@ class ImplicitField {
   virtual Vector3 gradientAt(const Vector3& p) const = 0;
   virtual BBox    bounds() const = 0;
   virtual Vector3 trueGradientAt(const Vector3& p) const;  // ∇f, magnitude kept
+  virtual bool    boundsBoundValue() const;                 // default false
   // derived, overridable for closed-form fast paths:
   virtual bool isInside(const Vector3&) const;             // default valueAt < 0
   virtual bool edgeHit(...) const;                         // default: Illinois regula falsi
@@ -53,6 +54,14 @@ four hard booleans. Everything else — the smooth booleans, `mix`, the graded d
 (whose `gradientAt` drops ∇t), `elongated`, `normalizedOf`, the distortions, the lifts,
 `MeshSource` — takes the default. Where the field is flat it is zero, with no fallback
 direction.
+
+**`boundsBoundValue` says the box also bounds the value**: outside `bounds()`, `valueAt(p)`
+is at least the distance from `p` to `bounds()`. It is a claim, default `false`; sphere,
+box, capsule, a round cone whose caps do not swallow each other, and a hard union of
+claimants make it. Being Lipschitz-1 is not enough (half an SDF is Lipschitz-1 and fails
+it). Its one reader is the pair of repeats: they skip a neighbour copy whose box is farther
+than the best value so far, which leaves their result bit for bit the 8-neighbour minimum
+(§ 10.4) — so a false claim is a wrong mesh, not a slow one.
 
 Only `valueAt` / `gradientAt` / `bounds` are mandatory. Fields compose through `FieldPtr`
 (`std::shared_ptr<const ImplicitField>`) into an immutable expression tree — the `const`
@@ -145,7 +154,10 @@ page states only how the library is built.
   wall.
 - **Domain operators** (`domain_ops.cpp`) — isometries (`mirrored`, `repeated`,
   `repeatedLimited`: the gradient comes from the active copy, so tile and mirror seams stay
-  sharp) and distortions (`twisted`, `bent`, `displaced`: the gradient is a central finite
+  sharp; a repeat whose child overhangs its period keeps the minimum over the home tile and
+  its 7 nearest neighbours, skipping the copies it can prove cannot win — a repeat of one
+  already read, or one outside whose box the point lies farther than the best so far, when
+  the child claims `boundsBoundValue`) and distortions (`twisted`, `bent`, `displaced`: the gradient is a central finite
   difference of the warped field, 6 `valueAt` calls per query, which multiply when nested).
 - **A 2D layer** ([`implicit2d.h`](../../include/dualc/implicit2d.h), `field2d.cpp`,
   `lift.cpp`) — `ImplicitField2D` with `Circle2D` / `Box2D` / `Segment2D` / `Polygon2D`,

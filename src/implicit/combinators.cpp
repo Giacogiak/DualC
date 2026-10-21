@@ -65,6 +65,13 @@ public:
                                               : b_->trueGradientAt(p);
   }
   BBox bounds() const override { return bboxUnion(a_->bounds(), b_->bounds()); }
+  // min(a, b) >= min(dist to box a, dist to box b) >= dist to their hull.
+  // Both boxes must be real: bboxUnion drops an invalid one, and the
+  // operand behind it would then be bounded by nothing.
+  bool boundsBoundValue() const override {
+    return a_->boundsBoundValue() && b_->boundsBoundValue() &&
+           a_->bounds().isValid() && b_->bounds().isValid();
+  }
   bool isInside(const Vector3& p) const override {
     return a_->isInside(p) || b_->isInside(p);
   }

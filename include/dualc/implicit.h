@@ -71,6 +71,17 @@ public:
   // empty field); the sampler then falls back to a unit root box.
   virtual BBox bounds() const = 0;
 
+  // True when bounds() also bounds the value from below: for every p
+  // OUTSIDE bounds(), valueAt(p) >= the Euclidean distance from p to
+  // bounds(). A metric SDF of a solid inside its box has it (sphere, box,
+  // capsule, a round cone with neither cap swallowing the other), and so
+  // does a hard union of such; a Lipschitz-1 field need not (0.5 * an SDF is
+  // Lipschitz-1 and fails it). Default false, the safe answer. `repeated`
+  // and `repeatedLimited` read it once, at construction, to skip a neighbour
+  // copy that provably cannot be the closest -- their output is unchanged by
+  // a true claim and wrong after a false one.
+  virtual bool boundsBoundValue() const { return false; }
+
   // --- derived; overridable for closed-form fast paths ---
 
   // Inside test. Default: valueAt(p) < 0.
