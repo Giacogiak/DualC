@@ -50,6 +50,7 @@ add_executable(dualc_tests
   test_validation.cpp
   test_cancel_progress.cpp
   test_writers_io.cpp
+  test_porous.cpp
   # Reuse the procedural mesh generators from examples/ (compiled in directly
   # so this does not depend on DUALC_BUILD_EXAMPLES being on).
   ${PROJECT_SOURCE_DIR}/examples/demo_meshes.cpp

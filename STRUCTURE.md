@@ -43,7 +43,8 @@ DualC/
 │   ├── progress.h             CancelToken / ProgressSink / Stage / Cancelled: cooperative cancellation + coarse progress (roadmap 14 #48)
 │   ├── implicit.h             v2 ImplicitField base, sources, combinators, decorators, domain ops
 │   ├── implicit2d.h           2D fields (Circle/Box/Segment/Polygon) + Revolve/Extrude lifts
-│   └── primitives.h           30 analytic primitive field classes (Tiers A/B/C) + 6 TPMS
+│   ├── primitives.h           30 analytic primitive field classes (Tiers A/B/C) + 6 TPMS
+│   └── porous.h               The porous shell's seeds: Pcg32, SeedParams / SeedSet, generatePorousSeeds, the ramps and ceilings (roadmap 23 #63)
 │
 ├── src/                       Core library implementation
 │   ├── hermite_octree.cpp     Octree node allocation & traversal
@@ -64,7 +65,8 @@ DualC/
 │   │   ├── primitives_tierA.cpp  Core 8 (sphere, box, roundbox, plane, capsule, cappedcylinder, torus, ellipsoid)
 │   │   ├── primitives_tierB.cpp  Common ~10 (boxframe, cone, hexprism, octahedron, pyramid, solidangle, …)
 │   │   ├── primitives_tierC.cpp  Long tail ~13 (cappedtorus, link, cutsphere, deathstar, vesica, rhombus, …)
-│   │   └── primitives_tpms.cpp   6 TPMS (gyroid, schwarz-p, diamond, fischer-koch, lidinoid, neovius)
+│   │   ├── primitives_tpms.cpp   6 TPMS (gyroid, schwarz-p, diamond, fischer-koch, lidinoid, neovius)
+│   │   └── porous_seeds.cpp      Porous seeds: Bridson Poisson-disk (variable radius), jitter, random, the pad, Lloyd by sampling; bit-identical on any OS (roadmap 23 #63)
 │   │
 │   └── internal/             Private internals (NOT public API)
 │       ├── octree.{h,cpp}        Octree structure, child indexing, topology queries
@@ -78,7 +80,8 @@ DualC/
 │       ├── contourer_internals.h Contouring algorithm internals (header-only)
 │       ├── distance_grid.h       Distance-grid helper struct (header-only)
 │       ├── fd_gradient.h         The one central-difference stencil: default trueGradientAt + the FD gradientAt of twist/bend/displace and the lifts (header-only)
-│       └── parallel.h            Threading helpers (header-only)
+│       ├── parallel.h            Threading helpers (header-only)
+│       └── seed_grid.h           Uniform point grid: O(1) insertion, near-cell iteration, exact nearest point (header-only; porous seeds, roadmap 23)
 │
 ├── examples/                  CLI tools + host-side glue (linked to geometry-central, NOT into libdualc)
 │   ├── CMakeLists.txt         Builds the example libs, the always-on CLIs and the opt-in GL targets
@@ -165,6 +168,7 @@ DualC/
 │   ├── test_diagnostics.cpp   Diagnostics channel: every reported degradation shown firing (roadmap 17 #26)
 │   ├── test_validation.cpp    Argument validation + the BBox::empty sentinel (roadmap 17 #34)
 │   ├── test_cancel_progress.cpp  CancelToken unwinds every driver; hooks are inert; report shape; the writers' rc 3 + `.part` guarantee (roadmap 14 #48)
+│   ├── test_porous.cpp        Porous seeds (roadmap 23 #63): PCG32 reference stream, ramps, determinism, Poisson distance, graded density, pad, relax, cancel, ceilings; a hidden `[porous-bench]` rate case
 │   └── test_writers_io.cpp    The writers' failure surface (17 #52): a failed open names the OS error through dce::lastError(); on
 │                                Windows a held `.part` is renamed after retries, a long hold fails with the text, a child started
 │                                with handle inheritance mid-export inherits nothing (output handles are non-inheritable)

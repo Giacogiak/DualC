@@ -23,7 +23,7 @@ and its numbers in a numbered child.
 | Item | Page | Status |
 | --- | --- | --- |
 | The owner's decisions of 2026-10-19 (D-67 … D-73) and the engine choice (D-74) | [02](02-record.md#the-owners-decisions) | DONE 2026-10-21 (decided; D-74 and the defaults marked † pending owner review) |
-| #63 Deterministic seeds in any volume | [02](02-record.md#63-deterministic-seeds-in-any-volume) | PLANNED — P02 |
+| #63 Deterministic seeds in any volume | [02](02-record.md#63-deterministic-seeds-in-any-volume) | DONE 2026-10-21 (P02; the in-run choices pending owner review) |
 | #64 Delaunay tetrahedralization and the packed complex | [02](02-record.md#64-delaunay-tetrahedralization-and-the-packed-complex) | PLANNED — P03 |
 | #65 The porous node on the CPU | [02](02-record.md#65-the-porous-node-on-the-cpu) | PLANNED — P04 |
 | #66 The porous node in GLSL and dualc_field_view | [02](02-record.md#66-the-porous-node-in-glsl-and-dualc_field_view) | PLANNED — P05 |

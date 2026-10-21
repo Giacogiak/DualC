@@ -8,6 +8,7 @@
 #include "dualc/implicit.h"
 #include "dualc/implicit2d.h"
 #include "dualc/pipeline.h"
+#include "dualc/porous.h"
 #include "dualc/primitives.h"
 #include "dualc/progress.h"
 #include "dualc/sampler.h"

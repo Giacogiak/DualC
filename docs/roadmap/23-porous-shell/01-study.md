@@ -80,7 +80,7 @@ measures. Lloyd by sampling costs one nearest-seed query per sample: 32 samples 
 cell size (CV 0.14), the look of a sponge. A few Lloyd steps push it towards soap foam (CV
 0.08, faces meeting near 120°). `poisson` stays the default; `relax` is the knob for the
 foam look. For a **graded** density, Lloyd must weight each sample by the target density
-`(spacing / spacing(x))³`. Plain Lloyd evens out the cell volumes and would erase the grading.
+`(spacing / spacing(x))³` *(P02: by `(spacing / spacing(x))⁵`, see the table)*. Plain Lloyd evens out the cell volumes and would erase the grading.
 
 ## (c) The distance formulas
 
@@ -149,11 +149,11 @@ The raw plan's node design stands except where a row says otherwise. Every row m
 | Token | `porous`; no clash in `field_graph.cpp` / `field_glsl.cpp` |
 | Engine † | Own Bowyer–Watson, sequential, on Shewchuk's `predicates.c` vendored in `src/internal/` (`-std=gnu89 -ffp-contract=off`; MSVC `/fp:precise`); finite super-tet at 1000× the extent; strict-conflict cavity; insertion in 63-bit Morton order of the seed array, ties by index; tets reported canonically (vertices sorted, list sorted) |
 | RNG | PCG32 XSH-RR 64/32 (O'Neill's `pcg32_srandom_r(seed, 0)`); a double in `[0,1)` from two draws, `((a >> 5)·2²⁶ + (b >> 6))·2⁻⁵³`; no `std::*_distribution` |
-| `spacing` † | `poisson`: Bridson minimum distance (k = 30, measured 0.573 seeds/s³); `jitter`: grid pitch; `random`: density 1/spacing³ (the P02 plan file's definitions; switching `dist` changes the cell count by the measured factor) |
+| `spacing` † | `poisson`: Bridson minimum distance (k = 30, measured 0.573 seeds/s³); `jitter`: grid pitch; `random`: density 1/spacing³ (the P02 plan file's definitions; switching `dist` changes the cell count by the measured factor) *(P02: graded `jitter` / `random` thin a layout at the smaller spacing by `(min spacing/spacing(x))³`)* |
 | Ramp | `u = clamp((control − d0)/(d1 − d0), 0, 1)`; `linear` u; `smooth` u²(3 − 2u); `gaussian` (1 − e^(−u²/2σ²))/(1 − e^(−1/2σ²)), σ = 1/√(2 ln 100) ≈ 0.3295 (99 % at u = 1, normalised to 1); `spacing(x) = spacing + (spacing2 − spacing)·w` |
-| Variable-radius Bridson † | Accept a candidate at `c` when every seed `s` is at least `(r(c) + r(s))/2` away; background grid at `rmin/√3`; search radius `rmax` |
+| Variable-radius Bridson † | Accept a candidate at `c` when every seed `s` is at least `(r(c) + r(s))/2` away; background grid at `rmin/√3`; search radius `rmax` *(P02 built it on a linked-list grid at `max(rmin, rmax/2)` with a restart scan: [02 #63](02-record.md#63-deterministic-seeds-in-any-volume))* |
 | Pad † | Seeds accepted where `V(x) < pad`, `pad = max(spacing, spacing2)`; those with `V(x) > 0` are flagged as pad |
-| `relax` † | Lloyd by sampling, 32 samples per seed per iteration, drawn uniformly in the box of V ∪ pad and rejected outside; samples weighted by `(spacing/spacing(x))³`; a seed whose centroid leaves V ∪ pad stays put |
+| `relax` † | Lloyd by sampling, 32 samples per seed per iteration, drawn uniformly in the box of V ∪ pad and rejected outside; samples weighted by `(spacing/spacing(x))³`; a seed whose centroid leaves V ∪ pad stays put *(corrected by P02: the weight is `(spacing/spacing(x))⁵`, the CVT cell-size law in 3D, measured to hold the grading better: [02 #63](02-record.md#63-deterministic-seeds-in-any-volume))* |
 | Ceilings | 2,000,000 seeds, `relax` ≤ 50, as the raw plan (P02/P03 may lower them on measurement) |
 | Voronoi walls | Greedy nearest seed from the bin's start seed, then min over the neighbours' bisectors (section c) |
 | Delaunay walls † | Visibility walk to the containing tet from the bin's start tet, then min over its 4 face planes; planes stored per tet |

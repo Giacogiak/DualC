@@ -191,6 +191,7 @@ add_library(dualc STATIC
   src/implicit/primitives_tierB.cpp
   src/implicit/primitives_tierC.cpp
   src/implicit/primitives_tpms.cpp
+  src/implicit/porous_seeds.cpp
   # Vendored (Unlicense) -- see THIRD_PARTY.md
   src/internal/qef.cpp
   src/internal/svd.cpp
@@ -235,6 +236,14 @@ else()
     src/internal/qef.cpp
     src/internal/svd.cpp
     PROPERTIES COMPILE_OPTIONS "-w")
+endif()
+
+# The porous seeds are bit-identical on every OS (roadmap 23 #63): no FMA
+# contraction, which Clang turns on by default on arm64 (the macOS CI). MSVC's
+# default /fp:precise does not contract.
+if(NOT MSVC)
+  set_source_files_properties(src/implicit/porous_seeds.cpp
+    PROPERTIES COMPILE_OPTIONS "-ffp-contract=off")
 endif()
 
 if(DUALC_BUILD_TESTS)
