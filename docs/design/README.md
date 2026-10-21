@@ -159,7 +159,7 @@ for you, in one place (§ 1).
 | [03-contourer-recursion.md](03-contourer-recursion.md) | § 4, § 4.1–4.3 | `cellProc`/`faceProc`/`edgeProc`, the two mixed-depth devices, emission and winding |
 | [04-qef-manifold-collapse.md](04-qef-manifold-collapse.md) | § 4.4–4.6 | the per-cell QEF, manifold DC, the collapse pass and its gates |
 | [05-conventions-and-tables.md](05-conventions-and-tables.md) | § 5, § 6 | geometry-central integration and the build rules that hold the library boundary; corner/edge/child indexing, the descent tables, the four-cell order |
-| [06-parameters-and-vendoring.md](06-parameters-and-vendoring.md) | § 7, § 8 | `SamplerParams` / `ContourerParams` field by field; the vendored QEF/SVD and its one local change |
+| [06-parameters-and-vendoring.md](06-parameters-and-vendoring.md) | § 7, § 8 | `SamplerParams` / `ContourerParams` field by field; the vendored QEF/SVD and its one local change, nanort, Shewchuk's predicates |
 | [07-limitations.md](07-limitations.md) | § 9 | the standing limitations, each with its fix and its roadmap item |
 | [08-implicit-field-layer.md](08-implicit-field-layer.md) | § 10, § 10.1, 10.3–10.5 | `ImplicitField`, sharp features, the shape of the field library, unbounded fields |
 | [09-conventions.md](09-conventions.md) | — | project-wide conventions: units and frames, export-format dispatch and the `.part` temp-then-rename, PowerShell quoting, keyboard-layout independence, primitive parameter forms, testing conventions |
@@ -175,8 +175,8 @@ Standing decisions that shape the code and the docs; each is a one-liner here, a
 - **geometry-central is consumed pinned, never vendored**: one upstream commit, fetched at
   configure, or a local tree via `-DDUALC_GC_DIR`
   ([§ 5](05-conventions-and-tables.md#5-geometry-central-integration)); the only vendored
-  sources are the public-domain QEF/SVD pair and the MIT nanort header the BVH is written
-  against ([§ 8](06-parameters-and-vendoring.md#8-vendored-third-party-code)), and LGPL/GPL
+  sources are the public-domain QEF/SVD pair, the MIT nanort header the BVH is written
+  against and Shewchuk's public-domain exact predicates under the porous Delaunay ([§ 8](06-parameters-and-vendoring.md#8-vendored-third-party-code)), and LGPL/GPL
   code is read, never copied ([`THIRD_PARTY.md`](../../THIRD_PARTY.md)).
 - **No mesh I/O and no mesh transforms in the library** — the host's job
   ([09](09-conventions.md#units-and-frames)).
