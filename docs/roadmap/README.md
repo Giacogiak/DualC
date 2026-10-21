@@ -18,22 +18,22 @@ belongs there, never here; a count or a version is stated only in its home.
 
 ## Current focus
 
-**The hygiene + editor run** ([17/22](17-code-audit-and-hardening/22-hygiene-plan-run.md))
-closed 2026-10-21 on branch `feat/hygiene-and-editor`, awaiting the owner's push and PR: the
-[hygiene + editor plan](../raw/2026-10-19-hygiene-and-editor-plan.md) took up the rest of
-#34 and, ahead of its trigger, #35 ([D-65](../decisions/01-settled.md)), made the gate build
-the C ABI (#53), and moved the standalone UI to DualCEditor ([22](22-dualceditor-handoff/README.md),
-[D-66](../decisions/01-settled.md)). **#35** is DONE; **#34** is PARTIAL: E12, the `GridField`
-normal, is open again ([17/20](17-code-audit-and-hardening/20-gridfield-normal.md)); **#53** is
-PARTIAL until the remote run. Before it, **CLI consolidation** ([21](21-cli-consolidation/README.md))
-made `dualc_field` + `dualc_field_view` the user surface
-([D-55 … D-60](../decisions/01-settled.md)), closed 2026-10-16
-([21/09](21-cli-consolidation/09-plan-run.md)) and merged 2026-10-19. The engine track draws on
-the 2026-08-19 audit's ledger ([17](17-code-audit-and-hardening/README.md)), through the hosted-CI
-plan before it, run closed 2026-10-07 ([20/04](20-public-delivery/04-hosted-ci-plan-run.md)). The docs restructuring ([19](19-docs-layers/README.md))
-is DONE and leaves the monthly `/docs-semantic-lint` to ordinary sessions; **#48**
-([14/05](14-c-abi/05-progress-and-cancel.md)) left D-44 / D-45 open and the re-vendor to
-Boletus ([15](15-boletus-handoff.md#dualc-retains--engine--abi-boletus-only-requests-these-upstream)).
+**The porous shell run** ([23](23-porous-shell/README.md)) opened 2026-10-21 on branch
+`feat/porous-shell`: a `porous` graph source — seeds in any volume, one Delaunay
+tetrahedralization, the distance to its complex, thickened by the graded nodes — in `dualc_field`, `dualc_field_view` and the C ABI, by the
+[porous shell plan](../raw/2026-10-19-porous-shell-plan.md); #63–#68 PLANNED, the study and
+defaults in [23/01](23-porous-shell/01-study.md). Before it, **the hygiene + editor run**
+([17/22](17-code-audit-and-hardening/22-hygiene-plan-run.md)) closed 2026-10-21 on branch
+`feat/hygiene-and-editor`, awaiting the owner's push and PR: **#35** DONE ([D-65](../decisions/01-settled.md)),
+**#34** PARTIAL (E12, the `GridField` normal, open again: [17/20](17-code-audit-and-hardening/20-gridfield-normal.md)),
+**#53** PARTIAL until the remote run, the standalone UI moved to DualCEditor
+([22](22-dualceditor-handoff/README.md), [D-66](../decisions/01-settled.md)). **CLI
+consolidation** ([21](21-cli-consolidation/README.md)) made `dualc_field` + `dualc_field_view`
+the user surface ([D-55 … D-60](../decisions/01-settled.md)), merged 2026-10-19. The engine
+track draws on the 2026-08-19 audit's ledger ([17](17-code-audit-and-hardening/README.md)); the
+docs restructuring ([19](19-docs-layers/README.md)) leaves the monthly `/docs-semantic-lint` to
+ordinary sessions; **#48** ([14/05](14-c-abi/05-progress-and-cancel.md)) left D-44 / D-45 open
+and the re-vendor to Boletus ([15](15-boletus-handoff.md#dualc-retains--engine--abi-boletus-only-requests-these-upstream)).
 
 **Recent milestones** — the last five: date, one clause, the record; older rows live in
 the block records the table links ([D-43](../decisions/01-settled.md)).
@@ -60,11 +60,9 @@ row (cited by ID).
 
 ### Track 1 — Engine & CLI expansion
 
-1. **CLI consolidation** ([21](21-cli-consolidation/README.md)) — the side CLIs folded into
-   `dualc_field` + `dualc_field_view`; the one status table is
-   [21 § The pages of this block](21-cli-consolidation/README.md#the-pages-of-this-block).
-   DONE — closed 2026-10-16, the run harvested in
-   [21/09](21-cli-consolidation/09-plan-run.md); merged 2026-10-19.
+1. **Porous shell** ([23](23-porous-shell/README.md)) — the `porous` source, run unattended;
+   the one status table is [23 § The pages of this block](23-porous-shell/README.md#the-pages-of-this-block).
+   #63–#68 PLANNED (P02–P07); #69, the graded nodes' negative-`t` gap, DEFERRED ([#69](../decisions/README.md)).
 2. **Engine hardening — the audit's open findings**
    ([17](17-code-audit-and-hardening/README.md)) — a standing ledger, not a phase; the
    one status table is [17 § Tracked items](17-code-audit-and-hardening/README.md#tracked-items--status-at-a-glance).
@@ -135,6 +133,7 @@ baked-preview hardening of
 | 20 | [Public delivery](20-public-delivery/README.md) | The repo as others build it: geometry-central pinned and fetched (options weighed), nanort vendored, the self-bootstrapping clean clone (#47); Linux as a build host (#49); hosted CI running the gate (#51), the plan's run (04). | **#47 DONE** (2026-09-21) · **#49 DONE** (2026-10-03) · **#51 DONE** (2026-10-06) |
 | 21 | [CLI consolidation](21-cli-consolidation/README.md) | One framework, `dualc_field` + `dualc_field_view`: the demo meshes wound outward, `mesh(sign="gwn")`, per-node `bake`, 2D profiles + lifts and a graph slice in the graph, then seven side CLIs retired (#55–#60). | **DONE** (2026-10-16) — #55–#60; D-60 kept; the run harvested (09) |
 | 22 | [DualCEditor hand-off](22-dualceditor-handoff/README.md) | The standalone-app UI (Track 2), archived from this roadmap: hand-off table (section-plane UI, parameter edits, clip mask, Web build), the boundary rule, the editor-driven items DualC retains, the original DualC intent (verbatim). | index — DONE here; DualCEditor tracks its own status |
+| 23 | [Porous shell](23-porous-shell/README.md) | The `porous` source: seeds, one Delaunay, the distance to its Voronoi / Delaunay complex smoothed in the node; CPU, GLSL, C ABI, a Boletus plan. | #63–#68 PLANNED; #69 DEFERRED |
 
 ## How the blocks relate
 

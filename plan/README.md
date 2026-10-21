@@ -33,6 +33,11 @@ at the repo root, which is gitignored. `init` splits these files into 12 units, 
   - Default `verify` = `tree-clean, new-commit, handoff, smoke`, where `smoke` is
     `cmake --build build -j && ctest --test-dir build -R "porous|field_graph|field_glsl" --output-on-failure`.
   - P08.1 and P08.2 also get `ci`.
+  - *Corrected by P01.1:* the `smoke` filter `porous|field_graph|field_glsl` matches no ctest
+    name today: the Catch2 cases read `field-graph …` and `GLSL codegen …`, so it runs only the
+    `porous` cases (none before P02, `ctest` then exits 0 on "No tests were found"). The
+    manifest is the owner's and is not changed; the defaults table names new cases `porous: …`
+    so the filter bites, and each unit also runs `-R 'porous|field-graph|GLSL codegen'` itself.
 - **`promptNotes`:** the hygiene run's rules, adapted:
   - never block on a question;
   - branch `feat/porous-shell`, never push;

@@ -23,6 +23,13 @@
    P04 T1, the round trip, a mesh volume, a missing `spacing` error, and the domain-wrapper
    property test in `test_domain_ops.cpp` if the node qualifies.
 
+   *Corrected by P01.1:* the raw plan's "`smooth` lowers the value by at most `k/4`" holds only
+   where two primitives are within `k` of the minimum. A fold of three (a generic cell corner)
+   lowers it by 0.39k, of four by 0.48k, and never by `k` or more. Test `k/4` at two-primitive
+   points and `< k` everywhere, by [23/01's defaults table](../docs/roadmap/23-porous-shell/01-study.md#the-defaults-table).
+   Name every new Catch2 case `porous: …`; `-R 'field_graph'` matches no test (the existing
+   names read `field-graph …`).
+
 #### Acceptance criteria
 
 - `ctest --test-dir build -R 'porous|field_graph|domain'` is green, and `dualc_field --list`
