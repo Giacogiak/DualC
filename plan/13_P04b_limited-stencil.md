@@ -57,6 +57,13 @@ averaging across a crease.** Branch `feat/hygiene-and-editor`. Never push.
    tree, which takes longer than ten minutes. If it must run long, run it in the foreground
    with a long timeout, never as a background call that can be killed.
 
+*Corrected by P04b.1 (2026-10-21):* step 3's "minmod equals the central difference to second
+order on smooth data" is wrong. Minmod picks a one-sided difference, first order. The smooth
+continuity test stayed green on minmod anyway, because continuity comes from nodes sharing a
+value, not from the stencil's order. And on the fallback path the cell gradient is restored, so
+the continuity test cannot stay green there; P04b.1 hid it (`[.]`) instead of deleting it
+(17/20 § P04b).
+
 #### Acceptance criteria
 
 - The crease test is red on P04.1 and green now. The smooth continuity test is unchanged and

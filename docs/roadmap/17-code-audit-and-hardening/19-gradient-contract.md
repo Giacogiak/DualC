@@ -39,7 +39,7 @@ in 3D; the 2D layer's two are listed after.
 | `SphereField` | `src/implicit/primitives_tierA.cpp:57` | unit | analytic: `p-c`, normalised; `(0,0,1)` at the centre |
 | `PlaneField` | `src/implicit/primitives_tierA.cpp:101` | unit | the stored unit normal |
 | `MeshSource` | `src/implicit/mesh_source.cpp:89` | unit | `p-cp` normalised, negated inside; on the surface the triangle's face normal (zero for a degenerate triangle); `(0,0,1)` if no closest point |
-| `GridField` | `src/implicit/grid_field.cpp:108` | unit | analytic trilinear gradient, normalised at `:142`; discontinuous across cell faces — since P04 the normalised blend of per-node central differences, continuous ([20](20-gridfield-normal.md)) |
+| `GridField` | `src/implicit/grid_field.cpp:108` | unit | analytic trilinear gradient, normalised at `:151`; discontinuous across cell faces — P04's continuous node blend was reverted by P04b, E12 open ([20](20-gridfield-normal.md)) |
 | `WindingNumberField` | `src/implicit/winding_field.cpp:76` | **raw FD** → unit (P03.2) | straddle-aware central/one-sided FD of `0.5 - w`, step 1e-4·diag, **not normalised** — the one override off the contract; since P03.2 that FD is its `trueGradientAt` and `gradientAt` its unit direction |
 | `RevolveField` | `src/implicit/lift.cpp:44` | unit | `fdGradient` copy at `lift.cpp:12` (P03.2: the shared `internal::fdGradientDirection`) |
 | `ExtrudeField` | `src/implicit/lift.cpp:70` | unit | same `fdGradient` |
@@ -159,6 +159,11 @@ and so the Newton step are unchanged. The angle across a face at ε = 10⁻⁶ c
 0.245 rad to 4.9e-7; the face counts of four baked demos are identical. Mean vertex deviation
 is −9 % on a smooth blend and +35 % on the sharp CAD pair. The full record, the timing and
 the owner-review note: [20](20-gridfield-normal.md).
+
+P04b (2026-10-21) limited the node stencil at creases (minmod, a ratio switch, a crease mask);
+no variant kept the CAD pair's mean deviation at or below the cell gradient's, so
+`gradientAt` is that gradient's direction again and #34 is PARTIAL (E12 open). The variants
+table: [20 § P04b](20-gridfield-normal.md#p04b--a-limited-node-stencil-measured).
 
 ## Gates
 

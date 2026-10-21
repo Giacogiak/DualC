@@ -27,7 +27,7 @@ a side tool holds moves into the graph, and so within the C ABI's reach, and the
 `feat/cli-consolidation`; #55–#60 are DONE (seven tools retired) and the block closed 2026-10-16 ([21/09](21-cli-consolidation/09-plan-run.md)); the PR is the owner's. Before it the engine
 track drew on the 2026-08-19 audit's ledger ([17](17-code-audit-and-hardening/README.md))
 through the hosted-CI plan, run closed 2026-10-07 ([20/04](20-public-delivery/04-hosted-ci-plan-run.md));
-**#34** is DONE (2026-10-20, branch `feat/hygiene-and-editor`, [17/20](17-code-audit-and-hardening/20-gridfield-normal.md)). The docs restructuring ([19](19-docs-layers/README.md))
+**#34** is PARTIAL (2026-10-21, branch `feat/hygiene-and-editor`): E12, the `GridField` normal, is open again — no continuous stencil kept a CAD pair's accuracy ([17/20](17-code-audit-and-hardening/20-gridfield-normal.md)). The docs restructuring ([19](19-docs-layers/README.md))
 is DONE and leaves the monthly `/docs-semantic-lint` to ordinary sessions; **#48**
 ([14/05](14-c-abi/05-progress-and-cancel.md)) left D-44 / D-45 open and the re-vendor to
 Boletus ([15](15-boletus-handoff.md#dualc-retains--engine--abi-boletus-only-requests-these-upstream)).
@@ -65,7 +65,7 @@ row (cited by ID).
 2. **Engine hardening — the audit's open findings**
    ([17](17-code-audit-and-hardening/README.md)) — a standing ledger, not a phase; the
    one status table is [17 § Tracked items](17-code-audit-and-hardening/README.md#tracked-items--status-at-a-glance).
-   #34 DONE 2026-10-20; **NEXT:** #35 on its trigger; **#53** (Linux `.so`, [14/06](14-c-abi/06-linux-shared-library.md))
+   #34 PARTIAL 2026-10-21 (E12 reopened); **NEXT:** #35 on its trigger; **#53** (Linux `.so`, [14/06](14-c-abi/06-linux-shared-library.md))
    PARTIAL (libraries landed with #52; CI proof owed).
 3. **TPMS / lattice capability** ([05](05-tpms-lattices/README.md)) — **#17 strut
    lattices** and their Phases 3–5 DONE; **#18 tight Lipschitz `cellOverlaps`**

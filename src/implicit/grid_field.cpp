@@ -143,54 +143,13 @@ Vector3 GridField::trueGradientAt(const Vector3& p) const {
 }
 
 Vector3 GridField::gradientAt(const Vector3& p) const {
-  // The trilinear blend of per-node gradients, normalised. The interpolant's
-  // own gradient (trueGradientAt) is only C0 inside a cell and jumps across
-  // its faces, so its direction did too (#34); a node's central difference is
-  // shared by every cell touching it, so the blend is continuous everywhere.
-  // Computed on the fly from the samples (48 loads), not stored: 17/20.
-  const Impl& m = *impl_;
-  int ix, iy, iz;
-  double fx, fy, fz;
-  locate(p.x, m.region.min.x, m.inv.x, m.res.x, ix, fx);
-  locate(p.y, m.region.min.y, m.inv.y, m.res.y, iy, fy);
-  locate(p.z, m.region.min.z, m.inv.z, m.res.z, iz, fz);
-
-  // d/d(axis) at a node: central over its two neighbours, one-sided at the
-  // grid boundary (res >= 2, so a neighbour always exists).
-  auto diff = [&](int i, int res, double inv, auto at) {
-    if (i == 0)       return (at(1) - at(0)) * inv;
-    if (i == res - 1) return (at(res - 1) - at(res - 2)) * inv;
-    return (at(i + 1) - at(i - 1)) * (0.5 * inv);
-  };
-  auto nodeGradient = [&](int jx, int jy, int jz) {
-    return Vector3{
-        diff(jx, m.res.x, m.inv.x,
-             [&](int k) { return double(m.v[m.index(k, jy, jz)]); }),
-        diff(jy, m.res.y, m.inv.y,
-             [&](int k) { return double(m.v[m.index(jx, k, jz)]); }),
-        diff(jz, m.res.z, m.inv.z,
-             [&](int k) { return double(m.v[m.index(jx, jy, k)]); })};
-  };
-
-  const Vector3 g00 = nodeGradient(ix, iy,     iz    ) * (1.0 - fx) +
-                      nodeGradient(ix + 1, iy,     iz    ) * fx;
-  const Vector3 g10 = nodeGradient(ix, iy + 1, iz    ) * (1.0 - fx) +
-                      nodeGradient(ix + 1, iy + 1, iz    ) * fx;
-  const Vector3 g01 = nodeGradient(ix, iy,     iz + 1) * (1.0 - fx) +
-                      nodeGradient(ix + 1, iy,     iz + 1) * fx;
-  const Vector3 g11 = nodeGradient(ix, iy + 1, iz + 1) * (1.0 - fx) +
-                      nodeGradient(ix + 1, iy + 1, iz + 1) * fx;
-  const Vector3 g0 = g00 * (1.0 - fy) + g10 * fy;
-  const Vector3 g1 = g01 * (1.0 - fy) + g11 * fy;
-  const Vector3 g  = g0 * (1.0 - fz) + g1 * fz;
-
+  // The contract's unit direction of the same interpolant gradient. It jumps
+  // across cell faces (#34, E12 open), but a continuous node-gradient blend --
+  // central, minmod, ratio switch or crease mask -- moved the sharp CAD pair's
+  // mean deviation above this one's in every variant measured: 17/20.
+  const Vector3 g = trueGradientAt(p);
   const double n = g.norm();
-  if (n > 1e-12) return g / n;
-  // The node gradients cancel (a feature thinner than two cells): fall back
-  // to the cell's own gradient direction, then the contract's (0,0,1).
-  const Vector3 t = trueGradientAt(p);
-  const double tn = t.norm();
-  return (tn > 1e-12) ? (t / tn) : Vector3{0.0, 0.0, 1.0};
+  return (n > 1e-12) ? (g / n) : Vector3{0.0, 0.0, 1.0};
 }
 
 BBox GridField::bounds() const { return impl_->region; }

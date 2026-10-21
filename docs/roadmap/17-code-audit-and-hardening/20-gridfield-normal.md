@@ -6,6 +6,9 @@ The record of the last open bullet of
 `feat/hygiene-and-editor`, 2026-10-20. It builds on P03's `trueGradientAt`
 ([19](19-gradient-contract.md#the-true-gradient-path)).
 
+> **2026-10-21, P04b:** the blend below was reverted; `gradientAt` is the cell gradient's
+> direction again and #34 is PARTIAL, E12 open — [§ P04b](#p04b--a-limited-node-stencil-measured).
+
 ## What changed
 
 `GridField::gradientAt` (`src/implicit/grid_field.cpp`) was the normalised analytic gradient
@@ -114,6 +117,82 @@ relies on the normalised direction at all; the new grid test asserts both halves
 library caller is the sampler's miss fallback (`src/sampler.cpp:80`, a missed edge crossing).
 `MeshSource` overrides `closestSurfacePoint` with its BVH query, so only a baked node (a
 `GridField`) reaches the default on a mesh graph.
+
+## P04b — a limited node stencil, measured
+
+2026-10-21. Giacomo's review of A's +35 %: keep continuity, but limit the node stencil at
+creases (unit P04b). **Outcome: no stencil kept A's mean at or below the cell gradient's, so
+by the plan's rule `gradientAt` is that gradient's direction again, #34 is PARTIAL and E12
+open.**
+
+**Method.** As § Measured, same host. The *old* (`e4be7ec`) and *P04* (`f939a35`) binaries
+first reproduced every figure above. Each variant was a branch of one scratch
+`grid_field.cpp`, picked by an environment variable, measured once. Faces and vertices
+equal old's in every run. The scratch tools (evaluator, variant source, bench script) are in
+`/tmp/p04b/`, not committed. Per interior node and axis, with `a`, `b` the forward and
+backward differences:
+
+- **minmod**: the smaller of `a`, `b` in magnitude when they share a sign, else 0;
+- **ratio switch r**: that smaller one when `max(|a|,|b|) > r·min(|a|,|b|)`, else central;
+- **crease mask**: if any of the cell's 8 nodes is flagged, the query returns the cell
+  gradient's direction. *Ratio r* flags opposite signs or a ratio above r on an axis;
+  *angle θ* flags `|F − B| > 2 sin(θ/2)·max(|F|, |B|)`, `F`, `B` the forward and backward
+  vectors. A first `atan2` angle test missed a zero side (crease test 9.7° at 20°
+  and 40°) and was replaced; its A means: 0.0140 / 0.0134 / 0.0142 at 10° / 20° / 40°.
+
+Crease: the test below, worst probe. Continuity: the sphere test above. A's max is 1.713
+in every row.
+
+| Stencil | A mean | B mean / max | C mean | D mean | D 45–90° | Crease | Continuity |
+| --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
+| *target* | ≤ 0.0129 | ≤ 0.00177 / 0.00545 | ≤ 0.000271 | ≤ 0.00282 | ≤ 4,975 | < 1° | green |
+| old, cell gradient — **shipped** | 0.01293 | 0.00186 / 0.00851 | 0.000259 | 0.00268 | 9,839 | 0.0° | red |
+| P04, central | 0.01739 | 0.00169 / 0.00519 | 0.000273 | 0.00269 | 4,523 | **9.7°** | green |
+| minmod | 0.01529 | 0.00194 / 0.00724 | 0.000299 | 0.00270 | 5,273 | 0.0° | green |
+| ratio, r = 2 | 0.01521 | 0.00177 / 0.00652 | 0.000282 | 0.00267 | 12,158 | 0.0° | green |
+| ratio, r = 4 | 0.01453 | 0.00178 / 0.00647 | 0.000281 | 0.00267 | 12,087 | 0.0° | green |
+| mask, ratio 1.25 | 0.01314 | 0.00186 / 0.00851 | 0.000262 | 0.00268 | 9,839 | 0.0° | red |
+| mask, ratio 1.5 | 0.01314 | 0.00186 / 0.00851 | 0.000266 | 0.00268 | 9,840 | 0.0° | red |
+| mask, ratio 2 | 0.01328 | 0.00186 / 0.00823 | 0.000270 | 0.00268 | 9,839 | 0.0° | red |
+| mask, ratio 4 | 0.01341 | 0.00179 / 0.00823 | 0.000266 | 0.00268 | 9,833 | 0.0° | red |
+| mask, angle 2° | 0.01300 | 0.00186 / 0.00851 | 0.000259 | 0.00268 | 9,839 | 0.0° | red |
+| mask, angle 5° | 0.01333 | 0.00186 / 0.00851 | 0.000267 | 0.00268 | 9,839 | 0.0° | red |
+| mask, angle 10° | 0.01389 | 0.00185 / 0.00851 | 0.000273 | 0.00268 | 9,839 | 0.0° | red |
+| mask, angle 20° | 0.01334 | 0.00169 / 0.00579 | 0.000273 | 0.00268 | 9,836 | 0.0° | red |
+| mask, angle 40° | 0.01365 | 0.00169 / 0.00519 | 0.000273 | 0.00268 | 9,787 | 0.0° | green |
+
+Dihedral histograms (bins as above; the shipped rows are the *old* rows of § Measured):
+
+| Case, stencil | < 1 | 1–5 | 5–10 | 10–20 | 20–45 | 45–90 | ≥ 90 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| A, minmod | 124,387 | 26,874 | 4,190 | 3,463 | 1,686 | 1,270 | 1,120 |
+| A, mask angle 40° | 123,463 | 27,682 | 4,470 | 3,504 | 1,658 | 1,226 | 987 |
+| D, minmod | 31,237 | 67,117 | 33,594 | 24,123 | 17,277 | 5,273 | 2,659 |
+| D, mask angle 40° | 37,986 | 63,824 | 29,983 | 18,264 | 18,690 | 9,787 | 2,746 |
+
+**Why A resists.** Bucketing A's output vertices by their largest incident dihedral (old
+mesh): of P04's +0.0045 mean, +0.0025 sits on vertices of 45–90° edges and +0.0007 on flat
+ones (< 1°). The 20° mask removes the crease share and leaves +0.0005 on flat vertices. A's
+mean is also fragile: the old normal plus a fixed wobble of at most 0.1° raises it to 0.01316
+(+1.8 %; 0.01295 at 0.01°). Any normal other than the cell gradient's lands above old.
+
+**Reading.** Each continuous stencil trades A for B and D. The masks keep A within 8 % but
+lose D's gain (the bunny's thin parts flag) and, below 40°, the sphere's continuity. Minmod
+is the best fully continuous one: A +18 %, B's max −15 % and D's 45–90° edges −46 % against
+old, the crease test green. **Chosen in-run (pending owner review):** the plan's fallback,
+the cell gradient, #34 PARTIAL. Owner options: keep it, take minmod, or the 40° angle mask
+(A +6 %, B as P04, D as old).
+
+**Tests.** New: *`GridField::gradientAt` keeps a face's normal one cell from a sharp edge* (a
+baked `BoxField`, three probes one cell from an edge, each within 1° of its face): red on
+P04's code (9.66°), green now (0.0°). The continuity test is red on the cell gradient (0.245
+rad at every ε), so it is hidden (`[.][grid][e12]`), kept for a future stencil: **chosen
+in-run (pending owner review)**, the plan's alternative being deletion. P03's `gradientAt ==
+trueGradientAt/|…|` assertion is back to 1e-15; the Newton-step test is renamed *… returns
+gradientAt*.
+
+**Timing** (median of 3, A / B): old 5.53 / 0.66 s, P04 5.71 / 0.69, shipped 5.74 / 0.70
+(old's code: the spread is noise); within 1.2× of P04.
 
 ## Gates
 

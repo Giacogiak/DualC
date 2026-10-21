@@ -258,12 +258,11 @@ FieldPtr windingNumberField(
 
 // An ImplicitField backed by a dense 3D signed-distance grid. `valueAt` is a
 // trilinear interpolation (O(1), a few dozen flops); `gradientAt` is the
-// trilinear blend of per-node gradients (central differences, one-sided at
-// the grid boundary), normalised to unit length -- continuous across cell
-// faces, where the interpolant's own gradient jumps -- and falls back to that
-// gradient's direction, then (0,0,1), where the blend vanishes. Its magnitude
-// is trueGradientAt()'s. A baked SDF stays ~Lipschitz-1, so
-// the default cellOverlaps / edgeHit behave well on it.
+// direction of that interpolant's analytic gradient, normalised to unit
+// length ((0,0,1) where it vanishes) -- not its magnitude, which is
+// trueGradientAt()'s. It is continuous inside a cell and jumps across its
+// faces (#34: a continuous blend cost sharp edges accuracy). A baked SDF
+// stays ~Lipschitz-1, so the default cellOverlaps / edgeHit behave well on it.
 //
 // This exists so an *expensive* field -- notably a MeshSource, or a whole
 // tree of them -- can be sampled once into a grid and then queried millions

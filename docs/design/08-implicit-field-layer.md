@@ -42,8 +42,9 @@ lerp). The census of the ~30 overrides against this contract is
 steps by it. Its default is a central difference of `valueAt` (step 1e-4, 6 calls — the
 stencil shared with the distorted operators, `src/internal/fd_gradient.h`). Sphere, plane
 and `GridField` (the trilinear interpolant's own gradient, which jumps across cell faces;
-its `gradientAt` is instead the normalised trilinear blend of per-node central differences,
-continuous everywhere — [17/20](../roadmap/17-code-audit-and-hardening/20-gridfield-normal.md))
+its `gradientAt` is that gradient's direction, so the normal jumps there too — every
+continuous node stencil measured cost the sharp edges accuracy,
+[17/20](../roadmap/17-code-audit-and-hardening/20-gridfield-normal.md#p04b--a-limited-node-stencil-measured))
 override it exactly;
 `WindingNumberField`'s is its straddle-aware finite difference, whose unit direction is its
 `gradientAt`. The nodes that pass a child's value through forward it, chain rule applied:
@@ -126,8 +127,8 @@ page states only how the library is built.
 - **Sources** — `MeshSource` (signed distance to a mesh: magnitude from a BVH closest-point
   query, sign from the configured `SignMethod`), `WindingNumberField` (`0.5 - w(p)`, a
   sign-correct pseudo-SDF over arbitrary triangle soup), `GridField` (a sampled lattice with
-  trilinear interpolation, its analytic gradient as `trueGradientAt`, a continuous
-  node-gradient blend as `gradientAt`), plus `bakeToGrid` /
+  trilinear interpolation, its analytic gradient as `trueGradientAt` and that gradient's
+  direction as `gradientAt`), plus `bakeToGrid` /
   `MeshSource::bakeToGrid` (narrow-band bake) to produce one.
 - **Combinators** (`src/implicit/combinators.cpp`) — the hard and smooth booleans and
   `mixOf`. Hard booleans keep the seam sharp by the active-operand rule of § 10.3.
