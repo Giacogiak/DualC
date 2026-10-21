@@ -27,7 +27,7 @@ a side tool holds moves into the graph, and so within the C ABI's reach, and the
 `feat/cli-consolidation`; #55–#60 are DONE (seven tools retired) and the block closed 2026-10-16 ([21/09](21-cli-consolidation/09-plan-run.md)); the PR is the owner's. Before it the engine
 track drew on the 2026-08-19 audit's ledger ([17](17-code-audit-and-hardening/README.md))
 through the hosted-CI plan, run closed 2026-10-07 ([20/04](20-public-delivery/04-hosted-ci-plan-run.md));
-**#34** is PARTIAL (2026-10-21, branch `feat/hygiene-and-editor`): E12, the `GridField` normal, is open again — no continuous stencil kept a CAD pair's accuracy ([17/20](17-code-audit-and-hardening/20-gridfield-normal.md)). The docs restructuring ([19](19-docs-layers/README.md))
+**#34** is PARTIAL (2026-10-21, branch `feat/hygiene-and-editor`): E12, the `GridField` normal, is open again ([17/20](17-code-audit-and-hardening/20-gridfield-normal.md)). The docs restructuring ([19](19-docs-layers/README.md))
 is DONE and leaves the monthly `/docs-semantic-lint` to ordinary sessions; **#48**
 ([14/05](14-c-abi/05-progress-and-cancel.md)) left D-44 / D-45 open and the re-vendor to
 Boletus ([15](15-boletus-handoff.md#dualc-retains--engine--abi-boletus-only-requests-these-upstream)).
@@ -38,9 +38,9 @@ the block records the table links ([D-43](../decisions/01-settled.md)).
 | Date | What landed | Record |
 | --- | --- | --- |
 | 2026-10-16 | **Block 21 closed** — the consolidation plan's eleven units harvested; the branch awaits its PR. | [21/09](21-cli-consolidation/09-plan-run.md) |
-| 2026-10-16 | **#60** — seven side CLIs retired into `dualc_field` + `dualc_field_view`, each tested path twinned (ctest 358 → 344), pages 01–07 and 10 tombstones. | [21/08](21-cli-consolidation/08-retire-tools.md) |
+| 2026-10-16 | **#60** — seven side CLIs retired into `dualc_field` + `dualc_field_view`, each tested path twinned, pages 01–07 and 10 tombstones. | [21/08](21-cli-consolidation/08-retire-tools.md) |
 | 2026-10-16 | **#59** — `dualc_field --slice AXIS=VALUE`: any graph sampled on a plane to PNG + SVG, `dualc_slice`'s output byte-identical. | [21/06](21-cli-consolidation/06-slice-any-graph.md) |
-| 2026-10-15 | **#58** — 2D profiles under `revolve` / `extrude` in the graph: `dualc_lift`'s recipes byte-identical, and in the viewer (parity 82). | [21/05](21-cli-consolidation/05-2d-profiles-and-lifts.md) |
+| 2026-10-15 | **#58** — 2D profiles under `revolve` / `extrude` in the graph: `dualc_lift`'s recipes byte-identical, and in the viewer. | [21/05](21-cli-consolidation/05-2d-profiles-and-lifts.md) |
 | 2026-10-15 | **#57** — per-node `bake=N` on `mesh` / `winding`: ~4× faster than exact on the large pair, the tool's accuracy at its root box; a baked node inherits its ancestors' `k` (D-62); `dualc_boolean` kept (D-60). | [21/04](21-cli-consolidation/04-mesh-node-bake.md) |
 
 **The shipped keystone (2026-06-14 … 2026-07-06)** — builds #1–#3, the C ABI (#19) and
@@ -145,6 +145,7 @@ workflow, graded-onion; GLSL codegen completeness DONE 2026-06-24 —
 | 19 | [Docs layers](19-docs-layers/README.md) | The 2026-09-17 docs restructuring: the plan (immutable, `docs/raw/`), items #36–#45, the phase table, per-phase evidence, the semantic-lint runs. | Phases 0–8 **DONE** (2026-09-20); the lint runs keep landing in [19/08](19-docs-layers/08-semantic-lint/README.md) |
 | 20 | [Public delivery](20-public-delivery/README.md) | The repo as others build it: geometry-central pinned and fetched (options weighed), nanort vendored, the self-bootstrapping clean clone (#47); Linux as a build host (#49); hosted CI running the gate (#51), the plan's run (04). | **#47 DONE** (2026-09-21) · **#49 DONE** (2026-10-03) · **#51 DONE** (2026-10-06) |
 | 21 | [CLI consolidation](21-cli-consolidation/README.md) | One framework, `dualc_field` + `dualc_field_view`: the demo meshes wound outward, `mesh(sign="gwn")`, per-node `bake`, 2D profiles + lifts and a graph slice in the graph, then seven side CLIs retired (#55–#60). | **DONE** (2026-10-16) — #55–#60; D-60 kept; the run harvested (09) |
+| 22 | [DualCEditor hand-off](22-dualceditor-handoff/README.md) | The standalone UI, now DualCEditor's. | index — DONE |
 
 ## How the blocks relate
 
