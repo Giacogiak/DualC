@@ -258,9 +258,11 @@ FieldPtr windingNumberField(
 
 // An ImplicitField backed by a dense 3D signed-distance grid. `valueAt` is a
 // trilinear interpolation (O(1), a few dozen flops); `gradientAt` is the
-// direction of that interpolant's analytic gradient, normalised to unit
-// length ((0,0,1) where it vanishes) -- not its magnitude, which is
-// trueGradientAt()'s. A baked SDF stays ~Lipschitz-1, so
+// trilinear blend of per-node gradients (central differences, one-sided at
+// the grid boundary), normalised to unit length -- continuous across cell
+// faces, where the interpolant's own gradient jumps -- and falls back to that
+// gradient's direction, then (0,0,1), where the blend vanishes. Its magnitude
+// is trueGradientAt()'s. A baked SDF stays ~Lipschitz-1, so
 // the default cellOverlaps / edgeHit behave well on it.
 //
 // This exists so an *expensive* field -- notably a MeshSource, or a whole
@@ -281,7 +283,8 @@ public:
 
   double  valueAt(const Vector3& p)    const override;
   Vector3 gradientAt(const Vector3& p) const override;
-  // The trilinear interpolant's analytic gradient, unnormalised.
+  // The trilinear interpolant's analytic gradient, unnormalised (exact for
+  // valueAt, so the Newton step's; discontinuous across cell faces).
   Vector3 trueGradientAt(const Vector3& p) const override;
   BBox    bounds() const override;
 

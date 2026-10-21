@@ -41,7 +41,10 @@ lerp). The census of the ~30 overrides against this contract is
 `NormalizedField::valueAt` divides by its child's, and the default `closestSurfacePoint`
 steps by it. Its default is a central difference of `valueAt` (step 1e-4, 6 calls — the
 stencil shared with the distorted operators, `src/internal/fd_gradient.h`). Sphere, plane
-and `GridField` (the trilinear gradient before normalisation) override it exactly;
+and `GridField` (the trilinear interpolant's own gradient, which jumps across cell faces;
+its `gradientAt` is instead the normalised trilinear blend of per-node central differences,
+continuous everywhere — [17/20](../roadmap/17-code-audit-and-hardening/20-gridfield-normal.md))
+override it exactly;
 `WindingNumberField`'s is its straddle-aware finite difference, whose unit direction is its
 `gradientAt`. The nodes that pass a child's value through forward it, chain rule applied:
 offset, onion, `transformed` (rotated), `scaled` (sign of `s`), mirror, both repeats, the
@@ -123,7 +126,8 @@ page states only how the library is built.
 - **Sources** — `MeshSource` (signed distance to a mesh: magnitude from a BVH closest-point
   query, sign from the configured `SignMethod`), `WindingNumberField` (`0.5 - w(p)`, a
   sign-correct pseudo-SDF over arbitrary triangle soup), `GridField` (a sampled lattice with
-  trilinear interpolation and an analytic gradient), plus `bakeToGrid` /
+  trilinear interpolation, its analytic gradient as `trueGradientAt`, a continuous
+  node-gradient blend as `gradientAt`), plus `bakeToGrid` /
   `MeshSource::bakeToGrid` (narrow-band bake) to produce one.
 - **Combinators** (`src/implicit/combinators.cpp`) — the hard and smooth booleans and
   `mixOf`. Hard booleans keep the seam sharp by the active-operand rule of § 10.3.

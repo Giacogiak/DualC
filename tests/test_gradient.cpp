@@ -168,8 +168,10 @@ TEST_CASE("GridField trueGradientAt is the trilinear gradient, unnormalised",
   const Vector3 ref = fd(*grid, p, 1e-6);
   REQUIRE((t - ref).norm() < 1e-6 * t.norm());
   REQUIRE(t.norm() > 2.0);
-  // gradientAt is its direction.
-  REQUIRE((grid->gradientAt(p) - t / t.norm()).norm() < 1e-15);
+  // gradientAt is no longer its direction: since #34's P04 it is the blend of
+  // per-node central differences (continuous across faces, 17/20), which at a
+  // cell centre of a smooth field agrees with it to second order (2.1e-8).
+  REQUIRE((grid->gradientAt(p) - t / t.norm()).norm() < 1e-6);
 }
 
 TEST_CASE("Pass-through nodes forward trueGradientAt with the chain rule",

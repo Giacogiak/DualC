@@ -39,7 +39,7 @@ in 3D; the 2D layer's two are listed after.
 | `SphereField` | `src/implicit/primitives_tierA.cpp:57` | unit | analytic: `p-c`, normalised; `(0,0,1)` at the centre |
 | `PlaneField` | `src/implicit/primitives_tierA.cpp:101` | unit | the stored unit normal |
 | `MeshSource` | `src/implicit/mesh_source.cpp:89` | unit | `p-cp` normalised, negated inside; on the surface the triangle's face normal (zero for a degenerate triangle); `(0,0,1)` if no closest point |
-| `GridField` | `src/implicit/grid_field.cpp:108` | unit | analytic trilinear gradient, normalised at `:142`; discontinuous across cell faces (P04) |
+| `GridField` | `src/implicit/grid_field.cpp:108` | unit | analytic trilinear gradient, normalised at `:142`; discontinuous across cell faces — since P04 the normalised blend of per-node central differences, continuous ([20](20-gridfield-normal.md)) |
 | `WindingNumberField` | `src/implicit/winding_field.cpp:76` | **raw FD** → unit (P03.2) | straddle-aware central/one-sided FD of `0.5 - w`, step 1e-4·diag, **not normalised** — the one override off the contract; since P03.2 that FD is its `trueGradientAt` and `gradientAt` its unit direction |
 | `RevolveField` | `src/implicit/lift.cpp:44` | unit | `fdGradient` copy at `lift.cpp:12` (P03.2: the shared `internal::fdGradientDirection`) |
 | `ExtrudeField` | `src/implicit/lift.cpp:70` | unit | same `fdGradient` |
@@ -102,7 +102,7 @@ the two `fdGradient` copies (`domain_ops.cpp`, `lift.cpp`) merged into, rounding
 | --- | --- | --- |
 | `ImplicitField` (default) | `src/implicit/implicit_field.cpp:73` | central FD, e=1e-4 |
 | `SphereField`, `PlaneField` | `src/implicit/primitives_tierA.cpp:63`, `:111` | analytic: unit radial (zero at the centre), the stored normal |
-| `GridField` | `src/implicit/grid_field.cpp:108` | the trilinear gradient, unnormalised; `gradientAt` normalises it |
+| `GridField` | `src/implicit/grid_field.cpp:108` | the trilinear gradient, unnormalised; `gradientAt` normalised it until P04 ([20](20-gridfield-normal.md)) |
 | `WindingNumberField` | `src/implicit/winding_field.cpp:76` | the straddle-aware FD that was its `gradientAt` |
 | offset, onion, transform, scale | `src/implicit/decorators.cpp:54`, `:91`, `:288`, `:411` | forwarded; `sign(f)` for onion, the rotation for transform, `sign(s)` for scale |
 | mirror, repeat, repeatLimited | `src/implicit/domain_ops.cpp:104`, `:192`, `:351` | forwarded from the active copy, reflected for mirror |
@@ -151,6 +151,14 @@ restored, 4 of the 10 cases fail (both Newton cases, the winding unit case, the 
 - the winding Newton test runs at edge 4 and 0.25, not 1 (above);
 - `MeshSource` keeps the FD default; its `gradientAt` is unit and exact off the surface, so
   forwarding it would be cheaper. The plan does not list it.
+
+## The `GridField` normal (P04)
+
+P04 (2026-10-20) made `GridField::gradientAt` continuous across cell faces; `trueGradientAt`
+and so the Newton step are unchanged. The angle across a face at ε = 10⁻⁶ cell went from
+0.245 rad to 4.9e-7; the face counts of four baked demos are identical. Mean vertex deviation
+is −9 % on a smooth blend and +35 % on the sharp CAD pair. The full record, the timing and
+the owner-review note: [20](20-gridfield-normal.md).
 
 ## Gates
 

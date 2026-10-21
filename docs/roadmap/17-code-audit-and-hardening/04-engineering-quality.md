@@ -130,9 +130,9 @@ How each sub-item closed, dated: [12 § #33](12-engineering-quality-records.md#3
 `docs/raw/study/T-unit-testing.md:462-463`.
 
 ## #34 API hygiene batch
-**PARTIAL: DONE (2026-09-01, 2026-09-10, 2026-10-19, 2026-10-20); the rest PLANNED.** Two of the bullets have
-landed — `FieldPtr` const-ness, and the `RepeatField` fold below, which turned out not to
-be hygiene at all but the only wrong-**geometry** defect in the batch. Every claim in this
+**DONE 2026-10-20** — every bullet landed (batches 2026-09-01, 09-10, 10-19, 10-20). The
+`RepeatField` fold below turned out not to be hygiene at all but the only wrong-**geometry**
+defect in the batch. Every claim in this
 entry was re-verified against `ebe929a` before any of it was scoped, after
 [#26](03-correctness-and-robustness/03-diagnostics-item.md#26-a-diagnostics-channel-for-the-silent-failure-surface)
 found one of the audit's claims had never been true: **all of #34's held**. The list:
@@ -162,9 +162,9 @@ found one of the audit's claims had never been true: **all of #34's held**. The 
   all hardware threads in the contourer~~ — **DONE 2026-10-19**: `numThreads` on it and on both
   bakes, through the C ABI (0.5.2) and `dualc_field --threads`, byte-identical at 1/2/all,
   proven red — record: [18](18-contourer-threads.md);
-- `GridField::gradientAt` returns a normalised direction that is discontinuous across cell
-  boundaries, which `closestSurfacePoint`'s Newton step relied on until it moved to
-  `trueGradientAt` (2026-10-20) — next, P04 of the run.
+- ~~`GridField::gradientAt` returns a normalised direction that is discontinuous across cell
+  boundaries~~ — **DONE 2026-10-20**: a blend of per-node central differences (jump 0.245 rad →
+  4.9e-7 at ε = 1e-6 cell), same faces; mean deviation −9 % smooth, +35 % on a CAD pair — [20](20-gridfield-normal.md).
 
 *(2026-09-18: the landed bullets are condensed to one line + link each — the removed
 text is verbatim in 07 and 08, the `FieldPtr` paragraph in 08 — to bring this page under

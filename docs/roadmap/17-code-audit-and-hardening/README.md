@@ -45,6 +45,7 @@ status and trigger, and links to both.
   `dualc_field_view`'s grazing silhouettes (DEFERRED, one renderer seen).
 - [`18-contourer-threads.md`](18-contourer-threads.md) — #34's thread-count delivery record.
 - [`19-gradient-contract.md`](19-gradient-contract.md) — #34's `gradientAt` contract, 30-override census, `trueGradientAt`.
+- [`20-gridfield-normal.md`](20-gridfield-normal.md) — #34's last bullet: a continuous `GridField` normal, measured.
 - [`07-repeat-tiling-fix.md`](07-repeat-tiling-fix.md) — the full record for #34's first
   item: `repeat` read only the folded tile, which put wrong geometry in shipped strut
   lattices; the conditional fix, its measured 2.3× cost, and the oracle test it showed to
@@ -60,14 +61,10 @@ status and trigger, and links to both.
 - [`11-diagnostics-verification.md`](11-diagnostics-verification.md) — #26's evidence
   pages: the claim-by-claim re-scoping, the verification digests, the untested branch
   (moved out of `05` on 2026-09-18).
-- [`09-local-checks-gate/`](09-local-checks-gate/README.md) — the local checks gate (a folder since 2026-09-21)
-  (`scripts/check.py`) that stands in for CI: the check
-  list, the doc-size ratchet, why every check was proven to fail, and exactly
-  which of #31/#32/#33 it does and does not move.
-- [`10-docs-system-screening.md`](10-docs-system-screening.md) — the 2026-09-11 audit
-  of the documentation system itself: the verdict (accurate data, redundant and
-  half-enforced system), the seven semantic gate checks, the one-ledger clean-up, the
-  unknown-parameter-key defect the recipes exposed, and the split pass (four frozen files → folders).
+- [`09-local-checks-gate/`](09-local-checks-gate/README.md) — the gate (`scripts/check.py`, a folder since
+  2026-09-21): the checks, the size ratchet, each proven to fail, its share of #31–#33.
+- [`10-docs-system-screening.md`](10-docs-system-screening.md) — the 2026-09-11 audit of the docs
+  system: verdict, seven semantic checks, one ledger, the unknown-key defect, the split pass.
 
 87 findings total. **Five defects and two coverage gaps were fixed by the 2026-08-21
 screening batch** — see [01 §
@@ -136,7 +133,9 @@ merge of #52 over #32 — two writer cases run everywhere, two more only on Wind
 (2026-10-06, asserted by `check.py --gpu` against `parity_expected_cases` in CI's required
 `gpu` job — [13](13-parity-gate-binding.md)); the same 270 pass under ASan + UBSan in CI's
 `sanitize` job (2026-10-06, [14](14-build-hardening-ci.md)); the same 270 pass under `ctest -j 8`,
-three runs in a row (2026-10-07, Linux, [15](15-test-coverage-batches.md)).
+three runs in a row (2026-10-07, Linux, [15](15-test-coverage-batches.md)). Local, branch
+`feat/hygiene-and-editor`, not yet in CI: ctest **362** (2026-10-20, Linux, [20](20-gridfield-normal.md)), parity
+**82/82** ([19](19-gradient-contract.md#gates)).
 
 | Item | Title | Status |
 | --- | --- | --- |
@@ -152,7 +151,7 @@ three runs in a row (2026-10-07, Linux, [15](15-test-coverage-batches.md)).
 | [#31](04-engineering-quality.md#31-make-the-cpugpu-parity-gate-binding) | Make the CPU/GPU parity gate binding | **DONE** 2026-10-06 ([13](13-parity-gate-binding.md)) |
 | [#32](04-engineering-quality.md#32-test-coverage-ledger) | Test-coverage ledger | **DONE** 2026-10-07 — Batch A and Batch B ([15](15-test-coverage-batches.md)) |
 | [#33](04-engineering-quality.md#33-build--tooling-hardening) | Build & tooling hardening | **DONE** 2026-10-06 ([14](14-build-hardening-ci.md)); batches 2026-08-31, 09-01, 09-10; nanort + clean-clone 2026-09-21 by [20 #47](../20-public-delivery/01-pin-geometry-central.md) |
-| [#34](04-engineering-quality.md#34-api-hygiene-batch) | API hygiene batch | **PARTIAL** — batches 2026-09-10 (×2), 09-11 ([10](10-docs-system-screening.md)), 10-19 (threads, [18](18-contourer-threads.md)), 10-20 (gradient, [19](19-gradient-contract.md)) |
+| [#34](04-engineering-quality.md#34-api-hygiene-batch) | API hygiene batch | **DONE** 2026-10-20 — last batches [18](18-contourer-threads.md), [19](19-gradient-contract.md), [20](20-gridfield-normal.md) |
 | [#35](04-engineering-quality.md#35-repeatfield-neighbour-set-optimisation) | `RepeatField` neighbour-set optimisation | PLANNED — born from #34's fix on 2026-09-10, no ledger finding behind it |
 | [#46](03-correctness-and-robustness/02-precision-and-celloverlaps.md#46-offsetfield-does-not-forward-celloverlaps) | `OffsetField` does not forward `cellOverlaps` | **DONE** 2026-09-21 — opened 2026-09-20 from the first semantic lint ([19/08/01](../19-docs-layers/08-semantic-lint/01-2026-09-20-first-run.md)), no ledger finding behind it |
 | [#52](16-windows-rename-race/README.md#52-windows-export-io-flake--the-part-rename-under-an-on-access-scanner) | Windows export I/O flake — the `.part` rename under an on-access scanner | **DONE** 2026-10-07 — opened the same day from Boletus's ask, no ledger finding behind it; the holder was an inherited handle, not a scanner |
