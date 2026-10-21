@@ -156,10 +156,10 @@ The raw plan's node design stands except where a row says otherwise. Every row m
 | `relax` † | Lloyd by sampling, 32 samples per seed per iteration, drawn uniformly in the box of V ∪ pad and rejected outside; samples weighted by `(spacing/spacing(x))³`; a seed whose centroid leaves V ∪ pad stays put *(corrected by P02: the weight is `(spacing/spacing(x))⁵`, the CVT cell-size law in 3D, measured to hold the grading better: [02 #63](02-record.md#63-deterministic-seeds-in-any-volume))* |
 | Ceilings | 2,000,000 seeds, `relax` ≤ 50, as the raw plan (P02/P03 may lower them on measurement) |
 | Voronoi walls | Greedy nearest seed from the bin's start seed, then min over the neighbours' bisectors (section c) |
-| Delaunay walls † | Visibility walk to the containing tet from the bin's start tet, then min over its 4 face planes; planes stored per tet |
-| Struts | Segments in bins of size `B`, 3×3×3 search, `min(d, B)` (section c); Voronoi edges with a circumcentre beyond the padded box are clamped to it and counted |
-| Bin grid | Struts: cell `B` = the larger spacing, a segment registered in every bin its box touches; own-cell cases: cell = the smaller spacing, holding one start seed / start tet |
-| `smooth` † | Quadratic `smin_k` folded in packed order; own-cell cases clamped at 0; the bound is k/4 for two primitives and < k in general (**this corrects the raw plan's "at most k/4"**; P04's test checks k/4 where only two primitives are within k, and < k elsewhere) |
+| Delaunay walls † | Visibility walk to the containing tet from the bin's start tet, then min over its 4 face planes; planes stored per tet *(P03: 0 outside the seeds' hull: [04](04-complex-and-bins.md))* |
+| Struts | Segments in bins of size `B`, 3×3×3 search, `min(d, B)` (section c); Voronoi edges with a circumcentre beyond the padded box are clamped to it and counted *(P03: clipped to the volume's box grown by `B`, and the value clamped at 0 too)* |
+| Bin grid | Struts: cell `B` = the larger spacing *(P03: or the largest cell radius, if larger)*, a segment registered in every bin its box touches; own-cell cases: cell = the smaller spacing, holding one start seed / start tet |
+| `smooth` † | Quadratic `smin_k` folded in packed order *(P03: in ascending distance order, ties by packed index: [04](04-complex-and-bins.md))*; own-cell cases clamped at 0; the bound is k/4 for two primitives and < k in general (**this corrects the raw plan's "at most k/4"**; P04's test checks k/4 where only two primitives are within k, and < k elsewhere) |
 | `cellOverlaps` | The default (Lipschitz-1) — no override |
 | Determinism | Same graph → bit-identical seeds, tets, packed arrays on any OS; parity relies on the CPU and GPU reading the same packed arrays |
 | GPU | Section d: 2D textures 2048 wide, `texelFetch`, RGBA32F + R32UI/RGBA32UI, `nodeStepScale` 1.0, `nodeFeatureScale` = the smaller spacing, `smooth` a uniform; fallback `emitBakedGrid` past the queried limits |

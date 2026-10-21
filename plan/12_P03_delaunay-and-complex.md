@@ -32,7 +32,9 @@ from the block's `01-study.md`. Branch `feat/porous-shell`. Never push.
    Drop the primitives that lie wholly in the pad beyond what the clipped volume can see (the
    rule is recorded).
 2. Pack the arrays in the layout P05 uploads: flat `float` / `int32` arrays, a CSR bin list,
-   and the bin origin, size and dimensions, with the bin size ≥ the largest cell radius. Add a
+   and the bin origin, size and dimensions, with the bin size ≥ the largest cell radius
+   *(P03.2: that is the struts' bins; the own-cell bins only hold a walk's start, so they keep
+   the defaults table's smaller spacing — 23/04 rule 4)*. Add a
    query returning the `smin_k` distance for the four `cells` × `mode` cases, with a clamped
    bound beyond 3×3×3.
 3. Tests: the dual adjacency is consistent; the bin query equals the brute-force minimum on 10k

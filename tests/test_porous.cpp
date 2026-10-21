@@ -1,13 +1,16 @@
 // The porous shell's seeds (roadmap 23 #63): the six properties of the raw
 // plan's P02 list, on a sphere volume and on a box. Its Delaunay
-// tetrahedralization (#64): the four properties of P03 T1. Every case is named
-// `porous: ...` so `ctest -R porous` finds it.
+// tetrahedralization (#64): the four properties of P03 T1; its complex and bins
+// (#64, P03 T2): the dual adjacency, and the bin query against brute force for
+// the four cells x mode cases. Every case is named `porous: ...` so
+// `ctest -R porous` finds it.
 
 #include "dualc/implicit.h"
 #include "dualc/porous.h"
 #include "dualc/primitives.h"
 
 #include "internal/exact_predicates.h"
+#include "internal/porous_complex.h"
 #include "internal/porous_delaunay.h"
 #include "internal/seed_grid.h"
 
@@ -27,6 +30,7 @@
 #include <limits>
 #include <map>
 #include <memory>
+#include <set>
 #include <sstream>
 #include <utility>
 #include <vector>
@@ -691,4 +695,559 @@ TEST_CASE("porous: tets per second", "[.][porous-bench]") {
          << " hull faces, " << ms << " ms";
       WARN(os.str());
     }
+}
+
+// --- The complex and its bins (#64, T2) -------------------------------------
+
+namespace {
+
+using internal::PorousCandidate;
+using internal::PorousComplex;
+using internal::PorousDual;
+
+const PorousCells kCells[2] = {PorousCells::Voronoi, PorousCells::Delaunay};
+const PorousMode kModes[2] = {PorousMode::Walls, PorousMode::Struts};
+
+const char* caseName(PorousCells c, PorousMode m) {
+  if (c == PorousCells::Voronoi) return m == PorousMode::Walls ? "voronoi walls" : "voronoi struts";
+  return m == PorousMode::Walls ? "delaunay walls" : "delaunay struts";
+}
+
+// The two seed sets of the complex cases: blue noise in a sphere, and the
+// regular grid (jitter = 0), whose cospherical cubes are the degenerate case.
+SeedSet sphereSeeds() {
+  SphereField sphere({0.1, -0.2, 0.05}, 1.0);
+  SeedParams sp;
+  sp.spacing = 0.2;
+  sp.seed = 21;
+  return generatePorousSeeds(sphere, nullptr, sp);
+}
+SeedSet gridSeeds() {
+  BoxField box({-0.6, -0.6, -0.6}, {0.6, 0.6, 0.6});
+  SeedParams sp;
+  sp.dist = SeedDistribution::Jitter;
+  sp.jitter = 0.0;
+  sp.spacing = 0.25;
+  return generatePorousSeeds(box, nullptr, sp);
+}
+
+double dot3(const Vector3& a, const Vector3& b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
+
+
+// Ericson's closest point on a triangle, for the geometric reference.
+double pointTriangle(const Vector3& p, const Vector3& a, const Vector3& b, const Vector3& c) {
+  const Vector3 ab = b - a, ac = c - a, ap = p - a;
+  const double d1 = dot3(ab, ap), d2 = dot3(ac, ap);
+  if (d1 <= 0 && d2 <= 0) return std::sqrt(dist2(p, a));
+  const Vector3 bp = p - b;
+  const double d3 = dot3(ab, bp), d4 = dot3(ac, bp);
+  if (d3 >= 0 && d4 <= d3) return std::sqrt(dist2(p, b));
+  const double vc = d1 * d4 - d3 * d2;
+  if (vc <= 0 && d1 >= 0 && d3 <= 0) return std::sqrt(dist2(p, a + (d1 / (d1 - d3)) * ab));
+  const Vector3 cp = p - c;
+  const double d5 = dot3(ab, cp), d6 = dot3(ac, cp);
+  if (d6 >= 0 && d5 <= d6) return std::sqrt(dist2(p, c));
+  const double vb = d5 * d2 - d1 * d6;
+  if (vb <= 0 && d2 >= 0 && d6 <= 0) return std::sqrt(dist2(p, a + (d2 / (d2 - d6)) * ac));
+  const double va = d3 * d6 - d5 * d4;
+  if (va <= 0 && (d4 - d3) >= 0 && (d5 - d6) >= 0)
+    return std::sqrt(dist2(p, b + ((d4 - d3) / ((d4 - d3) + (d5 - d6))) * (c - b)));
+  const double den = 1.0 / (va + vb + vc);
+  return std::sqrt(dist2(p, a + ab * (vb * den) + ac * (vc * den)));
+}
+
+// The brute-force references: every primitive, no bins, no walks.
+struct Brute {
+  const SeedSet& seeds;
+  const PorousDual& dual;
+  std::vector<char> dup;
+  std::vector<std::array<double, 6>> tetBox;
+  std::vector<std::vector<std::int32_t>> tetNeighbours;  // per seed, read off the tets
+
+  Brute(const SeedSet& s, const PorousDual& d)
+      : seeds(s), dual(d), dup(d.points.size(), 0), tetNeighbours(d.points.size()) {
+    for (std::int32_t i : d.tets.duplicates) dup[std::size_t(i)] = 1;
+    for (std::size_t t = 0; t < d.tets.size(); ++t) {
+      const std::int32_t* v = &d.tets.verts[4 * t];
+      for (int i = 0; i < 4; ++i)
+        for (int j = 0; j < 4; ++j)
+          if (i != j) tetNeighbours[std::size_t(v[i])].push_back(v[j]);
+    }
+    for (auto& nb : tetNeighbours) {
+      std::sort(nb.begin(), nb.end());
+      nb.erase(std::unique(nb.begin(), nb.end()), nb.end());
+    }
+    for (std::size_t t = 0; t < d.tets.size(); ++t) {
+      std::array<double, 6> b{1e300, 1e300, 1e300, -1e300, -1e300, -1e300};
+      for (int k = 0; k < 4; ++k) {
+        const Vector3& v = d.points[std::size_t(d.tets.verts[4 * t + std::size_t(k)])];
+        const double c[3] = {v.x, v.y, v.z};
+        for (int a = 0; a < 3; ++a) {
+          b[std::size_t(a)] = std::min(b[std::size_t(a)], c[a]);
+          b[std::size_t(3 + a)] = std::max(b[std::size_t(3 + a)], c[a]);
+        }
+      }
+      tetBox.push_back(b);
+    }
+  }
+
+  std::int32_t nearestSeed(const Vector3& p) const {
+    std::int32_t best = -1;
+    double bd = 1e300;
+    for (std::size_t i = 0; i < dual.points.size(); ++i) {
+      if (dup[i]) continue;
+      const double d = dist2(p, dual.points[i]);
+      if (d < bd) {
+        bd = d;
+        best = std::int32_t(i);
+      }
+    }
+    return best;
+  }
+
+  // The tet holding p by exact orient3d, or -1 outside the hull.
+  std::int32_t locate(const Vector3& p) const {
+    const double q[3] = {p.x, p.y, p.z};
+    for (std::size_t t = 0; t < dual.tets.size(); ++t) {
+      const auto& b = tetBox[t];
+      if (q[0] < b[0] || q[1] < b[1] || q[2] < b[2] || q[0] > b[3] || q[1] > b[4] || q[2] > b[5])
+        continue;
+      const double* v[4];
+      for (int k = 0; k < 4; ++k) v[k] = xyz(dual.points, dual.tets.verts[4 * t + std::size_t(k)]);
+      const double o = internal::orient3d(v[0], v[1], v[2], v[3]);
+      bool in = true;
+      for (int k = 0; k < 4 && in; ++k) {
+        const double* w[4] = {v[0], v[1], v[2], v[3]};
+        w[k] = q;
+        const double s = internal::orient3d(w[0], w[1], w[2], w[3]);
+        in = s == 0 || ((s > 0) == (o > 0));
+      }
+      if (in) return std::int32_t(t);
+    }
+    return -1;
+  }
+
+  double voronoiWalls(const PorousComplex& c, const Vector3& p, double k,
+                      bool allSeeds) const {
+    const std::int32_t s = nearestSeed(p);
+    const Vector3 ps = internal::porousPackedPoint(&c.seeds[4 * std::size_t(s)]);
+    std::vector<PorousCandidate> cand;
+    if (allSeeds) {  // every other seed, not only the Delaunay neighbours
+      for (std::size_t j = 0; j < dual.points.size(); ++j)
+        if (!dup[j] && j != std::size_t(s))
+          cand.push_back({internal::porousBisectorDistance(
+                              p, ps, internal::porousPackedPoint(&c.seeds[4 * j])),
+                          std::int32_t(j)});
+    } else {  // s's neighbours, read off the tets
+      for (std::int32_t j : tetNeighbours[std::size_t(s)])
+        cand.push_back({internal::porousBisectorDistance(
+                            p, ps, internal::porousPackedPoint(&c.seeds[4 * std::size_t(j)])),
+                        j});
+    }
+    return std::max(0.0, internal::porousSmoothFold(cand, k));
+  }
+
+  // The fold over the packed planes of the tet located exactly.
+  double delaunayWalls(const PorousComplex& c, const Vector3& p, double k) const {
+    const std::int32_t t = locate(p);
+    if (t < 0) return 0.0;
+    std::vector<PorousCandidate> cand;
+    for (int f = 0; f < 4; ++f)
+      cand.push_back({-internal::porousPlaneDistance(&c.tetPlanes[16 * std::size_t(t) + 4 * std::size_t(f)], p),
+                      4 * t + f});
+    return std::max(0.0, internal::porousSmoothFold(cand, k));
+  }
+
+  // The geometric distance to every Delaunay face (k = 0), 0 outside the hull.
+  double delaunayFaces(const Vector3& p) const {
+    if (locate(p) < 0) return 0.0;
+    double m = 1e300;
+    for (std::size_t f = 0; f < dual.faces.size() / 3; ++f)
+      m = std::min(m, pointTriangle(p, dual.points[std::size_t(dual.faces[3 * f])],
+                                    dual.points[std::size_t(dual.faces[3 * f + 1])],
+                                    dual.points[std::size_t(dual.faces[3 * f + 2])]));
+    return m;
+  }
+
+  static double struts(const PorousComplex& c, const Vector3& p, double k) {
+    const double B = double(c.bound);
+    std::vector<PorousCandidate> cand;
+    const double reject = B * (1 + 1e-9);
+    for (std::size_t s = 0; s < c.segments.size() / 8; ++s) {
+      const float* v = &c.segments[8 * s];
+      // Skip a segment whose box is beyond B: its distance is too.
+      double g2 = 0.0;
+      for (int a = 0; a < 3; ++a) {
+        const double q = a == 0 ? p.x : a == 1 ? p.y : p.z;
+        const double lo = std::min(v[a], v[4 + a]), hi = std::max(v[a], v[4 + a]);
+        const double g = q < lo ? lo - q : q > hi ? q - hi : 0.0;
+        g2 += g * g;
+      }
+      if (g2 >= reject * reject) continue;
+      const double d = internal::porousSegmentDistance(p, internal::porousPackedPoint(v),
+                                                       internal::porousPackedPoint(v + 4));
+      if (d < B) cand.push_back({d, std::int32_t(s)});
+    }
+    if (cand.empty()) return B;
+    return std::max(0.0, std::min(internal::porousSmoothFold(cand, k), B));
+  }
+};
+
+std::vector<Vector3> randomIn(const BBox& b, std::size_t n, std::uint64_t seed) {
+  Pcg32 rng(seed, 2000);
+  const Vector3 e = b.extent();
+  std::vector<Vector3> pts(n);
+  for (Vector3& p : pts)
+    p = {b.min.x + rng.nextDouble() * e.x, b.min.y + rng.nextDouble() * e.y,
+         b.min.z + rng.nextDouble() * e.z};
+  return pts;
+}
+
+std::uint64_t digest(const PorousComplex& c) {
+  std::uint64_t h = 1469598103934665603ULL;
+  auto mix = [&](const void* data, std::size_t n) {
+    const auto* b = static_cast<const unsigned char*>(data);
+    for (std::size_t i = 0; i < n; ++i) h = (h ^ b[i]) * 1099511628211ULL;
+  };
+  auto mixf = [&](const std::vector<float>& v) { mix(v.data(), 4 * v.size()); };
+  auto mixi = [&](const std::vector<std::int32_t>& v) { mix(v.data(), 4 * v.size()); };
+  mix(c.bins.origin, sizeof c.bins.origin);
+  mix(&c.bins.size, sizeof c.bins.size);
+  mix(c.bins.dims, sizeof c.bins.dims);
+  mix(&c.bound, sizeof c.bound);
+  mixf(c.seeds);
+  mixi(c.neighbourOffsets);
+  mixi(c.neighbours);
+  mixf(c.tetPlanes);
+  mixi(c.tetNeighbours);
+  mixi(c.binStart);
+  mixf(c.segments);
+  mixi(c.binOffsets);
+  mixi(c.binItems);
+  return h;
+}
+
+} // namespace
+
+TEST_CASE("porous: the dual adjacency is consistent", "[porous]") {
+  for (const SeedSet& seeds : {sphereSeeds(), gridSeeds()}) {
+    const PorousDual d = internal::derivePorousDual(seeds);
+    const std::size_t nt = d.tets.size(), np = d.points.size();
+    const std::size_t nf = d.faceTets.size() / 2, ne = d.edges.size() / 2;
+    INFO(np << " seeds, " << nt << " tets, " << nf << " faces, " << ne << " edges");
+    REQUIRE(d.faces.size() == 3 * nf);
+    // The points are the seeds rounded to float.
+    for (std::size_t i = 0; i < np; ++i)
+      REQUIRE(d.points[i].x == double(float(seeds.points[i].x)));
+
+    // Each face once; its tets are adjacent across it: every Voronoi edge
+    // joins two tets that are each other's neighbour, through that face.
+    std::map<std::array<std::int32_t, 3>, int> faceSet;
+    std::size_t hull = 0, interior = 0;
+    long bad = 0;
+    for (std::size_t f = 0; f < nf; ++f) {
+      const std::array<std::int32_t, 3> fv{d.faces[3 * f], d.faces[3 * f + 1], d.faces[3 * f + 2]};
+      if (!(fv[0] < fv[1] && fv[1] < fv[2])) ++bad;
+      ++faceSet[fv];
+      const std::int32_t t0 = d.faceTets[2 * f], t1 = d.faceTets[2 * f + 1];
+      auto holds = [&](std::int32_t t) {
+        const std::int32_t* v = &d.tets.verts[4 * std::size_t(t)];
+        int n = 0;
+        for (std::int32_t x : fv) n += std::find(v, v + 4, x) != v + 4;
+        return n == 3;
+      };
+      auto across = [&](std::int32_t t, std::int32_t u) {  // u is t's neighbour opposite
+        for (int k = 0; k < 4; ++k)                     // the vertex not on the face
+          if (std::find(fv.begin(), fv.end(), d.tets.verts[4 * std::size_t(t) + std::size_t(k)]) == fv.end())
+            return d.tets.neighbours[4 * std::size_t(t) + std::size_t(k)] == u;
+        return false;
+      };
+      if (!holds(t0) || !across(t0, t1)) ++bad;
+      if (t1 < 0) {
+        ++hull;
+        continue;
+      }
+      ++interior;
+      if (!(t0 < t1) || !holds(t1) || !across(t1, t0)) ++bad;
+      // Both circumcentres are on the face's dual line: equidistant from its
+      // three vertices (unless clamped).
+      for (std::int32_t t : {t0, t1}) {
+        if (d.clamped[std::size_t(t)]) continue;
+        const Vector3& c = d.circumcentres[std::size_t(t)];
+        const double r0 = dist2(c, d.points[std::size_t(fv[0])]);
+        for (int j = 1; j < 3; ++j)
+          if (std::fabs(dist2(c, d.points[std::size_t(fv[std::size_t(j)])]) - r0) > 1e-9 * (1 + r0)) ++bad;
+      }
+    }
+    CHECK(bad == 0);
+    CHECK(faceSet.size() == nf);
+    CHECK(4 * nt == 2 * interior + hull);
+    std::size_t tetPairs = 0;
+    for (std::int32_t u : d.tets.neighbours) tetPairs += u >= 0;
+    CHECK(tetPairs == 2 * interior);
+
+    // Each edge once, sorted; Euler for the 3-ball: V - E + F - T = 1.
+    bad = 0;
+    for (std::size_t e = 0; e < ne; ++e) {
+      if (!(d.edges[2 * e] < d.edges[2 * e + 1])) ++bad;
+      if (e > 0 && !(std::make_pair(d.edges[2 * e - 2], d.edges[2 * e - 1]) <
+                     std::make_pair(d.edges[2 * e], d.edges[2 * e + 1])))
+        ++bad;
+    }
+    CHECK(bad == 0);
+    const long V = long(np - d.tets.duplicates.size());
+    CHECK(V - long(ne) + long(nf) - long(nt) == 1);
+
+    // The neighbour lists: ascending, symmetric, the edges seen from each end.
+    REQUIRE(d.neighbourOffsets.size() == np + 1);
+    CHECK(std::size_t(d.neighbourOffsets.back()) == 2 * ne);
+    std::set<std::pair<std::int32_t, std::int32_t>> edgeSet;
+    for (std::size_t e = 0; e < ne; ++e) edgeSet.insert({d.edges[2 * e], d.edges[2 * e + 1]});
+    bad = 0;
+    for (std::size_t i = 0; i < np; ++i)
+      for (std::int32_t j = d.neighbourOffsets[i]; j < d.neighbourOffsets[i + 1]; ++j) {
+        const std::int32_t q = d.neighbours[std::size_t(j)];
+        if (j > d.neighbourOffsets[i] && !(d.neighbours[std::size_t(j) - 1] < q)) ++bad;
+        if (!edgeSet.count({std::min(std::int32_t(i), q), std::max(std::int32_t(i), q)})) ++bad;
+      }
+    CHECK(bad == 0);
+
+    // The Voronoi vertices: equidistant from their tet's corners, or clamped
+    // into the padded box and counted.
+    std::size_t clamped = 0;
+    bad = 0;
+    for (std::size_t t = 0; t < nt; ++t) {
+      const Vector3& c = d.circumcentres[t];
+      if (c.x < seeds.box.min.x || c.x > seeds.box.max.x || c.y < seeds.box.min.y ||
+          c.y > seeds.box.max.y || c.z < seeds.box.min.z || c.z > seeds.box.max.z)
+        ++bad;
+      if (d.clamped[t]) {
+        ++clamped;
+        continue;
+      }
+      const double r0 = dist2(c, d.points[std::size_t(d.tets.verts[4 * t])]);
+      for (int k = 1; k < 4; ++k)
+        if (std::fabs(dist2(c, d.points[std::size_t(d.tets.verts[4 * t + std::size_t(k)])]) - r0) >
+            1e-9 * (1 + r0))
+          ++bad;
+    }
+    CHECK(bad == 0);
+    CHECK(clamped == d.clampedCount);
+    CHECK(clamped < nt / 5);  // the pad's hull slivers: 9 % of the sphere's tets
+
+    // The packed tet planes: a shared face is (n, d) on one side and exactly
+    // (-n, -d) on the other, and every tet's own corners are on the inner
+    // side of its planes.
+    const PorousComplex dw = internal::packPorousComplex(d, seeds, PorousCells::Delaunay, PorousMode::Walls);
+    bad = 0;
+    for (std::size_t t = 0; t < nt; ++t)
+      for (int k = 0; k < 4; ++k) {
+        const float* pl = &dw.tetPlanes[16 * t + 4 * std::size_t(k)];
+        if (internal::porousPlaneDistance(pl, d.points[std::size_t(d.tets.verts[4 * t + std::size_t(k)])]) >= 0)
+          ++bad;
+        const std::int32_t u = d.tets.neighbours[4 * t + std::size_t(k)];
+        if (u < 0) continue;
+        for (int j = 0; j < 4; ++j)
+          if (d.tets.neighbours[4 * std::size_t(u) + std::size_t(j)] == std::int32_t(t))
+            for (int a = 0; a < 4; ++a)
+              if (dw.tetPlanes[16 * std::size_t(u) + 4 * std::size_t(j) + std::size_t(a)] != -pl[a]) ++bad;
+      }
+    CHECK(bad == 0);
+  }
+}
+
+TEST_CASE("porous: the bin query equals brute force in all four cases", "[porous]") {
+  int set = 0;
+  for (const SeedSet& seeds : {sphereSeeds(), gridSeeds()}) {
+    ++set;
+    const PorousDual dual = internal::derivePorousDual(seeds);
+    const Brute brute(seeds, dual);
+    // 10k points over the padded box and a margin beyond it.
+    const double margin = 0.5 * seeds.maxSpacing;
+    const BBox probe{seeds.box.min - Vector3{margin, margin, margin},
+                     seeds.box.max + Vector3{margin, margin, margin}};
+    const std::vector<Vector3> pts = randomIn(probe, 10000, 30 + std::uint64_t(set));
+    for (PorousCells cells : kCells)
+      for (PorousMode mode : kModes) {
+        const PorousComplex c = internal::packPorousComplex(dual, seeds, cells, mode);
+        for (double k : {0.0, 0.3 * seeds.minSpacing}) {
+          INFO((set == 1 ? "sphere" : "grid") << ", " << caseName(cells, mode) << ", k = " << k);
+          internal::PorousQueryStats st;
+          long mismatch = 0, notExact = 0, clampedInVolume = 0;
+          double worst = 0.0, worstGeometric = 0.0;
+          for (const Vector3& p : pts) {
+            const double q = internal::porousDistance(c, p, k, &st);
+            REQUIRE(std::isfinite(q));
+            REQUIRE(q >= 0.0);
+            double ref;
+            if (mode == PorousMode::Struts) {
+              ref = Brute::struts(c, p, k);
+              // In a cell of a volume seed, the bound never clamps: the bin
+              // is at least the largest cell radius.
+              if (!seeds.isPad[std::size_t(brute.nearestSeed(p))] && q >= double(c.bound))
+                ++clampedInVolume;
+            } else if (cells == PorousCells::Voronoi) {
+              ref = brute.voronoiWalls(c, p, k, false);
+              if (k == 0.0) {
+                const double all = brute.voronoiWalls(c, p, 0.0, true);
+                worstGeometric = std::max(worstGeometric, std::fabs(all - q));
+              }
+            } else {
+              ref = brute.delaunayWalls(c, p, k);
+              if (k == 0.0 && &p - pts.data() < 2000)  // every face: the slow one
+                worstGeometric = std::max(worstGeometric, std::fabs(brute.delaunayFaces(p) - q));
+            }
+            if (q != ref) ++notExact;
+            worst = std::max(worst, std::fabs(q - ref));
+            // Delaunay walls: the walk on float planes and the exact location
+            // may pick the two tets of a face p is within rounding of.
+            const double tol = cells == PorousCells::Delaunay && mode == PorousMode::Walls ? 1e-6 : 0.0;
+            if (std::fabs(q - ref) > tol) ++mismatch;
+          }
+          INFO("walk steps " << st.walkSteps << " (max " << st.maxWalkSteps << "), candidates "
+                             << st.candidates << ", not bit-equal " << notExact << ", worst "
+                             << worst << ", geometric " << worstGeometric);
+          CHECK(mismatch == 0);
+          CHECK(st.walkCapHits == 0);
+          CHECK(worstGeometric < 1e-6);
+          CHECK(clampedInVolume == 0);
+          if (cells == PorousCells::Voronoi || mode == PorousMode::Struts) CHECK(notExact == 0);
+        }
+      }
+  }
+}
+
+TEST_CASE("porous: the complex is deterministic and pinned", "[porous]") {
+  const SeedSet seeds = sphereSeeds();
+  std::uint64_t got[4];
+  int i = 0;
+  for (PorousCells cells : kCells)
+    for (PorousMode mode : kModes) {
+      const PorousComplex a = internal::buildPorousComplex(seeds, cells, mode);
+      const PorousComplex b = internal::buildPorousComplex(seeds, cells, mode);
+      CHECK(digest(a) == digest(b));
+      got[i++] = digest(a);
+    }
+  // Pinned, so a CI OS whose packed arrays differ fails here.
+  CHECK(got[0] == 0x170305c0a0289c47ULL);  // voronoi walls
+  CHECK(got[1] == 0xb9d20f69d696dd95ULL);  // voronoi struts
+  CHECK(got[2] == 0x894e2d7c2db2acaaULL);  // delaunay walls
+  CHECK(got[3] == 0x0dbc0edbb9ab1ec5ULL);  // delaunay struts
+}
+
+TEST_CASE("porous: the complex rejects a bad seed set and honours cancel", "[porous]") {
+  SeedSet s = sphereSeeds();
+  SeedSet noPad = s;
+  noPad.isPad.pop_back();
+  CHECK_THROWS_AS(internal::buildPorousComplex(noPad, PorousCells::Voronoi, PorousMode::Walls),
+                  std::invalid_argument);
+  SeedSet noSpacing = s;
+  noSpacing.minSpacing = 0.0;
+  CHECK_THROWS_AS(internal::buildPorousComplex(noSpacing, PorousCells::Voronoi, PorousMode::Walls),
+                  std::invalid_argument);
+  const PorousDual d = internal::derivePorousDual(s);
+  CancelToken token;
+  token.request();
+  CHECK_THROWS_AS(internal::derivePorousDual(s, &token), Cancelled);
+  for (PorousCells cells : kCells)
+    for (PorousMode mode : kModes)
+      CHECK_THROWS_AS(internal::packPorousComplex(d, s, cells, mode, &token), Cancelled);
+}
+
+TEST_CASE("porous: a capped bin grid gets coarser bins, still exact", "[porous]") {
+  // Two clusters at opposite corners of a box 30 wide: 300^3 bins of the
+  // spacing, against a cap lowered to 4096 (the library's is 2048 x 8192).
+  SeedSet s;
+  for (int c = 0; c < 2; ++c)
+    for (const Vector3& p : randomCube(150, 40 + std::uint64_t(c)))
+      s.points.push_back(p + Vector3{30.0 * c, 30.0 * c, 30.0 * c});
+  s.isPad.assign(s.points.size(), 0);
+  s.minSpacing = s.maxSpacing = s.pad = 0.1;
+  s.box = BBox{{-0.1, -0.1, -0.1}, {31.1, 31.1, 31.1}};
+  const PorousDual d = internal::derivePorousDual(s);
+  const Brute brute(s, d);
+  std::vector<Vector3> pts = randomCube(300, 50);
+  for (std::size_t i = 0; i < 150; ++i) pts[i] = pts[i] + Vector3{30.0, 30.0, 30.0};
+  for (PorousCells cells : kCells)
+    for (PorousMode mode : kModes) {
+      INFO(caseName(cells, mode));
+      const PorousComplex c = internal::packPorousComplex(d, s, cells, mode, nullptr, 4096.0);
+      CHECK(c.bins.count() <= 4096);
+      CHECK(c.bins.size > 0.1f);
+      if (mode == PorousMode::Struts) CHECK(c.bound == c.bins.size);
+      long mismatch = 0;
+      for (const Vector3& p : pts) {
+        const double q = internal::porousDistance(c, p, 0.02);
+        const double ref = mode == PorousMode::Struts ? Brute::struts(c, p, 0.02)
+                           : cells == PorousCells::Voronoi ? brute.voronoiWalls(c, p, 0.02, false)
+                                                           : brute.delaunayWalls(c, p, 0.02);
+        mismatch += std::fabs(q - ref) > 1e-6;
+      }
+      CHECK(mismatch == 0);
+    }
+}
+
+TEST_CASE("porous: complex sizes and query rates", "[.][porous-bench]") {
+  BoxField box({-0.65, -0.65, -0.65}, {0.65, 0.65, 0.65});
+  auto ctl = xControl();
+  SeedParams uniform;
+  uniform.spacing = 0.0245;
+  SeedParams graded;
+  graded.spacing = 0.03;
+  graded.spacing2 = 0.06;
+  graded.d0 = -0.5;
+  graded.d1 = 0.5;
+  const std::pair<const char*, SeedSet> sets[2] = {
+      {"poisson box +-0.65, spacing 0.0245", generatePorousSeeds(box, nullptr, uniform)},
+      {"poisson box +-0.65, graded 0.03 -> 0.06 along x",
+       generatePorousSeeds(box, ctl.get(), graded)}};
+  for (const auto& [name, seeds] : sets) {
+    auto t0 = std::chrono::steady_clock::now();
+    const PorousDual d = internal::derivePorousDual(seeds);
+    auto ms = [](auto a, auto b) { return std::chrono::duration<double, std::milli>(b - a).count(); };
+    const double deriveMs = ms(t0, std::chrono::steady_clock::now());
+    std::ostringstream os;
+    os << name << ": " << seeds.points.size() << " seeds, " << d.tets.size() << " tets, "
+       << d.faceTets.size() / 2 << " faces, " << d.edges.size() / 2 << " edges, "
+       << d.clampedCount << " clamped circumcentres; derive " << deriveMs << " ms";
+    const std::vector<Vector3> pts = randomIn(seeds.box, 200000, 77);
+    for (PorousCells cells : kCells)
+      for (PorousMode mode : kModes) {
+        t0 = std::chrono::steady_clock::now();
+        const PorousComplex c = internal::packPorousComplex(d, seeds, cells, mode);
+        const double packMs = ms(t0, std::chrono::steady_clock::now());
+        const auto& st = c.stats;
+        os << "\n  " << caseName(cells, mode) << ": pack " << packMs << " ms, "
+           << c.packedBytes() << " B = " << double(c.packedBytes()) / seeds.points.size()
+           << " B/seed; bins " << c.bins.dims[0] << "x" << c.bins.dims[1] << "x"
+           << c.bins.dims[2] << " of " << c.bins.size;
+        const double n = double(seeds.points.size());
+        os << "\n    per seed: seeds " << c.seeds.size() / n << ", neighbourOffsets "
+           << c.neighbourOffsets.size() / n << ", neighbours " << c.neighbours.size() / n
+           << ", tetPlanes " << c.tetPlanes.size() / n << ", tetNeighbours "
+           << c.tetNeighbours.size() / n << ", binStart " << c.binStart.size() / n
+           << ", segments " << c.segments.size() / n << ", binOffsets "
+           << c.binOffsets.size() / n << ", binItems " << c.binItems.size() / n
+           << " (array elements)";
+        if (mode == PorousMode::Struts)
+          os << ", bound " << c.bound << " (largest cell radius " << st.largestCellRadius
+             << ", max spacing " << seeds.maxSpacing << "), " << st.segments << " segments ("
+             << st.candidateSegments << " candidates, dropped " << st.droppedOutside
+             << " outside, " << st.droppedZeroLength << " zero-length, " << st.droppedDuplicate
+             << " duplicate), items per bin mean " << double(st.binItems) / st.bins << " max "
+             << st.maxBinItems;
+        for (double k : {0.0, 0.3 * seeds.minSpacing}) {
+          internal::PorousQueryStats qs;
+          double sum = 0.0;
+          t0 = std::chrono::steady_clock::now();
+          for (const Vector3& p : pts) sum += internal::porousDistance(c, p, k, &qs);
+          const double qMs = ms(t0, std::chrono::steady_clock::now());
+          os << "\n    k = " << k << ": " << pts.size() / qMs * 1e3 << " queries/s, mean walk "
+             << double(qs.walkSteps) / pts.size() << " (max " << qs.maxWalkSteps << ", cap hits "
+             << qs.walkCapHits << "), mean candidates " << double(qs.candidates) / pts.size()
+             << " (sum " << sum << ")";
+        }
+      }
+    WARN(os.str());
+  }
 }

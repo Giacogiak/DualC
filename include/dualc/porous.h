@@ -9,7 +9,8 @@
 #include <vector>
 
 // The porous shell's build-time half (roadmap 23): seeds placed in any
-// volume, deterministically on every OS. The Delaunay complex (#64) and the
+// volume, deterministically on every OS. The Delaunay complex (#64,
+// src/internal/porous_complex.h) and the
 // `porous` field (#65) build on SeedSet; the defaults every choice here
 // follows are the table in docs/roadmap/23-porous-shell/01-study.md.
 
@@ -36,6 +37,13 @@ private:
 };
 
 enum class SeedDistribution { Poisson, Jitter, Random };
+
+// Which complex the porous field measures the distance to (#64): the Voronoi
+// cells of the seeds or their Delaunay tets; and whether that is the cells'
+// walls (the Voronoi faces / the tet faces) or their edges (the Voronoi edges
+// / the tet edges), the struts of an open-cell foam.
+enum class PorousCells { Voronoi, Delaunay };
+enum class PorousMode { Walls, Struts };
 enum class DensityRamp { Linear, Smooth, Gaussian };
 
 // The ramp weight w(u) for u = (control - d0) / (d1 - d0), clamped to

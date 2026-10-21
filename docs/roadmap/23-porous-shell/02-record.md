@@ -110,8 +110,8 @@ volume to a grid (`bakeToGrid`) before `porous`, or reuse one sample pool across
 
 ## #64 Delaunay tetrahedralization and the packed complex
 
-**PARTIAL** 2026-10-21 — P03.1 built the tetrahedralization (T1); the complex and its bins
-(T2, P03.2) are next. Planned as: the engine of D-74 under `src/internal/` + `THIRD_PARTY.md`,
+**DONE** 2026-10-21 — P03.1 built the tetrahedralization (T1), P03.2 the complex and its
+bins (T2). Planned as: the engine of D-74 under `src/internal/` + `THIRD_PARTY.md`,
 then the faces, edges, Voronoi vertices and edges, neighbour lists and bins packed as P05
 uploads them; acceptance: Euler, empty sphere, the regular grid, determinism, dual adjacency
 and the brute-force equality of the four `cells` × `mode` queries; the 100k-seed tet count,
@@ -127,6 +127,20 @@ points the tet set is geogram's, hash for hash. The library now needs a C compil
 digests, and errors. **Chosen in-run (pending owner review):** the infinite vertex instead of
 the table's finite super-tet; the symbol renaming; C as a project language. The files, the
 numbers and the tests are in [03](03-delaunay-engine.md).
+
+**2026-10-21 — T2, the complex and its bins.** `internal::buildPorousComplex(seeds, cells,
+mode)` (`src/implicit/porous_complex.cpp`, with `PorousCells` / `PorousMode` in
+`dualc/porous.h`) rounds the seeds to float, tetrahedralizes exactly those, derives the
+faces, edges, neighbour lists and clamped circumcentres, and packs one case in flat `float` /
+`int32` arrays with a bin grid; `internal::porousDistance(complex, p, smooth)` is the query.
+Tested: the dual adjacency on blue noise and the regular grid; the query **bit-equal to brute
+force** on 10k points in all four cases, k = 0 and k > 0; pinned digests; errors and cancel.
+At 99,712 seeds the packed sizes are **87 (Voronoi walls), 492 (Voronoi struts), 526
+(Delaunay walls) and 368 (Delaunay struts) bytes per seed**. **Chosen in-run (pending owner
+review):** the smooth fold in ascending distance order, not packed order; struts clamped at
+0; Delaunay walls 0 outside the seeds' hull; the struts' bin max(larger spacing, largest cell
+radius); struts clipped to the volume's box grown by `B`, points and float duplicates
+dropped. The layout, rules and numbers are in [04](04-complex-and-bins.md).
 
 ## #65 The porous node on the CPU
 
