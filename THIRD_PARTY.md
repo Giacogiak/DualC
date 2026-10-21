@@ -1,9 +1,10 @@
 # Third-party code in DualC
 
-The library proper (`libdualc`) bundles five files vendored from other projects:
-four Unlicense source files (the QEF/SVD solver) and one MIT header (nanort).
-All retain their original headers; all but one are byte-identical to upstream,
-and that one carries a single documented local modification (see below).
+The library proper (`libdualc`) bundles six files vendored from other projects:
+four Unlicense source files (the QEF/SVD solver), one MIT header (nanort) and
+one public-domain C file (Shewchuk's predicates). All retain their original
+headers; all but one are byte-identical to upstream, and that one carries a
+single documented local modification (see below).
 
 ## QEF / SVD solver
 
@@ -77,6 +78,42 @@ the current upstream release, whose `BVHAccel<T>` takes one template argument
 and no longer compiles `mesh_bvh.cpp`. DualC therefore owns the header it was
 written against and pins the older API on purpose. Bumping to current nanort
 is a port of `mesh_bvh.cpp`, not a header swap.
+
+## Shewchuk's exact predicates
+
+- `src/internal/third_party/shewchuk/predicates.c`
+
+Origin: <https://www.cs.cmu.edu/afs/cs/project/quake/public/code/predicates.c>,
+"Routines for Arbitrary Precision Floating-point Arithmetic and Fast Robust
+Geometric Predicates" by Jonathan Richard Shewchuk, dated May 18, 1996, and
+**placed in the public domain** by its author (the file's header says so; there
+is no separate licence file). Downloaded 2026-10-21; sha256
+`f8662c3f407d1c1c5dcd4dd49ea8b8ddd801a71827d65734206ddc3741792029`
+(roadmap 23, [the study's measurement dump](docs/raw/2026-10-21-porous-study-measurements.md)).
+It gives the exact `orient3d` and `insphere` that the porous shell's Delaunay
+tetrahedralization (`src/implicit/porous_delaunay.cpp`, roadmap 23 #64) is built
+on, which is why that tetrahedralization is deterministic and makes no flat tet.
+
+**Byte-identical: no local modification.** Everything DualC needs around it is
+in DualC's own files:
+
+- `src/internal/exact_predicates.c` is the one translation unit that compiles
+  it (`#include <shewchuk/predicates.c>` through the SYSTEM include path). It
+  first renames every external symbol the file defines to `dualc_pred_*`, so a
+  host that links its own copy (Triangle, TetGen and others carry one) does not
+  collide with `libdualc`, and it sends the file's `random()` calls (in random
+  test-value helpers DualC never calls) to a local stub, so MSVC, which has no
+  POSIX `random()`, links it.
+- `src/internal/exact_predicates.h` declares the renamed functions for C++.
+- `src/internal/compat/sys/time.h` is an empty header on that file's include
+  path on MSVC only: the file includes `<sys/time.h>` and uses nothing from it.
+- `CMakeLists.txt` compiles it as C90 with extensions (`-std=gnu90`: it uses
+  K&R definitions, which C23 removed), with no FMA contraction
+  (`-ffp-contract=off`; `/fp:precise` on MSVC), which its exact arithmetic
+  needs, and with its warnings silenced, as for the QEF files.
+
+Re-syncing with upstream is a file copy; a new external symbol upstream would
+need a rename line in `exact_predicates.c` (`nm` on the object lists them).
 
 ## Example-only host I/O deps (`examples/third_party/`)
 

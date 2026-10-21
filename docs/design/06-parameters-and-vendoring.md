@@ -40,7 +40,7 @@ that silently does nothing is a promise the library does not keep
 
 ## 8. Vendored third-party code
 
-DualC is MIT-licensed. Two third-party pieces are vendored in-tree. The first is the public-domain
+DualC is MIT-licensed. Three third-party pieces are vendored in-tree. The first is the public-domain
 (Unlicense) QEF/SVD solver from Nick Gildea's
 [DualContouringSample](https://github.com/nickgildea/DualContouringSample), vendored as
 `src/internal/qef.{h,cpp}` and `src/internal/svd.{h,cpp}` with their original headers
@@ -58,7 +58,16 @@ The second is nanort (MIT, Light Transport Entertainment), the 2016 single-heade
 before v1.1.0. `mesh_bvh.cpp` instantiates its four-parameter `BVHAccel` and walks its nodes
 directly; geometry-central v1.1.0 made its own nanort private and updated it to an incompatible
 API, so DualC owns the header it was written against. Bumping nanort is a port of `mesh_bvh.cpp`,
-not a header swap. Everything else under `src/internal/` is DualC-original.
+not a header swap.
+
+The third is Shewchuk's public-domain `predicates.c` (1996), the exact `orient3d` / `insphere`
+under the porous shell's Delaunay tetrahedralization, at
+`src/internal/third_party/shewchuk/predicates.c`, byte-identical to upstream. DualC's
+`src/internal/exact_predicates.c` is the one unit that compiles it: it renames every symbol
+to `dualc_pred_*` (no clash with a host's own copy) and stubs its unused `random()` calls;
+the build compiles it as C90 (its K&R definitions) with no FMA contraction, which exact
+arithmetic needs. It is the library's one C source. Everything else under `src/internal/`
+is DualC-original.
 
 `svd.cpp` is not a general SVD: it is a cyclic Jacobi eigensolver for a symmetric 3×3 matrix
 (two-sided symmetric rotations on `AᵀA`, accumulating the eigenvectors). Because the input is `AᵀA` (symmetric PSD), the "singular values" it produces are

@@ -110,11 +110,23 @@ volume to a grid (`bakeToGrid`) before `porous`, or reuse one sample pool across
 
 ## #64 Delaunay tetrahedralization and the packed complex
 
-**PLANNED** — P03. The engine of D-74 under `src/internal/` + `THIRD_PARTY.md`, then the
-faces, edges, Voronoi vertices and edges, neighbour lists and bins packed as P05 uploads them;
-acceptance: Euler, empty sphere, the regular grid, determinism, dual adjacency and the
-brute-force equality of the four `cells` × `mode` queries; the 100k-seed tet count, time and
-bytes per seed recorded here.
+**PARTIAL** 2026-10-21 — P03.1 built the tetrahedralization (T1); the complex and its bins
+(T2, P03.2) are next. Planned as: the engine of D-74 under `src/internal/` + `THIRD_PARTY.md`,
+then the faces, edges, Voronoi vertices and edges, neighbour lists and bins packed as P05
+uploads them; acceptance: Euler, empty sphere, the regular grid, determinism, dual adjacency
+and the brute-force equality of the four `cells` × `mode` queries; the 100k-seed tet count,
+time and bytes per seed recorded here.
+
+**2026-10-21 — T1, the tetrahedralization.** `internal::tetrahedralize`
+(`src/implicit/porous_delaunay.cpp`) on Shewchuk's `predicates.c`, vendored byte-identical
+and compiled through DualC's `src/internal/exact_predicates.c`, which renames its symbols
+`dualc_pred_*`. The hull is exact, closed by an infinite vertex, and the output is canonical.
+100k white-noise points give 672,339 tets in 1.43 s (Release, one thread). On the study's
+points the tet set is geogram's, hash for hash. The library now needs a C compiler. Five
+`porous:` cases: Euler and the convex hull, the empty sphere, the regular grid, pinned
+digests, and errors. **Chosen in-run (pending owner review):** the infinite vertex instead of
+the table's finite super-tet; the symbol renaming; C as a project language. The files, the
+numbers and the tests are in [03](03-delaunay-engine.md).
 
 ## #65 The porous node on the CPU
 

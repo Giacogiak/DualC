@@ -11,7 +11,7 @@ DualC/
 ├── LICENSE                     MIT license (own code)
 ├── CITATION.cff               Citation metadata (GitHub "Cite this repository"); the credit request in README § License
 ├── README.md                  Front page: pitch, dependency layout, build, consume, minimal usage, tool list, doc pointer
-├── THIRD_PARTY.md             Vendoring & attribution (qef/svd Unlicense; nanort MIT; miniz/stb/json/meshoptimizer; the geometry-central pin + its transitive deps)
+├── THIRD_PARTY.md             Vendoring & attribution (qef/svd Unlicense; nanort MIT; Shewchuk's predicates public domain; miniz/stb/json/meshoptimizer; the geometry-central pin + its transitive deps)
 ├── .gitignore                 Ignores build/, *.obj demo meshes, etc.
 ├── .gitattributes             Pins scripts/hooks/* to LF (core.autocrlf would break the shebang)
 ├── .github/
@@ -66,7 +66,8 @@ DualC/
 │   │   ├── primitives_tierB.cpp  Common ~10 (boxframe, cone, hexprism, octahedron, pyramid, solidangle, …)
 │   │   ├── primitives_tierC.cpp  Long tail ~13 (cappedtorus, link, cutsphere, deathstar, vesica, rhombus, …)
 │   │   ├── primitives_tpms.cpp   6 TPMS (gyroid, schwarz-p, diamond, fischer-koch, lidinoid, neovius)
-│   │   └── porous_seeds.cpp      Porous seeds: Bridson Poisson-disk (variable radius), jitter, random, the pad, Lloyd by sampling; bit-identical on any OS (roadmap 23 #63)
+│   │   ├── porous_seeds.cpp      Porous seeds: Bridson Poisson-disk (variable radius), jitter, random, the pad, Lloyd by sampling; bit-identical on any OS (roadmap 23 #63)
+│   │   └── porous_delaunay.cpp   The seeds' Delaunay tetrahedralization: Bowyer–Watson on exact predicates, Morton order, an infinite vertex for the hull, canonical tet list (roadmap 23 #64)
 │   │
 │   └── internal/             Private internals (NOT public API)
 │       ├── octree.{h,cpp}        Octree structure, child indexing, topology queries
@@ -74,6 +75,10 @@ DualC/
 │       ├── svd.{h,cpp}           VENDORED (Unlicense, Nick Gildea) — 3×3 SVD for QEF
 │       ├── mesh_bvh.{h,cpp}      nanort BVH wrapper: hits, closest-point, winding number, AABB overlap
 │       ├── third_party/nanort/   VENDORED (MIT, Light Transport Entertainment) — nanort.h, the 2016 single-header BVH mesh_bvh is written against; nanort_LICENSE.txt beside it
+│       ├── third_party/shewchuk/ VENDORED (public domain, J. R. Shewchuk) — predicates.c, exact orient3d / insphere, byte-identical; compiled only through exact_predicates.c
+│       ├── exact_predicates.{h,c} The C wrapper that compiles predicates.c with every symbol renamed dualc_pred_*, and the C++ declarations (roadmap 23 #64)
+│       ├── compat/sys/time.h     An empty <sys/time.h> for predicates.c on MSVC, which has none
+│       ├── porous_delaunay.h     DelaunayTets + tetrahedralize(): the tet list (sorted vertices, neighbours, -1 on the hull) P03's complex is derived from
 │       ├── sign_oracle.{h,cpp}   inside/outside via pseudonormal / winding / generalized-winding
 │       ├── dc_tables.{h,cpp}     DC corner/edge indexing + cell/face/edge descent tables
 │       ├── cube_components.{h,cpp} Union-find component labeling for Manifold DC
@@ -168,7 +173,7 @@ DualC/
 │   ├── test_diagnostics.cpp   Diagnostics channel: every reported degradation shown firing (roadmap 17 #26)
 │   ├── test_validation.cpp    Argument validation + the BBox::empty sentinel (roadmap 17 #34)
 │   ├── test_cancel_progress.cpp  CancelToken unwinds every driver; hooks are inert; report shape; the writers' rc 3 + `.part` guarantee (roadmap 14 #48)
-│   ├── test_porous.cpp        Porous seeds (roadmap 23 #63): PCG32 reference stream, ramps, determinism, Poisson distance, graded density, pad, relax, cancel, ceilings; a hidden `[porous-bench]` rate case
+│   ├── test_porous.cpp        Porous seeds (roadmap 23 #63): PCG32 reference stream, ramps, determinism, Poisson distance, graded density, pad, relax, cancel, ceilings; the Delaunay (#64): Euler and the convex hull, empty sphere, the regular grid, a pinned tet-list digest, errors; hidden `[porous-bench]` rate cases
 │   └── test_writers_io.cpp    The writers' failure surface (17 #52): a failed open names the OS error through dce::lastError(); on
 │                                Windows a held `.part` is renamed after retries, a long hold fails with the text, a child started
 │                                with handle inheritance mid-export inherits nothing (output handles are non-inheritable)
@@ -200,7 +205,8 @@ DualC/
 ## Build targets at a glance
 
 - `dualc` (`dualc::dualc`) — core static library; PUBLIC-links geometry-central
-  (→ Eigen, happly transitively); nanort is its own vendored header.
+  (→ Eigen, happly transitively); nanort is its own vendored header, and Shewchuk's
+  `predicates.c` its one C source (C90, so the library needs a C compiler).
 - `dualc_demo_data` — runs `dualc_gen_demo all` into `build/data/`; every mesh-consuming
   binary depends on it and copies the meshes next to itself (`dualc_copy_demo_meshes()`).
 - `dualc_tests` — Catch2 test executable (CTest).

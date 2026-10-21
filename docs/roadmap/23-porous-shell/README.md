@@ -18,13 +18,14 @@ A folder from the start. [01](01-study.md) is the P01 study — the Delaunay eng
 distributions, the distance formulas, the GPU layout — ending in **the defaults table**
 that binds the later phases. [02](02-record.md) is the record: every item, its acceptance
 line and its dated appends; an item whose measurements outgrow it keeps its summary there
-and its numbers in a numbered child.
+and its numbers in a numbered child: [03](03-delaunay-engine.md) is #64's, the Delaunay
+engine as built and measured.
 
 | Item | Page | Status |
 | --- | --- | --- |
 | The owner's decisions of 2026-10-19 (D-67 … D-73) and the engine choice (D-74) | [02](02-record.md#the-owners-decisions) | DONE 2026-10-21 (decided; D-74 and the defaults marked † pending owner review) |
 | #63 Deterministic seeds in any volume | [02](02-record.md#63-deterministic-seeds-in-any-volume) | DONE 2026-10-21 (P02; the in-run choices pending owner review) |
-| #64 Delaunay tetrahedralization and the packed complex | [02](02-record.md#64-delaunay-tetrahedralization-and-the-packed-complex) | PLANNED — P03 |
+| #64 Delaunay tetrahedralization and the packed complex | [02](02-record.md#64-delaunay-tetrahedralization-and-the-packed-complex) · [03](03-delaunay-engine.md) | PARTIAL 2026-10-21 (P03.1, the tetrahedralization; the complex next) |
 | #65 The porous node on the CPU | [02](02-record.md#65-the-porous-node-on-the-cpu) | PLANNED — P04 |
 | #66 The porous node in GLSL and dualc_field_view | [02](02-record.md#66-the-porous-node-in-glsl-and-dualc_field_view) | PLANNED — P05 |
 | #67 The C ABI test and the documentation | [02](02-record.md#67-the-c-abi-test-and-the-documentation) | PLANNED — P06 |

@@ -147,7 +147,7 @@ The raw plan's node design stands except where a row says otherwise. Every row m
 | Topic | What later phases follow |
 | --- | --- |
 | Token | `porous`; no clash in `field_graph.cpp` / `field_glsl.cpp` |
-| Engine † | Own Bowyer–Watson, sequential, on Shewchuk's `predicates.c` vendored in `src/internal/` (`-std=gnu89 -ffp-contract=off`; MSVC `/fp:precise`); finite super-tet at 1000× the extent; strict-conflict cavity; insertion in 63-bit Morton order of the seed array, ties by index; tets reported canonically (vertices sorted, list sorted) |
+| Engine † | Own Bowyer–Watson, sequential, on Shewchuk's `predicates.c` vendored in `src/internal/` (`-std=gnu89 -ffp-contract=off`; MSVC `/fp:precise`); finite super-tet at 1000× the extent *(P03: an infinite vertex instead, for an exact hull: [03](03-delaunay-engine.md))*; strict-conflict cavity; insertion in 63-bit Morton order of the seed array, ties by index; tets reported canonically (vertices sorted, list sorted) |
 | RNG | PCG32 XSH-RR 64/32 (O'Neill's `pcg32_srandom_r(seed, 0)`); a double in `[0,1)` from two draws, `((a >> 5)·2²⁶ + (b >> 6))·2⁻⁵³`; no `std::*_distribution` |
 | `spacing` † | `poisson`: Bridson minimum distance (k = 30, measured 0.573 seeds/s³); `jitter`: grid pitch; `random`: density 1/spacing³ (the P02 plan file's definitions; switching `dist` changes the cell count by the measured factor) *(P02: graded `jitter` / `random` thin a layout at the smaller spacing by `(min spacing/spacing(x))³`)* |
 | Ramp | `u = clamp((control − d0)/(d1 − d0), 0, 1)`; `linear` u; `smooth` u²(3 − 2u); `gaussian` (1 − e^(−u²/2σ²))/(1 − e^(−1/2σ²)), σ = 1/√(2 ln 100) ≈ 0.3295 (99 % at u = 1, normalised to 1); `spacing(x) = spacing + (spacing2 − spacing)·w` |

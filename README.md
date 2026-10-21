@@ -53,8 +53,9 @@ ctest --test-dir build -C Release --output-on-failure
 
 With Ninja: `-G Ninja -DCMAKE_BUILD_TYPE=Release`, then `cmake --build build -j`. Builds and
 tests on Windows (Visual Studio 2022) and Linux (GCC 15, CMake 4, Ninja; on Ubuntu
-`sudo apt install cmake ninja-build g++`); the tests and examples also compile one C file
-(miniz), so they need a C compiler next to the C++ one. The GL
+`sudo apt install cmake ninja-build g++`); the library compiles one C file (Shewchuk's
+exact predicates) and the tests and examples another (miniz), so a C compiler is needed next
+to the C++ one. The GL
 tools and the C ABI are opt-in (`-DDUALC_BUILD_FIELD_VIEW`, `_GLSL_PARITY`, `_C_ABI`,
 all `OFF` by default; `scripts/check.py` turns `_C_ABI` on); none of them adds a dependency
 to `libdualc`. Two diagnostics options are `OFF` / empty by default too:

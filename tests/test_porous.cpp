@@ -1,11 +1,14 @@
 // The porous shell's seeds (roadmap 23 #63): the six properties of the raw
-// plan's P02 list, on a sphere volume and on a box. Every case is named
+// plan's P02 list, on a sphere volume and on a box. Its Delaunay
+// tetrahedralization (#64): the four properties of P03 T1. Every case is named
 // `porous: ...` so `ctest -R porous` finds it.
 
 #include "dualc/implicit.h"
 #include "dualc/porous.h"
 #include "dualc/primitives.h"
 
+#include "internal/exact_predicates.h"
+#include "internal/porous_delaunay.h"
 #include "internal/seed_grid.h"
 
 #include "demo_meshes.h"
@@ -15,10 +18,14 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <algorithm>
+#include <array>
 #include <chrono>
 #include <cmath>
 #include <cstdint>
 #include <cstring>
+#include <limits>
+#include <map>
 #include <memory>
 #include <sstream>
 #include <utility>
@@ -82,6 +89,160 @@ double cellVolumeCv(const SeedSet& s, const ImplicitField& volume, double depth,
   REQUIRE(n > 30);
   const double mean = sum / n;
   return std::sqrt(sum2 / n - mean * mean) / mean;
+}
+
+
+// --- The Delaunay tetrahedralization (#64) -------------------------------
+
+const double* xyz(const std::vector<Vector3>& pts, std::int32_t i) {
+  return &pts[static_cast<std::size_t>(i)].x;
+}
+
+std::vector<Vector3> randomCube(std::size_t n, std::uint64_t seed) {
+  Pcg32 rng(seed, 1000);
+  std::vector<Vector3> pts(n);
+  for (Vector3& p : pts) p = {rng.nextDouble(), rng.nextDouble(), rng.nextDouble()};
+  return pts;
+}
+
+std::vector<Vector3> integerGrid(int n) {
+  std::vector<Vector3> pts;
+  for (int i = 0; i < n; ++i)
+    for (int j = 0; j < n; ++j)
+      for (int k = 0; k < n; ++k) pts.push_back({double(i), double(j), double(k)});
+  return pts;
+}
+
+std::uint64_t digest(const internal::DelaunayTets& t) {
+  std::uint64_t h = 1469598103934665603ULL;
+  auto mix = [&](const std::vector<std::int32_t>& v) {
+    for (std::int32_t x : v) h = (h ^ static_cast<std::uint32_t>(x)) * 1099511628211ULL;
+  };
+  mix(t.verts);
+  mix(t.neighbours);
+  mix(t.duplicates);
+  return h;
+}
+
+// What the structure checks find. A valid tetrahedralization of the hull has
+// every count below at zero, euler = 1 (V - E + F - T of a 3-ball) and
+// hullEuler = 2 (the hull surface, a sphere).
+struct TetCheck {
+  long flat = 0;            // tets with orient3d == 0
+  long badNeighbour = 0;    // a neighbour that does not point back across the same face
+  long unusedPoints = 0;    // kept points no tet names
+  long namedDuplicates = 0; // duplicate points a tet names
+  long nonConvex = 0;       // a point strictly beyond a hull face
+  long badHullEdges = 0;    // a hull edge not on exactly two hull faces
+  long euler = 0, hullEuler = 0;
+  double absVolume6 = 0.0;  // sum of |orient3d|: six times the volume
+};
+
+TetCheck checkTets(const std::vector<Vector3>& pts, const internal::DelaunayTets& d) {
+  TetCheck c;
+  const std::size_t nt = d.size();
+  std::vector<char> used(pts.size(), 0), dup(pts.size(), 0);
+  for (std::int32_t i : d.duplicates) dup[static_cast<std::size_t>(i)] = 1;
+  auto face = [&](std::size_t t, int k) {
+    std::array<std::int32_t, 3> f{};
+    int m = 0;
+    for (int j = 0; j < 4; ++j)
+      if (j != k) f[m++] = d.verts[4 * t + j];
+    return f;  // ascending: the vertices are
+  };
+  std::map<std::pair<std::int32_t, std::int32_t>, int> edges, hullEdges;
+  std::vector<std::array<std::int32_t, 4>> hullFaces;  // face + the opposite vertex
+  long faces = 0;
+  for (std::size_t t = 0; t < nt; ++t) {
+    const std::int32_t* v = &d.verts[4 * t];
+    for (int k = 0; k < 4; ++k) {
+      used[static_cast<std::size_t>(v[k])] = 1;
+      if (dup[static_cast<std::size_t>(v[k])]) ++c.namedDuplicates;
+      for (int j = k + 1; j < 4; ++j) edges[{v[k], v[j]}] = 1;
+    }
+    const double o = internal::orient3d(xyz(pts, v[0]), xyz(pts, v[1]),
+                                        xyz(pts, v[2]), xyz(pts, v[3]));
+    if (o == 0) ++c.flat;
+    c.absVolume6 += std::fabs(o);
+    for (int k = 0; k < 4; ++k) {
+      const std::int32_t u = d.neighbours[4 * t + k];
+      if (u < 0) {
+        ++faces;
+        const auto f = face(t, k);
+        hullFaces.push_back({f[0], f[1], f[2], v[k]});
+        ++hullEdges[{f[0], f[1]}];
+        ++hullEdges[{f[0], f[2]}];
+        ++hullEdges[{f[1], f[2]}];
+        continue;
+      }
+      if (static_cast<std::size_t>(u) > t) ++faces;
+      int back = 0;
+      for (int j = 0; j < 4; ++j)
+        if (d.neighbours[4 * static_cast<std::size_t>(u) + j] == static_cast<std::int32_t>(t)) {
+          ++back;
+          if (face(static_cast<std::size_t>(u), j) != face(t, k)) ++c.badNeighbour;
+        }
+      if (back != 1) ++c.badNeighbour;
+    }
+  }
+  for (std::size_t i = 0; i < pts.size(); ++i)
+    if (!dup[i] && !used[i]) ++c.unusedPoints;
+  long verts = 0;
+  for (char u : used) verts += u;
+  c.euler = verts - long(edges.size()) + faces - long(nt);
+  std::vector<char> onHull(pts.size(), 0);
+  for (const auto& h : hullFaces)
+    for (int k = 0; k < 3; ++k) onHull[static_cast<std::size_t>(h[k])] = 1;
+  long hullVerts = 0;
+  for (char u : onHull) hullVerts += u;
+  for (const auto& e : hullEdges)
+    if (e.second != 2) ++c.badHullEdges;
+  c.hullEuler = hullVerts - long(hullEdges.size()) + long(hullFaces.size());
+  // Convex: every point is on the inner side of every hull face, or on it.
+  for (const auto& h : hullFaces) {
+    const double* a = xyz(pts, h[0]);
+    const double* b = xyz(pts, h[1]);
+    const double* f = xyz(pts, h[2]);
+    const double inner = internal::orient3d(a, b, f, xyz(pts, h[3]));
+    for (std::size_t i = 0; i < pts.size(); ++i) {
+      const double s = internal::orient3d(a, b, f, &pts[i].x);
+      if ((inner > 0 && s < 0) || (inner < 0 && s > 0)) ++c.nonConvex;
+    }
+  }
+  return c;
+}
+
+// Points strictly inside the circumsphere of `samples` tets drawn at random,
+// each against every point.
+long emptySphereViolations(const std::vector<Vector3>& pts,
+                           const internal::DelaunayTets& d, std::size_t samples) {
+  Pcg32 rng(11, 1001);
+  long bad = 0;
+  for (std::size_t s = 0; s < samples; ++s) {
+    const std::size_t t = rng.next() % d.size();
+    const double* a = xyz(pts, d.verts[4 * t]);
+    const double* b = xyz(pts, d.verts[4 * t + 1]);
+    const double* c = xyz(pts, d.verts[4 * t + 2]);
+    const double* e = xyz(pts, d.verts[4 * t + 3]);
+    const double o = internal::orient3d(a, b, c, e);
+    for (const Vector3& p : pts) {
+      const double in = o > 0 ? internal::insphere(a, b, c, e, &p.x)
+                              : internal::insphere(b, a, c, e, &p.x);
+      if (in > 0) ++bad;
+    }
+  }
+  return bad;
+}
+
+void requireValid(const TetCheck& c) {
+  CHECK(c.flat == 0);
+  CHECK(c.badNeighbour == 0);
+  CHECK(c.unusedPoints == 0);
+  CHECK(c.namedDuplicates == 0);
+  CHECK(c.nonConvex == 0);
+  CHECK(c.badHullEdges == 0);
+  CHECK(c.euler == 1);
+  CHECK(c.hullEuler == 2);
 }
 
 } // namespace
@@ -400,4 +561,134 @@ TEST_CASE("porous: seeds per second on a mesh volume", "[.][porous-bench]") {
            << seeds.points.size() / sec << " seeds/s";
         WARN(os.str());
       }
+}
+
+TEST_CASE("porous: the tets fill the convex hull by Euler's formula", "[porous]") {
+  // White noise in a cube, and the seeds of a sphere volume with their pad.
+  SphereField sphere({0.0, 0.0, 0.0}, 1.0);
+  SeedParams sp;
+  sp.spacing = 0.12;
+  sp.seed = 3;
+  const std::vector<Vector3> sets[2] = {randomCube(3000, 5),
+                                        generatePorousSeeds(sphere, nullptr, sp).points};
+  for (const std::vector<Vector3>& pts : sets) {
+    const internal::DelaunayTets d = internal::tetrahedralize(pts);
+    INFO(pts.size() << " points, " << d.size() << " tets");
+    CHECK(d.duplicates.empty());
+    requireValid(checkTets(pts, d));
+    // About 6.5 tets per point in a cloud this size (6.7 at 100k).
+    CHECK(d.size() > 5 * pts.size());
+    CHECK(d.size() < 7 * pts.size());
+  }
+}
+
+TEST_CASE("porous: no point is inside a tet's circumsphere", "[porous]") {
+  SphereField sphere({0.0, 0.0, 0.0}, 1.0);
+  SeedParams sp;
+  sp.spacing = 0.12;
+  sp.dist = SeedDistribution::Random;
+  const std::vector<Vector3> sets[2] = {randomCube(3000, 6),
+                                        generatePorousSeeds(sphere, nullptr, sp).points};
+  for (const std::vector<Vector3>& pts : sets) {
+    const internal::DelaunayTets d = internal::tetrahedralize(pts);
+    INFO(pts.size() << " points");
+    CHECK(emptySphereViolations(pts, d, 400) == 0);
+  }
+}
+
+TEST_CASE("porous: a regular grid gives no degenerate tet", "[porous]") {
+  // jitter = 0: the seeds are a lattice, every cube's eight corners
+  // cospherical and every hull face coplanar with its neighbours.
+  BoxField box({-1.0, -1.0, -1.0}, {1.0, 1.0, 1.0});
+  SeedParams sp;
+  sp.dist = SeedDistribution::Jitter;
+  sp.jitter = 0.0;
+  sp.spacing = 0.25;
+  const SeedSet lattice = generatePorousSeeds(box, nullptr, sp);
+  const std::vector<Vector3> grid = integerGrid(8);
+  for (const std::vector<Vector3>* pts : {&lattice.points, &grid}) {
+    const internal::DelaunayTets d = internal::tetrahedralize(*pts);
+    INFO(pts->size() << " points, " << d.size() << " tets");
+    const TetCheck c = checkTets(*pts, d);
+    requireValid(c);
+    CHECK(emptySphereViolations(*pts, d, 300) == 0);
+    if (pts == &grid) CHECK(c.absVolume6 == 6.0 * 7 * 7 * 7);  // exact: integers
+  }
+}
+
+TEST_CASE("porous: same points, same tet list", "[porous]") {
+  const std::vector<Vector3> cloud = randomCube(5000, 9);
+  const std::vector<Vector3> grid = integerGrid(9);
+  const internal::DelaunayTets a = internal::tetrahedralize(cloud);
+  const internal::DelaunayTets b = internal::tetrahedralize(cloud);
+  CHECK(a.verts == b.verts);
+  CHECK(a.neighbours == b.neighbours);
+  const internal::DelaunayTets g1 = internal::tetrahedralize(grid);
+  const internal::DelaunayTets g2 = internal::tetrahedralize(grid);
+  CHECK(g1.verts == g2.verts);
+  CHECK(g1.neighbours == g2.neighbours);
+  // Pinned, so a CI OS whose list differs fails here. The cloud is in general
+  // position, so its tetrahedralization is unique; the grid's depends on the
+  // insertion order, so this also pins the Morton order.
+  CHECK(digest(a) == 0x05c997ba5690c4c5ULL);
+  CHECK(digest(g1) == 0xf248fc73c6345e82ULL);
+}
+
+TEST_CASE("porous: delaunay rejects what does not span 3D, skips duplicates", "[porous]") {
+  using internal::tetrahedralize;
+  CHECK_THROWS_AS(tetrahedralize({{0, 0, 0}, {1, 0, 0}, {0, 1, 0}}), std::invalid_argument);
+  std::vector<Vector3> flat = randomCube(200, 2);
+  for (Vector3& p : flat) p.z = 0.5;
+  CHECK_THROWS_AS(tetrahedralize(flat), std::invalid_argument);
+  std::vector<Vector3> line;
+  for (int i = 0; i < 50; ++i) line.push_back({0.1 * i, 0.2 * i, 0.3 * i});
+  CHECK_THROWS_AS(tetrahedralize(line), std::invalid_argument);
+  std::vector<Vector3> same(10, Vector3{1, 2, 3});
+  CHECK_THROWS_AS(tetrahedralize(same), std::invalid_argument);
+  std::vector<Vector3> nan = randomCube(10, 3);
+  nan[4].y = std::numeric_limits<double>::quiet_NaN();
+  CHECK_THROWS_AS(tetrahedralize(nan), std::invalid_argument);
+  CHECK_THROWS_AS(tetrahedralize(std::vector<Vector3>(kPorousMaxSeeds + 1)),
+                  std::invalid_argument);
+
+  // A repeated point is reported (the later index) and named by no tet; the
+  // rest is the tetrahedralization of the distinct points.
+  const std::vector<Vector3> base = randomCube(500, 4);
+  std::vector<Vector3> withDup = base;
+  withDup.push_back(base[3]);
+  withDup.push_back(base[10]);
+  withDup.push_back(base[3]);
+  const internal::DelaunayTets d0 = tetrahedralize(base);
+  const internal::DelaunayTets d1 = tetrahedralize(withDup);
+  CHECK(d1.duplicates == std::vector<std::int32_t>{500, 501, 502});
+  CHECK(d1.verts == d0.verts);
+  CHECK(d1.neighbours == d0.neighbours);
+  requireValid(checkTets(withDup, d1));
+
+  CancelToken token;
+  token.request();
+  CHECK_THROWS_AS(tetrahedralize(base, &token), Cancelled);
+}
+
+TEST_CASE("porous: tets per second", "[.][porous-bench]") {
+  BoxField box({-0.65, -0.65, -0.65}, {0.65, 0.65, 0.65});
+  SeedParams sp;
+  sp.spacing = 0.025;
+  const std::pair<const char*, std::vector<Vector3>> sets[2] = {
+      {"100k white noise in a cube", randomCube(100000, 42)},
+      {"poisson seeds of a box, spacing 0.025", generatePorousSeeds(box, nullptr, sp).points}};
+  for (const auto& [name, pts] : sets)
+    for (int run = 0; run < 2; ++run) {
+      const auto t0 = std::chrono::steady_clock::now();
+      const internal::DelaunayTets d = internal::tetrahedralize(pts);
+      const double ms = std::chrono::duration<double, std::milli>(
+                            std::chrono::steady_clock::now() - t0).count();
+      std::size_t hull = 0;
+      for (std::int32_t u : d.neighbours) hull += (u < 0);
+      std::ostringstream os;
+      os << name << ": " << pts.size() << " points, " << d.size() << " tets ("
+         << double(d.size()) / pts.size() << " per point), " << hull
+         << " hull faces, " << ms << " ms";
+      WARN(os.str());
+    }
 }
