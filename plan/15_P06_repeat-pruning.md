@@ -18,6 +18,9 @@ cost record in `07-repeat-tiling-fix.md`. Branch `feat/hygiene-and-editor`. Neve
 4. **Lever (b).** Skip a neighbour whose box lower bound (its distance from `p` to that copy's
    bounds) is already ≥ the current best value. This holds only where the child is
    Lipschitz-bounded; check `lipschitzBound()` and apply it only when it is safe.
+   *(2026-10-21, P06.1: there is no `lipschitzBound()`, and Lipschitz-1 is not the property
+   needed — it bounds the slope, not the value far away. The certificate is the new opt-in
+   `ImplicitField::boundsBoundValue()`; [17/21](../docs/roadmap/17-code-audit-and-hardening/21-repeat-pruning.md).)*
 5. **Lever (c).** A cell symmetry flag that restores the single fold for mirror-symmetric strut
    cells (17/07's 2026-10-07 note). Do it **only if** (a) + (b) still leave more than about 1.3×
    over the fold. Record which levers you kept.
