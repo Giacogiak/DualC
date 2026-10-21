@@ -3,7 +3,8 @@
 Unit P03.2 of [`plan/12_P03_delaunay-and-complex.md`](../12_P03_delaunay-and-complex.md) § T2,
 the last unit of P03; session of 2026-10-21, branch `feat/porous-shell` in
 `~/Documents/DualC-porous`. Nothing was pushed, no remote was touched, and `main`,
-`feat/hygiene-and-editor` and `~/Documents/DualC` were left alone. The record:
+`feat/hygiene-and-editor` and `~/Documents/DualC` were left alone. The commits are `a7a05ce`
+(code, tests, record) and `63bf6ba` (this handoff). The record:
 
 - [23/02 #64](../../docs/roadmap/23-porous-shell/02-record.md#64-delaunay-tetrahedralization-and-the-packed-complex)
   is now **DONE** (T1 + T2), with a dated T2 append;
