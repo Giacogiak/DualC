@@ -167,6 +167,10 @@ rows are scoring noise; of `plan/`, every file but `HANDOFF_P07_TASK1.md` was in
 above, and that handoff's rows each land in this page, the D-40 / D-33 rows, 19/08 run 07 or the
 PR's description. Nothing untriaged is lost; the dump is not kept (as 20/04).
 
+*2026-10-19, merged.* The owner merged the branch's PR into `main` as `5ce5b1c` (the raw
+[hygiene + editor plan](../../raw/2026-10-19-hygiene-and-editor-plan.md) § 2 records it; written
+here at that run's close, [17/22](../17-code-audit-and-hardening/22-hygiene-plan-run.md)).
+
 ---
 
 ← Back to [CLI consolidation](README.md) · the [Roadmap index](../README.md).

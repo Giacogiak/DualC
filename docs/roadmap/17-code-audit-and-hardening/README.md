@@ -34,9 +34,7 @@ status and trigger, and links to both.
   rest: `DUALC_WERROR`, `DUALC_SANITIZE`, the layering assertion and the per-target dialect,
   the first warnings and sanitizer findings, and the CI runs that proved each one red.
 - [`15-test-coverage-batches.md`](15-test-coverage-batches.md) — the delivery record of
-  **#32**: Batch A (the corrected counts, the 38 `Approx(0.0)` margins and their gate check,
-  a working directory per test case, the serial-`ctest` decision) and Batch B (the missing
-  tests, the CLI content checks, coverage measured once, the strut-oracle correction).
+  **#32**, Batches A and B: margins, counts, the missing tests, coverage measured once.
 - [`16-windows-rename-race/README.md`](16-windows-rename-race/README.md) — the record of **#52**, the
   Windows export I/O flake Boletus reported: the desk analysis fixed before the runs, the
   `dualc_io_stress` experiment's five samples, the verdict (an inherited handle, not a
@@ -47,6 +45,7 @@ status and trigger, and links to both.
 - [`19-gradient-contract.md`](19-gradient-contract.md) — #34's `gradientAt` contract, 30-override census, `trueGradientAt`.
 - [`20-gridfield-normal.md`](20-gridfield-normal.md) — #34's `GridField` normal: stencils measured, E12 open.
 - [`21-repeat-pruning.md`](21-repeat-pruning.md) — #35: `repeat`'s neighbours pruned, byte-identical.
+- [`22-hygiene-plan-run.md`](22-hygiene-plan-run.md) — the hygiene + editor run harvested: counts, plan corrections, the in-run choices for review, what it left open.
 - [`07-repeat-tiling-fix.md`](07-repeat-tiling-fix.md) — #34's first item: `repeat` read
   only the folded tile; the conditional fix, its 2.3× cost, the oracle test it showed to
   certify less than it claims (both strut-lattice claims corrected in

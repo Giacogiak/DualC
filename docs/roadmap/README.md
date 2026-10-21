@@ -18,16 +18,19 @@ belongs there, never here; a count or a version is stated only in its home.
 
 ## Current focus
 
-**CLI consolidation** ([21](21-cli-consolidation/README.md)) opened 2026-10-14: the user
-surface becomes the two framework CLIs, `dualc_field` + `dualc_field_view` — a capability only
-a side tool holds moves into the graph, and so within the C ABI's reach, and the tool retires
-([D-55 … D-59](../decisions/01-settled.md); `dualc_boolean` stays,
-[D-60](../decisions/01-settled.md)). It runs as the
-[consolidation plan](../raw/2026-10-14-cli-consolidation-plan.md) on branch
-`feat/cli-consolidation`; #55–#60 are DONE (seven tools retired) and the block closed 2026-10-16 ([21/09](21-cli-consolidation/09-plan-run.md)); the PR is the owner's. Before it the engine
-track drew on the 2026-08-19 audit's ledger ([17](17-code-audit-and-hardening/README.md))
-through the hosted-CI plan, run closed 2026-10-07 ([20/04](20-public-delivery/04-hosted-ci-plan-run.md));
-**#34** is PARTIAL (2026-10-21, branch `feat/hygiene-and-editor`): E12, the `GridField` normal, is open again ([17/20](17-code-audit-and-hardening/20-gridfield-normal.md)). The docs restructuring ([19](19-docs-layers/README.md))
+**The hygiene + editor run** ([17/22](17-code-audit-and-hardening/22-hygiene-plan-run.md))
+closed 2026-10-21 on branch `feat/hygiene-and-editor`, awaiting the owner's push and PR: the
+[hygiene + editor plan](../raw/2026-10-19-hygiene-and-editor-plan.md) took up the rest of
+#34 and, ahead of its trigger, #35 ([D-65](../decisions/01-settled.md)), made the gate build
+the C ABI (#53), and moved the standalone UI to DualCEditor ([22](22-dualceditor-handoff/README.md),
+[D-66](../decisions/01-settled.md)). **#35** is DONE; **#34** is PARTIAL: E12, the `GridField`
+normal, is open again ([17/20](17-code-audit-and-hardening/20-gridfield-normal.md)); **#53** is
+PARTIAL until the remote run. Before it, **CLI consolidation** ([21](21-cli-consolidation/README.md))
+made `dualc_field` + `dualc_field_view` the user surface
+([D-55 … D-60](../decisions/01-settled.md)), closed 2026-10-16
+([21/09](21-cli-consolidation/09-plan-run.md)) and merged 2026-10-19. The engine track draws on
+the 2026-08-19 audit's ledger ([17](17-code-audit-and-hardening/README.md)), through the hosted-CI
+plan before it, run closed 2026-10-07 ([20/04](20-public-delivery/04-hosted-ci-plan-run.md)). The docs restructuring ([19](19-docs-layers/README.md))
 is DONE and leaves the monthly `/docs-semantic-lint` to ordinary sessions; **#48**
 ([14/05](14-c-abi/05-progress-and-cancel.md)) left D-44 / D-45 open and the re-vendor to
 Boletus ([15](15-boletus-handoff.md#dualc-retains--engine--abi-boletus-only-requests-these-upstream)).
@@ -37,11 +40,11 @@ the block records the table links ([D-43](../decisions/01-settled.md)).
 
 | Date | What landed | Record |
 | --- | --- | --- |
-| 2026-10-16 | **Block 21 closed** — the consolidation plan's eleven units harvested; the branch awaits its PR. | [21/09](21-cli-consolidation/09-plan-run.md) |
+| 2026-10-21 | **Hygiene + editor run closed** — #35 DONE (`repeat`'s neighbours pruned, exact), #34 PARTIAL (E12 reopened), the gate builds the C ABI (#53, the remote run owed), the standalone UI moved to DualCEditor; the branch awaits its PR. | [17/22](17-code-audit-and-hardening/22-hygiene-plan-run.md) |
+| 2026-10-16 | **Block 21 closed** — the consolidation plan's eleven units harvested; its PR merged 2026-10-19 (`5ce5b1c`). | [21/09](21-cli-consolidation/09-plan-run.md) |
 | 2026-10-16 | **#60** — seven side CLIs retired into `dualc_field` + `dualc_field_view`, each tested path twinned, pages 01–07 and 10 tombstones. | [21/08](21-cli-consolidation/08-retire-tools.md) |
 | 2026-10-16 | **#59** — `dualc_field --slice AXIS=VALUE`: any graph sampled on a plane to PNG + SVG, `dualc_slice`'s output byte-identical. | [21/06](21-cli-consolidation/06-slice-any-graph.md) |
 | 2026-10-15 | **#58** — 2D profiles under `revolve` / `extrude` in the graph: `dualc_lift`'s recipes byte-identical, and in the viewer. | [21/05](21-cli-consolidation/05-2d-profiles-and-lifts.md) |
-| 2026-10-15 | **#57** — per-node `bake=N` on `mesh` / `winding`: ~4× faster than exact on the large pair, the tool's accuracy at its root box; a baked node inherits its ancestors' `k` (D-62); `dualc_boolean` kept (D-60). | [21/04](21-cli-consolidation/04-mesh-node-bake.md) |
 
 **The shipped keystone (2026-06-14 … 2026-07-06)** — builds #1–#3, the C ABI (#19) and
 the client layer's move to Boletus, each DONE with its evidence in
@@ -61,12 +64,13 @@ row (cited by ID).
    `dualc_field` + `dualc_field_view`; the one status table is
    [21 § The pages of this block](21-cli-consolidation/README.md#the-pages-of-this-block).
    DONE — closed 2026-10-16, the run harvested in
-   [21/09](21-cli-consolidation/09-plan-run.md); the PR is the owner's.
+   [21/09](21-cli-consolidation/09-plan-run.md); merged 2026-10-19.
 2. **Engine hardening — the audit's open findings**
    ([17](17-code-audit-and-hardening/README.md)) — a standing ledger, not a phase; the
    one status table is [17 § Tracked items](17-code-audit-and-hardening/README.md#tracked-items--status-at-a-glance).
    #34 PARTIAL 2026-10-21 (E12 reopened); #35 DONE 2026-10-21; **NEXT:** **#53** (Linux `.so`, [14/06](14-c-abi/06-linux-shared-library.md))
-   PARTIAL (libraries landed with #52; CI proof owed).
+   PARTIAL (libraries landed with #52; the gate builds the ABI since 2026-10-21; CI proof owed);
+   the run's harvest is [17/22](17-code-audit-and-hardening/22-hygiene-plan-run.md).
 3. **TPMS / lattice capability** ([05](05-tpms-lattices/README.md)) — **#17 strut
    lattices** and their Phases 3–5 DONE; **#18 tight Lipschitz `cellOverlaps`**
    DEFERRED ([#18](../decisions/README.md)).

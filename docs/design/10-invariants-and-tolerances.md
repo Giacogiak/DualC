@@ -96,8 +96,7 @@ edges, dropped slivers. The cell side is `rootExtent / 2^depth`
 thinnest wall or gap must span at least two to three cells**; otherwise raise `--depth` or
 thicken the feature. No other parameter substitutes for it — `--collapse` merges cells, it
 does not add them, and `mix`, `onion`, `repeat` all produce features that are only as real
-as the cells that resolve them. Which depth a given recipe needs is that recipe's page in the
-command reference.
+as the cells that resolve them. Each recipe's command-reference page gives its depth.
 
 The same sampling rule sets the **output size**: one vertex per surface cell, so the
 triangle count scales with `4^maxDepth` (the surface-cell count), not with the shape — a
@@ -173,7 +172,7 @@ condition is `D ≥ depth + 1`; the text is imprecise, the behaviour is as above
 | Root-box padding | `padFraction = 0.05` of the longest axis, every axis | the auto-fitted root box and `--slice`'s default region; explicit `rootBounds` gets no padding | `padBBox`, `src/sampler.cpp`; [§ 7](06-parameters-and-vendoring.md#7-configuration-parameters) |
 | Lipschitz-1 prune test | `\|f(centre)\| ≤ halfDiagonal` | the default `cellOverlaps` after the corner-sign test; wrong for a field with `\|∇f\| > 1` | [§ 9](07-limitations.md#standing-limitations), [§ 10.1](08-implicit-field-layer.md#101-implicitfield) |
 | `edgeHit` budget | 6 Illinois regula-falsi steps | where a crossing is placed on an edge and the normal is taken | [§ 10.1](08-implicit-field-layer.md#101-implicitfield) |
-| Central-difference step | `e = 1e-4`, absolute, `double` | every finite-difference gradient: `PrimitiveField`, `PrimitiveField2D`, the default `trueGradientAt` (`normalizedOf`), distortions, lifts | `include/dualc/primitives.h`, `implicit2d.h`, `src/internal/fd_gradient.h`; the absoluteness is [17 E20](../roadmap/17-code-audit-and-hardening/01-findings-ledger-engine.md) |
+| Central-difference step | `e = 1e-4`, absolute, `double` | the finite differences of `PrimitiveField`, `PrimitiveField2D`, the default `trueGradientAt`, distortions, lifts; `WindingNumberField`'s is `1e-4 ×` its mesh diagonal | `include/dualc/primitives.h`, `implicit2d.h`, `src/internal/fd_gradient.h`; the absoluteness is [17 E20](../roadmap/17-code-audit-and-hardening/01-findings-ledger-engine.md) |
 | Gradient-magnitude floor | `kEps = 1e-9` | `normalizedOf` divides by `max(\|∇f\|, kEps)`; a degenerate gradient returns `+z` | `NormalizedField`, `src/implicit/decorators.cpp` |
 | QEF truncation | `qefRegularization = 0.1` on eigenvalues of `AᵀA` (≈ 0.316 on singular values of `A`) | which directions the pseudo-inverse keeps; leaf and collapse solves alike | [§ 4.4](04-qef-manifold-collapse.md#44-the-per-cell-qef), [§ 8](06-parameters-and-vendoring.md#8-vendored-third-party-code) |
 | Vertex clamp tolerance | `clampToleranceCells = 1.0` | a minimiser more than one cell width outside its cell is replaced by the mass point | [§ 4.4](04-qef-manifold-collapse.md#44-the-per-cell-qef) |

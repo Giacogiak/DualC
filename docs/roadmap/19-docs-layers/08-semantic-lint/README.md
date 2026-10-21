@@ -28,6 +28,7 @@ belongs in `design/`; **(d)** an orphan page no page links but its folder README
 | [06-2026-10-07-after-ci-plan.md](06-2026-10-07-after-ci-plan.md) | 2026-10-07 | delta run after the hosted-CI plan (#51, #31, #33, #32: build, tests, `check.py`; design 10/11): (a) 1 · (b) 1 · (c) 1 · (d) 0 · (e) 0 — run 05's "area-weighted" survived in four more places; the #33 build rules and the test conventions had no `design/` home |
 | [07-2026-10-16-after-cli-consolidation.md](07-2026-10-16-after-cli-consolidation.md) | 2026-10-16 | delta run after the CLI consolidation plan (#55–#60: `examples/` graph, codegen, slice, seven tools retired; design 02/09): (a) 3 · (b) 1 · (c) 2 · (d) 0 · (e) 2 — 5 fixed (a new `design/12` for the graph's own rules), 1 handed to 21/09, D-40 and D-33 met, the owner's call |
 | [08-2026-10-19-after-contourer-threads.md](08-2026-10-19-after-contourer-threads.md) | 2026-10-19 | delta run after #34's thread count (P02: contourer, bakes, C ABI 0.5.2, `--threads`; design 03/06): (a) 1 · (b) 1 · (c) 0 · (d) 0 · (e) 0 — 2 fixed, the invariant list and the graph's bake rule |
+| [09-2026-10-21-after-hygiene-run.md](09-2026-10-21-after-hygiene-run.md) | 2026-10-21 | delta run at the hygiene run's close (#34 gradient contract + `trueGradientAt`, the `GridField` normal, #35 pruning, #53 gate; design 08/10): (a) 1 · (b) 0 · (c) 0 · (d) 0 · (e) 1 — the FD-step row fixed; #11's trigger met by the run's scratch benchmarks, the owner's |
 
 ---
 
