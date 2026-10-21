@@ -54,6 +54,11 @@ read it only.
 2. **Pointer stubs in the old homes:** 12/03 § D and § D.1, 12/05 § F's clip mask, and 08's web
    build. Each section keeps its heading, and its body becomes a one-line pointer to the block.
    The verbatim text now lives in the block. Do not leave banners above the old text.
+   *(P07.2 correction: 12/03 § D's body and § Section planes' keyboard record are DualC's
+   `dualc_field_view` record, and 08 has no Web-build section, only a clause of a DONE
+   paragraph. Those three keep their record and gain a pointer sentence for the moved part;
+   12/03 § Parameter push, 12/05's clip mask and Track 2 become pointer bodies. See
+   [22 § How the block was opened](../docs/roadmap/22-dualceditor-handoff/README.md#how-the-block-was-opened).)*
 3. **Decision rows in the index.**
    - D-17: DONE, by DualCEditor.
    - D-16 and D-25: owned by DualCEditor (D-25 DONE there).

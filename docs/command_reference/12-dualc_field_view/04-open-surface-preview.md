@@ -75,9 +75,10 @@ dualc_field_view --expr "onion(normalize(gyroid(wavelength=12)),thickness=1.2)" 
 > what you thicken and export next. To **export** the same isolated lattice as a
 > watertight mesh (and to add a skin / boolean it), feed the identical expression
 > to [`dualc_field`](../11-dualc_field/04-workflow-open-surface.md#workflow-isolate--thicken--skin--union-a-tpms-lattice).
-> A genuinely *open* zero-thickness preview (a render-time clip mask) is not built —
+> A genuinely *open* zero-thickness preview (a render-time clip mask) is not built; it
+> moved to DualCEditor —
 > [roadmap 12 § F](../../roadmap/12-field-graph-and-app/05-open-surface.md#deferred-optional--render-time-clip-mask-isolated-open-surface-preview)
-> holds the decision and its trigger.
+> points to the hand-off.
 
 ---
 

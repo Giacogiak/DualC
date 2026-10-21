@@ -6,7 +6,8 @@ thin-shell workflow and the deferred render-time clip mask.
 ## F. Isolating the open lattice surface — validated workflow + deferred clip mask
 
 > **Status:** thin-shell workflow **validated 2026-06-16** (existing ops, no new
-> code); the render-time clip mask is **deferred / optional**.
+> code); the render-time clip mask is **deferred / optional**, and DualCEditor's since
+> 2026-10-21 ([22](../22-dualceditor-handoff/README.md)).
 
 A recurring engineer question: a zero-thickness TPMS clipped to a volume (e.g.
 `dualc_lattice cube.obj`, or `intersection(gyroid, volume)`) contours into a
@@ -51,62 +52,8 @@ motivates the deferred feature below.
 
 ### Deferred (optional) — render-time clip mask: isolated open-surface preview
 
-> **Not to be confused with the shipped section planes (D.1).** To inspect the
-> *interior of a solid* lattice, the viewers already have axis-aligned **section
-> planes** ([§ D › Section planes](03-raymarch-app.md#section-planes-viewport-inspection);
-> keys in [command_reference/12](../../command_reference/12-dualc_field_view/01-controls.md#section-planes-viewport-only-inspection)).
-> The clip mask below is a *different* feature: it isolates a genuinely **open**
-> surface (a zero-thickness membrane) by masking it with a *second field*, where a
-> section plane is a half-space cut of a *solid*.
-
-**What it is.** A visualization-only capability for `dualc_field_view`: march a
-**surface field** (e.g. a bare `gyroid`, the `gyroid=0` membrane) and accept a hit
-only where a **separate clip field** is inside, otherwise keep marching. Exposed as a
-second field-graph, e.g. `dualc_field_view --expr "<surface>" --clip "<volume>"`. The
-clip volume can be any GLSL-compilable field (box/sphere/their booleans — exact) or a
-mesh (baked to the existing `sampler3D` path). It is the literal "render the surface,
-masked by the volume," with no field-algebra change.
-
-**What it adds beyond the shipped thin-shell approach.**
-
-1. **True zero-thickness open surface** — renders the genuine single membrane as a
-   2-sided sheet with real open boundary edges where it is cut, not a thin *closed*
-   shell with an artificial ±t wall and tiny strut-end caps.
-2. **Decouples "what to draw" from "where to draw it"** — today you must bake a
-   thickness into the field just to make the membrane hit-able and to suppress the
-   skin; the mask draws any field's isosurface inside any volume *without* altering
-   the field, so the preview is exactly the design surface.
-3. **Inspection independent of wall thickness** — judge cell geometry / wavelength /
-   how the lattice meets the boundary before committing a wall thickness.
-4. **Cleaner clipped preview against arbitrary volumes** — open cuts at the volume
-   surface, no tiny boundary caps, for any analytic or mesh clip region.
-
-**Why it is deferred / optional.** Every downstream manufacturing step (thicken →
-watertight export → boolean) requires a real thickness anyway, and the thin-shell
-preview is visually faithful for that workflow. The mask is a pure inspection nicety;
-it unlocks no new *export*. *(2026-09-18: trigger written as row D-16 of the
-[decisions index](../../decisions/README.md).)*
-
-**Implementation sketch (examples-layer only — no core-DC changes).**
-
-- `examples/field_glsl.{h,cpp}`: emit a second `clipSDF(p)` alongside `sceneSDF(p)`
-  from the `--clip` graph; add its uniforms / `MeshTexture` bakes to the binding table.
-- The `kTraceFramework` trace loop (`field_glsl.cpp`) + `examples/raymarch_gl`: at the
-  hit test (and the pre-loop entry-inside case), accept only when `clipSDF(hp) <= 0`;
-  on rejection **continue marching** past the crossing instead of `break`. Needs care
-  for a solid surface field (a bare gyroid's `<0` half-space — march out of the solid
-  before resuming the sphere-trace) and for bisection / normal estimation right at the
-  open boundary.
-- `examples/dualc_field_view.cpp`: add the `--clip` flag and wire the second compile.
-- `examples/dualc_glsl_parity.cpp`: a parity / `--snapshot` case for the masked render.
-- Cost: two SDF evaluations per step (surface + clip) where masking is active.
-
-**Relationship to `#13`/`#14` (roadmap 01).** Distinct — those are **core-DC mesh**
-features; the clip mask is **viewer-only**. If an open-surface *mesh* (not just a
-preview) is ever required, that is the `#14` "open-boundary" direction; how it would be
-realized (the Hermite-edge source tag) is on the item itself,
-[01 Tier-4 item 14](../01-core-dual-contouring/README.md#14-multi-material--open-boundary-contouring)
-— a separate, larger item, PLANNED without a trigger.
+**DEFERRED** — moved to DualCEditor (D-16), not started there; the intent, verbatim, and
+its relation to #13 / #14: [22](../22-dualceditor-handoff/README.md).
 
 ---
 

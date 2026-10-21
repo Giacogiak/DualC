@@ -71,6 +71,20 @@ Unit P07.1 of the hygiene-and-editor plan, 2026-10-21, on branch `feat/hygiene-a
   the editor. The editor has no channel; the second note under the hand-off table records
   that difference.
 
+Unit P07.2, the same day, wrote the pointers back here. **Chosen in-run (pending owner
+review):**
+
+- **Two old homes keep their record.** 12/03 § D is the `dualc_field_view` record and
+  § Section planes the keyboard-planes record, both DualC's; each got a pointer sentence
+  for its moved part (the Web build, the sliders) rather than a one-line body. 08's
+  § Generalized is a DONE record too and got a trailing pointer. Only 12/03 § Parameter
+  push, 12/05's clip mask and the roadmap README's Track 2 became pointer bodies.
+- **D-16 stays DEFERRED, with its trigger.** Nothing has started it, in DualC or in the
+  editor; its row names the editor as owner. D-17 and D-25 read DONE and stay in the open
+  table, as #31 / #33 did when they landed.
+- **Two usage pages say where the item went.** cmd-ref 12/01 (parameter push) and 12/04
+  (clip mask) named it "not built"; each now names DualCEditor.
+
 ## The pages of this block
 
 | Page | Holds |
