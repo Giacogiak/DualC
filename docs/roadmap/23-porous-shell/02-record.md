@@ -144,10 +144,23 @@ dropped. The layout, rules and numbers are in [04](04-complex-and-bins.md).
 
 ## #65 The porous node on the CPU
 
-**PLANNED** — P04. `PorousField` and the `porous` graph token (build, shorthand, JSON round
+**PARTIAL** 2026-10-21 — P04.1 built the field and the token (T1); the end-to-end sponge
+(T2) next. Planned as: `PorousField` and the `porous` graph token (build, shorthand, JSON round
 trip, `rejectUnreadParams`, `--list`); acceptance: Lipschitz-1 sampled, the smoothing bound of
 the defaults table, unknown keys rejected, and a contoured `walls` sponge that is watertight
 with more than one connected component; samples in `examples/samples/`.
+
+**2026-10-21 — T1, the field and the token.** `PorousField` (`dualc/porous.h`,
+`src/implicit/porous.cpp`) builds the seeds and the complex from the volume, then keeps only
+the packed complex and the volume's box. Its value is the packed query; its gradient is
+analytic (`porousDistanceGradient`, 3.2–4.6× the central difference's rate); `cellOverlaps`
+is the default, argued in the file. The `porous` token takes volume[, control] and the twelve
+keys; `dualc_field --list` shows it. Ten `porous:` cases: Lipschitz-1 on random pairs, the
+smoothing bound (k/4 at two primitives, < k elsewhere), the gradient, a mesh volume, errors,
+the round trip. **Chosen in-run (pending owner review):** the struts capped at `B − smooth`
+(P03's cap at `B` steps by about 0.18 k at k > 0, measured); `smooth` ≥ `B` an error for
+struts; `childBakeMargin` hands the volume the pad; no cancel token reaches the graph build.
+The contract, the key table and the numbers are in [05](05-porous-field.md).
 
 ## #66 The porous node in GLSL and dualc_field_view
 

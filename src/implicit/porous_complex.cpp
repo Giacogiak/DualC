@@ -135,18 +135,46 @@ public:
     spill_.push_back({d, i});
     ++n_;
   }
-  double fold(double k) {
-    return porousSmoothFoldRaw(spill_.empty() ? fixed_.data() : spill_.data(), n_, k);
+  double fold(double k) { return porousSmoothFoldRaw(data(), n_, k); }
+  // The fold, and in *g its gradient: gradOf(index) is each primitive's. Each
+  // step smin(acc, d) with acc <= d has the gradient (1 - h/2) grad acc +
+  // (h/2) grad d, h as porousSmin's.
+  template <class GradOf>
+  double foldGradient(double k, const GradOf& gradOf, Vector3* g) {
+    PorousCandidate* c = data();
+    std::size_t w = 0;
+    const double v = porousSmoothFoldRaw(c, n_, k, &w);
+    if (w == 0) {
+      *g = Vector3{0.0, 0.0, 0.0};
+      return v;
+    }
+    double acc = c[0].d;
+    Vector3 grad = gradOf(c[0].index);
+    for (std::size_t i = 1; i < w; ++i) {
+      if (c[i].index == c[i - 1].index) continue;
+      const double h = std::max(k - std::fabs(acc - c[i].d), 0.0) / k;
+      grad = (1.0 - 0.5 * h) * grad + (0.5 * h) * gradOf(c[i].index);
+      acc = porousSmin(acc, c[i].d, k);
+    }
+    *g = grad;
+    return v;
   }
-  static double porousSmoothFoldRaw(PorousCandidate* c, std::size_t n, double k);
+  // Sets *kept to the number of candidates the fold used (sorted at the front
+  // of c), 0 when it returned the bare minimum.
+  static double porousSmoothFoldRaw(PorousCandidate* c, std::size_t n, double k,
+                                    std::size_t* kept = nullptr);
 
 private:
+  PorousCandidate* data() { return spill_.empty() ? fixed_.data() : spill_.data(); }
+
   std::array<PorousCandidate, 64> fixed_;  // the first n_ are set
   std::vector<PorousCandidate> spill_;
   std::size_t n_ = 0;
 };
 
-double Candidates::porousSmoothFoldRaw(PorousCandidate* c, std::size_t n, double k) {
+double Candidates::porousSmoothFoldRaw(PorousCandidate* c, std::size_t n, double k,
+                                       std::size_t* kept) {
+  if (kept) *kept = 0;
   if (n == 0) return kInfinity;
   double m = kInfinity;
   for (std::size_t i = 0; i < n; ++i) m = std::min(m, c[i].d);
@@ -162,6 +190,7 @@ double Candidates::porousSmoothFoldRaw(PorousCandidate* c, std::size_t n, double
       c[j] = c[j - 1];
     c[j] = x;
   }
+  if (kept) *kept = w;
   double acc = c[0].d;
   for (std::size_t i = 1; i < w; ++i)
     if (c[i].index != c[i - 1].index) acc = porousSmin(acc, c[i].d, k);
@@ -702,7 +731,14 @@ PorousComplex buildPorousComplex(const SeedSet& seeds, PorousCells cells, Porous
 
 namespace {
 
-double voronoiWalls(const PorousComplex& c, const Vector3& p, double k, PorousQueryStats* st) {
+const Vector3 kZero{0.0, 0.0, 0.0};
+
+// Each query below fills *grad (when not null) with the gradient of the value
+// it returns: the fold's over the primitives' own (a bisector's -e/|e|, a
+// face plane's -n, a segment's unit offset), zero where a clamp holds the
+// value or the walk gave up.
+double voronoiWalls(const PorousComplex& c, const Vector3& p, double k, PorousQueryStats* st,
+                    Vector3* grad) {
   const PorousBins& g = c.bins;
   std::int32_t s = c.binStart[g.flat(g.coord(p.x, 0), g.coord(p.y, 1), g.coord(p.z, 2))];
   auto seed = [&](std::int32_t i) { return porousPackedPoint(&c.seeds[4 * std::size_t(i)]); };
@@ -739,22 +775,38 @@ double voronoiWalls(const PorousComplex& c, const Vector3& p, double k, PorousQu
     st->maxWalkSteps = std::max(st->maxWalkSteps, steps);
     st->walkCapHits += capped;
   }
+  if (grad) *grad = kZero;
   if (capped) return 0.0;
   const Vector3 ps = seed(s);
   Candidates cand;
   double m = kInfinity;
+  std::int32_t arg = -1;
   for (std::int32_t j = c.neighbourOffsets[std::size_t(s)];
        j < c.neighbourOffsets[std::size_t(s) + 1]; ++j) {
     const std::int32_t q = c.neighbours[std::size_t(j)];
     const double v = porousBisectorDistance(p, ps, seed(q));
+    if (v < m) arg = q;
     m = std::min(m, v);
     if (k > 0.0) cand.push(v, q);
   }
-  const double v = k > 0.0 ? cand.fold(k) : m;
+  if (!grad) {
+    const double v = k > 0.0 ? cand.fold(k) : m;
+    return std::max(0.0, v);
+  }
+  auto gradOf = [&](std::int32_t q) {
+    const Vector3 e = seed(q) - ps;
+    return e * (-1.0 / std::sqrt(dot3(e, e)));
+  };
+  Vector3 gd = kZero;
+  double v = m;
+  if (k > 0.0) v = cand.foldGradient(k, gradOf, &gd);
+  else if (arg >= 0) gd = gradOf(arg);
+  if (v > 0.0) *grad = gd;
   return std::max(0.0, v);
 }
 
-double delaunayWalls(const PorousComplex& c, const Vector3& p, double k, PorousQueryStats* st) {
+double delaunayWalls(const PorousComplex& c, const Vector3& p, double k, PorousQueryStats* st,
+                     Vector3* grad) {
   const PorousBins& g = c.bins;
   const std::int32_t start =
       c.binStart[g.flat(g.coord(p.x, 0), g.coord(p.y, 1), g.coord(p.z, 2))];
@@ -766,23 +818,40 @@ double delaunayWalls(const PorousComplex& c, const Vector3& p, double k, PorousQ
     st->maxWalkSteps = std::max(st->maxWalkSteps, steps);
     st->walkCapHits += capped;
   }
+  if (grad) *grad = kZero;
   if (outside || capped) return 0.0;
   Candidates cand;
   double m = kInfinity;
+  std::int32_t arg = -1;
   for (int f = 0; f < 4; ++f) {
     const double v = -porousPlaneDistance(&c.tetPlanes[16 * std::size_t(t) + 4 * std::size_t(f)], p);
+    if (v < m) arg = 4 * t + f;
     m = std::min(m, v);
     if (k > 0.0) cand.push(v, 4 * t + f);
   }
-  const double v = k > 0.0 ? cand.fold(k) : m;
+  if (!grad) {
+    const double v = k > 0.0 ? cand.fold(k) : m;
+    return std::max(0.0, v);
+  }
+  auto gradOf = [&](std::int32_t i) {
+    const float* n = &c.tetPlanes[4 * std::size_t(i)];
+    return Vector3{-double(n[0]), -double(n[1]), -double(n[2])};
+  };
+  Vector3 gd = kZero;
+  double v = m;
+  if (k > 0.0) v = cand.foldGradient(k, gradOf, &gd);
+  else if (arg >= 0) gd = gradOf(arg);
+  if (v > 0.0) *grad = gd;
   return std::max(0.0, v);
 }
 
-double struts(const PorousComplex& c, const Vector3& p, double k, PorousQueryStats* st) {
+double struts(const PorousComplex& c, const Vector3& p, double k, PorousQueryStats* st,
+              Vector3* grad) {
   const PorousBins& g = c.bins;
   const double B = double(c.bound);
   const int cx = g.coord(p.x, 0), cy = g.coord(p.y, 1), cz = g.coord(p.z, 2);
   double m = kInfinity;
+  std::int32_t arg = -1;
   Candidates cand;
   long visited = 0;
   auto visit = [&](int x, int y, int z) {
@@ -793,6 +862,7 @@ double struts(const PorousComplex& c, const Vector3& p, double k, PorousQuerySta
       const double d = porousSegmentDistance(p, porousPackedPoint(v), porousPackedPoint(v + 4));
       ++visited;
       if (!(d < B)) continue;
+      if (d < m || (d == m && s < arg)) arg = s;
       m = std::min(m, d);
       if (k > 0.0 && d < m + k) cand.push(d, s);
     }
@@ -810,8 +880,27 @@ double struts(const PorousComplex& c, const Vector3& p, double k, PorousQuerySta
         visit(x, y, z);
       }
   if (st) st->candidates += visited;
+  if (grad) *grad = kZero;
   if (m == kInfinity) return B;
-  const double v = k > 0.0 ? cand.fold(k) : m;
+  if (!grad) {
+    const double v = k > 0.0 ? cand.fold(k) : m;
+    return std::max(0.0, std::min(v, B));
+  }
+  auto gradOf = [&](std::int32_t s) {
+    const float* v = &c.segments[8 * std::size_t(s)];
+    const Vector3 a = porousPackedPoint(v), e = porousPackedPoint(v + 4) - a, q = p - a;
+    const double l2 = dot3(e, e);
+    double t = l2 > 0.0 ? dot3(q, e) / l2 : 0.0;
+    t = std::min(std::max(t, 0.0), 1.0);
+    const Vector3 r = q - t * e;
+    const double n = std::sqrt(dot3(r, r));
+    return n > 0.0 ? r * (1.0 / n) : kZero;
+  };
+  Vector3 gd = kZero;
+  double v = m;
+  if (k > 0.0) v = cand.foldGradient(k, gradOf, &gd);
+  else gd = gradOf(arg);
+  if (v > 0.0 && v < B) *grad = gd;
   return std::max(0.0, std::min(v, B));
 }
 
@@ -820,9 +909,17 @@ double struts(const PorousComplex& c, const Vector3& p, double k, PorousQuerySta
 double porousDistance(const PorousComplex& c, const Vector3& p, double smooth,
                       PorousQueryStats* stats) {
   const double k = smooth > 0.0 ? smooth : 0.0;
-  if (c.mode == PorousMode::Struts) return struts(c, p, k, stats);
-  if (c.cells == PorousCells::Voronoi) return voronoiWalls(c, p, k, stats);
-  return delaunayWalls(c, p, k, stats);
+  if (c.mode == PorousMode::Struts) return struts(c, p, k, stats, nullptr);
+  if (c.cells == PorousCells::Voronoi) return voronoiWalls(c, p, k, stats, nullptr);
+  return delaunayWalls(c, p, k, stats, nullptr);
+}
+
+double porousDistanceGradient(const PorousComplex& c, const Vector3& p, double smooth,
+                              Vector3* gradient, PorousQueryStats* stats) {
+  const double k = smooth > 0.0 ? smooth : 0.0;
+  if (c.mode == PorousMode::Struts) return struts(c, p, k, stats, gradient);
+  if (c.cells == PorousCells::Voronoi) return voronoiWalls(c, p, k, stats, gradient);
+  return delaunayWalls(c, p, k, stats, gradient);
 }
 
 } // namespace internal

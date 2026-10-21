@@ -44,7 +44,7 @@ DualC/
 │   ├── implicit.h             v2 ImplicitField base, sources, combinators, decorators, domain ops
 │   ├── implicit2d.h           2D fields (Circle/Box/Segment/Polygon) + Revolve/Extrude lifts
 │   ├── primitives.h           30 analytic primitive field classes (Tiers A/B/C) + 6 TPMS
-│   └── porous.h               The porous shell's seeds: Pcg32, SeedParams / SeedSet, generatePorousSeeds, the ramps and ceilings (roadmap 23 #63); PorousCells / PorousMode (#64)
+│   └── porous.h               The porous shell's seeds: Pcg32, SeedParams / SeedSet, generatePorousSeeds, the ramps and ceilings (roadmap 23 #63); PorousCells / PorousMode (#64); PorousParams, PorousField (#65)
 │
 ├── src/                       Core library implementation
 │   ├── hermite_octree.cpp     Octree node allocation & traversal
@@ -68,7 +68,8 @@ DualC/
 │   │   ├── primitives_tpms.cpp   6 TPMS (gyroid, schwarz-p, diamond, fischer-koch, lidinoid, neovius)
 │   │   ├── porous_seeds.cpp      Porous seeds: Bridson Poisson-disk (variable radius), jitter, random, the pad, Lloyd by sampling; bit-identical on any OS (roadmap 23 #63)
 │   │   ├── porous_delaunay.cpp   The seeds' Delaunay tetrahedralization: Bowyer–Watson on exact predicates, Morton order, an infinite vertex for the hull, canonical tet list (roadmap 23 #64)
-│   │   └── porous_complex.cpp    The complex: the dual (faces, edges, neighbours, clamped circumcentres), the packed arrays and bins of the four cells × mode cases, the smoothed distance query (roadmap 23 #64)
+│   │   ├── porous_complex.cpp    The complex: the dual (faces, edges, neighbours, clamped circumcentres), the packed arrays and bins of the four cells × mode cases, the smoothed distance query and its gradient (roadmap 23 #64, #65)
+│   │   └── porous.cpp            PorousField: the volume read at build time only, the packed query as the value (struts capped at B − smooth), the analytic gradient, the Lipschitz-1 argument for the default cellOverlaps (roadmap 23 #65)
 │   │
 │   └── internal/             Private internals (NOT public API)
 │       ├── octree.{h,cpp}        Octree structure, child indexing, topology queries
@@ -79,7 +80,7 @@ DualC/
 │       ├── third_party/shewchuk/ VENDORED (public domain, J. R. Shewchuk) — predicates.c, exact orient3d / insphere, byte-identical; compiled only through exact_predicates.c
 │       ├── exact_predicates.{h,c} The C wrapper that compiles predicates.c with every symbol renamed dualc_pred_*, and the C++ declarations (roadmap 23 #64)
 │       ├── compat/sys/time.h     An empty <sys/time.h> for predicates.c on MSVC, which has none
-│       ├── porous_complex.h      PorousDual, PorousComplex (the flat float / int32 arrays + bin grid the GLSL node uploads), buildPorousComplex, porousDistance, the shared smin and distance pieces
+│       ├── porous_complex.h      PorousDual, PorousComplex (the flat float / int32 arrays + bin grid the GLSL node uploads), buildPorousComplex, porousDistance / porousDistanceGradient, the shared smin and distance pieces
 │       ├── porous_delaunay.h     DelaunayTets + tetrahedralize(): the tet list (sorted vertices, neighbours, -1 on the hull) the complex is derived from
 │       ├── sign_oracle.{h,cpp}   inside/outside via pseudonormal / winding / generalized-winding
 │       ├── dc_tables.{h,cpp}     DC corner/edge indexing + cell/face/edge descent tables
@@ -169,13 +170,13 @@ DualC/
 │   ├── test_strut_lattice.cpp Strut lattices (sc/bcc/fcc/octet) vs an independent segment-distance oracle
 │   ├── test_demo_meshes.cpp   Procedural mesh topology validation
 │   ├── test_parallel.cpp      parallelFor: exception propagation + the bit-identical-across-thread-counts guarantee
-│   ├── test_field_graph.cpp   Field-graph parse/build/dispatch + mesh-resolver caching + located errors
+│   ├── test_field_graph.cpp   Field-graph parse/build/dispatch + mesh-resolver caching + located errors; the `porous` token (roadmap 23 #65)
 │   ├── test_field_glsl.cpp    Field→GLSL codegen: DAG dedup + emission (GL-free, so it runs under CTest)
 │   ├── test_streaming_export.cpp  Tiled/streamed STL + 3MF vs the monolithic mesh
 │   ├── test_diagnostics.cpp   Diagnostics channel: every reported degradation shown firing (roadmap 17 #26)
 │   ├── test_validation.cpp    Argument validation + the BBox::empty sentinel (roadmap 17 #34)
 │   ├── test_cancel_progress.cpp  CancelToken unwinds every driver; hooks are inert; report shape; the writers' rc 3 + `.part` guarantee (roadmap 14 #48)
-│   ├── test_porous.cpp        Porous seeds (roadmap 23 #63): PCG32 reference stream, ramps, determinism, Poisson distance, graded density, pad, relax, cancel, ceilings; the Delaunay (#64): Euler and the convex hull, empty sphere, the regular grid, a pinned tet-list digest, errors; the complex (#64): dual adjacency, the bin query bit-equal to brute force in the four cases, pinned digests, errors and cancel; hidden `[porous-bench]` rate and size cases
+│   ├── test_porous.cpp        Porous seeds (roadmap 23 #63): PCG32 reference stream, ramps, determinism, Poisson distance, graded density, pad, relax, cancel, ceilings; the Delaunay (#64): Euler and the convex hull, empty sphere, the regular grid, a pinned tet-list digest, errors; the complex (#64): dual adjacency, the bin query bit-equal to brute force in the four cases, pinned digests, errors and cancel; the field (#65): 1-Lipschitz, the smoothing bound, the analytic gradient, a mesh volume, determinism and errors; hidden `[porous-bench]` rate and size cases
 │   └── test_writers_io.cpp    The writers' failure surface (17 #52): a failed open names the OS error through dce::lastError(); on
 │                                Windows a held `.part` is renamed after retries, a long hold fails with the text, a child started
 │                                with handle inheritance mid-export inherits nothing (output handles are non-inheritable)

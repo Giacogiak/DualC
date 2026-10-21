@@ -6,12 +6,13 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <vector>
 
 // The porous shell's build-time half (roadmap 23): seeds placed in any
 // volume, deterministically on every OS. The Delaunay complex (#64,
 // src/internal/porous_complex.h) and the
-// `porous` field (#65) build on SeedSet; the defaults every choice here
+// `porous` field (#65, PorousField below) build on SeedSet; the defaults every choice here
 // follows are the table in docs/roadmap/23-porous-shell/01-study.md.
 
 namespace dualc {
@@ -101,5 +102,64 @@ SeedSet generatePorousSeeds(const ImplicitField& volume,
                             const ImplicitField* control,
                             const SeedParams&    params,
                             const CancelToken*   cancel = nullptr);
+
+// What one porous field is built from: its seeds, which complex, and the
+// smooth-min radius of the fold (k >= 0; 0 = the exact distance).
+struct PorousParams {
+  SeedParams  seeds;
+  PorousCells cells  = PorousCells::Voronoi;
+  PorousMode  mode   = PorousMode::Walls;
+  double      smooth = 0.0;
+};
+
+// The `porous` source (#65): the unsigned distance to the Voronoi or Delaunay
+// complex of seeds placed in a volume -- its walls or its struts -- smoothed
+// by PorousParams::smooth. Zero on the complex and positive elsewhere, so a
+// contour of the bare field is empty: it is a source to give a thickness to,
+// e.g. intersection(V, onion(porous(V, ...), thickness=t)).
+//
+// The volume and the control are read during construction only (seeds,
+// tetrahedralization, packing); the field keeps the packed complex and the
+// volume's box, nothing that points back at the caller's fields. bounds() is
+// that box: the complex is built for it and is meant to be clipped by the
+// volume. Construction costs the seeds plus about 2 s per 100k seeds (one
+// thread); evaluation is const and thread-safe.
+//
+// Throws std::invalid_argument on what generatePorousSeeds and the complex
+// reject, on a negative or non-finite smooth, and, for struts, on a smooth at
+// or past the struts' bound B (the field would be 0 everywhere); throws
+// Cancelled when `cancel` is requested.
+class PorousField : public ImplicitField {
+public:
+  PorousField(const ImplicitField& volume, const ImplicitField* control,
+              const PorousParams& params, const CancelToken* cancel = nullptr);
+  ~PorousField() override;
+
+  PorousField(const PorousField&)            = delete;
+  PorousField& operator=(const PorousField&) = delete;
+
+  double  valueAt(const Vector3& p) const override;
+  // Analytic: one query, the fold's gradient over the primitives' own.
+  Vector3 gradientAt(const Vector3& p) const override;
+  Vector3 trueGradientAt(const Vector3& p) const override;
+  BBox    bounds() const override;
+  // cellOverlaps: the default, deliberately -- see porous.cpp for why the
+  // value is 1-Lipschitz.
+
+  struct Stats {
+    std::size_t seeds = 0, padSeeds = 0, tets = 0;
+    std::size_t delaunayFaces = 0, delaunayEdges = 0;
+    std::size_t segments = 0;     // struts: the packed segments
+    std::size_t bins = 0;
+    std::size_t packedBytes = 0;  // what the GLSL node uploads
+    double bound = 0.0;           // struts: B, where the distance is clamped
+  };
+  const Stats&        stats() const;
+  const PorousParams& params() const;
+
+private:
+  struct Impl;
+  std::unique_ptr<const Impl> impl_;
+};
 
 } // namespace dualc

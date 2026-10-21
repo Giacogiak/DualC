@@ -177,6 +177,15 @@ constexpr int kPorousMaxWalk = 1024;
 double porousDistance(const PorousComplex& c, const Vector3& p, double smooth,
                       PorousQueryStats* stats = nullptr);
 
+// The same value, bit for bit, and in *gradient its gradient (#65): the
+// smooth fold's chain of (1 - h/2, h/2) weights over the primitives' own
+// gradients, the nearest primitive's at smooth = 0, zero where a clamp (0,
+// or B for struts) holds the value or a walk gave up. PorousField clamps the
+// struts lower, at B - smooth (src/implicit/porous.cpp says why). One query, where a
+// central difference takes six.
+double porousDistanceGradient(const PorousComplex& c, const Vector3& p, double smooth,
+                              Vector3* gradient, PorousQueryStats* stats = nullptr);
+
 // --- The pieces the query and its brute-force test share ---------------------
 
 // The quadratic smooth minimum: min(a, b) - h^2 k / 4, h = max(k - |a-b|, 0)/k.

@@ -29,6 +29,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
 #include <map>
 #include <memory>
@@ -971,6 +972,70 @@ dualc::Field2DPtr buildProfile(const GraphNode& n, const std::string& lift) {
 
 // A lift's own value, read through this TU's findParam (the unread-key check
 // sees it) and checked by checkLiftParam -- the readNodeBake pattern.
+// A string key that names one of `names` (the first is the default).
+std::size_t choiceParam(const GraphNode& n, const std::string& key,
+                        const std::vector<const char*>& names) {
+  const std::string v = strParam(n, key, names[0]);
+  for (std::size_t i = 0; i < names.size(); ++i)
+    if (v == names[i]) return i;
+  std::string list;
+  for (std::size_t i = 0; i < names.size(); ++i)
+    list += (i ? (i + 1 == names.size() ? " or " : ", ") : "") + std::string(names[i]);
+  throw GraphError("'" + n.op + "' " + key + " must be " + list + " (got '" + v + "')",
+                   n.pointer);
+}
+
+// A whole-number key in [lo, hi].
+double wholeParam(const GraphNode& n, const std::string& key, double def, double lo,
+                  double hi) {
+  const double v = numParam(n, key, def);
+  if (!std::isfinite(v) || v != std::floor(v) || v < lo || v > hi) {
+    char range[64];
+    std::snprintf(range, sizeof range, "[%.17g, %.17g]", lo, hi);
+    throw GraphError("'" + n.op + "' " + key + " must be a whole number in " + range,
+                     n.pointer);
+  }
+  return v;
+}
+
+// porous(volume[, control], ...): the node's keys, read and checked; the
+// defaults are the raw plan's signature (docs/raw/2026-10-19-porous-shell-plan.md
+// § 3) as the study's defaults table refines it (docs/roadmap/23-porous-shell/01).
+dualc::PorousParams readPorousParams(const GraphNode& n, bool hasControl) {
+  dualc::PorousParams p;
+  p.cells = choiceParam(n, "cells", {"voronoi", "delaunay"}) == 0
+                ? dualc::PorousCells::Voronoi
+                : dualc::PorousCells::Delaunay;
+  p.mode = choiceParam(n, "mode", {"walls", "struts"}) == 0 ? dualc::PorousMode::Walls
+                                                             : dualc::PorousMode::Struts;
+  static const dualc::SeedDistribution dists[] = {dualc::SeedDistribution::Poisson,
+                                                  dualc::SeedDistribution::Jitter,
+                                                  dualc::SeedDistribution::Random};
+  p.seeds.dist = dists[choiceParam(n, "dist", {"poisson", "jitter", "random"})];
+  static const dualc::DensityRamp ramps[] = {dualc::DensityRamp::Linear,
+                                             dualc::DensityRamp::Smooth,
+                                             dualc::DensityRamp::Gaussian};
+  p.seeds.ramp = ramps[choiceParam(n, "ramp", {"linear", "smooth", "gaussian"})];
+  p.seeds.spacing = requireNum(n, "spacing");
+  if (!std::isfinite(p.seeds.spacing) || !(p.seeds.spacing > 0.0))
+    throw GraphError("'porous' spacing must be > 0", n.pointer);
+  p.seeds.spacing2 = numParam(n, "spacing2", p.seeds.spacing);
+  if (!std::isfinite(p.seeds.spacing2) || !(p.seeds.spacing2 > 0.0))
+    throw GraphError("'porous' spacing2 must be > 0", n.pointer);
+  const bool graded = p.seeds.spacing2 != p.seeds.spacing;
+  if (graded && !hasControl)
+    throw GraphError("'porous' spacing2 differs from spacing: give a control field "
+                     "as the second child",
+                     n.pointer);
+  p.seeds.d0 = numParam(n, "d0", 0.0);
+  p.seeds.d1 = graded ? requireNum(n, "d1") : numParam(n, "d1", 0.0);
+  p.seeds.relax = int(wholeParam(n, "relax", 0.0, 0.0, double(dualc::kPorousMaxRelax)));
+  p.seeds.seed = std::uint64_t(wholeParam(n, "seed", 0.0, 0.0, 9007199254740992.0));
+  p.seeds.jitter = numParam(n, "jitter", 1.0);
+  p.smooth = numParam(n, "smooth", 0.0);
+  return p;
+}
+
 double readLiftParam(const GraphNode& n) {
   const char* key = liftParamKey(n.op);
   const bool has = findParam(n, key) != nullptr;
@@ -1115,6 +1180,21 @@ dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes,
                         requireNum(n, "hi"));
   }
 
+  // porous: the unsigned distance to the cell complex of seeds placed in the
+  // volume (child 0), the spacing graded by an optional control (child 1).
+  // Both children are read while the node is built and never again; the
+  // field-graph build has no cancel token, so none reaches the seeds.
+  if (op == "porous") {
+    if (n.in.size() != 1 && n.in.size() != 2)
+      throw GraphError("'porous' expects 1 or 2 child node(s) (volume[, control]), got " +
+                           std::to_string(n.in.size()),
+                       n.pointer);
+    const dualc::PorousParams p = readPorousParams(n, n.in.size() == 2);
+    const dualc::FieldPtr volume = child(0);
+    const dualc::FieldPtr control = n.in.size() == 2 ? child(1) : nullptr;
+    return std::make_shared<dualc::PorousField>(*volume, control.get(), p);
+  }
+
   // 5. Decorators / domain ops via the shared PostOp registry (one child).
   PostOp pop;
   if (tryMakePostOp(n, pop)) {
@@ -1244,6 +1324,15 @@ double childBakeMargin(const GraphNode& parent, std::size_t i, double margin) {
     return margin + std::abs(rawNum(parent, "thickness", 0.0));
   if (op == "displace")
     return margin + std::abs(rawNum(parent, "amplitude", 0.1));
+  // porous reads its volume (child 0) only to place seeds, up to the pad
+  // max(spacing, spacing2) outside it -- above the zero level, where a bake's
+  // far field over-estimates; its own value never reads the volume, so the
+  // ancestors' margin does not pass down. The control is read for its value
+  // anywhere in the volume and pad, which no band bounds.
+  if (op == "porous")
+    return i == 0 ? std::max(rawNum(parent, "spacing", 0.0),
+                             rawNum(parent, "spacing2", rawNum(parent, "spacing", 0.0)))
+                  : 0.0;
   if ((op == "graded-onion" || op == "graded-offset") && i == 0)
     return margin + std::max(std::abs(rawNum(parent, "t1", 0.0)),
                              std::abs(rawNum(parent, "t2", 0.0)));

@@ -10,6 +10,7 @@
 #include "dualc/primitives.h"
 
 #include "internal/exact_predicates.h"
+#include "internal/fd_gradient.h"
 #include "internal/porous_complex.h"
 #include "internal/porous_delaunay.h"
 #include "internal/seed_grid.h"
@@ -1250,4 +1251,304 @@ TEST_CASE("porous: complex sizes and query rates", "[.][porous-bench]") {
       }
     WARN(os.str());
   }
+}
+
+// --- The porous field (#65) ---------------------------------------------------
+
+namespace {
+
+// The field cases' volume and seeds: sphereSeeds()'s, so the field's complex
+// is the one packPorousComplex makes from them.
+PorousParams sphereParams(PorousCells cells, PorousMode mode, double smooth) {
+  PorousParams p;
+  p.seeds.spacing = 0.2;
+  p.seeds.seed = 21;
+  p.cells = cells;
+  p.mode = mode;
+  p.smooth = smooth;
+  return p;
+}
+SphereField sphereVolume() { return SphereField({0.1, -0.2, 0.05}, 1.0); }
+
+// The distances of the primitives the value at p is folded from, each once:
+// the nearest seed's bisectors, the containing tet's faces (none outside the
+// hull), or every segment within B.
+std::vector<double> primitiveDistances(const Brute& br, const PorousComplex& c,
+                                       const Vector3& p) {
+  std::vector<double> d;
+  if (c.mode == PorousMode::Struts) {
+    const double B = double(c.bound);
+    for (std::size_t s = 0; s < c.segments.size() / 8; ++s) {
+      const float* v = &c.segments[8 * s];
+      const double e = internal::porousSegmentDistance(p, internal::porousPackedPoint(v),
+                                                       internal::porousPackedPoint(v + 4));
+      if (e < B) d.push_back(e);
+    }
+  } else if (c.cells == PorousCells::Voronoi) {
+    const std::int32_t s = br.nearestSeed(p);
+    const Vector3 ps = internal::porousPackedPoint(&c.seeds[4 * std::size_t(s)]);
+    for (std::int32_t j : br.tetNeighbours[std::size_t(s)])
+      d.push_back(internal::porousBisectorDistance(
+          p, ps, internal::porousPackedPoint(&c.seeds[4 * std::size_t(j)])));
+  } else {
+    const std::int32_t t = br.locate(p);
+    if (t >= 0)
+      for (int f = 0; f < 4; ++f)
+        d.push_back(-internal::porousPlaneDistance(
+            &c.tetPlanes[16 * std::size_t(t) + 4 * std::size_t(f)], p));
+  }
+  return d;
+}
+
+Vector3 randomUnit(Pcg32& rng) {
+  for (;;) {
+    const Vector3 v{2 * rng.nextDouble() - 1, 2 * rng.nextDouble() - 1, 2 * rng.nextDouble() - 1};
+    const double n = std::sqrt(dot3(v, v));
+    if (n > 0.1 && n <= 1.0) return v * (1.0 / n);
+  }
+}
+
+} // namespace
+
+TEST_CASE("porous: the field is 1-Lipschitz on random pairs", "[porous]") {
+  const SphereField volume = sphereVolume();
+  BBox box = volume.bounds();
+  box.min -= Vector3{0.3, 0.3, 0.3};
+  box.max += Vector3{0.3, 0.3, 0.3};
+  const double lengths[] = {1e-4, 1e-3, 1e-2, 0.05, 0.3};
+  for (PorousCells cells : kCells)
+    for (PorousMode mode : kModes)
+      for (double k : {0.0, 0.06}) {
+        const PorousField f(volume, nullptr, sphereParams(cells, mode, k));
+        INFO(caseName(cells, mode) << ", smooth " << k);
+        Pcg32 rng(5, 11);
+        double worst = 0.0;
+        const std::vector<Vector3> pts = randomIn(box, 20000, 31);
+        for (std::size_t i = 0; i < pts.size(); ++i) {
+          const Vector3 p = pts[i];
+          const Vector3 q = p + randomUnit(rng) * lengths[i % 5];
+          const double fp = f.valueAt(p), fq = f.valueAt(q);
+          REQUIRE(fp >= 0.0);
+          const double l = std::sqrt(dist2(p, q));
+          worst = std::max(worst, std::fabs(fp - fq) / l);
+          REQUIRE(std::fabs(fp - fq) <= l * (1.0 + 1e-6) + 1e-9);
+        }
+        REQUIRE(worst > 0.5);  // the pairs do probe the slope
+        if (mode == PorousMode::Struts) {
+          // Far from every segment the struts sit at their ceiling, B - k.
+          const double B = f.stats().bound;
+          REQUIRE(B > 0.0);
+          REQUIRE(f.valueAt(Vector3{9.0, 9.0, 9.0}) == B - k);
+        }
+      }
+}
+
+TEST_CASE("porous: smooth only lowers the value by < k and by k/4 at two primitives",
+          "[porous]") {
+  // The defaults table's bound (23/01): a fold of two primitives within k of
+  // the minimum lowers it by at most k/4; any fold by less than k. Struts are
+  // held at B - k, so there the bound is read where m + k < B (the exact
+  // region); beyond, the ceiling lowers B to B - k, by exactly k.
+  const SphereField volume = sphereVolume();
+  const SeedSet seeds = sphereSeeds();
+  const PorousDual dual = internal::derivePorousDual(seeds);
+  const Brute br(seeds, dual);
+  const double k = 0.06;
+  for (PorousCells cells : kCells)
+    for (PorousMode mode : kModes) {
+      INFO(caseName(cells, mode));
+      const PorousComplex c = internal::packPorousComplex(dual, seeds, cells, mode);
+      const PorousField f0(volume, nullptr, sphereParams(cells, mode, 0.0));
+      const PorousField fk(volume, nullptr, sphereParams(cells, mode, k));
+      REQUIRE(f0.stats().seeds == seeds.points.size());
+      REQUIRE(f0.stats().packedBytes == c.packedBytes());
+      const double B = double(c.bound);
+      std::size_t two = 0, exact = 0;
+      for (const Vector3& p : randomIn(volume.bounds(), 3000, 41)) {
+        const double v0 = f0.valueAt(p), vk = fk.valueAt(p);
+        // The field is the packed query (struts: under their ceiling).
+        if (mode == PorousMode::Walls) {
+          REQUIRE(v0 == internal::porousDistance(c, p, 0.0));
+          REQUIRE(vk == internal::porousDistance(c, p, k));
+        } else {
+          REQUIRE(vk == std::min(internal::porousDistance(c, p, k), B - k));
+        }
+        REQUIRE(vk <= v0);
+        std::vector<double> d = primitiveDistances(br, c, p);
+        if (d.empty()) continue;
+        const double m = *std::min_element(d.begin(), d.end());
+        if (mode == PorousMode::Struts && !(m + k < B)) {
+          REQUIRE(v0 - vk <= k);
+          continue;
+        }
+        ++exact;
+        REQUIRE(v0 - vk < k);
+        const auto within = std::count_if(d.begin(), d.end(), [&](double e) { return e < m + k; });
+        if (within == 2) {
+          ++two;
+          REQUIRE(v0 - vk <= 0.25 * k * (1.0 + 1e-9));
+        }
+      }
+      REQUIRE(exact > 1000);
+      REQUIRE(two > 50);
+    }
+}
+
+TEST_CASE("porous: the analytic gradient matches a central difference", "[porous]") {
+  const SphereField volume = sphereVolume();
+  for (PorousCells cells : kCells)
+    for (PorousMode mode : kModes)
+      for (double k : {0.0, 0.06}) {
+        INFO(caseName(cells, mode) << ", smooth " << k);
+        const PorousField f(volume, nullptr, sphereParams(cells, mode, k));
+        std::size_t agree = 0, n = 0;
+        for (const Vector3& p : randomIn(volume.bounds(), 2000, 51)) {
+          const Vector3 g = f.trueGradientAt(p);
+          REQUIRE(g.norm() <= 1.0 + 1e-6);
+          const Vector3 u = f.gradientAt(p);
+          const double un = u.norm();
+          REQUIRE((std::fabs(un - 1.0) < 1e-9 || un == 0.0));
+          if (g.norm() > 1e-12) REQUIRE(dot3(u, g) > 0.0);
+          else REQUIRE(u == Vector3{0.0, 0.0, 1.0});
+          const Vector3 fd = internal::fdTrueGradient(f, p);
+          ++n;
+          if ((g - fd).norm() < 1e-3) ++agree;
+        }
+        // Only a point within the step of a kink (a wall, a cell edge, a
+        // clamp) disagrees.
+        REQUIRE(agree >= n * 97 / 100);
+      }
+}
+
+TEST_CASE("porous: a mesh volume is read at build time only", "[porous]") {
+  auto [mesh, geom] = dce::makeTorus(1.0, 0.35, 48, 24);
+  std::unique_ptr<PorousField> f;
+  BBox torusBox;
+  std::vector<Vector3> pts;
+  std::vector<char> inside;
+  {
+    MeshSource torus(*mesh, *geom);
+    torusBox = torus.bounds();
+    pts = randomIn(torusBox, 3000, 61);
+    for (const Vector3& p : pts) inside.push_back(torus.valueAt(p) < 0.0);
+    PorousParams p;
+    p.seeds.spacing = 0.12;
+    p.cells = PorousCells::Voronoi;
+    p.mode = PorousMode::Walls;
+    f = std::make_unique<PorousField>(torus, nullptr, p);
+  }  // the volume is gone; the field keeps what it packed
+  mesh.reset();
+  geom.reset();
+  REQUIRE(f->bounds().min == torusBox.min);
+  REQUIRE(f->bounds().max == torusBox.max);
+  const PorousField::Stats& st = f->stats();
+  REQUIRE(st.seeds > 500);
+  REQUIRE(st.padSeeds > 0);
+  REQUIRE(st.padSeeds < st.seeds);
+  REQUIRE(st.tets > st.seeds);
+  Pcg32 rng(3, 4);
+  std::size_t zeroish = 0;
+  for (std::size_t i = 0; i < pts.size(); ++i) {
+    const Vector3 p = pts[i];
+    const Vector3 q = p + randomUnit(rng) * 0.01;
+    const double fp = f->valueAt(p);
+    REQUIRE(fp >= 0.0);
+    // Inside, a wall is nearer than the nearest seed, which blue noise keeps
+    // within 1.16 spacings (the study's largest empty sphere).
+    if (inside[i]) REQUIRE(fp < 1.2 * 0.12);
+    REQUIRE(std::fabs(fp - f->valueAt(q)) <= 0.01 * (1.0 + 1e-6) + 1e-9);
+    if (fp < 0.01) ++zeroish;
+  }
+  REQUIRE(zeroish > 100);
+}
+
+TEST_CASE("porous: the field is deterministic and rejects a bad smooth or a cancel",
+          "[porous]") {
+  const SphereField volume = sphereVolume();
+  const PorousField a(volume, nullptr, sphereParams(PorousCells::Delaunay, PorousMode::Struts, 0.03));
+  const PorousField b(volume, nullptr, sphereParams(PorousCells::Delaunay, PorousMode::Struts, 0.03));
+  for (const Vector3& p : randomIn(volume.bounds(), 500, 71)) REQUIRE(a.valueAt(p) == b.valueAt(p));
+
+  REQUIRE_THROWS_AS(PorousField(volume, nullptr, sphereParams(PorousCells::Voronoi, PorousMode::Walls, -0.1)),
+                    std::invalid_argument);
+  REQUIRE_THROWS_AS(
+      PorousField(volume, nullptr,
+                  sphereParams(PorousCells::Voronoi, PorousMode::Walls,
+                               std::numeric_limits<double>::infinity())),
+      std::invalid_argument);
+  // Struts: a smooth at B (about 1.2 x the spacing) would leave 0 everywhere.
+  try {
+    PorousField(volume, nullptr, sphereParams(PorousCells::Voronoi, PorousMode::Struts, 0.5));
+    FAIL("expected std::invalid_argument");
+  } catch (const std::invalid_argument& e) {
+    REQUIRE(std::string(e.what()).find("bound B") != std::string::npos);
+  }
+  // Walls take any smooth.
+  REQUIRE_NOTHROW(PorousField(volume, nullptr, sphereParams(PorousCells::Voronoi, PorousMode::Walls, 0.5)));
+  // What the seeds reject comes through.
+  PorousParams bad = sphereParams(PorousCells::Voronoi, PorousMode::Walls, 0.0);
+  bad.seeds.spacing = 0.0;
+  REQUIRE_THROWS_AS(PorousField(volume, nullptr, bad), std::invalid_argument);
+
+  CancelToken cancel;
+  cancel.request();
+  REQUIRE_THROWS_AS(
+      PorousField(volume, nullptr, sphereParams(PorousCells::Voronoi, PorousMode::Walls, 0.0), &cancel),
+      Cancelled);
+}
+
+// Why the field holds the struts at B - k and not at porousDistance's B
+// (src/implicit/porous.cpp): the largest slope of each, on close pairs; then
+// the field's build time and query rates (roadmap 23/02 #65).
+TEST_CASE("porous: the struts' ceiling and the raw query's slope", "[.][porous-bench]") {
+  const SeedSet seeds = sphereSeeds();
+  const SphereField volume = sphereVolume();
+  std::ostringstream os;
+  for (PorousCells cells : kCells) {
+    const double k = 0.06;
+    const PorousComplex c = internal::buildPorousComplex(seeds, cells, PorousMode::Struts);
+    const PorousField f(volume, nullptr, sphereParams(cells, PorousMode::Struts, k));
+    Pcg32 rng(9, 9);
+    double raw = 0.0, field = 0.0;
+    for (const Vector3& p : randomIn(volume.bounds(), 400000, 81)) {
+      const Vector3 q = p + randomUnit(rng) * 1e-5;
+      raw = std::max(raw, std::fabs(internal::porousDistance(c, p, k) -
+                                    internal::porousDistance(c, q, k)) / 1e-5);
+      field = std::max(field, std::fabs(f.valueAt(p) - f.valueAt(q)) / 1e-5);
+    }
+    os << "\n" << caseName(cells, PorousMode::Struts) << ", k = " << k << ", B = " << c.bound
+       << ": largest slope, raw query " << raw << ", field " << field;
+  }
+  // The field's build and its rates: value, analytic gradient, central
+  // difference, on the analytic unit sphere at spacing 0.05.
+  const SphereField unit({0.0, 0.0, 0.0}, 1.0);
+  auto ms = [](auto a, auto b) { return std::chrono::duration<double, std::milli>(b - a).count(); };
+  const std::vector<Vector3> pts = randomIn(unit.bounds(), 200000, 91);
+  for (PorousCells cells : kCells)
+    for (PorousMode mode : kModes) {
+      PorousParams pp;
+      pp.seeds.spacing = 0.05;
+      pp.cells = cells;
+      pp.mode = mode;
+      pp.smooth = 0.015;
+      auto t0 = std::chrono::steady_clock::now();
+      const PorousField f(unit, nullptr, pp);
+      const double build = ms(t0, std::chrono::steady_clock::now());
+      double sum = 0.0;
+      t0 = std::chrono::steady_clock::now();
+      for (const Vector3& p : pts) sum += f.valueAt(p);
+      const double tv = ms(t0, std::chrono::steady_clock::now());
+      t0 = std::chrono::steady_clock::now();
+      for (const Vector3& p : pts) sum += f.trueGradientAt(p).x;
+      const double tg = ms(t0, std::chrono::steady_clock::now());
+      t0 = std::chrono::steady_clock::now();
+      for (const Vector3& p : pts) sum += internal::fdTrueGradient(f, p).x;
+      const double tf = ms(t0, std::chrono::steady_clock::now());
+      const double n = double(pts.size());
+      os << "\n" << caseName(cells, mode) << ", spacing 0.05, smooth 0.015: " << f.stats().seeds
+         << " seeds, " << f.stats().tets << " tets, build " << build << " ms; per second: value "
+         << n / tv * 1e3 << ", analytic gradient " << n / tg * 1e3 << ", central difference "
+         << n / tf * 1e3 << " (sum " << sum << ")";
+    }
+  WARN(os.str());
 }
