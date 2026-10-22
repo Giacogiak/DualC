@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(dualc VERSION 0.5.2 LANGUAGES CXX)
+project(dualc VERSION 0.5.2 LANGUAGES CXX C)
 
 # Is DualC the top-level project, or is it being add_subdirectory'd into one?
 # PROJECT_IS_TOP_LEVEL would say so directly but needs CMake 3.21; this project
@@ -45,14 +45,10 @@ endif()
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(DualCWarnings)
 
-# The library is C++ only; examples/ and tests/ also compile the vendored
-# miniz.c. The Visual Studio generator compiles a .c file without C being
-# enabled, Ninja and Makefiles do not (CMAKE_C_COMPILE_OBJECT unset), so C is
-# enabled here, at top level so both sibling directories see it, and only when
-# they are built -- a consumer of the library alone still needs no C compiler.
-if(DUALC_BUILD_EXAMPLES OR DUALC_BUILD_TESTS)
-  enable_language(C)
-endif()
+# C is a project language: the library compiles Shewchuk's predicates.c
+# (src/internal/exact_predicates.c, roadmap 23 #64), and examples/ and tests/
+# compile the vendored miniz.c. Ninja and Makefiles need C enabled to compile a
+# .c file at all (CMAKE_C_COMPILE_OBJECT unset otherwise).
 
 # No CMAKE_CXX_STANDARD here: a global set before the fetches below leaked
 # -std=c++17 into geometry-central and Catch2 (roadmap 17 #33). The dialect is
@@ -191,9 +187,15 @@ add_library(dualc STATIC
   src/implicit/primitives_tierB.cpp
   src/implicit/primitives_tierC.cpp
   src/implicit/primitives_tpms.cpp
+  src/implicit/porous_seeds.cpp
+  src/implicit/porous_delaunay.cpp
+  src/implicit/porous_complex.cpp
+  src/implicit/porous.cpp
   # Vendored (Unlicense) -- see THIRD_PARTY.md
   src/internal/qef.cpp
   src/internal/svd.cpp
+  # DualC's wrapper around the vendored (public-domain) predicates.c
+  src/internal/exact_predicates.c
   # DualC-original
   src/internal/octree.cpp
   src/internal/mesh_bvh.cpp
@@ -235,6 +237,43 @@ else()
     src/internal/qef.cpp
     src/internal/svd.cpp
     PROPERTIES COMPILE_OPTIONS "-w")
+endif()
+
+# The porous seeds, tets, packed complex and field are bit-identical on every OS (roadmap
+# 23 #63-#65): no FMA contraction, which Clang turns on by default on arm64 (the macOS
+# CI). MSVC's default /fp:precise does not contract.
+if(NOT MSVC)
+  set_source_files_properties(
+    src/implicit/porous_seeds.cpp
+    src/implicit/porous_delaunay.cpp
+    src/implicit/porous_complex.cpp
+    src/implicit/porous.cpp
+    PROPERTIES COMPILE_OPTIONS "-ffp-contract=off")
+endif()
+
+# Shewchuk's predicates.c (vendored, see THIRD_PARTY.md), compiled through
+# src/internal/exact_predicates.c and the SYSTEM include path above: K&R
+# definitions, which C23 removed, so C90 with extensions (-std=gnu90); no FMA
+# contraction, which would defeat its exact arithmetic; warnings silenced as for
+# the other vendored sources. MSVC has no <sys/time.h>: src/internal/compat
+# holds an empty one, on that file's include path alone.
+set_target_properties(dualc PROPERTIES C_STANDARD 90 C_EXTENSIONS ON)
+if(MSVC)
+  set_source_files_properties(src/internal/exact_predicates.c PROPERTIES
+    COMPILE_OPTIONS "/W0;/fp:precise"
+    INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/src/internal/compat")
+else()
+  # Under DUALC_SANITIZE the file is not ASan-instrumented: its
+  # fast_expansion_sum_zeroelim reads one element past its inputs (the value is
+  # never used; the inputs are the caller's stack arrays), which the sanitize
+  # CI job reports on the first exact orient3d. The file stays byte-identical
+  # to upstream; UBSan still covers it.
+  set(_dualc_pred_opts "-w;-ffp-contract=off")
+  if(DUALC_SANITIZE MATCHES "address")
+    list(APPEND _dualc_pred_opts "-fno-sanitize=address")
+  endif()
+  set_source_files_properties(src/internal/exact_predicates.c PROPERTIES
+    COMPILE_OPTIONS "${_dualc_pred_opts}")
 endif()
 
 if(DUALC_BUILD_TESTS)

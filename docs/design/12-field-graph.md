@@ -56,6 +56,34 @@ named keys, then `params` / positionals from the front (a longer flat list is re
 returns the values in `profileKinds()`'s flat order. A nested array (`points=[[x,y],…]`) is
 read as its flattening by every reader.
 
+## The porous source
+
+`porous(volume[, control], …)` builds a `PorousField` (`dualc/porous.h`): seeds in the
+volume, one Delaunay tetrahedralization of them, and the packed complex its value queries
+(the keys: [11/16](../command_reference/11-dualc_field/16-porous-shell.md)). How the library
+builds and queries it — the seeds, the tets, the packed layout, the bin bound, 1-Lipschitz,
+determinism, the ceilings — is [13](13-porous-shell.md). The graph adds these rules:
+
+- **The volume is read at build time only.** The seeds are placed where the volume's value
+  is below the pad `max(spacing, spacing2)`, graded by the control; then the field keeps the
+  packed complex and the volume's box (its `bounds()`) and drops both children.
+  `childBakeMargin` hands the volume the pad, as it is read up to the pad above its zero
+  level, and the control 0; the node's value never reads either, so the margin the node is
+  handed does not pass down.
+- **No cancel.** `FieldGraph::build` takes no token, so neither the CLI's build nor the C
+  ABI's create calls can cancel the seeds or the tetrahedralization; contour and export
+  cancel as for any field. A ceiling or a bad `smooth` throws `std::invalid_argument` in
+  the library, which the graph locates.
+- **One builder for the preview.** The codegen runs `FieldGraph::build` on the `porous`
+  node itself and uploads that field's `packed()` arrays, so the preview reads the export's
+  cells bit for bit. They go in 2D data textures 2048 texels wide, item `i` at
+  `(i mod 2048, i div 2048)`: RGBA32F for seeds, planes and segment ends, R32I / RGBA32I for
+  offsets, neighbours, start indices and bin items. `smooth` is the node's one uniform; the
+  bin origin, size and dims and `B` are literals; `nodeStepScale` is 1 and
+  `nodeFeatureScale` the smaller spacing. A texture taller than `GlslLimits::maxTextureSize`,
+  or more units than `maxTextureUnits`, sends the node to the baked grid instead (a
+  `GlslScene` note, step scale 0.5).
+
 ## What the preview cannot show as exported
 
 The preview is the export's field ([10 § Preview equals export](10-invariants-and-tolerances.md#output-invariants))

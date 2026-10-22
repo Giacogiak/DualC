@@ -36,22 +36,22 @@ root instead, populate `data/` with `dualc_gen_demo all --dir data` ([09](09-dua
 
 | # | Tool | Purpose | Page |
 | --- | --- | --- | --- |
-| 1 | `dualc_demo` | Retired 2026-10-16 (#60): re-meshing is `mesh(path=…)` in `dualc_field` ([11/11](11-dualc_field/11-mesh-in.md)); the number is never reused. | [01-dualc_demo.md](01-dualc_demo.md) |
-| 2 | `dualc_primitive` | Retired 2026-10-16 (#60): the catalogue is [11/12](11-dualc_field/12-primitive-catalogue.md); the number is never reused. | [02-dualc_primitive.md](02-dualc_primitive.md) |
+| 1 | `dualc_demo` | Retired 2026-10-16 (#60): re-meshing is `mesh(path=…)` in `dualc_field` ([11/11](11-dualc_field/11-mesh-in.md)). | [01-dualc_demo.md](01-dualc_demo.md) |
+| 2 | `dualc_primitive` | Retired 2026-10-16 (#60): the catalogue is [11/12](11-dualc_field/12-primitive-catalogue.md). | [02-dualc_primitive.md](02-dualc_primitive.md) |
 | 3 | `dualc_boolean` | Booleans of two meshes. | [03-dualc_boolean.md](03-dualc_boolean.md) |
-| 4 | `dualc_lift` | Retired 2026-10-16 (#60): the lifts are graph nodes ([11/09](11-dualc_field/09-2d-profiles-and-lifts.md)); the number is never reused. | [04-dualc_lift.md](04-dualc_lift.md) |
-| 5 | `dualc_csg_demo` | Retired 2026-10-16 (#60): the six recipes are graph files ([11/13](11-dualc_field/13-composition-samples.md)); the number is never reused. | [05-dualc_csg_demo.md](05-dualc_csg_demo.md) |
-| 6 | `dualc_lattice` | Retired 2026-10-16 (#60): the lattice-in-mesh graph is [11/14](11-dualc_field/14-tpms-in-mesh.md); the number is never reused. | [06-dualc_lattice.md](06-dualc_lattice.md) |
-| 7 | `dualc_slice` | Retired 2026-10-16 (#60): `dualc_field --slice` slices any graph ([11/10](11-dualc_field/10-slice.md)); the number is never reused. | [07-dualc_slice.md](07-dualc_slice.md) |
-| 8 | `dualc_view` | Retired 2026-10-03 with the Polyscope dependency; the number is never reused. | [08-dualc_view.md](08-dualc_view.md) |
+| 4 | `dualc_lift` | Retired 2026-10-16 (#60): the lifts are graph nodes ([11/09](11-dualc_field/09-2d-profiles-and-lifts.md)). | [04-dualc_lift.md](04-dualc_lift.md) |
+| 5 | `dualc_csg_demo` | Retired 2026-10-16 (#60): the six recipes are graph files ([11/13](11-dualc_field/13-composition-samples.md)). | [05-dualc_csg_demo.md](05-dualc_csg_demo.md) |
+| 6 | `dualc_lattice` | Retired 2026-10-16 (#60): the lattice-in-mesh graph is [11/14](11-dualc_field/14-tpms-in-mesh.md). | [06-dualc_lattice.md](06-dualc_lattice.md) |
+| 7 | `dualc_slice` | Retired 2026-10-16 (#60): `dualc_field --slice` slices any graph ([11/10](11-dualc_field/10-slice.md)). | [07-dualc_slice.md](07-dualc_slice.md) |
+| 8 | `dualc_view` | Retired 2026-10-03 with the Polyscope dependency. | [08-dualc_view.md](08-dualc_view.md) |
 | 9 | `dualc_gen_demo` | Generate the procedural demo meshes (sphere, torus, knot, …). | [09-dualc_gen_demo.md](09-dualc_gen_demo.md) |
-| 10 | `dualc_raymarch` | Retired 2026-10-16 (#60): the same preview is a `dualc_field_view` graph ([12/05](12-dualc_field_view/05-tpms-in-mesh-preview.md)); the number is never reused. | [10-dualc_raymarch.md](10-dualc_raymarch.md) |
+| 10 | `dualc_raymarch` | Retired 2026-10-16 (#60): the same preview is a `dualc_field_view` graph ([12/05](12-dualc_field_view/05-tpms-in-mesh-preview.md)). | [10-dualc_raymarch.md](10-dualc_raymarch.md) |
 | 11 | `dualc_field` | General field-graph: compose any ops (JSON) and contour once. | [11-dualc_field/](11-dualc_field/README.md) |
 | 12 | `dualc_field_view` | Field-graph GPU raymarch viewer — any field-graph compiled to GLSL and sphere-traced (opt-in build). | [12-dualc_field_view/](12-dualc_field_view/README.md) |
 
-Four tools ship: 3, 9, 11 and 12. A retired tool keeps its number and its page, a tombstone
-that says where its content lives now. Pages 11 and 12 are same-numbered folders; the size
-contract (`scripts/check.py`) applies to every page.
+Four tools ship: 3, 9, 11 and 12. A retired tool keeps its number, never reused, and its
+page, a tombstone that says where its content lives now. Pages 11 and 12 are same-numbered
+folders.
 
 ### Lattices have no separate tool page — they are field-graph *nodes*
 
@@ -93,6 +93,7 @@ Design rationale and status: [roadmap 05 §17 / §17b](../roadmap/05-tpms-lattic
 | Headless PNG of a field graph; smooth orbit on a weak GPU; the WebGL2 shader | `--snapshot`, `--preview-scale`, `--es` | [12/README](12-dualc_field_view/README.md#cli-flags) |
 | Inspect a lattice membrane without the volume's skin | `intersection(onion(normalize(tpms)), volume)` | [12/04](12-dualc_field_view/04-open-surface-preview.md); export it: [11/04](11-dualc_field/04-workflow-open-surface.md) |
 | Cross-section of a field on a plane | `--slice`, `--res` (was `dualc_slice --plane`) | [11/10](11-dualc_field/10-slice.md) |
+| A sponge, foam or bone inside any volume | `porous(…)` + `onion` / `graded-onion` / `offset` | [11/16](11-dualc_field/16-porous-shell.md) |
 
 ## GPU viewer keyboard map (`dualc_raymarch` & `dualc_field_view`)
 
@@ -172,6 +173,7 @@ and [§ Units and frames](../design/09-conventions.md#units-and-frames).
 | 3D primitives | 30 | P1–P30 (see [11/12](11-dualc_field/12-primitive-catalogue.md)) |
 | TPMS primitives | 6 | `gyroid`, `schwarz-p`, `diamond`, `fischer-koch`, `lidinoid`, `neovius` |
 | Strut lattices | 4 | `sc`, `bcc`, `fcc`, `octet` (field-graph nodes; see [11-dualc_field/ § Strut lattices](11-dualc_field/02-strut-lattices.md#strut-lattices-wireframe-crystals)) |
+| Porous source | 1 | `porous` ([11/16](11-dualc_field/16-porous-shell.md)) |
 | 2D primitives | 4 | `circle`, `rect`, `segment`, `polygon` |
 | Decorators | 6 (7 names) | `offset` ≡ `round`, `onion`, `scale`, `elongate`, `translate`, `rotate` (D1–D7 on [11/12](11-dualc_field/12-primitive-catalogue.md#the-decorators-one-child)) |
 | Decorators, with no former flag | 2 + 2 graded | `normalize`, `transform`; two-child `graded-onion` (hollow shell), `graded-offset` (solid inflation / graded strut radius) |

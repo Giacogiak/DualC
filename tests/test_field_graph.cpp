@@ -1,6 +1,7 @@
 #include "field_graph.h"
 
 #include "dualc/pipeline.h"
+#include "dualc/porous.h"
 
 #include "geometrycentral/surface/meshio.h"
 #include "geometrycentral/surface/surface_mesh.h"
@@ -11,11 +12,17 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
+#include <cstdlib>
 #include <filesystem>
+#include <iostream>
+#include <map>
 #include <memory>
+#include <numeric>
 #include <string>
 #include <tuple>
+#include <utility>
 #include <vector>
 
 // Tests for the field-graph parser/builder (examples/field_graph.{h,cpp}). The
@@ -904,4 +911,254 @@ TEST_CASE("2D profiles and lifts round-trip through dumpJson + parseJson",
   const FieldGraph a = FieldGraph::build(viaShort, meshes);
   const FieldGraph b = FieldGraph::build(viaJson, meshes);
   requireSameField(a.field(), b.field());
+}
+
+// --- porous (roadmap 23 #65) --------------------------------------------------
+
+namespace {
+
+std::string porousError(const std::string& shorthand) {
+  FixedResolver meshes{nullptr, nullptr};
+  try {
+    FieldGraph::build(parseShorthand(shorthand), meshes);
+  } catch (const GraphError& e) {
+    REQUIRE_FALSE(e.pointer().empty());
+    return e.what();
+  }
+  FAIL("expected a GraphError for " << shorthand);
+  return {};
+}
+
+}  // namespace
+
+TEST_CASE("porous: the node builds from JSON and shorthand and round-trips",
+          "[field_graph][porous]") {
+  FixedResolver meshes{nullptr, nullptr};
+  const std::string sh =
+      "porous(sphere(radius=1), spacing=0.3, cells=delaunay, mode=struts, "
+      "smooth=0.05, seed=3, relax=2)";
+  const std::string js = R"({"op":"porous","spacing":0.3,"cells":"delaunay",
+      "mode":"struts","smooth":0.05,"seed":3,"relax":2,
+      "in":[{"op":"sphere","radius":1}]})";
+  const GraphNode a = parseShorthand(sh);
+  const std::string dumped = dumpJson(a);
+  const GraphNode b = parseJson(dumped);
+  REQUIRE(dumpJson(b) == dumped);
+  FieldGraph fa = FieldGraph::build(a, meshes);
+  FieldGraph fb = FieldGraph::build(b, meshes);
+  FieldGraph fj = FieldGraph::build(parseJson(js), meshes);
+  const auto* pf = dynamic_cast<const dualc::PorousField*>(&fa.field());
+  REQUIRE(pf != nullptr);
+  REQUIRE(pf->params().cells == dualc::PorousCells::Delaunay);
+  REQUIRE(pf->params().mode == dualc::PorousMode::Struts);
+  REQUIRE(pf->params().seeds.relax == 2);
+  REQUIRE(pf->params().seeds.seed == 3);
+  REQUIRE(pf->params().smooth == 0.05);
+  REQUIRE(fa.field().bounds().max.x == Catch::Approx(1.0));
+  for (int i = 0; i < 64; ++i) {
+    const Vector3 p{std::sin(1.3 * i), std::cos(0.7 * i), std::sin(0.31 * i + 1)};
+    const double v = fa.field().valueAt(p);
+    REQUIRE(v >= 0.0);
+    REQUIRE(fb.field().valueAt(p) == v);
+    REQUIRE(fj.field().valueAt(p) == v);
+  }
+}
+
+TEST_CASE("porous: every key of the signature is read and defaulted",
+          "[field_graph][porous]") {
+  FixedResolver meshes{nullptr, nullptr};
+  // All twelve keys, with the control child: no unread-key error.
+  FieldGraph g = FieldGraph::build(
+      parseShorthand("porous(sphere(radius=1), plane(1,0,0,0), cells=voronoi, "
+                     "mode=walls, dist=jitter, spacing=0.25, spacing2=0.4, d0=-1, "
+                     "d1=1, ramp=smooth, relax=1, seed=7, smooth=0.02, jitter=0.5)"),
+      meshes);
+  const auto& p = dynamic_cast<const dualc::PorousField&>(g.field()).params();
+  REQUIRE(p.seeds.dist == dualc::SeedDistribution::Jitter);
+  REQUIRE(p.seeds.ramp == dualc::DensityRamp::Smooth);
+  REQUIRE(p.seeds.spacing2 == 0.4);
+  REQUIRE(p.seeds.d0 == -1.0);
+  REQUIRE(p.seeds.d1 == 1.0);
+  REQUIRE(p.seeds.jitter == 0.5);
+  REQUIRE(p.smooth == 0.02);
+
+  // The defaults of the raw plan's signature.
+  FieldGraph d = FieldGraph::build(parseShorthand("porous(sphere(radius=1), spacing=0.3)"),
+                                   meshes);
+  const auto& q = dynamic_cast<const dualc::PorousField&>(d.field()).params();
+  REQUIRE(q.cells == dualc::PorousCells::Voronoi);
+  REQUIRE(q.mode == dualc::PorousMode::Walls);
+  REQUIRE(q.seeds.dist == dualc::SeedDistribution::Poisson);
+  REQUIRE(q.seeds.spacing2 == 0.3);
+  REQUIRE(q.seeds.d0 == 0.0);
+  REQUIRE(q.seeds.ramp == dualc::DensityRamp::Linear);
+  REQUIRE(q.seeds.relax == 0);
+  REQUIRE(q.seeds.seed == 0);
+  REQUIRE(q.seeds.jitter == 1.0);
+  REQUIRE(q.smooth == 0.0);
+}
+
+TEST_CASE("porous: unknown keys a missing spacing and bad values are located errors",
+          "[field_graph][porous]") {
+  const std::string v = "sphere(radius=1)";
+  std::string e = porousError("porous(" + v + ", spacing=0.3, spacng=0.2)");
+  REQUIRE(e.find("unknown parameter 'spacng' for 'porous'") != std::string::npos);
+  REQUIRE(e.find("spacing2") != std::string::npos);  // the accepted list
+  REQUIRE(porousError("porous(" + v + ")").find("missing required parameter 'spacing'") !=
+          std::string::npos);
+  REQUIRE(porousError("porous(" + v + ", spacing=0)").find("spacing must be > 0") !=
+          std::string::npos);
+  REQUIRE(porousError("porous(" + v + ", spacing=0.3, cells=foam)")
+              .find("cells must be voronoi or delaunay (got 'foam')") != std::string::npos);
+  REQUIRE(porousError("porous(" + v + ", spacing=0.3, mode=wall)").find("walls or struts") !=
+          std::string::npos);
+  REQUIRE(porousError("porous(" + v + ", spacing=0.3, dist=blue)")
+              .find("poisson, jitter or random") != std::string::npos);
+  REQUIRE(porousError("porous(" + v + ", spacing=0.3, relax=2.5)").find("relax must be") !=
+          std::string::npos);
+  REQUIRE(porousError("porous(" + v + ", spacing=0.3, relax=51)").find("relax must be") !=
+          std::string::npos);
+  REQUIRE(porousError("porous(" + v + ", spacing=0.3, seed=-1)").find("seed must be") !=
+          std::string::npos);
+  REQUIRE(porousError("porous(" + v + ", spacing=0.3, spacing2=0.5)")
+              .find("give a control field") != std::string::npos);
+  REQUIRE(porousError("porous(" + v + ", plane(1,0,0,0), spacing=0.3, spacing2=0.5)")
+              .find("missing required parameter 'd1'") != std::string::npos);
+  REQUIRE(porousError("porous(spacing=0.3)").find("expects 1 or 2 child") != std::string::npos);
+  REQUIRE(porousError("porous(" + v + "," + v + "," + v + ", spacing=0.3)")
+              .find("expects 1 or 2 child") != std::string::npos);
+  // The library's own checks come back located.
+  REQUIRE(porousError("porous(" + v + ", spacing=0.3, smooth=-1)").find("smooth must be") !=
+          std::string::npos);
+  REQUIRE(porousError("porous(" + v + ", spacing=0.3, jitter=-1)").find("jitter must be") !=
+          std::string::npos);
+}
+
+TEST_CASE("porous: a mesh volume through the graph", "[field_graph][porous]") {
+  auto box = makeBox(1.0);
+  FixedResolver meshes{std::get<0>(box).get(), std::get<1>(box).get()};
+  FieldGraph g = FieldGraph::build(
+      parseShorthand("intersection(mesh(path=\"x\"), "
+                     "onion(porous(mesh(path=\"x\"), spacing=0.4), thickness=0.02))"),
+      meshes);
+  REQUIRE(meshes.calls == 2);
+  const dualc::BBox b = g.field().bounds();
+  REQUIRE(b.min.x == Catch::Approx(-1.0));
+  REQUIRE(b.max.z == Catch::Approx(1.0));
+  // Material (< 0) and pores (> 0) both occur inside the cube.
+  int solid = 0, pore = 0;
+  for (int i = 0; i < 400; ++i) {
+    const Vector3 p{0.9 * std::sin(1.3 * i), 0.9 * std::cos(0.7 * i),
+                    0.9 * std::sin(0.31 * i + 1)};
+    (g.field().valueAt(p) < 0.0 ? solid : pore)++;
+  }
+  REQUIRE(solid > 0);
+  REQUIRE(pore > 0);
+}
+
+TEST_CASE("porous: childBakeMargin hands the volume the pad and the control nothing",
+          "[field_graph][porous][bake]") {
+  const std::string a = "sphere(radius=1)";
+  REQUIRE(childBakeMargin(parseShorthand("porous(" + a + ", spacing=0.3)"), 0, 0.7) == 0.3);
+  const GraphNode g =
+      parseShorthand("porous(" + a + ", plane(1,0,0,0), spacing=0.3, spacing2=0.5, d1=1)");
+  REQUIRE(childBakeMargin(g, 0, 0.0) == 0.5);
+  REQUIRE(childBakeMargin(g, 1, 0.7) == 0.0);
+}
+
+namespace {
+
+// The connected surfaces of a contoured mesh: a union-find over its faces,
+// two faces joined when they share an edge. A sponge's outer skin is one
+// surface and every closed cavity adds one, so a count above 1 means the walls
+// enclose pores. The counter is the test's, not the library's (raw plan § 3
+// P04 T2).
+std::size_t countSurfaces(geometrycentral::surface::SurfaceMesh& m) {
+  const std::vector<std::vector<std::size_t>> faces = m.getFaceVertexList();
+  std::vector<std::size_t> parent(faces.size());
+  std::iota(parent.begin(), parent.end(), std::size_t{0});
+  auto find = [&](std::size_t x) {
+    while (parent[x] != x) x = parent[x] = parent[parent[x]];
+    return x;
+  };
+  std::map<std::pair<std::size_t, std::size_t>, std::size_t> firstFace;
+  for (std::size_t f = 0; f < faces.size(); ++f) {
+    const std::vector<std::size_t>& v = faces[f];
+    for (std::size_t i = 0; i < v.size(); ++i) {
+      const std::size_t a = v[i], b = v[(i + 1) % v.size()];
+      const auto key = std::make_pair(std::min(a, b), std::max(a, b));
+      const auto [it, fresh] = firstFace.emplace(key, f);
+      if (!fresh) parent[find(f)] = find(it->second);
+    }
+  }
+  std::size_t roots = 0;
+  for (std::size_t f = 0; f < faces.size(); ++f)
+    if (find(f) == f) ++roots;
+  return roots;
+}
+
+}  // namespace
+
+// The sponge end to end (#65, P04 T2): the foam recipe on the unit sphere,
+// its rim rounded by a smooth-intersection, contours to a closed mesh whose
+// walls enclose cavities. The crisp `intersection` of the same graph leaves
+// a few non-manifold edges where a pore nearly breaks through the sphere, at
+// every seed and at depth 6 and 7 -- the rim limit an `intersection` of a thin
+// shell already has (23/06); `k` = 0.1 is three cells here. Depth 6 keeps the
+// case near 0.4 GB and a second.
+TEST_CASE("porous: a walls sponge contours watertight with more than one component",
+          "[field_graph][porous]") {
+  FixedResolver meshes{nullptr, nullptr};
+  FieldGraph fg = FieldGraph::build(
+      parseShorthand("smooth-intersection(sphere(radius=1), "
+                     "onion(porous(sphere(radius=1), spacing=0.4, seed=3), "
+                     "thickness=0.06), k=0.1)"),
+      meshes);
+  dualc::SamplerParams sp;
+  sp.maxDepth = 6;
+  dualc::ContourerParams cp;
+  dualc::Diagnostics diag;
+  auto [mesh, geom, normals] = dualc::dualContourField(fg.field(), sp, cp, &diag);
+  REQUIRE_FALSE(diag.emptyContour);
+  REQUIRE(diag.outputBoundaryEdges == 0);
+  REQUIRE(diag.outputNonManifoldEdges == 0);
+  REQUIRE(diag.outputWatertight);
+  const std::size_t surfaces = countSurfaces(*mesh);
+  INFO("faces " << mesh->nFaces() << ", surfaces " << surfaces);
+  REQUIRE(surfaces > 1);
+}
+
+// The sizes behind 23/06's table: the seeds, pad seeds, tets and packed
+// primitives of every porous node the end-to-end cases contour, and the build
+// time. Hidden; run it from build/examples (the bracket is read by bare name,
+// or from DUALC_POROUS_BENCH_MESH).
+TEST_CASE("porous: the end-to-end cases' seeds and tets", "[.][porous-bench]") {
+  const char* env = std::getenv("DUALC_POROUS_BENCH_MESH");
+  const std::string mesh = std::string("mesh(path=\"") + (env ? env : "bracket.obj") + "\")";
+  const std::string sphere = "sphere(radius=1)";
+  const std::vector<std::string> nodes = {
+      "porous(" + sphere + ", spacing=0.25)",
+      "porous(" + sphere + ", cells=delaunay, spacing=0.5)",
+      "porous(" + sphere + ", mode=struts, spacing=0.25)",
+      "porous(" + sphere + ", cells=delaunay, mode=struts, spacing=0.4)",
+      "porous(" + sphere + ", spacing=0.4, seed=3)",
+      "porous(" + mesh + ", spacing=0.15)",
+      "porous(" + mesh + ", cells=delaunay, spacing=0.3)",
+      "porous(" + mesh + ", mode=struts, spacing=0.15)",
+      "porous(" + mesh + ", cells=delaunay, mode=struts, spacing=0.25)",
+  };
+  FileMeshResolver files;
+  for (const std::string& n : nodes) {
+    const auto t0 = std::chrono::steady_clock::now();
+    FieldGraph fg = FieldGraph::build(parseShorthand(n), files);
+    const double ms = std::chrono::duration<double, std::milli>(
+                          std::chrono::steady_clock::now() - t0).count();
+    const auto* f = dynamic_cast<const dualc::PorousField*>(&fg.field());
+    REQUIRE(f != nullptr);
+    const dualc::PorousField::Stats& st = f->stats();
+    std::cout << n << ": seeds " << st.seeds << " (pad " << st.padSeeds << "), tets "
+              << st.tets << ", faces " << st.delaunayFaces << ", edges " << st.delaunayEdges
+              << ", segments " << st.segments << ", packed " << st.packedBytes
+              << " B, build " << ms << " ms\n";
+  }
 }

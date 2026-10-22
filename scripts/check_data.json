@@ -37,7 +37,8 @@
   "status_tables": [
     "docs/roadmap/README.md",
     "docs/roadmap/17-code-audit-and-hardening/README.md",
-    "docs/roadmap/21-cli-consolidation/README.md"
+    "docs/roadmap/21-cli-consolidation/README.md",
+    "docs/roadmap/23-porous-shell/README.md"
   ],
 
   "status_vocab_only": {
@@ -45,7 +46,8 @@
     "tables": [
       "docs/decisions/README.md",
       "docs/decisions/01-settled.md",
-      "docs/decisions/02-dropped.md"
+      "docs/decisions/02-dropped.md",
+      "docs/decisions/03-settled-continued.md"
     ]
   },
 
@@ -166,7 +168,7 @@
     "docs/roadmap/17-code-audit-and-hardening/03-correctness-and-robustness/03-diagnostics-item.md",
     "docs/roadmap/17-code-audit-and-hardening/04-engineering-quality.md",
     "docs/roadmap/17-code-audit-and-hardening/17-viewer-silhouette-specks.md",
-    "docs/roadmap/21-cli-consolidation/01-record.md"
+    "docs/roadmap/21-cli-consolidation/01-record.md", "docs/roadmap/23-porous-shell/02-record.md"
   ],
 
   "external_link_prefixes": [
@@ -197,7 +199,7 @@
     "src/internal/third_party/"
   ],
 
-  "parity_expected_cases": 82,
+  "parity_expected_cases": 87,
 
   "io_stress": { "concurrency": 6, "iterations": 30 }
 }

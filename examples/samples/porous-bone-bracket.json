@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "units": "mm",
+  "root": {
+    "op": "intersection",
+    "in": [
+      { "op": "mesh", "path": "bracket.obj" },
+      {
+        "op": "offset",
+        "r": 0.015,
+        "in": [
+          {
+            "op": "porous",
+            "cells": "delaunay",
+            "mode": "struts",
+            "spacing": 0.25,
+            "in": [
+              { "op": "mesh", "path": "bracket.obj" }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

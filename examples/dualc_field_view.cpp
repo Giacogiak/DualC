@@ -109,6 +109,16 @@ GLuint uploadMesh(GLuint prog, const dce::fieldgraph::MeshTexture& mt, int unit)
                                mt.values.data(), unit);
 }
 
+// Upload one porous data texture on unit `unit` (after the meshes'), through
+// the same raymarch_gl path dualc_glsl_parity uses. Returns the texture id.
+GLuint uploadData(GLuint prog, const dce::fieldgraph::DataTexture& dt, int unit) {
+  const bool f = dt.format == dce::fieldgraph::DataTexture::Format::RGBA32F;
+  return dce::gl::uploadData2D(
+      prog, dt.samplerName, dce::fieldgraph::dataTextureChannels(dt.format), !f,
+      dt.width, dt.height,
+      f ? static_cast<const void*>(dt.floats.data()) : dt.ints.data(), unit);
+}
+
 // Set a binding's current value into its uniform (a parameter edit -- no
 // recompile). mat4 bindings are uploaded row-major (transpose) to match
 // Mat4::transformPoint.
@@ -225,10 +235,16 @@ int main(int argc, char** argv) {
   }
 
   // ---- compile the graph to GLSL ------------------------------------------
+  // The first compile runs before the window exists (a bad graph never opens
+  // one), so it uses the guaranteed texture limits; once the context answers,
+  // the queried ones replace them (below), and every reload uses those.
+  dce::fieldgraph::GlslLimits limits;
   auto compile = [&](const GraphNode& g, GlslScene& scene) -> bool {
     try {
       scene = dce::fieldgraph::compileToGlsl(g, resolver, bounds, gridRes,
-                                             bakeThreads);
+                                             bakeThreads, limits);
+      for (const std::string& note : scene.notes)
+        std::cerr << "[dualc_field_view] " << note << "\n";
       return true;
     } catch (const dce::fieldgraph::GraphError& e) {
       std::cerr << "[dualc_field_view] codegen error"
@@ -264,6 +280,35 @@ int main(int argc, char** argv) {
   const bool snapshot = !snapshotPath.empty();
   GLFWwindow* win = dce::gl::initWindow("dualc_field_view", 1100, 800, !snapshot);
   if (!win) return 1;
+  // The scene was compiled against the guaranteed texture limits; this
+  // context's own replace them. Recompile when the difference matters: a node
+  // that took the baked fallback (a porous complex past 2048 rows of data
+  // texture, roadmap 23 #66) may fit now, and a scene past a smaller limit
+  // must bake. Otherwise the scene is unchanged.
+  {
+    GLint rows = 0, units = 0;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &rows);
+    glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &units);
+    dce::fieldgraph::GlslLimits queried = limits;
+    if (rows > 0) queried.maxTextureSize = rows;
+    if (units > 0) queried.maxTextureUnits = units;
+    int tallest = 0;
+    for (const auto& dt : scene.dataTextures) tallest = std::max(tallest, dt.height);
+    const bool overflows =
+        tallest > queried.maxTextureSize ||
+        int(scene.meshes.size() + scene.dataTextures.size()) > queried.maxTextureUnits;
+    const bool mayFit = !scene.notes.empty() &&
+                        (queried.maxTextureSize > limits.maxTextureSize ||
+                         queried.maxTextureUnits > limits.maxTextureUnits);
+    limits = queried;
+    if (overflows || mayFit) {
+      std::cerr << "[dualc_field_view] recompiling for this context's limits ("
+                << limits.maxTextureSize << " rows, " << limits.maxTextureUnits
+                << " units)\n";
+      GlslScene s;
+      if (compile(root, s)) scene = std::move(s);
+    }
+  }
 
   auto buildProgram = [&](const GlslScene& s) -> GLuint {
     return dce::gl::linkProgram(dce::fieldgraph::vertexShaderSource(emitES),
@@ -292,6 +337,9 @@ int main(int argc, char** argv) {
     }
     for (std::size_t i = 0; i < s.meshes.size(); ++i)
       meshTextures.push_back(uploadMesh(prog, s.meshes[i], static_cast<int>(i)));
+    for (std::size_t i = 0; i < s.dataTextures.size(); ++i)
+      meshTextures.push_back(uploadData(prog, s.dataTextures[i],
+                                        static_cast<int>(s.meshes.size() + i)));
     for (const auto& b : s.bindings) setBinding(prog, b);
   };
   applyScene(scene);

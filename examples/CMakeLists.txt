@@ -118,7 +118,8 @@ dualc_target_options(dualc_examples_fieldglsl)
 # curious user) can run them by bare filename.
 set(FIELD_GRAPH_SAMPLES gyroid_box.json mesh_lattice.json
     cube_minus_sphere.json smooth_blend.json displaced_sphere.json
-    mesh_shell.json mesh_minus_sphere.json twisted_mesh.json)
+    mesh_shell.json mesh_minus_sphere.json twisted_mesh.json
+    porous-sponge.json porous-foam-bracket.json porous-bone-bracket.json)
 foreach(sample ${FIELD_GRAPH_SAMPLES})
   add_custom_command(TARGET dualc_field POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -382,6 +383,14 @@ if(DUALC_BUILD_TESTS)
   set(DUALC_FIELD_SAMPLES cube_minus_sphere smooth_blend displaced_sphere
       mesh_shell mesh_minus_sphere twisted_mesh)
   foreach(sample ${DUALC_FIELD_SAMPLES})
+    add_test(NAME cli_field_sample_${sample}
+      COMMAND dualc_field ${sample}.json --depth 5 -o cli_field_${sample}.obj
+      WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
+  endforeach()
+  # The three porous samples (roadmap 23 #65, P04 T2): a graded sponge in the
+  # unit sphere, a foam and a strut bone in the bracket. Depth 5 is a smoke run
+  # (under 0.2 GB); their measured depth-7 runs are 23/06's.
+  foreach(sample porous-sponge porous-foam-bracket porous-bone-bracket)
     add_test(NAME cli_field_sample_${sample}
       COMMAND dualc_field ${sample}.json --depth 5 -o cli_field_${sample}.obj
       WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)

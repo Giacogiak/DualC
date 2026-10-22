@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "units": "mm",
+  "root": {
+    "op": "smooth-intersection",
+    "k": 0.1,
+    "in": [
+      { "op": "sphere", "radius": 1.0 },
+      {
+        "op": "graded-onion",
+        "t1": 0.04,
+        "t2": 0.08,
+        "d1": 1.0,
+        "in": [
+          {
+            "op": "porous",
+            "spacing": 0.4,
+            "in": [
+              { "op": "sphere", "radius": 1.0 }
+            ]
+          },
+          { "op": "sphere", "radius": 0.0 }
+        ]
+      }
+    ]
+  }
+}

@@ -4,7 +4,7 @@ The decisions index, so a decision buried in a topic file's chronology is visibl
 place and is not proposed again. Three tables, same columns: **this page holds every open
 decision** — **DEFERRED** with the trigger that reopens it, and the tracked items that were
 one — [02-dropped.md](02-dropped.md) every **DROPPED** one with the rationale, and
-[01-settled.md](01-settled.md) the decisions **DONE** by choice, not re-litigated. The gate's
+[01-settled.md](01-settled.md) (from D-67 on, [03](03-settled-continued.md)) the decisions **DONE** by choice, not re-litigated. The gate's
 `decisions-index` fails on a `**DEFERRED**` / `**DROPPED**` roadmap entry with no row here or
 in 02, or a DEFERRED row with no trigger.
 
@@ -51,6 +51,7 @@ only the status cell changes.
 | D-53 | A `--gpu`-tier `--snapshot` smoke check of the GL viewers | DEFERRED — trigger: a viewer regression the parity harness missed, or a change to their window or snapshot code | 2026-10-07 | [17/13](../roadmap/17-code-audit-and-hardening/13-parity-gate-binding.md#what-changed) |
 | #61 | Dark specks on `dualc_field_view`'s grazing silhouettes (pre-existing; the plain torus shows them) | DEFERRED — trigger: seen on a second renderer, or a change to the tracer's hit / miss test | 2026-10-16 | [17 #61](../roadmap/17-code-audit-and-hardening/17-viewer-silhouette-specks.md#61-dark-specks-on-grazing-silhouettes-in-dualc_field_view) |
 | #62 | The C ABI's create calls bake `bake=N` nodes on every hardware thread — `DualcContourParams.numThreads` arrives only at contour time; a create twin with a thread count is an ABI minor | DEFERRED — trigger: a host (Boletus) asks for bounded create-time bakes | 2026-10-20 | [14/04 #62](../roadmap/14-c-abi/04-abi-0-4-0.md#62-create-time-bakes-ignore-the-hosts-thread-count) |
+| #69 | `graded-onion` / `graded-offset` grow the probed cell by max(t1, t2, 0): a negative `t` (a shrinking `graded-offset`) is not covered | DEFERRED — trigger: a `graded-offset` with a negative `t` losing surface, or the next change to the graded nodes | 2026-10-21 | [23 #69](../roadmap/23-porous-shell/02-record.md#69-graded-nodes-miss-a-negative-thickness-in-celloverlaps) |
 | D-40 | An FTS5 search index over the docs — `rg` and the README indexes are the search layer; no vector database, no RAG skill | DEFERRED — trigger: `docs/raw/` exceeds 50 text files or 1 MB of hand-written text (generated reports such as the loss-audit dumps, and SVG / HTML assets, do not count), or three sessions in a row where `rg` failed to find a fact that was in the repo; the first trigger was met 2026-10-16 by the audit dumps ([19/08 run 07](../roadmap/19-docs-layers/08-semantic-lint/07-2026-10-16-after-cli-consolidation.md)) — re-deferred by Giacomo the same day: "Re-defer, exclude audit dumps" | 2026-09-17 | [plan § 6](../raw/2026-09-17-docs-restructuring-plan.md#6-deliberately-not-done) |
 
 ---

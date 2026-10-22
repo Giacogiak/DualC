@@ -53,6 +53,17 @@ unsigned int uploadGrid3D(unsigned int prog, const std::string& samplerName,
                           const dualc::Vector3i& res, const float* values,
                           int unit);
 
+// Upload one data texture (a porous node's packed array, field_glsl's
+// DataTexture) to an unfiltered 2D texture on unit `unit` and point the
+// sampler there: `channels` 4 or 1 values per texel, floats (GL_RGBA32F) or
+// int32 (GL_RGBA32I / GL_R32I, read through an isampler2D), `width * height`
+// texels row-major. Integer textures need GL_NEAREST to be complete; the GLSL
+// reads every one with texelFetch, so no filtering applies anyway. Returns the
+// texture id. Shared by the viewer and dualc_glsl_parity, as uploadGrid3D is.
+unsigned int uploadData2D(unsigned int prog, const std::string& samplerName,
+                          int channels, bool integer, int width, int height,
+                          const void* values, int unit);
+
 // ---- orbit camera ---------------------------------------------------------
 struct OrbitState {
   dualc::Vector3 target{0, 0, 0};

@@ -11,7 +11,7 @@ DualC/
 ├── LICENSE                     MIT license (own code)
 ├── CITATION.cff               Citation metadata (GitHub "Cite this repository"); the credit request in README § License
 ├── README.md                  Front page: pitch, dependency layout, build, consume, minimal usage, tool list, doc pointer
-├── THIRD_PARTY.md             Vendoring & attribution (qef/svd Unlicense; nanort MIT; miniz/stb/json/meshoptimizer; the geometry-central pin + its transitive deps)
+├── THIRD_PARTY.md             Vendoring & attribution (qef/svd Unlicense; nanort MIT; Shewchuk's predicates public domain; miniz/stb/json/meshoptimizer; the geometry-central pin + its transitive deps)
 ├── .gitignore                 Ignores build/, *.obj demo meshes, etc.
 ├── .gitattributes             Pins scripts/hooks/* to LF (core.autocrlf would break the shebang)
 ├── .github/
@@ -43,7 +43,8 @@ DualC/
 │   ├── progress.h             CancelToken / ProgressSink / Stage / Cancelled: cooperative cancellation + coarse progress (roadmap 14 #48)
 │   ├── implicit.h             v2 ImplicitField base, sources, combinators, decorators, domain ops
 │   ├── implicit2d.h           2D fields (Circle/Box/Segment/Polygon) + Revolve/Extrude lifts
-│   └── primitives.h           30 analytic primitive field classes (Tiers A/B/C) + 6 TPMS
+│   ├── primitives.h           30 analytic primitive field classes (Tiers A/B/C) + 6 TPMS
+│   └── porous.h               The porous shell's seeds: Pcg32, SeedParams / SeedSet, generatePorousSeeds, the ramps and ceilings (roadmap 23 #63); PorousCells / PorousMode (#64); PorousParams, PorousField (#65) and its packed() views (#66)
 │
 ├── src/                       Core library implementation
 │   ├── hermite_octree.cpp     Octree node allocation & traversal
@@ -64,7 +65,11 @@ DualC/
 │   │   ├── primitives_tierA.cpp  Core 8 (sphere, box, roundbox, plane, capsule, cappedcylinder, torus, ellipsoid)
 │   │   ├── primitives_tierB.cpp  Common ~10 (boxframe, cone, hexprism, octahedron, pyramid, solidangle, …)
 │   │   ├── primitives_tierC.cpp  Long tail ~13 (cappedtorus, link, cutsphere, deathstar, vesica, rhombus, …)
-│   │   └── primitives_tpms.cpp   6 TPMS (gyroid, schwarz-p, diamond, fischer-koch, lidinoid, neovius)
+│   │   ├── primitives_tpms.cpp   6 TPMS (gyroid, schwarz-p, diamond, fischer-koch, lidinoid, neovius)
+│   │   ├── porous_seeds.cpp      Porous seeds: Bridson Poisson-disk (variable radius), jitter, random, the pad, Lloyd by sampling; bit-identical on any OS (roadmap 23 #63)
+│   │   ├── porous_delaunay.cpp   The seeds' Delaunay tetrahedralization: Bowyer–Watson on exact predicates, Morton order, an infinite vertex for the hull, canonical tet list (roadmap 23 #64)
+│   │   ├── porous_complex.cpp    The complex: the dual (faces, edges, neighbours, clamped circumcentres), the packed arrays and bins of the four cells × mode cases, the smoothed distance query and its gradient (roadmap 23 #64, #65)
+│   │   └── porous.cpp            PorousField: the volume read at build time only, the packed query as the value (struts capped at B − smooth), the analytic gradient, the Lipschitz-1 argument for the default cellOverlaps (roadmap 23 #65)
 │   │
 │   └── internal/             Private internals (NOT public API)
 │       ├── octree.{h,cpp}        Octree structure, child indexing, topology queries
@@ -72,13 +77,19 @@ DualC/
 │       ├── svd.{h,cpp}           VENDORED (Unlicense, Nick Gildea) — 3×3 SVD for QEF
 │       ├── mesh_bvh.{h,cpp}      nanort BVH wrapper: hits, closest-point, winding number, AABB overlap
 │       ├── third_party/nanort/   VENDORED (MIT, Light Transport Entertainment) — nanort.h, the 2016 single-header BVH mesh_bvh is written against; nanort_LICENSE.txt beside it
+│       ├── third_party/shewchuk/ VENDORED (public domain, J. R. Shewchuk) — predicates.c, exact orient3d / insphere, byte-identical; compiled only through exact_predicates.c
+│       ├── exact_predicates.{h,c} The C wrapper that compiles predicates.c with every symbol renamed dualc_pred_*, and the C++ declarations (roadmap 23 #64)
+│       ├── compat/sys/time.h     An empty <sys/time.h> for predicates.c on MSVC, which has none
+│       ├── porous_complex.h      PorousDual, PorousComplex (the flat float / int32 arrays + bin grid the GLSL node uploads), buildPorousComplex, porousDistance / porousDistanceGradient, the shared smin and distance pieces
+│       ├── porous_delaunay.h     DelaunayTets + tetrahedralize(): the tet list (sorted vertices, neighbours, -1 on the hull) the complex is derived from
 │       ├── sign_oracle.{h,cpp}   inside/outside via pseudonormal / winding / generalized-winding
 │       ├── dc_tables.{h,cpp}     DC corner/edge indexing + cell/face/edge descent tables
 │       ├── cube_components.{h,cpp} Union-find component labeling for Manifold DC
 │       ├── contourer_internals.h Contouring algorithm internals (header-only)
 │       ├── distance_grid.h       Distance-grid helper struct (header-only)
 │       ├── fd_gradient.h         The one central-difference stencil: default trueGradientAt + the FD gradientAt of twist/bend/displace and the lifts (header-only)
-│       └── parallel.h            Threading helpers (header-only)
+│       ├── parallel.h            Threading helpers (header-only)
+│       └── seed_grid.h           Uniform point grid: O(1) insertion, near-cell iteration, exact nearest point (header-only; porous seeds, roadmap 23)
 │
 ├── examples/                  CLI tools + host-side glue (linked to geometry-central, NOT into libdualc)
 │   ├── CMakeLists.txt         Builds the example libs, the always-on CLIs and the opt-in GL targets
@@ -88,9 +99,9 @@ DualC/
 │   │                            (own lib dualc_examples_fieldgraph; shared by dualc_field and the C ABI in capi/)
 │   ├── field_slice.{h,cpp}    Any field sampled on an axis plane → PNG heatmap + SVG contour (marching squares)
 │   │                            (lib dualc_examples_slice, the one CLI lib with the PNG writer; dualc_field --slice)
-│   ├── field_glsl.{h,cpp}     Field-graph → GLSL codegen: GraphNode → generated sceneSDF() + binding table
+│   ├── field_glsl.{h,cpp}     Field-graph → GLSL codegen: GraphNode → generated sceneSDF() + binding table; porous as 2D data textures (roadmap 23 #66)
 │   │                            (lib dualc_examples_fieldglsl, no GL dep; mirrors field_graph's walk + the C++ formulas)
-│   ├── raymarch_gl.{h,cpp}    Shared GL plumbing (window/compile/snapshot/orbit camera) for the GPU viewer + parity
+│   ├── raymarch_gl.{h,cpp}    Shared GL plumbing (window/compile/snapshot/orbit camera, grid + data-texture upload) for the GPU viewer + parity
 │   │                            (lib dualc_examples_gl; gated on the viewer or the parity-harness flag)
 │   ├── gpu_preference.h       Exports NvOptimusEnablement / AmdPowerXpressRequestHighPerformance so the GL
 │   │                            exes pick the discrete GPU on hybrid laptops (Win-only; include from one TU per exe)
@@ -108,7 +119,8 @@ DualC/
 │   │                            `--force-hold` (Windows) pins the sharing-violation case (no CTest; `check.py --io-stress`)
 │   ├── samples/              Ready-to-run field-graphs (gyroid_box.json, mesh_lattice.json) copied next to dualc_field,
 │   │                            with the retired dualc_csg_demo's six recipes as graphs (cube_minus_sphere.json, smooth_blend.json,
-│   │                            displaced_sphere.json, mesh_shell.json, mesh_minus_sphere.json, twisted_mesh.json)
+│   │                            displaced_sphere.json, mesh_shell.json, mesh_minus_sphere.json, twisted_mesh.json), and three
+│   │                            porous sponges (porous-sponge.json, porous-foam-bracket.json, porous-bone-bracket.json; roadmap 23 #65)
 │   └── third_party/          Host-only I/O deps (never linked into libdualc)
 │       ├── miniz.{c,h}          ZIP/deflate for 3MF export (MIT)
 │       ├── miniz_LICENSE.txt
@@ -132,7 +144,7 @@ DualC/
 │   ├── CMakeLists.txt         Builds dualc_capi SHARED + the C demo + the cli_c_abi CTest
 │   ├── dualc_c.h              Public C header: opaque DualcField, flat params/mesh, the extern "C" entry points
 │   ├── dualc_c.cpp            Shim: parse (JSON/--expr) → FieldGraph::build → contour/writeField; no exception escapes
-│   ├── dualc_c_demo.c         C-compiled smoke test (proves the header is C-clean): build → proxy → export STL
+│   ├── dualc_c_demo.c         C-compiled smoke test (proves the header is C-clean): build → proxy → export STL; modes mesh, inmem, cancel, threads, porous (roadmap 23 #67)
 │   ├── README.md              API + build + usage for the C ABI
 │   └── CSHARP_WRAPPER_HANDOFF.md  Client-side P/Invoke hand-off notes (the client itself lives in Boletus)
 │
@@ -159,12 +171,13 @@ DualC/
 │   ├── test_strut_lattice.cpp Strut lattices (sc/bcc/fcc/octet) vs an independent segment-distance oracle
 │   ├── test_demo_meshes.cpp   Procedural mesh topology validation
 │   ├── test_parallel.cpp      parallelFor: exception propagation + the bit-identical-across-thread-counts guarantee
-│   ├── test_field_graph.cpp   Field-graph parse/build/dispatch + mesh-resolver caching + located errors
-│   ├── test_field_glsl.cpp    Field→GLSL codegen: DAG dedup + emission (GL-free, so it runs under CTest)
+│   ├── test_field_graph.cpp   Field-graph parse/build/dispatch + mesh-resolver caching + located errors; the `porous` token (roadmap 23 #65)
+│   ├── test_field_glsl.cpp    Field→GLSL codegen: DAG dedup + emission; the porous data textures + fallback (GL-free, so it runs under CTest)
 │   ├── test_streaming_export.cpp  Tiled/streamed STL + 3MF vs the monolithic mesh
 │   ├── test_diagnostics.cpp   Diagnostics channel: every reported degradation shown firing (roadmap 17 #26)
 │   ├── test_validation.cpp    Argument validation + the BBox::empty sentinel (roadmap 17 #34)
 │   ├── test_cancel_progress.cpp  CancelToken unwinds every driver; hooks are inert; report shape; the writers' rc 3 + `.part` guarantee (roadmap 14 #48)
+│   ├── test_porous.cpp        Porous seeds (roadmap 23 #63): PCG32 reference stream, ramps, determinism, Poisson distance, graded density, pad, relax, cancel, ceilings; the Delaunay (#64): Euler and the convex hull, empty sphere, the regular grid, a pinned tet-list digest, errors; the complex (#64): dual adjacency, the bin query bit-equal to brute force in the four cases, pinned digests, errors and cancel; the field (#65): 1-Lipschitz, the smoothing bound, the analytic gradient, a mesh volume, determinism and errors; hidden `[porous-bench]` rate and size cases
 │   └── test_writers_io.cpp    The writers' failure surface (17 #52): a failed open names the OS error through dce::lastError(); on
 │                                Windows a held `.part` is renamed after retries, a long hold fails with the text, a child started
 │                                with handle inheritance mid-export inherits nothing (output handles are non-inheritable)
@@ -196,7 +209,8 @@ DualC/
 ## Build targets at a glance
 
 - `dualc` (`dualc::dualc`) — core static library; PUBLIC-links geometry-central
-  (→ Eigen, happly transitively); nanort is its own vendored header.
+  (→ Eigen, happly transitively); nanort is its own vendored header, and Shewchuk's
+  `predicates.c` its one C source (C90, so the library needs a C compiler).
 - `dualc_demo_data` — runs `dualc_gen_demo all` into `build/data/`; every mesh-consuming
   binary depends on it and copies the meshes next to itself (`dualc_copy_demo_meshes()`).
 - `dualc_tests` — Catch2 test executable (CTest).

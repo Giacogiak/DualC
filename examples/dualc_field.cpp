@@ -145,6 +145,25 @@ void printVocabulary() {
                "exact-distance\n"
                "              shell, widened by the k / offset of the ops above it\n";
 
+  std::cout << "\nPorous source (children: volume[, control]; read at build time "
+               "only):\n"
+               "  porous   -- unsigned distance to the cell complex of seeds "
+               "placed in the\n"
+               "              volume; 0 on the walls / struts, so give it a "
+               "thickness:\n"
+               "              intersection(V, onion(porous(V, spacing=S), "
+               "thickness=t))\n"
+               "              spacing (required), cells=voronoi|delaunay, "
+               "mode=walls|struts,\n"
+               "              dist=poisson|jitter|random, spacing2=spacing, "
+               "d0=0, d1 (needed\n"
+               "              when spacing2 differs; then the control grades "
+               "the spacing),\n"
+               "              ramp=linear|smooth|gaussian, relax=0 (Lloyd, "
+               "<= 50), seed=0,\n"
+               "              smooth=0 (smooth-min radius), jitter=1 "
+               "(dist=jitter; 0 = grid)\n";
+
   std::cout << "\nBooleans (2 children; smooth-* take k=0.25):\n";
   struct BoolHint { dce::BoolOp op; const char* hint; };
   const BoolHint bops[] = {

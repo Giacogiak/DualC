@@ -30,7 +30,15 @@
  *                        numThreads = 1 the CONTOUR stage's first half reports
  *                        every max(1, n/64) leaves (the serial path's poll
  *                        cadence; the threaded path polls on a 100 ms timer),
- *                        and 1, 2 and 0 threads give a BYTE-IDENTICAL mesh. */
+ *                        and 1, 2 and 0 threads give a BYTE-IDENTICAL mesh.
+ *   "porous"           : the porous source (roadmap 23 #67) -- a foam in an
+ *                        in-memory cube, porous(mesh(id="cube")), built from
+ *                        the shorthand and from JSON contours BYTE-IDENTICAL,
+ *                        watertight and non-empty; a sponge in an analytic
+ *                        sphere through the plain expression call is
+ *                        watertight; a missing `spacing` is a located graph
+ *                        error; a token cancels the contour and the export
+ *                        (the create call that builds the cells takes none). */
 
 #include "dualc_c.h"
 
@@ -47,6 +55,21 @@
 #define DUALC_DEMO_EXPR_MESH_ID                           \
   "intersection(onion(gyroid(wavelength=0.5),thickness=0.1)," \
   "mesh(id=\"cube\"))"
+
+/* The porous source: a uniform foam clipped to the in-memory cube (+/-0.5),
+ * walls 0.06 thick (about 3.6 cells at depth 6), and the same graph as JSON. */
+#define DUALC_DEMO_EXPR_POROUS_ID                                       \
+  "intersection(mesh(id=\"cube\"),"                                    \
+  "onion(porous(mesh(id=\"cube\"),spacing=0.25),thickness=0.03))"
+#define DUALC_DEMO_JSON_POROUS_ID                                       \
+  "{\"op\":\"intersection\",\"in\":[{\"op\":\"mesh\",\"id\":\"cube\"},"     \
+  "{\"op\":\"onion\",\"thickness\":0.03,\"in\":[{\"op\":\"porous\","          \
+  "\"spacing\":0.25,\"in\":[{\"op\":\"mesh\",\"id\":\"cube\"}]}]}]}"
+/* A uniform sponge in an analytic sphere, its rim rounded: the graph of
+ * the library's own watertight test (seed 3 at depth 6, roadmap 23/06). */
+#define DUALC_DEMO_EXPR_POROUS_SPHERE                                   \
+  "smooth-intersection(sphere(radius=1),onion(porous(sphere(radius=1),"  \
+  "spacing=0.4,seed=3),thickness=0.06),k=0.1)"
 
 /* Minimal Wavefront-OBJ reader: pulls vertex positions and (fan-triangulated)
  * face indices into flat buffers. Handles `f a b c`, quads, and `a/b/c` tokens.
@@ -592,6 +615,194 @@ static int runThreads(void) {
   return ok ? 0 : 1;
 }
 
+/* --- the "porous" mode ----------------------------------------------------- */
+
+/* Contour `field` at depth 6 with the diagnostics and require a non-empty,
+ * watertight, clean mesh. On success *out holds the mesh (the caller releases
+ * it). Returns 0 on success. */
+static int contourWatertight(const char* label, DualcField* field,
+                             DualcMesh* out) {
+  char err[512];
+  DualcContourParams params;
+  DualcDiagnostics diag;
+  int rc;
+  dualc_default_params(&params);
+  params.maxDepth = 6;
+  memset(&diag, 0, sizeof(diag));
+  rc = dualc_field_contour_with_diagnostics(field, &params, out, &diag, err,
+                                           (int)sizeof(err));
+  if (rc != DUALC_OK) {
+    fprintf(stderr, "%s: contour failed (rc=%d): %s\n", label, rc, err);
+    return 1;
+  }
+  printf("%s: %u verts, %u tris, boundary=%llu, non-manifold=%llu, "
+         "watertight=%d, emptyContour=%d, anyIssue=%d\n",
+         label, out->vertexCount, out->triangleCount,
+         (unsigned long long)diag.outputBoundaryEdges,
+         (unsigned long long)diag.outputNonManifoldEdges,
+         diag.outputWatertight, diag.emptyContour, diag.anyIssue);
+  if (out->triangleCount == 0 || diag.emptyContour || !diag.outputWatertight ||
+      diag.anyIssue) {
+    fprintf(stderr, "%s: not a clean watertight mesh\n", label);
+    dualc_mesh_release(out);
+    return 1;
+  }
+  return 0;
+}
+
+static int runPorous(const char* outPath) {
+  float* verts = NULL;
+  uint32_t* idxs = NULL;
+  uint32_t vc = 0, tc = 0;
+  char err[512];
+  char partPath[600];
+  DualcMeshSource src;
+  DualcField* exprField = NULL;
+  DualcField* jsonField = NULL;
+  DualcField* sphereField = NULL;
+  DualcContourParams params;
+  DualcMesh a, b, c;
+  DualcCancelToken* token;
+  ProgressLog log;
+  int rc;
+
+  snprintf(partPath, sizeof(partPath), "%s.part", outPath);
+  remove(outPath);
+  remove(partPath);
+
+  if (!loadObj("cube.obj", &verts, &vc, &idxs, &tc)) {
+    fprintf(stderr, "could not load cube.obj into buffers\n");
+    return 1;
+  }
+  src.id = "cube";
+  src.vertices = verts;
+  src.vertexCount = vc;
+  src.indices = idxs;
+  src.triangleCount = tc;
+  src.normals = NULL;
+
+  /* The same graph through the shorthand and through JSON. The cube is read
+     to place the seeds and as the clip; both copies happen in the create. */
+  rc = dualc_field_create_from_expr_with_meshes(DUALC_DEMO_EXPR_POROUS_ID, &src,
+                                                1, &exprField, err,
+                                                (int)sizeof(err));
+  if (rc == DUALC_OK)
+    rc = dualc_field_create_from_json_with_meshes(DUALC_DEMO_JSON_POROUS_ID,
+                                                  &src, 1, &jsonField, err,
+                                                  (int)sizeof(err));
+  if (rc != DUALC_OK) {
+    fprintf(stderr, "porous create failed (rc=%d): %s\n", rc, err);
+    dualc_field_destroy(exprField);
+    free(verts);
+    free(idxs);
+    return 1;
+  }
+  /* A porous node without its required spacing, and a spacing2 without the
+     control that grades it, are located graph errors. */
+  if (expectGraphErr("porous without spacing",
+                     "onion(porous(mesh(id=\"cube\")),thickness=0.03)", &src,
+                     1) != 0 ||
+      expectGraphErr("porous spacing2 without a control",
+                     "onion(porous(mesh(id=\"cube\"),spacing=0.25,"
+                     "spacing2=0.1,d1=0.5),thickness=0.03)",
+                     &src, 1) != 0) {
+    dualc_field_destroy(exprField);
+    dualc_field_destroy(jsonField);
+    free(verts);
+    free(idxs);
+    return 1;
+  }
+  free(verts);
+  free(idxs);
+
+  /* (a) the in-memory foam: watertight, and JSON == shorthand. */
+  if (contourWatertight("(a) porous(mesh(id)) shorthand", exprField, &a) != 0) {
+    dualc_field_destroy(exprField);
+    dualc_field_destroy(jsonField);
+    return 1;
+  }
+  if (contourWatertight("(a) porous(mesh(id)) JSON", jsonField, &b) != 0) {
+    dualc_mesh_release(&a);
+    dualc_field_destroy(exprField);
+    dualc_field_destroy(jsonField);
+    return 1;
+  }
+  rc = sameMesh(&a, &b);
+  dualc_mesh_release(&a);
+  dualc_mesh_release(&b);
+  dualc_field_destroy(jsonField);
+  if (!rc) {
+    fprintf(stderr, "MISMATCH: the JSON and the shorthand porous meshes differ\n");
+    dualc_field_destroy(exprField);
+    return 1;
+  }
+  printf("(a) JSON == shorthand: BYTE-IDENTICAL\n");
+
+  /* (b) the plain expression call over an analytic volume. */
+  rc = dualc_field_create_from_expr(DUALC_DEMO_EXPR_POROUS_SPHERE, &sphereField,
+                                    err, (int)sizeof(err));
+  if (rc != DUALC_OK) {
+    fprintf(stderr, "porous sphere create failed (rc=%d): %s\n", rc, err);
+    dualc_field_destroy(exprField);
+    return 1;
+  }
+  rc = contourWatertight("(b) porous(sphere) expression", sphereField, &c);
+  dualc_field_destroy(sphereField);
+  if (rc != 0) {
+    dualc_field_destroy(exprField);
+    return 1;
+  }
+  dualc_mesh_release(&c);
+
+  dualc_default_params(&params);
+  params.maxDepth = 6;
+
+  /* (c) a pre-requested token cancels the contour of a porous field. */
+  token = dualc_cancel_token_create();
+  dualc_cancel_token_request(token);
+  rc = dualc_field_contour_with_progress(exprField, &params, &a, NULL, token,
+                                         NULL, NULL, err, (int)sizeof(err));
+  dualc_cancel_token_destroy(token);
+  if (rc != DUALC_CANCELLED || a.positions != NULL || a.triangleCount != 0) {
+    fprintf(stderr, "(c) pre-requested porous contour: rc=%d err='%s'\n", rc, err);
+    dualc_field_destroy(exprField);
+    return 1;
+  }
+  printf("(c) pre-requested token -> DUALC_CANCELLED: %s\n", err);
+
+  /* (d) a token requested mid-way through the contour stage cancels the
+     export: no file, no .part. */
+  token = dualc_cancel_token_create();
+  memset(&log, 0, sizeof(log));
+  log.token = token;
+  log.cancelStage = DUALC_STAGE_CONTOUR;
+  log.cancelAtDone = 1;
+  log.monotonic = 1;
+  rc = dualc_field_export_with_progress(exprField, outPath, &params, NULL, token,
+                                        onProgress, &log, err, (int)sizeof(err));
+  dualc_cancel_token_destroy(token);
+  if (rc != DUALC_CANCELLED || fileExists(outPath) || fileExists(partPath) ||
+      !log.seen[DUALC_STAGE_CONTOUR]) {
+    fprintf(stderr, "(d) porous export cancel: rc=%d err='%s' out=%d part=%d\n",
+            rc, err, fileExists(outPath), fileExists(partPath));
+    dualc_field_destroy(exprField);
+    return 1;
+  }
+  printf("(d) export cancelled in the contour stage -> DUALC_CANCELLED, no file, "
+         "no .part\n");
+
+  /* (e) and the same export, uncancelled. */
+  rc = dualc_field_export(exprField, outPath, &params, err, (int)sizeof(err));
+  dualc_field_destroy(exprField);
+  if (rc != DUALC_OK || fileSize(outPath) < 84) {
+    fprintf(stderr, "(e) porous export failed (rc=%d): %s\n", rc, err);
+    return 1;
+  }
+  printf("(e) exported %s (%ld bytes)\n", outPath, fileSize(outPath));
+  printf("OK\n");
+  return 0;
+}
+
 int main(int argc, char** argv) {
   const char* outPath = (argc > 1) ? argv[1] : "c_abi_demo.stl";
   const char* mode = (argc > 2) ? argv[2] : "";
@@ -599,6 +810,7 @@ int main(int argc, char** argv) {
   const int inmemMode = (mode[0] == 'i'); /* "inmem" */
   const int cancelMode = (mode[0] == 'c'); /* "cancel" */
   const int threadsMode = (mode[0] == 't'); /* "threads" */
+  const int porousMode = (mode[0] == 'p'); /* "porous" */
   const char* expr = meshMode ? DUALC_DEMO_EXPR_MESH : DUALC_DEMO_EXPR_ANALYTIC;
   char err[512];
   int rc;
@@ -613,6 +825,7 @@ int main(int argc, char** argv) {
   if (inmemMode) return runInmemParity(outPath);
   if (cancelMode) return runCancel(outPath);
   if (threadsMode) return runThreads();
+  if (porousMode) return runPorous(outPath);
 
   rc = dualc_field_create_from_expr(expr, &field, err, (int)sizeof(err));
   if (rc != DUALC_OK) {

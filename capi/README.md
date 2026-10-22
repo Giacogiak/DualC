@@ -82,6 +82,34 @@ The buffers are copied during the call (need not outlive `field`); the optional
 `normals` is ignored. An `id=` mesh contours byte-identical to the same geometry
 loaded via `mesh(path=…)` (see `cli_c_abi_mesh_inmem`). `path=` still works.
 
+### The porous source from a host mesh
+
+The `porous` node (a sponge, foam or bone in any volume) is part of the same graph
+vocabulary, so no entry point is new. Reference the host mesh twice — once as the volume
+the seeds fill, once as the clip:
+
+```c
+DualcMeshSource src = { "part", verts, vertexCount, idx, triCount, NULL };
+dualc_field_create_from_expr_with_meshes(
+    "intersection(mesh(id=\"part\"),"
+    "onion(porous(mesh(id=\"part\"),spacing=0.25),thickness=0.03))",
+    &src, 1, &field, err, sizeof(err));
+```
+
+- **The keys and their defaults**, the four recipes and the cost guide are
+  [`docs/command_reference/11-dualc_field/16-porous-shell.md`](../docs/command_reference/11-dualc_field/16-porous-shell.md);
+  the JSON form is `{"op":"porous","spacing":0.25,"in":[{"op":"mesh","id":"part"}]}`.
+- **The cells are built inside the create call.** It reads the volume to place the seeds
+  and tetrahedralizes them; the field keeps only the cells, so the volume's buffers may be
+  freed after the call, as always. The create takes no token, so that build cannot be
+  cancelled, and `relax` uses every hardware thread; contour and export cancel and take
+  `numThreads` as usual.
+- **Errors** are `DUALC_ERR_GRAPH` with a locator: a missing `spacing`, a `spacing2`
+  without a control field, a bad name, more than 2,000,000 seeds.
+- **Same graph, same cells.** The seeds and cells are bit-identical on any OS, and the JSON
+  and the shorthand of one graph contour byte-identical. `cli_c_abi_porous` (`dualc_c_demo … porous`)
+  checks that, watertightness, the errors and a cancelled contour and export.
+
 ## Contract
 
 - **Return codes** (`int`): `DUALC_OK` (0), `DUALC_ERR_BOUNDS` (1, unbounded field

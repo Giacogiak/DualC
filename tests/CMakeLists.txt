@@ -50,6 +50,7 @@ add_executable(dualc_tests
   test_validation.cpp
   test_cancel_progress.cpp
   test_writers_io.cpp
+  test_porous.cpp
   # Reuse the procedural mesh generators from examples/ (compiled in directly
   # so this does not depend on DUALC_BUILD_EXAMPLES being on).
   ${PROJECT_SOURCE_DIR}/examples/demo_meshes.cpp
@@ -93,6 +94,10 @@ else()
     ${PROJECT_SOURCE_DIR}/examples/third_party/meshoptimizer/simplifier.cpp
     ${PROJECT_SOURCE_DIR}/examples/third_party/meshoptimizer/vfetchoptimizer.cpp
     PROPERTIES COMPILE_OPTIONS "-w")
+  # The brute-force references call porous_complex.h's inline distances and are
+  # compared bit for bit with the library's, built without FMA contraction
+  # (CMakeLists.txt; Clang contracts by default on arm64, the macOS CI).
+  set_source_files_properties(test_porous.cpp PROPERTIES COMPILE_OPTIONS "-ffp-contract=off")
 endif()
 
 include(CTest)
