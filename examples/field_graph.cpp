@@ -970,8 +970,6 @@ dualc::Field2DPtr buildProfile(const GraphNode& n, const std::string& lift) {
   }
 }
 
-// A lift's own value, read through this TU's findParam (the unread-key check
-// sees it) and checked by checkLiftParam -- the readNodeBake pattern.
 // A string key that names one of `names` (the first is the default).
 std::size_t choiceParam(const GraphNode& n, const std::string& key,
                         const std::vector<const char*>& names) {
@@ -1036,6 +1034,8 @@ dualc::PorousParams readPorousParams(const GraphNode& n, bool hasControl) {
   return p;
 }
 
+// A lift's own value, read through this TU's findParam (the unread-key check
+// sees it) and checked by checkLiftParam -- the readNodeBake pattern.
 double readLiftParam(const GraphNode& n) {
   const char* key = liftParamKey(n.op);
   const bool has = findParam(n, key) != nullptr;
