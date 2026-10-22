@@ -40,6 +40,7 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 namespace dualc {
 
@@ -127,5 +128,37 @@ BBox PorousField::bounds() const { return impl_->box; }
 const PorousField::Stats& PorousField::stats() const { return impl_->stats; }
 
 const PorousParams& PorousField::params() const { return impl_->params; }
+
+namespace {
+
+template <class T>
+PorousField::Array<T> view(const std::vector<T>& v) {
+  return PorousField::Array<T>{v.empty() ? nullptr : v.data(), v.size()};
+}
+
+} // namespace
+
+PorousField::Packed PorousField::packed() const {
+  const internal::PorousComplex& c = impl_->complex;
+  Packed p;
+  p.cells = c.cells;
+  p.mode = c.mode;
+  for (int a = 0; a < 3; ++a) {
+    p.binOrigin[a] = c.bins.origin[a];
+    p.binDims[a] = c.bins.dims[a];
+  }
+  p.binSize = c.bins.size;
+  p.bound = c.bound;
+  p.seeds = view(c.seeds);
+  p.tetPlanes = view(c.tetPlanes);
+  p.segments = view(c.segments);
+  p.neighbourOffsets = view(c.neighbourOffsets);
+  p.neighbours = view(c.neighbours);
+  p.tetNeighbours = view(c.tetNeighbours);
+  p.binStart = view(c.binStart);
+  p.binOffsets = view(c.binOffsets);
+  p.binItems = view(c.binItems);
+  return p;
+}
 
 } // namespace dualc

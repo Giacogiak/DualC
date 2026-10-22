@@ -174,10 +174,14 @@ sphere sample, seed 3 at depth 6, no new item for the rim. Numbers: [06](06-spon
 
 ## #66 The porous node in GLSL and dualc_field_view
 
-**PLANNED** — P05. Data textures by [01 § (d)](01-study.md#d-the-gpu-layout), the emitter for
-the four cases, the `emitBakedGrid` fallback; acceptance: GL-free tests, at least four parity
-cases with `parity_expected_cases` bumped, the structural-key rebuild in the viewer, and the
-GPU tier green.
+**PARTIAL** — P05.1 (T1) 2026-10-22; T2 is P05.2. Planned: data textures by [01 § (d)](01-study.md#d-the-gpu-layout),
+the four cases, the `emitBakedGrid` fallback; acceptance: GL-free tests, four parity cases
+(count bumped), the viewer's structural rebuild, the GPU tier green.
+
+**2026-10-22 — T1.** The builder's own `PorousField::packed()` arrays as 3–4 data textures,
+a `smooth` uniform, the bake past `GlslLimits`; three `porous: field_glsl` cases; 20 graphs
+match `valueAt` within 2.4e-7 on llvmpipe. A first draft hung this host's NV92.
+**Chosen in-run (pending owner review):** [07](07-glsl-node.md#the-in-run-choices).
 
 ## #67 The C ABI test and the documentation
 

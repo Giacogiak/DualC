@@ -2,11 +2,14 @@
 
 #include "example_common.h"
 
+#include "dualc/porous.h"
+
 #include "geometrycentral/surface/surface_mesh.h"
 #include "geometrycentral/surface/vertex_position_geometry.h"
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <limits>
 #include <map>
 #include <set>
@@ -456,6 +459,204 @@ float dcRoundTA(float x) { return sign(x) * floor(abs(x) + 0.5); }
 float dcDispSine(vec3 q)   { return sin(q.x) * sin(q.y) * sin(q.z); }
 float dcDispGyroid(vec3 q) { return sin(q.x)*cos(q.y) + sin(q.y)*cos(q.z) + sin(q.z)*cos(q.x); }
 float dcDispBumps(vec3 q)  { return cos(q.x) + cos(q.y) + cos(q.z); }
+
+// ---- porous (roadmap 23 #66) ----------------------------------------------
+// src/implicit/porous_complex.cpp's query over the same packed arrays, read
+// from 2D data textures (item i at texel (i % 2048, i / 2048)): the bins, the
+// walks, the bisector / plane / segment distances, porousSmin, and
+// porousSmoothFold's fold over the primitives within k of the minimum in
+// ascending (d, index) order, each index once. In float where the CPU is in
+// double; the walks are capped at kPorousMaxWalk = 1024 steps (then 0).
+//
+// Written for a shallow control-flow stack: no arrays, no `continue`, no
+// return inside a loop, selects over branches. The fold is a cursor rescan --
+// each step scans the candidates again for the next (d, index) pair after the
+// last one folded -- exact for up to 64 primitives within k of the minimum
+// (a generic cell corner has 3). On nouveau's NV92 (P05.1, 2026-10-22) a
+// sorted-buffer fold with nested loops overflowed the MP's stack (TRAP_MP
+// STACK_LIMIT), gave wrong values and then hung the GPU.
+ivec2 dcPTexel(int i) { return ivec2(i % 2048, i / 2048); }
+int dcPCoord(float v, float o, float s, int n) {
+  float f = floor((v - o) / s);
+  return !(f > 0.0) ? 0 : (f >= float(n - 1) ? n - 1 : int(f));
+}
+ivec3 dcPBin(vec3 p, vec3 o, float s, ivec3 n) {
+  return ivec3(dcPCoord(p.x, o.x, s, n.x), dcPCoord(p.y, o.y, s, n.y),
+               dcPCoord(p.z, o.z, s, n.z));
+}
+int dcPFlat(ivec3 b, ivec3 n) { return (b.z * n.y + b.y) * n.x + b.x; }
+float dcPSmin(float a, float b, float k) {
+  float h = max(k - abs(a - b), 0.0) / k;
+  return k > 0.0 ? min(a, b) - h * h * k * 0.25 : min(a, b);
+}
+float dcPBisector(vec3 p, vec3 s, vec3 t) {  // positive on s's side
+  vec3 e = t - s;
+  float l2 = dot(e, e);
+  return (0.5 * l2 - dot(p - s, e)) / sqrt(l2);
+}
+float dcPSegment(vec3 p, vec3 a, vec3 b) {
+  vec3 e = b - a, q = p - a;
+  float l2 = dot(e, e);
+  float t = l2 > 0.0 ? dot(q, e) / l2 : 0.0;
+  return length(q - clamp(t, 0.0, 1.0) * e);
+}
+// (d, i) sorts after the cursor (cd, ci) and before the best (nd, ni) so far.
+bool dcPTake(float d, int i, float cd, int ci, float nd, int ni) {
+  return (d > cd || (d == cd && i > ci)) && (d < nd || (d == nd && i < ni));
+}
+// Voronoi walls: the next bisector of seed ps's neighbours j0 .. j1 after the
+// cursor and below lim; its neighbour in ni, -1 when none.
+float dcPVoronoiNext(vec3 p, vec3 ps, sampler2D seeds, isampler2D nbrs, int j0,
+                     int j1, float cd, int ci, float lim, out int ni) {
+  float nd = lim;
+  ni = -1;
+  for (int j = j0; j < j1; ++j) {
+    int q = texelFetch(nbrs, dcPTexel(j), 0).r;
+    float v = dcPBisector(p, ps, texelFetch(seeds, dcPTexel(q), 0).xyz);
+    bool take = dcPTake(v, q, cd, ci, nd, ni);
+    nd = take ? v : nd;
+    ni = take ? q : ni;
+  }
+  return nd;
+}
+// The nearest seed by a greedy walk from the bin's start seed, then the
+// bisectors of its neighbours, folded, clamped at 0.
+float dcPorousVoronoiWalls(vec3 p, float k, sampler2D seeds, isampler2D offs,
+                           isampler2D nbrs, isampler2D start, vec3 bo, float bs,
+                           ivec3 bn) {
+  int s = texelFetch(start, dcPTexel(dcPFlat(dcPBin(p, bo, bs, bn), bn)), 0).r;
+  vec3 e0 = texelFetch(seeds, dcPTexel(s), 0).xyz - p;
+  float best = dot(e0, e0);
+  bool settled = false;
+  for (int step = 0; step < 1024 && !settled; ++step) {
+    int next = s;
+    float nd = best;
+    int j1 = texelFetch(offs, dcPTexel(s + 1), 0).r;
+    for (int j = texelFetch(offs, dcPTexel(s), 0).r; j < j1; ++j) {
+      int q = texelFetch(nbrs, dcPTexel(j), 0).r;
+      vec3 e = texelFetch(seeds, dcPTexel(q), 0).xyz - p;
+      float d2 = dot(e, e);
+      bool take = d2 < nd || (d2 == nd && q < next);
+      nd = take ? d2 : nd;
+      next = take ? q : next;
+    }
+    settled = next == s;
+    s = next;
+    best = nd;
+  }
+  if (!settled) return 0.0;
+  vec3 ps = texelFetch(seeds, dcPTexel(s), 0).xyz;
+  int j0 = texelFetch(offs, dcPTexel(s), 0).r, j1 = texelFetch(offs, dcPTexel(s + 1), 0).r;
+  float kk = max(k, 0.0);
+  int ci;
+  float m = dcPVoronoiNext(p, ps, seeds, nbrs, j0, j1, -3.0e38, -1, 3.0e38, ci);
+  float acc = m, cd = m;
+  bool more = kk > 0.0;
+  for (int step = 0; step < 64 && more; ++step) {
+    int ni;
+    float nd = dcPVoronoiNext(p, ps, seeds, nbrs, j0, j1, cd, ci, m + kk, ni);
+    more = ni >= 0;
+    acc = more ? dcPSmin(acc, nd, kk) : acc;
+    cd = nd;
+    ci = ni;
+  }
+  return max(0.0, acc);
+}
+// Delaunay walls: the tet holding p by a visibility walk from the bin's start
+// tet (0 once it would leave the hull), then its four face planes, folded,
+// clamped at 0.
+vec4 dcPFaces(sampler2D planes, int t, vec3 p) {  // n.p + d, per face
+  vec4 a = texelFetch(planes, dcPTexel(4 * t), 0);
+  vec4 b = texelFetch(planes, dcPTexel(4 * t + 1), 0);
+  vec4 c = texelFetch(planes, dcPTexel(4 * t + 2), 0);
+  vec4 d = texelFetch(planes, dcPTexel(4 * t + 3), 0);
+  return vec4(dot(a.xyz, p) + a.w, dot(b.xyz, p) + b.w, dot(c.xyz, p) + c.w,
+              dot(d.xyz, p) + d.w);
+}
+float dcPorousDelaunayWalls(vec3 p, float k, sampler2D planes, isampler2D tnb,
+                            isampler2D start, vec3 bo, float bs, ivec3 bn) {
+  int t = texelFetch(start, dcPTexel(dcPFlat(dcPBin(p, bo, bs, bn), bn)), 0).r;
+  bool inside = false, outside = false;
+  for (int step = 0; step < 1024 && !inside && !outside; ++step) {
+    vec4 s = dcPFaces(planes, t, p);
+    // The face p is farthest beyond, the first on a tie; -1 when none.
+    int far = -1;
+    float best = 0.0;
+    far = s.x > best ? 0 : far;  best = max(best, s.x);
+    far = s.y > best ? 1 : far;  best = max(best, s.y);
+    far = s.z > best ? 2 : far;  best = max(best, s.z);
+    far = s.w > best ? 3 : far;
+    ivec4 nb = texelFetch(tnb, dcPTexel(t), 0);
+    int nt = far == 0 ? nb.x : (far == 1 ? nb.y : (far == 2 ? nb.z : nb.w));
+    inside = far < 0;
+    outside = !inside && nt < 0;
+    t = (inside || outside) ? t : nt;
+  }
+  if (!inside) return 0.0;
+  vec4 v = -dcPFaces(planes, t, p);
+  float m = min(min(v.x, v.y), min(v.z, v.w));
+  float kk = max(k, 0.0);
+  // The four ascending (a sorting network): only the values enter the fold.
+  vec2 a = vec2(min(v.x, v.y), max(v.x, v.y)), b = vec2(min(v.z, v.w), max(v.z, v.w));
+  float lo = max(a.x, b.x), hi = min(a.y, b.y);
+  float s1 = min(lo, hi), s2 = max(lo, hi), s3 = max(a.y, b.y);
+  float acc = m;
+  acc = s1 < m + kk ? dcPSmin(acc, s1, kk) : acc;
+  acc = s2 < m + kk ? dcPSmin(acc, s2, kk) : acc;
+  acc = s3 < m + kk ? dcPSmin(acc, s3, kk) : acc;
+  return max(0.0, kk > 0.0 ? acc : m);
+}
+// Struts: the next segment after the cursor and below lim among the 3 x 3 x 3
+// bins around p's (a bin that cannot hold one nearer than the best so far is
+// skipped); its index in ni, -1 when none.
+float dcPStrutsNext(vec3 p, sampler2D segs, isampler2D offs, isampler2D items,
+                    vec3 bo, float bs, ivec3 bn, float cd, int ci, float lim,
+                    out int ni) {
+  ivec3 c = dcPBin(p, bo, bs, bn);
+  float nd = lim;
+  ni = -1;
+  for (int n = 0; n < 27; ++n) {
+    int o = n == 0 ? 13 : (n <= 13 ? n - 1 : n);  // the centre bin first
+    ivec3 x = c + ivec3(o % 3, (o / 3) % 3, o / 9) - 1;
+    vec3 lo = bo + vec3(x) * bs;
+    vec3 g = max(max(lo - p, p - (lo + bs)), 0.0);
+    float r = nd * (1.0 + 1e-5);
+    bool visit = all(greaterThanEqual(x, ivec3(0))) && all(lessThan(x, bn)) &&
+                 dot(g, g) < r * r;
+    int bi = dcPFlat(x, bn);
+    int i0 = visit ? texelFetch(offs, dcPTexel(bi), 0).r : 0;
+    int i1 = visit ? texelFetch(offs, dcPTexel(bi + 1), 0).r : 0;
+    for (int i = i0; i < i1; ++i) {
+      int s = texelFetch(items, dcPTexel(i), 0).r;
+      float d = dcPSegment(p, texelFetch(segs, dcPTexel(2 * s), 0).xyz,
+                           texelFetch(segs, dcPTexel(2 * s + 1), 0).xyz);
+      bool take = dcPTake(d, s, cd, ci, nd, ni);
+      nd = take ? d : nd;
+      ni = take ? s : ni;
+    }
+  }
+  return nd;
+}
+// The segments within B, folded, then min(., B), clamped at 0 -- and
+// PorousField's ceiling B - k.
+float dcPorousStruts(vec3 p, float k, sampler2D segs, isampler2D offs,
+                     isampler2D items, vec3 bo, float bs, ivec3 bn, float B) {
+  float kk = max(k, 0.0);
+  int ci;
+  float m = dcPStrutsNext(p, segs, offs, items, bo, bs, bn, -3.0e38, -1, B, ci);
+  if (ci < 0) return B - kk;
+  float lim = min(m + kk, B), acc = m, cd = m;
+  bool more = kk > 0.0;
+  for (int step = 0; step < 64 && more; ++step) {
+    int ni;
+    float nd = dcPStrutsNext(p, segs, offs, items, bo, bs, bn, cd, ci, lim, ni);
+    more = ni >= 0;
+    acc = more ? dcPSmin(acc, nd, kk) : acc;
+    cd = nd;
+    ci = ni;
+  }
+  return min(max(0.0, min(acc, B)), B - kk);
+}
 )GLSL";
 
 // The full-screen-triangle vertex body (version-independent).
@@ -614,7 +815,8 @@ void main() {
 std::string header(bool es) {
   if (es)
     return "#version 300 es\nprecision highp float;\nprecision highp int;\n"
-           "precision highp sampler3D;\n";
+           "precision highp sampler3D;\nprecision highp sampler2D;\n"
+           "precision highp isampler2D;\n";
   return "#version 330 core\n";
 }
 
@@ -798,6 +1000,10 @@ struct Ctx {
   std::ostringstream funcs;   // per-node function bodies, children first
   std::vector<UniformBinding> bindings;
   std::vector<MeshTexture> meshes;
+  std::vector<DataTexture> dataTextures;
+  std::vector<std::string> notes;
+  GlslLimits limits;
+  float stepCap = 1.0f;  // lowered when a porous node falls back to a bake
   MeshResolver* resolver = nullptr;
   dualc::BBox bounds;
   int gridRes = kDefaultMeshGridRes;
@@ -1309,6 +1515,120 @@ int emitWinding(const GraphNode& n, Ctx& c) {
   return emitBakedGrid(grid, c);
 }
 
+// porous(volume[, control], ...) (roadmap 23 #66). The field is the builder's
+// own -- FieldGraph::build on this node, so the seeds and the complex are the
+// export's, bit for bit -- and its packed arrays (PorousField::packed) become
+// data textures the prelude's dcPorous* query exactly as porous_complex.cpp
+// does. The volume and the control are read by that build only and emit no
+// GLSL. `smooth` is a uniform (the arrays do not depend on it); every other key
+// changes the complex and recompiles. Past the limits -- a texture taller than
+// maxTextureSize, or more units than maxTextureUnits -- the node bakes to a
+// sampler3D over the trace box instead, as a mesh does, and says so in a note.
+int emitPorous(const GraphNode& n, Ctx& c) {
+  // Every key the builder's readPorousParams reads, read here too, so this
+  // TU's unread-key check passes them; the builder validates the values.
+  for (const char* key : {"cells", "mode", "dist", "ramp", "spacing", "spacing2", "d0",
+                          "d1", "relax", "seed", "jitter", "smooth"})
+    findParam(n, key);
+  const FieldGraph fg = FieldGraph::build(n, *c.resolver, c.threads);
+  const auto* field = dynamic_cast<const dualc::PorousField*>(&fg.field());
+  if (!field)
+    throw GraphError("internal: 'porous' did not build a PorousField", n.pointer);
+  const dualc::PorousField::Packed pk = field->packed();
+
+  // One texture per array, `channels` values per texel.
+  struct Array {
+    const char* key;
+    DataTexture::Format format;
+    const float* floats;
+    const std::int32_t* ints;
+    std::size_t size;
+  };
+  using F = DataTexture::Format;
+  std::vector<Array> arrays;
+  auto geometry = [&](const char* key, const dualc::PorousField::Array<float>& a) {
+    arrays.push_back({key, F::RGBA32F, a.data, nullptr, a.size});
+  };
+  auto indices = [&](const char* key, F f, const dualc::PorousField::Array<std::int32_t>& a) {
+    arrays.push_back({key, f, nullptr, a.data, a.size});
+  };
+  if (pk.mode == dualc::PorousMode::Struts) {
+    geometry("segments", pk.segments);
+    indices("binOffsets", F::R32I, pk.binOffsets);
+    indices("binItems", F::R32I, pk.binItems);
+  } else if (pk.cells == dualc::PorousCells::Voronoi) {
+    geometry("seeds", pk.seeds);
+    indices("offsets", F::R32I, pk.neighbourOffsets);
+    indices("neighbours", F::R32I, pk.neighbours);
+    indices("start", F::R32I, pk.binStart);
+  } else {
+    geometry("planes", pk.tetPlanes);
+    indices("tetNeighbours", F::RGBA32I, pk.tetNeighbours);
+    indices("start", F::R32I, pk.binStart);
+  }
+  auto rows = [&](const Array& a) {
+    const std::size_t texels = a.size / std::size_t(dataTextureChannels(a.format));
+    return std::max<std::size_t>(1, (texels + kDataTextureWidth - 1) / kDataTextureWidth);
+  };
+  std::size_t tallest = 0;
+  for (const Array& a : arrays) tallest = std::max(tallest, rows(a));
+  const std::size_t units = c.meshes.size() + c.dataTextures.size() + arrays.size();
+  if (tallest > std::size_t(std::max(c.limits.maxTextureSize, 1)) ||
+      units > std::size_t(std::max(c.limits.maxTextureUnits, 0))) {
+    const dualc::FieldPtr gridPtr = dualc::bakeToGrid(
+        *field, c.bounds, dualc::Vector3i{c.gridRes, c.gridRes, c.gridRes}, c.threads);
+    auto* grid = dynamic_cast<const dualc::GridField*>(gridPtr.get());
+    if (!grid)
+      throw GraphError("internal: porous bake did not return a GridField", n.pointer);
+    std::ostringstream note;
+    note << "porous at " << (n.pointer.empty() ? "/" : n.pointer) << ": " << tallest
+         << " texture rows and " << units << " texture units pass the limits ("
+         << c.limits.maxTextureSize << " rows, " << c.limits.maxTextureUnits
+         << " units); baked to a " << c.gridRes << "^3 grid instead";
+    c.notes.push_back(note.str());
+    // A trilinear grid of a 1-Lipschitz field can be steeper by up to sqrt(3).
+    c.stepCap = std::min(c.stepCap, 0.5f);
+    return emitBakedGrid(grid, c);
+  }
+
+  const int idx = c.counter++;
+  const std::string base = "u_n" + std::to_string(idx) + "_";
+  std::string samplers;
+  for (const Array& a : arrays) {
+    DataTexture t;
+    t.samplerName = base + a.key;
+    t.format = a.format;
+    t.width = kDataTextureWidth;
+    t.height = int(rows(a));
+    const std::size_t values =
+        std::size_t(dataTextureChannels(a.format)) * std::size_t(t.width) * std::size_t(t.height);
+    if (t.format == F::RGBA32F) {
+      t.floats.assign(values, 0.0f);
+      if (a.size) std::copy(a.floats, a.floats + a.size, t.floats.begin());
+    } else {
+      t.ints.assign(values, 0);
+      if (a.size) std::copy(a.ints, a.ints + a.size, t.ints.begin());
+    }
+    c.decls << "uniform " << (t.format == F::RGBA32F ? "sampler2D " : "isampler2D ") << t.samplerName
+            << ";\n";
+    samplers += ", " + t.samplerName;
+    c.dataTextures.push_back(std::move(t));
+  }
+  const std::string k = declScalar(c, idx, "smooth", field->params().smooth, n);
+  std::ostringstream bins;
+  bins << ", vec3(" << glslLit(pk.binOrigin[0]) << ", " << glslLit(pk.binOrigin[1]) << ", "
+       << glslLit(pk.binOrigin[2]) << "), " << glslLit(pk.binSize) << ", ivec3("
+       << pk.binDims[0] << ", " << pk.binDims[1] << ", " << pk.binDims[2] << ")";
+  const char* fn = pk.mode == dualc::PorousMode::Struts ? "dcPorousStruts"
+                   : pk.cells == dualc::PorousCells::Voronoi ? "dcPorousVoronoiWalls"
+                                                             : "dcPorousDelaunayWalls";
+  c.funcs << "float " << fname(idx) << "(vec3 p){ return " << fn << "(p, " << k << samplers
+          << bins.str();
+  if (pk.mode == dualc::PorousMode::Struts) c.funcs << ", " << glslLit(pk.bound);
+  c.funcs << "); }\n";
+  return idx;
+}
+
 // translate/rotate/transform all lower to a TransformField; emit the
 // localFromWorld matrix (= worldFromLocal.inverseRigid()) and warp the point.
 int emitTransform(const GraphNode& n, Ctx& c, const dualc::Mat4& worldFromLocal) {
@@ -1440,6 +1760,7 @@ int emitNodeImpl(const GraphNode& n, Ctx& c) {
   // 3. Mesh sources.
   if (op == "mesh") return emitMesh(n, c);
   if (op == "winding") return emitWinding(n, c);
+  if (op == "porous") return emitPorous(n, c);
 
   // 3b. The lifts, each over one 2D profile; a profile anywhere else is the
   // builder's typing error.
@@ -1707,6 +2028,10 @@ float nodeStepScale(const GraphNode& n) {
   // back -- see docs/roadmap/12-field-graph-and-app/02-glsl-codegen.md.
   if (op == "mesh") return 0.6f;
   if (op == "winding") return 0.5f;
+  // porous is 1-Lipschitz (src/implicit/porous.cpp says why), and its children
+  // place the seeds without being traced. A baked fallback lowers the scene's
+  // scale through Ctx::stepCap.
+  if (op == "porous") return 1.0f;
   // primitives / metric decorators: pass child through (1.0 at a leaf).
   float s = 1.0f;
   for (const GraphNode& ch : n.in) s = std::min(s, nodeStepScale(ch));
@@ -1718,6 +2043,19 @@ float nodeStepScale(const GraphNode& n) {
 // can fall back to the bounds diagonal.
 float nodeFeatureScale(const GraphNode& n) {
   float best = std::numeric_limits<float>::infinity();
+  // porous: the smaller spacing, the cells' size where they are densest. Read
+  // raw (the builder checks the values); the children are not traced.
+  if (n.op == "porous") {
+    auto raw = [&](const char* key, double def) {
+      auto it = n.params.find(key);
+      return it != n.params.end() && it->second.kind == ParamValue::Kind::Number
+                 ? it->second.num
+                 : def;
+    };
+    const double s1 = raw("spacing", 0.0);
+    const double s = std::min(s1, raw("spacing2", s1));
+    return s > 0.0 ? float(s) : best;
+  }
   if (isTpmsOp(n.op) || isStrutOp(n.op))
     best = std::min(best, float(numParam(n, "wavelength", 1.0)));
   for (const GraphNode& ch : n.in) best = std::min(best, nodeFeatureScale(ch));
@@ -1728,8 +2066,9 @@ float nodeFeatureScale(const GraphNode& n) {
 
 GlslScene compileToGlsl(const GraphNode& root, MeshResolver& meshes,
                         const dualc::BBox& bounds, int gridRes,
-                        unsigned bakeThreads) {
+                        unsigned bakeThreads, const GlslLimits& limits) {
   Ctx c;
+  c.limits = limits;
   c.resolver = &meshes;
   c.bounds = bounds;
   c.threads = bakeThreads;
@@ -1745,9 +2084,11 @@ GlslScene compileToGlsl(const GraphNode& root, MeshResolver& meshes,
   scene.generatedSource = src.str();
   scene.bindings = std::move(c.bindings);
   scene.meshes = std::move(c.meshes);
+  scene.dataTextures = std::move(c.dataTextures);
+  scene.notes = std::move(c.notes);
   scene.bounds = bounds;
   scene.nodeCount = c.counter;
-  scene.stepScale = nodeStepScale(root);
+  scene.stepScale = std::min(nodeStepScale(root), c.stepCap);
   const float feat = nodeFeatureScale(root);
   scene.featureScale = std::isfinite(feat) ? feat : 0.0f;
   return scene;

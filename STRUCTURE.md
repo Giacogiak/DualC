@@ -44,7 +44,7 @@ DualC/
 │   ├── implicit.h             v2 ImplicitField base, sources, combinators, decorators, domain ops
 │   ├── implicit2d.h           2D fields (Circle/Box/Segment/Polygon) + Revolve/Extrude lifts
 │   ├── primitives.h           30 analytic primitive field classes (Tiers A/B/C) + 6 TPMS
-│   └── porous.h               The porous shell's seeds: Pcg32, SeedParams / SeedSet, generatePorousSeeds, the ramps and ceilings (roadmap 23 #63); PorousCells / PorousMode (#64); PorousParams, PorousField (#65)
+│   └── porous.h               The porous shell's seeds: Pcg32, SeedParams / SeedSet, generatePorousSeeds, the ramps and ceilings (roadmap 23 #63); PorousCells / PorousMode (#64); PorousParams, PorousField (#65) and its packed() views (#66)
 │
 ├── src/                       Core library implementation
 │   ├── hermite_octree.cpp     Octree node allocation & traversal
@@ -99,9 +99,9 @@ DualC/
 │   │                            (own lib dualc_examples_fieldgraph; shared by dualc_field and the C ABI in capi/)
 │   ├── field_slice.{h,cpp}    Any field sampled on an axis plane → PNG heatmap + SVG contour (marching squares)
 │   │                            (lib dualc_examples_slice, the one CLI lib with the PNG writer; dualc_field --slice)
-│   ├── field_glsl.{h,cpp}     Field-graph → GLSL codegen: GraphNode → generated sceneSDF() + binding table
+│   ├── field_glsl.{h,cpp}     Field-graph → GLSL codegen: GraphNode → generated sceneSDF() + binding table; porous as 2D data textures (roadmap 23 #66)
 │   │                            (lib dualc_examples_fieldglsl, no GL dep; mirrors field_graph's walk + the C++ formulas)
-│   ├── raymarch_gl.{h,cpp}    Shared GL plumbing (window/compile/snapshot/orbit camera) for the GPU viewer + parity
+│   ├── raymarch_gl.{h,cpp}    Shared GL plumbing (window/compile/snapshot/orbit camera, grid + data-texture upload) for the GPU viewer + parity
 │   │                            (lib dualc_examples_gl; gated on the viewer or the parity-harness flag)
 │   ├── gpu_preference.h       Exports NvOptimusEnablement / AmdPowerXpressRequestHighPerformance so the GL
 │   │                            exes pick the discrete GPU on hybrid laptops (Win-only; include from one TU per exe)
@@ -172,7 +172,7 @@ DualC/
 │   ├── test_demo_meshes.cpp   Procedural mesh topology validation
 │   ├── test_parallel.cpp      parallelFor: exception propagation + the bit-identical-across-thread-counts guarantee
 │   ├── test_field_graph.cpp   Field-graph parse/build/dispatch + mesh-resolver caching + located errors; the `porous` token (roadmap 23 #65)
-│   ├── test_field_glsl.cpp    Field→GLSL codegen: DAG dedup + emission (GL-free, so it runs under CTest)
+│   ├── test_field_glsl.cpp    Field→GLSL codegen: DAG dedup + emission; the porous data textures + fallback (GL-free, so it runs under CTest)
 │   ├── test_streaming_export.cpp  Tiled/streamed STL + 3MF vs the monolithic mesh
 │   ├── test_diagnostics.cpp   Diagnostics channel: every reported degradation shown firing (roadmap 17 #26)
 │   ├── test_validation.cpp    Argument validation + the BBox::empty sentinel (roadmap 17 #34)

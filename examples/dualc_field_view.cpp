@@ -109,6 +109,16 @@ GLuint uploadMesh(GLuint prog, const dce::fieldgraph::MeshTexture& mt, int unit)
                                mt.values.data(), unit);
 }
 
+// Upload one porous data texture on unit `unit` (after the meshes'), through
+// the same raymarch_gl path dualc_glsl_parity uses. Returns the texture id.
+GLuint uploadData(GLuint prog, const dce::fieldgraph::DataTexture& dt, int unit) {
+  const bool f = dt.format == dce::fieldgraph::DataTexture::Format::RGBA32F;
+  return dce::gl::uploadData2D(
+      prog, dt.samplerName, dce::fieldgraph::dataTextureChannels(dt.format), !f,
+      dt.width, dt.height,
+      f ? static_cast<const void*>(dt.floats.data()) : dt.ints.data(), unit);
+}
+
 // Set a binding's current value into its uniform (a parameter edit -- no
 // recompile). mat4 bindings are uploaded row-major (transpose) to match
 // Mat4::transformPoint.
@@ -229,6 +239,8 @@ int main(int argc, char** argv) {
     try {
       scene = dce::fieldgraph::compileToGlsl(g, resolver, bounds, gridRes,
                                              bakeThreads);
+      for (const std::string& note : scene.notes)
+        std::cerr << "[dualc_field_view] " << note << "\n";
       return true;
     } catch (const dce::fieldgraph::GraphError& e) {
       std::cerr << "[dualc_field_view] codegen error"
@@ -292,6 +304,9 @@ int main(int argc, char** argv) {
     }
     for (std::size_t i = 0; i < s.meshes.size(); ++i)
       meshTextures.push_back(uploadMesh(prog, s.meshes[i], static_cast<int>(i)));
+    for (std::size_t i = 0; i < s.dataTextures.size(); ++i)
+      meshTextures.push_back(uploadData(prog, s.dataTextures[i],
+                                        static_cast<int>(s.meshes.size() + i)));
     for (const auto& b : s.bindings) setBinding(prog, b);
   };
   applyScene(scene);

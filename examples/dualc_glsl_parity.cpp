@@ -127,6 +127,15 @@ bool runCase(const Case& c, GLuint fbo) {
                                             mt.resolution, mt.values.data(),
                                             int(m)));
   }
+  for (std::size_t d = 0; d < scene.dataTextures.size(); ++d) {
+    const auto& dt = scene.dataTextures[d];
+    const bool f = dt.format == dce::fieldgraph::DataTexture::Format::RGBA32F;
+    meshTex.push_back(dce::gl::uploadData2D(
+        prog, dt.samplerName, dce::fieldgraph::dataTextureChannels(dt.format), !f,
+        dt.width, dt.height,
+        f ? static_cast<const void*>(dt.floats.data()) : dt.ints.data(),
+        int(scene.meshes.size() + d)));
+  }
   glClear(GL_COLOR_BUFFER_BIT);
   glDrawArrays(GL_TRIANGLES, 0, 3);
   glFinish();

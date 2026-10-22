@@ -4,6 +4,7 @@
 #include "example_common.h"
 
 #include "dualc/implicit.h"
+#include "dualc/porous.h"
 
 #include "geometrycentral/surface/surface_mesh.h"
 #include "geometrycentral/surface/surface_mesh_factories.h"
@@ -11,6 +12,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <memory>
@@ -570,4 +572,179 @@ TEST_CASE("GLSL codegen caps the polygon at its vertex ceiling",
   // Located on the polygon (shorthand pointers are character offsets).
   CHECK(err.rfind(std::to_string(over.find("polygon")) + ":", 0) == 0);
   CHECK_NOTHROW(FieldGraph::build(parseShorthand(over), resolver));
+}
+
+// ---- porous (roadmap 23 #66) ------------------------------------------------
+// The node compiles to data textures holding the builder's own packed arrays
+// (PorousField::packed), a `smooth` uniform and one dcPorous* call; the GPU
+// value is gated by dualc_glsl_parity. Named "porous: field_glsl ..." so both
+// the `-R porous` and the `-R field_glsl` filters run them.
+
+namespace {
+
+const dualc::PorousField& porousOf(const FieldGraph& fg) {
+  const auto* f = dynamic_cast<const dualc::PorousField*>(&fg.field());
+  REQUIRE(f != nullptr);
+  return *f;
+}
+
+// The texture holds the array, then zeros to the end of its last row.
+template <class T>
+void checkTexture(const DataTexture& t, const dualc::PorousField::Array<T>& a,
+                  const std::vector<T>& data) {
+  const std::size_t ch = std::size_t(dataTextureChannels(t.format));
+  REQUIRE(a.size % ch == 0);
+  const std::size_t texels = a.size / ch;
+  CHECK(t.width == kDataTextureWidth);
+  CHECK(std::size_t(t.height) ==
+        std::max<std::size_t>(1, (texels + kDataTextureWidth - 1) / kDataTextureWidth));
+  REQUIRE(data.size() == ch * std::size_t(t.width) * std::size_t(t.height));
+  CHECK(std::vector<T>(data.begin(), data.begin() + std::ptrdiff_t(a.size)) ==
+        std::vector<T>(a.data, a.data + a.size));
+  bool zeros = true;
+  for (std::size_t i = a.size; i < data.size(); ++i) zeros = zeros && data[i] == T(0);
+  CHECK(zeros);
+}
+
+}  // namespace
+
+TEST_CASE("porous: field_glsl compiles the four cases to data textures and a smooth uniform",
+          "[field_glsl][porous]") {
+  using F = DataTexture::Format;
+  struct Case {
+    const char* keys;
+    const char* fn;
+    std::vector<std::pair<std::string, F>> textures;
+  };
+  const std::vector<Case> cases = {
+      {"", "dcPorousVoronoiWalls",
+       {{"seeds", F::RGBA32F}, {"offsets", F::R32I}, {"neighbours", F::R32I},
+        {"start", F::R32I}}},
+      {", cells=delaunay", "dcPorousDelaunayWalls",
+       {{"planes", F::RGBA32F}, {"tetNeighbours", F::RGBA32I}, {"start", F::R32I}}},
+      {", mode=struts", "dcPorousStruts",
+       {{"segments", F::RGBA32F}, {"binOffsets", F::R32I}, {"binItems", F::R32I}}},
+      {", cells=delaunay, mode=struts", "dcPorousStruts",
+       {{"segments", F::RGBA32F}, {"binOffsets", F::R32I}, {"binItems", F::R32I}}},
+  };
+  FileMeshResolver resolver;
+  for (const Case& c : cases) {
+    INFO(c.keys);
+    const GraphNode g = parseShorthand(std::string("porous(sphere(radius=1), spacing=0.3, "
+                                                   "smooth=0.04") +
+                                       c.keys + ")");
+    const GlslScene s = compileToGlsl(g, resolver, box(-1.2, 1.2));
+    const FieldGraph fg = FieldGraph::build(g, resolver);
+    const dualc::PorousField::Packed pk = porousOf(fg).packed();
+
+    REQUIRE(s.dataTextures.size() == c.textures.size());
+    CHECK(s.meshes.empty());
+    CHECK(s.notes.empty());
+    for (std::size_t i = 0; i < c.textures.size(); ++i) {
+      const DataTexture& t = s.dataTextures[i];
+      CHECK(t.samplerName == "u_n0_" + c.textures[i].first);
+      CHECK(t.format == c.textures[i].second);
+      const std::string decl = std::string("uniform ") +
+                               (t.format == F::RGBA32F ? "sampler2D " : "isampler2D ") +
+                               t.samplerName + ";";
+      CHECK(countOccurrences(s.generatedSource, decl) == 1);
+      // Within the limits P01 recorded: WebGL2's 2048 rows, 16 units.
+      CHECK(t.height <= GlslLimits{}.maxTextureSize);
+    }
+    CHECK(s.dataTextures.size() <= std::size_t(GlslLimits{}.maxTextureUnits));
+    if (pk.mode == dualc::PorousMode::Struts) {
+      checkTexture(s.dataTextures[0], pk.segments, s.dataTextures[0].floats);
+      checkTexture(s.dataTextures[1], pk.binOffsets, s.dataTextures[1].ints);
+      checkTexture(s.dataTextures[2], pk.binItems, s.dataTextures[2].ints);
+      CHECK(pk.bound > 0.0f);
+    } else if (pk.cells == dualc::PorousCells::Voronoi) {
+      checkTexture(s.dataTextures[0], pk.seeds, s.dataTextures[0].floats);
+      checkTexture(s.dataTextures[1], pk.neighbourOffsets, s.dataTextures[1].ints);
+      checkTexture(s.dataTextures[2], pk.neighbours, s.dataTextures[2].ints);
+      checkTexture(s.dataTextures[3], pk.binStart, s.dataTextures[3].ints);
+    } else {
+      checkTexture(s.dataTextures[0], pk.tetPlanes, s.dataTextures[0].floats);
+      checkTexture(s.dataTextures[1], pk.tetNeighbours, s.dataTextures[1].ints);
+      checkTexture(s.dataTextures[2], pk.binStart, s.dataTextures[2].ints);
+    }
+    // smooth is the one uniform; the call passes it, the textures and the bins.
+    REQUIRE(s.bindings.size() == 1);
+    CHECK(s.bindings[0].name == "u_n0_smooth");
+    CHECK(s.bindings[0].paramKey == "smooth");
+    CHECK(s.bindings[0].value == std::vector<float>{0.04f});
+    CHECK(countOccurrences(s.generatedSource, std::string("return ") + c.fn + "(p, u_n0_smooth, ") == 1);
+    CHECK(countOccurrences(s.generatedSource,
+                           "ivec3(" + std::to_string(pk.binDims[0]) + ", " +
+                               std::to_string(pk.binDims[1]) + ", " +
+                               std::to_string(pk.binDims[2]) + ")") == 1);
+    // The volume places the seeds and is not traced; the node is 1-Lipschitz.
+    CHECK(s.generatedSource.find("sdSphere") == std::string::npos);
+    CHECK(s.stepScale == 1.0f);
+    CHECK(s.featureScale == 0.3f);
+    // The ES header gives the samplers a precision.
+    const std::string es = assembleTraceShader(s, true);
+    CHECK(es.find("precision highp isampler2D;") != std::string::npos);
+    CHECK(es.find("precision highp sampler2D;") != std::string::npos);
+  }
+}
+
+TEST_CASE("porous: field_glsl reads every key, rejects an unknown one, keeps children untraced",
+          "[field_glsl][porous]") {
+  FileMeshResolver resolver;
+  // Every key of the signature, so this TU's unread-key check sees each read.
+  CHECK_NOTHROW(compileToGlsl(
+      parseShorthand("porous(sphere(radius=1), plane(1,0,0,0), cells=voronoi, mode=walls, "
+                     "dist=jitter, spacing=0.3, spacing2=0.4, d0=-1, d1=1, ramp=smooth, "
+                     "relax=1, seed=7, jitter=0.5, smooth=0.02)"),
+      resolver, box(-1.5, 1.5)));
+  // A typo is a located error, as on the contour path.
+  const std::string err = glslError("porous(sphere(radius=1), spacing=0.3, smoth=0.1)");
+  CHECK(err.find("smoth") != std::string::npos);
+  CHECK(err.rfind("0:", 0) == 0);
+  // A gyroid control grades the seeds only: no TPMS in the trace, so neither
+  // its step scale nor its wavelength reaches the scene.
+  const GlslScene s = compileToGlsl(
+      parseShorthand("porous(sphere(radius=1), gyroid(wavelength=0.1), spacing=0.25, "
+                     "spacing2=0.35, d1=1)"),
+      resolver, box(-1.2, 1.2));
+  CHECK(s.generatedSource.find("sdGyroid(p") == std::string::npos);
+  CHECK(s.stepScale == 1.0f);
+  CHECK(s.featureScale == 0.25f);
+  // A repeated porous node uploads its arrays once (DAG dedup).
+  const GlslScene d = compileToGlsl(
+      parseShorthand("union(onion(porous(sphere(radius=1), spacing=0.3), thickness=0.02), "
+                     "offset(porous(sphere(radius=1), spacing=0.3), r=0.01))"),
+      resolver, box(-1.2, 1.2));
+  CHECK(d.dataTextures.size() == 4);
+  CHECK(bindingsWithKey(d, "smooth") == 1);
+}
+
+TEST_CASE("porous: field_glsl bakes the node past the texture limits", "[field_glsl][porous]") {
+  FileMeshResolver resolver;
+  const GraphNode g = parseShorthand("porous(sphere(radius=1), spacing=0.3)");
+  const dualc::BBox region = box(-1.2, 1.2);
+  // Voronoi walls need 4 units: allow 3, and the node becomes a sampler3D.
+  GlslLimits units;
+  units.maxTextureUnits = 3;
+  const GlslScene s = compileToGlsl(g, resolver, region, 24, 0, units);
+  CHECK(s.dataTextures.empty());
+  REQUIRE(s.meshes.size() == 1);
+  REQUIRE(s.notes.size() == 1);
+  CHECK(s.notes[0].find("baked to a 24^3 grid") != std::string::npos);
+  CHECK(s.stepScale == 0.5f);
+  // The grid is the builder's field baked over the trace box.
+  const FieldGraph fg = FieldGraph::build(g, resolver);
+  const dualc::FieldPtr grid = dualc::bakeToGrid(fg.field(), region, 24);
+  const auto* gf = dynamic_cast<const dualc::GridField*>(grid.get());
+  REQUIRE(gf != nullptr);
+  CHECK(s.meshes[0].values == gf->values());
+  // A texture taller than the limit takes the same path: the neighbour list
+  // spans more than one 2048-wide row here.
+  GlslLimits rows;
+  rows.maxTextureSize = 1;
+  const GlslScene r = compileToGlsl(g, resolver, region, 24, 0, rows);
+  CHECK(r.dataTextures.empty());
+  CHECK(r.meshes.size() == 1);
+  // Within the defaults it stays exact.
+  CHECK(compileToGlsl(g, resolver, region, 24).dataTextures.size() == 4);
 }

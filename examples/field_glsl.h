@@ -4,6 +4,7 @@
 
 #include "dualc/dualc.h"
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -34,7 +35,9 @@
 // (baked to a sampler3D), and (#58, 2026-10-15) the 2D profiles circle/rect/
 // segment/polygon under the lifts revolve/extrude -- a profile emits a
 // `float fN(vec2 p)`, read through field_graph's readProfile, and a polygon
-// above kMaxGlslPolygonVertices is refused. A genuinely unknown op still throws a GraphError naming
+// above kMaxGlslPolygonVertices is refused, and (#66, 2026-10-22) `porous`: the
+// builder's own PorousField, its packed complex uploaded as 2D data textures
+// (DataTexture) and queried by the same walk and fold. A genuinely unknown op still throws a GraphError naming
 // it. Each prelude helper is bit-faithful to its src/implicit/ formula (gated by
 // dualc_glsl_parity). Emission is a **deduped DAG**: nodes are keyed by
 // structural equality (op + params + children), so a duplicated subtree emits one
@@ -68,11 +71,50 @@ struct MeshTexture {
   std::vector<float> values;    // resolution.x*y*z, x-fastest (GridField layout)
 };
 
+// One packed array of a `porous` node (roadmap 23 #66) -> one 2D data texture
+// the app uploads unfiltered on its own texture unit and the GLSL reads with
+// texelFetch: item i at texel ivec2(i % kDataTextureWidth, i / kDataTextureWidth),
+// the last row zero-padded. RGBA32F holds geometry (a seed, a plane, a segment
+// end), R32I / RGBA32I indices through an isampler2D, exact where a float index
+// is not and able to say -1. `floats` (RGBA32F) or `ints` (the two integer
+// formats) holds channels x width x height values, row-major.
+struct DataTexture {
+  enum class Format { RGBA32F, R32I, RGBA32I };
+  std::string samplerName;  // e.g. "u_n4_seeds"
+  Format      format = Format::RGBA32F;
+  int         width = 0, height = 0;
+  std::vector<float>        floats;
+  std::vector<std::int32_t> ints;
+};
+
+// Values per texel: 4 for RGBA32F / RGBA32I, 1 for R32I.
+inline int dataTextureChannels(DataTexture::Format f) {
+  return f == DataTexture::Format::R32I ? 1 : 4;
+}
+
+// The width of every data texture: WebGL2's guaranteed MAX_TEXTURE_SIZE.
+inline constexpr int kDataTextureWidth = 2048;
+
+// What the target GL allows, for the codegen's fallback: a `porous` node whose
+// data textures would pass `maxTextureSize` rows, or whose units would take the
+// scene past `maxTextureUnits` (mesh grids and data textures together), is
+// baked to a sampler3D like a mesh instead and says so in GlslScene::notes. The
+// defaults are the guarantees (WebGL2's 2048, GL 3.3's and WebGL2's 16
+// fragment units); an app with a context passes the values it queried.
+struct GlslLimits {
+  int maxTextureSize = 2048;
+  int maxTextureUnits = 16;
+};
+
 // The compiled scene: generated GLSL + the tables the host needs to feed it.
 struct GlslScene {
   std::string generatedSource;          // uniform decls + per-node fN + sceneSDF
   std::vector<UniformBinding> bindings; // tier-2 (parameter) edit table
   std::vector<MeshTexture>    meshes;   // one per unique mesh node
+  std::vector<DataTexture>    dataTextures; // porous nodes' arrays; their units
+                                            // follow the meshes', in this order
+  std::vector<std::string>    notes;    // codegen choices the app reports, e.g.
+                                        // a porous node baked past the limits
   float       stepScale = 1.0f;         // graph-level safe sphere-trace factor
   float       featureScale = 0.0f;      // smallest characteristic feature length
                                         // (min TPMS wavelength); 0 => none, the
@@ -107,7 +149,8 @@ inline constexpr int kMaxGlslPolygonVertices = 64;
 GlslScene compileToGlsl(const GraphNode& root, MeshResolver& meshes,
                         const dualc::BBox& bounds,
                         int gridRes = kDefaultMeshGridRes,
-                        unsigned bakeThreads = 0);
+                        unsigned bakeThreads = 0,
+                        const GlslLimits& limits = GlslLimits{});
 
 // Assemble the full fragment shader for the live sphere-tracer (app): version
 // header + fixed primitive/op library + the scene's generated source + the fixed

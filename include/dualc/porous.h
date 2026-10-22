@@ -157,6 +157,38 @@ public:
   const Stats&        stats() const;
   const PorousParams& params() const;
 
+  // The packed complex the field reads, as read-only views valid for the
+  // field's lifetime: the arrays and the bin grid of
+  // docs/roadmap/23-porous-shell/04-complex-and-bins.md, only those of this
+  // field's (cells, mode) case non-empty. A host that runs the same query
+  // elsewhere reads these -- the GLSL node (#66) uploads them as data
+  // textures -- so it never rebuilds the complex differently.
+  template <class T>
+  struct Array {
+    const T*    data = nullptr;
+    std::size_t size = 0;
+  };
+  struct Packed {
+    PorousCells  cells = PorousCells::Voronoi;
+    PorousMode   mode  = PorousMode::Walls;
+    // Bin (i, j, k) covers binOrigin + [i, i+1) x [j, j+1) x [k, k+1) times
+    // binSize, flat index (k * binDims[1] + j) * binDims[0] + i; a point
+    // outside the grid falls in the nearest boundary bin.
+    float        binOrigin[3] = {0.0f, 0.0f, 0.0f};
+    float        binSize = 1.0f;
+    std::int32_t binDims[3] = {1, 1, 1};
+    // Struts: B, where the distance is clamped; valueAt clamps at B - smooth.
+    float        bound = 0.0f;
+    // Voronoi walls: seeds (x, y, z, 1 if pad), the neighbour CSR, binStart
+    // (a seed per bin). Delaunay walls: tetPlanes (4 x (n, d) per tet),
+    // tetNeighbours (4 per tet, -1 on the hull), binStart (a tet per bin).
+    // Struts: segments (a.xyz, 0, b.xyz, 0), the bins' CSR of segment indices.
+    Array<float>        seeds, tetPlanes, segments;
+    Array<std::int32_t> neighbourOffsets, neighbours, tetNeighbours, binStart;
+    Array<std::int32_t> binOffsets, binItems;
+  };
+  Packed packed() const;
+
 private:
   struct Impl;
   std::unique_ptr<const Impl> impl_;

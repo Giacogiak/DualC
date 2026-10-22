@@ -139,6 +139,29 @@ unsigned int uploadGrid3D(unsigned int prog, const std::string& samplerName,
   return tex;
 }
 
+unsigned int uploadData2D(unsigned int prog, const std::string& samplerName,
+                          int channels, bool integer, int width, int height,
+                          const void* values, int unit) {
+  GLuint tex = 0;
+  glGenTextures(1, &tex);
+  glActiveTexture(GL_TEXTURE0 + unit);
+  glBindTexture(GL_TEXTURE_2D, tex);
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  const bool rgba = channels == 4;
+  const GLint internal = integer ? (rgba ? GL_RGBA32I : GL_R32I)
+                                 : (rgba ? GL_RGBA32F : GL_R32F);
+  const GLenum format = integer ? (rgba ? GL_RGBA_INTEGER : GL_RED_INTEGER)
+                                : (rgba ? GL_RGBA : GL_RED);
+  glTexImage2D(GL_TEXTURE_2D, 0, internal, width, height, 0, format,
+               integer ? GL_INT : GL_FLOAT, values);
+  setU1i(prog, samplerName.c_str(), unit);
+  return tex;
+}
+
 void frameBounds(OrbitState& s, const dualc::BBox& b) {
   const Vector3 e = b.extent();
   const double diag = std::sqrt(e.x * e.x + e.y * e.y + e.z * e.z);

@@ -22,6 +22,10 @@ block's `01-study.md` and P03's packed sizes. Branch `feat/porous-shell`. Never 
 #### Acceptance criteria
 
 - `ctest --test-dir build -R field_glsl` is green, and `build-gl` builds.
+- *Correction (P05.1, 2026-10-22):* before this unit the pattern matched **no** test (the
+  codegen cases are named `GLSL codegen …`, as the study's defaults table says), so it was
+  green vacuously. The new cases are named `porous: field_glsl …`, so `-R field_glsl` and
+  `-R porous` both run them (3 tests); `-R "GLSL codegen"` runs the 16 older ones.
 
 ### T2. Parity and the viewer
 

@@ -20,7 +20,8 @@ that binds the later phases. [02](02-record.md) is the record: every item, its a
 line and its dated appends; an item whose measurements outgrow it keeps its summary there
 and its numbers in a numbered child: [03](03-delaunay-engine.md) and [04](04-complex-and-bins.md) are #64's, the
 Delaunay engine and the packed complex as built and measured; [05](05-porous-field.md) and
-[06](06-sponge-end-to-end.md) are #65's, the field and the graph token, and the sponge end to end.
+[06](06-sponge-end-to-end.md) are #65's, the field and the graph token, and the sponge end to end;
+[07](07-glsl-node.md) is #66's, the GLSL emitter and its data textures.
 
 | Item | Page | Status |
 | --- | --- | --- |
@@ -28,7 +29,7 @@ Delaunay engine and the packed complex as built and measured; [05](05-porous-fie
 | #63 Deterministic seeds in any volume | [02](02-record.md#63-deterministic-seeds-in-any-volume) | DONE 2026-10-21 (P02; the in-run choices pending owner review) |
 | #64 Delaunay tetrahedralization and the packed complex | [02](02-record.md#64-delaunay-tetrahedralization-and-the-packed-complex) · [03](03-delaunay-engine.md) · [04](04-complex-and-bins.md) | DONE 2026-10-21 (P03; the in-run choices pending owner review) |
 | #65 The porous node on the CPU | [02](02-record.md#65-the-porous-node-on-the-cpu) · [05](05-porous-field.md) · [06](06-sponge-end-to-end.md) | DONE 2026-10-22 (P04; the in-run choices pending owner review) |
-| #66 The porous node in GLSL and dualc_field_view | [02](02-record.md#66-the-porous-node-in-glsl-and-dualc_field_view) | PLANNED — P05 |
+| #66 The porous node in GLSL and dualc_field_view | [02](02-record.md#66-the-porous-node-in-glsl-and-dualc_field_view) · [07](07-glsl-node.md) | PARTIAL — P05.1 (T1) 2026-10-22; T2 P05.2 |
 | #67 The C ABI test and the documentation | [02](02-record.md#67-the-c-abi-test-and-the-documentation) | PLANNED — P06 |
 | #68 The Boletus implementation plan | [02](02-record.md#68-the-boletus-implementation-plan) | PLANNED — P07 |
 | #69 Graded nodes miss a negative thickness in cellOverlaps | [02](02-record.md#69-graded-nodes-miss-a-negative-thickness-in-celloverlaps) | DEFERRED — trigger in the decisions index |
