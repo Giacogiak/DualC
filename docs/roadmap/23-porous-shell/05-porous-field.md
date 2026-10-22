@@ -3,7 +3,8 @@
 The contract, the choices and the numbers behind
 [02 #65](02-record.md#65-the-porous-node-on-the-cpu)'s first half (P04 T1, 2026-10-21): the
 field over the packed complex of [04](04-complex-and-bins.md), and the `porous` token that
-builds it in `dualc_field`.
+builds it in `dualc_field`. The field's contract as it is today is
+[design/13 § The field](../../design/13-porous-shell.md#the-field) (2026-10-22, P08.1).
 
 ## What was built
 

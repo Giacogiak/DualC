@@ -1,7 +1,7 @@
 # 7–8. Configuration parameters and the vendored solver
 
 The two parameter structs, field by field, with the defaults the headers declare (§ 7), and
-the one piece of third-party code in the tree (§ 8). The CLI flags that set these fields, and
+the three pieces of third-party code vendored in the tree (§ 8). The CLI flags that set these fields, and
 their own defaults, are the [command reference](../command_reference/README.md); which value
 is rejected at construction is [17/08](../roadmap/17-code-audit-and-hardening/08-argument-validation.md).
 

@@ -159,7 +159,7 @@ public:
 
   // The packed complex the field reads, as read-only views valid for the
   // field's lifetime: the arrays and the bin grid of
-  // docs/roadmap/23-porous-shell/04-complex-and-bins.md, only those of this
+  // docs/design/13-porous-shell.md § The packed layout, only those of this
   // field's (cells, mode) case non-empty. A host that runs the same query
   // elsewhere reads these -- the GLSL node (#66) uploads them as data
   // textures -- so it never rebuilds the complex differently.

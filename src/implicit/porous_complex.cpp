@@ -1,8 +1,8 @@
 // The porous cell complex (roadmap 23 #64): the dual of the seeds' Delaunay
 // tetrahedralization, packed for the CPU field and the GLSL node, and the
-// distance query over it. See src/internal/porous_complex.h for the contract
-// and docs/roadmap/23-porous-shell/04-complex-and-bins.md for the rules and
-// the numbers.
+// distance query over it. See src/internal/porous_complex.h for the contract,
+// docs/design/13-porous-shell.md for the rules and
+// docs/roadmap/23-porous-shell/04-complex-and-bins.md for why and the numbers.
 //
 // Bit-identical on every OS: only IEEE arithmetic (+ - * / sqrt), compiled
 // without FMA contraction (CMakeLists.txt), exact predicates for every sign

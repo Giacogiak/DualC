@@ -60,7 +60,9 @@ read as its flattening by every reader.
 
 `porous(volume[, control], …)` builds a `PorousField` (`dualc/porous.h`): seeds in the
 volume, one Delaunay tetrahedralization of them, and the packed complex its value queries
-(the keys: [11/16](../command_reference/11-dualc_field/16-porous-shell.md)). Its rules:
+(the keys: [11/16](../command_reference/11-dualc_field/16-porous-shell.md)). How the library
+builds and queries it — the seeds, the tets, the packed layout, the bin bound, 1-Lipschitz,
+determinism, the ceilings — is [13](13-porous-shell.md). The graph adds these rules:
 
 - **The volume is read at build time only.** The seeds are placed where the volume's value
   is below the pad `max(spacing, spacing2)`, graded by the control; then the field keeps the
@@ -68,29 +70,10 @@ volume, one Delaunay tetrahedralization of them, and the packed complex its valu
   `childBakeMargin` hands the volume the pad, as it is read up to the pad above its zero
   level, and the control 0; the node's value never reads either, so the margin the node is
   handed does not pass down.
-- **1-Lipschitz, so the default `cellOverlaps`.** Each primitive's distance — a bisector, a
-  face plane, a segment — is 1-Lipschitz; the cells meet where both sides read 0, so the
-  piecewise value is continuous; the smooth fold `smin_k` takes the primitives within `k`
-  of the minimum in ascending (distance, index) order and its gradient is a convex
-  combination of theirs; `smooth` only lowers the value, by less than `k`. The argument is
-  at the top of `src/implicit/porous.cpp`. The gradient is analytic, from the same query.
-- **The bin bound.** The struts' segments sit in a uniform grid of bins of size `B` (the
-  larger spacing, or the largest cell radius if larger), so a 3 × 3 × 3 search finds every
-  segment within `B`; beyond it the value is the bound. The field caps the struts at
-  `B − smooth`, below which including a segment at `B` cannot move the fold, and refuses
-  `smooth` ≥ `B` for struts. The walls start a walk from their bin's seed (Voronoi: greedy
-  to the nearest seed) or tet (Delaunay: a visibility walk to the containing tet), stopped
-  at `kPorousMaxWalk` = 1024 steps; the Delaunay walls read 0 outside the seeds' hull.
-- **Determinism.** The same graph gives bit-identical seeds, tets and packed arrays on any
-  OS and at any thread count: PCG32 is the only randomness; the exact predicates decide
-  every orientation; insertion is in Morton order; the tet list is canonical; the porous
-  sources compile without floating-point contraction; Lloyd's parallel samples are summed in
-  sample order.
-- **Ceilings.** 2,000,000 seeds and `relax` 50; past them, and on a bad `smooth`, the
-  library throws `std::invalid_argument`, which the graph locates.
 - **No cancel.** `FieldGraph::build` takes no token, so neither the CLI's build nor the C
   ABI's create calls can cancel the seeds or the tetrahedralization; contour and export
-  cancel as for any field.
+  cancel as for any field. A ceiling or a bad `smooth` throws `std::invalid_argument` in
+  the library, which the graph locates.
 - **One builder for the preview.** The codegen runs `FieldGraph::build` on the `porous`
   node itself and uploads that field's `packed()` arrays, so the preview reads the export's
   cells bit for bit. They go in 2D data textures 2048 texels wide, item `i` at

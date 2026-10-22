@@ -19,7 +19,8 @@ namespace internal {
 // tetrahedralization yields, packed in the flat arrays the GLSL node uploads
 // (#66) and the CPU field reads (#65), with the distance query over them.
 // Defined in src/implicit/porous_complex.cpp; the layout and every rule here
-// are recorded in docs/roadmap/23-porous-shell/04-complex-and-bins.md.
+// are docs/design/13-porous-shell.md, why each and the numbers
+// docs/roadmap/23-porous-shell/04-complex-and-bins.md.
 
 // --- The dual: every primitive, in doubles ---------------------------------
 

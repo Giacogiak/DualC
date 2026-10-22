@@ -3,7 +3,8 @@
 The numbers and rules behind [02 #64](02-record.md#64-delaunay-tetrahedralization-and-the-packed-complex)'s
 second half (P03 T2, 2026-10-21): the dual of the tets of [03](03-delaunay-engine.md), packed
 in the arrays #66 uploads and #65 reads, and the distance query of
-[01 § (c)](01-study.md#c-the-distance-formulas) over them.
+[01 § (c)](01-study.md#c-the-distance-formulas) over them. The layout and the rules as they are today
+are [design/13](../../design/13-porous-shell.md) (2026-10-22, P08.1).
 
 ## What was built
 

@@ -3,6 +3,7 @@
 The numbers and choices behind [02 #64](02-record.md#64-delaunay-tetrahedralization-and-the-packed-complex)'s
 first half (P03 T1, 2026-10-21): the engine D-74 chose, built from the P01 prototype of
 [01 § (a)](01-study.md#a-the-delaunay-engine). The complex and its bins (T2) append below.
+The engine as it is today is [design/13](../../design/13-porous-shell.md) (2026-10-22, P08.1).
 
 ## What was built
 
