@@ -748,3 +748,72 @@ TEST_CASE("porous: field_glsl bakes the node past the texture limits", "[field_g
   // Within the defaults it stays exact.
   CHECK(compileToGlsl(g, resolver, region, 24).dataTextures.size() == 4);
 }
+
+namespace {
+
+bool sameTextures(const GlslScene& a, const GlslScene& b) {
+  if (a.dataTextures.size() != b.dataTextures.size()) return false;
+  for (std::size_t i = 0; i < a.dataTextures.size(); ++i) {
+    const DataTexture& x = a.dataTextures[i];
+    const DataTexture& y = b.dataTextures[i];
+    if (x.samplerName != y.samplerName || x.format != y.format || x.width != y.width ||
+        x.height != y.height || x.floats != y.floats || x.ints != y.ints)
+      return false;
+  }
+  return true;
+}
+
+}  // namespace
+
+// What dualc_field_view relies on (roadmap 23 #66, P05.2): a reload recompiles
+// and re-uploads the scene's textures (applyScene), so a structural key must
+// reach the textures or the source; a nudge only rewrites a uniform, so smooth
+// must leave both alone and live in its binding.
+TEST_CASE("porous: field_glsl a structural key changes the textures, smooth only its uniform",
+          "[field_glsl][porous]") {
+  FileMeshResolver resolver;
+  const dualc::BBox region = box(-1.2, 1.2);
+  const auto compile = [&](const std::string& keys) {
+    return compileToGlsl(parseShorthand("porous(sphere(radius=1), spacing=0.3, smooth=0.04" +
+                                        keys + ")"),
+                         resolver, region);
+  };
+  const GlslScene base = compile("");
+
+  const GlslScene nudged = compile(", smooth=0.08");
+  CHECK(nudged.generatedSource == base.generatedSource);
+  CHECK(sameTextures(nudged, base));
+  REQUIRE(nudged.bindings.size() == 1);
+  CHECK(nudged.bindings[0].name == base.bindings[0].name);
+  CHECK(nudged.bindings[0].value == std::vector<float>{0.08f});
+
+  for (const char* keys :
+       {", spacing=0.35", ", seed=7", ", dist=jitter", ", relax=2", ", cells=delaunay",
+        ", mode=struts"}) {
+    INFO(keys);
+    const GlslScene s = compile(keys);
+    CHECK((s.generatedSource != base.generatedSource || !sameTextures(s, base)));
+  }
+  CHECK_FALSE(sameTextures(compile(", dist=jitter"), compile(", dist=jitter, jitter=0.5")));
+  // spacing2 needs a control, and the control is structural too: it grades
+  // the seeds.
+  const GlslScene graded = compileToGlsl(
+      parseShorthand("porous(sphere(radius=1), sphere(radius=0), spacing=0.3, spacing2=0.4, "
+                     "d1=1, smooth=0.04)"),
+      resolver, region);
+  const GlslScene graded2 = compileToGlsl(
+      parseShorthand("porous(sphere(radius=1), sphere(center=[0.5,0,0],radius=0), "
+                     "spacing=0.3, spacing2=0.4, d1=1, smooth=0.04)"),
+      resolver, region);
+  CHECK_FALSE(sameTextures(graded, graded2));
+
+  // In the sponge recipe the shell's thicknesses and both smooth radii nudge.
+  const GlslScene sponge = compileToGlsl(
+      parseShorthand("smooth-intersection(sphere(radius=1), graded-onion(porous(sphere(radius=1), "
+                     "spacing=0.4, smooth=0.02), sphere(radius=0), t1=0.04, t2=0.08, d1=1), k=0.1)"),
+      resolver, region);
+  for (const char* key : {"t1", "t2", "k", "smooth"}) {
+    INFO(key);
+    CHECK(bindingsWithKey(sponge, key) == 1);
+  }
+}

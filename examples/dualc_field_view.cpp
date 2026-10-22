@@ -235,10 +235,14 @@ int main(int argc, char** argv) {
   }
 
   // ---- compile the graph to GLSL ------------------------------------------
+  // The first compile runs before the window exists (a bad graph never opens
+  // one), so it uses the guaranteed texture limits; once the context answers,
+  // the queried ones replace them (below), and every reload uses those.
+  dce::fieldgraph::GlslLimits limits;
   auto compile = [&](const GraphNode& g, GlslScene& scene) -> bool {
     try {
       scene = dce::fieldgraph::compileToGlsl(g, resolver, bounds, gridRes,
-                                             bakeThreads);
+                                             bakeThreads, limits);
       for (const std::string& note : scene.notes)
         std::cerr << "[dualc_field_view] " << note << "\n";
       return true;
@@ -276,6 +280,35 @@ int main(int argc, char** argv) {
   const bool snapshot = !snapshotPath.empty();
   GLFWwindow* win = dce::gl::initWindow("dualc_field_view", 1100, 800, !snapshot);
   if (!win) return 1;
+  // The scene was compiled against the guaranteed texture limits; this
+  // context's own replace them. Recompile when the difference matters: a node
+  // that took the baked fallback (a porous complex past 2048 rows of data
+  // texture, roadmap 23 #66) may fit now, and a scene past a smaller limit
+  // must bake. Otherwise the scene is unchanged.
+  {
+    GLint rows = 0, units = 0;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &rows);
+    glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &units);
+    dce::fieldgraph::GlslLimits queried = limits;
+    if (rows > 0) queried.maxTextureSize = rows;
+    if (units > 0) queried.maxTextureUnits = units;
+    int tallest = 0;
+    for (const auto& dt : scene.dataTextures) tallest = std::max(tallest, dt.height);
+    const bool overflows =
+        tallest > queried.maxTextureSize ||
+        int(scene.meshes.size() + scene.dataTextures.size()) > queried.maxTextureUnits;
+    const bool mayFit = !scene.notes.empty() &&
+                        (queried.maxTextureSize > limits.maxTextureSize ||
+                         queried.maxTextureUnits > limits.maxTextureUnits);
+    limits = queried;
+    if (overflows || mayFit) {
+      std::cerr << "[dualc_field_view] recompiling for this context's limits ("
+                << limits.maxTextureSize << " rows, " << limits.maxTextureUnits
+                << " units)\n";
+      GlslScene s;
+      if (compile(root, s)) scene = std::move(s);
+    }
+  }
 
   auto buildProgram = [&](const GlslScene& s) -> GLuint {
     return dce::gl::linkProgram(dce::fieldgraph::vertexShaderSource(emitES),

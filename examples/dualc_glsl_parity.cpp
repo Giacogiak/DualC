@@ -366,6 +366,25 @@ int main() {
       {"roundedcylinder", "roundedcylinder()", box(-2, 2), A, R},
       {"quad", "quad()", box(-1, 2), A, R},
       {"infinitecone", "infinitecone()", box(-2, 2), A, R},
+      // porous (roadmap 23 #66): the builder's packed complex read from data
+      // textures. The same float query as porousDistance, so the tight tier;
+      // the box reaches past the sphere volume so the hull side (walls) and the
+      // clamp at B (struts) are compared too.
+      {"porous-voronoi-walls", "porous(sphere(radius=1),spacing=0.3)", box(-1.2, 1.2), A, R},
+      {"porous-delaunay-walls", "porous(sphere(radius=1),spacing=0.3,cells=delaunay)",
+       box(-1.2, 1.2), A, R},
+      {"porous-struts", "porous(sphere(radius=1),spacing=0.3,mode=struts)", box(-1.2, 1.2), A, R},
+      // smooth > 0 runs the fold (each case's own); Delaunay struts are the
+      // fourth complex, so this case covers it.
+      {"porous-smooth",
+       "porous(sphere(radius=1),spacing=0.3,cells=delaunay,mode=struts,smooth=0.05)",
+       box(-1.2, 1.2), A, R},
+      // The sample sponge recipe (examples/samples/porous-sponge.json): the
+      // node under a graded shell and a smooth intersection.
+      {"porous-sponge",
+       "smooth-intersection(sphere(radius=1),graded-onion(porous(sphere(radius=1),"
+       "spacing=0.4),sphere(radius=0),t1=0.04,t2=0.08,d1=1),k=0.1)",
+       box(-1.2, 1.2), A, R},
   };
 
   // ---- baked sources (mesh / winding) --------------------------------------
