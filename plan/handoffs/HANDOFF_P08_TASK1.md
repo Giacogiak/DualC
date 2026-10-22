@@ -65,7 +65,7 @@ No gate failed. Only the semantic lint (step 5) produced findings
 
    Adding either means splitting design/10 into a folder. That retargets about 50 links in
    about 35 files, too much for a close. design/13 states both meanwhile.
-   [23/10 § Open after the gates](../../docs/roadmap/23-porous-shell/10-plan-run-record.md#open-after-the-gates)
+   [23/10 § Open after the gates](../../docs/roadmap/23-porous-shell/10-plan-run-record/README.md#open-after-the-gates)
    item 1.
 5. **(e), handed to the owner:** D-53's trigger reads "a change to their window or snapshot
    code". #66 added two things, and is arguably that change:

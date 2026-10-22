@@ -18,10 +18,11 @@ belongs there, never here; a count or a version is stated only in its home.
 
 ## Current focus
 
-**The porous shell run** ([23](23-porous-shell/README.md)) opened 2026-10-21 on branch
-`feat/porous-shell`: a `porous` graph source — seeds in any volume, one Delaunay, the distance to its complex, thickened by the graded nodes — in `dualc_field`, `dualc_field_view` and the C ABI, by the
-[porous shell plan](../raw/2026-10-19-porous-shell-plan.md); #63–#68 DONE, the study and
-defaults in [23/01](23-porous-shell/01-study.md). Before it, **the hygiene + editor run**
+**The porous shell run** ([23](23-porous-shell/README.md)) closed 2026-10-22 on branch
+`feat/porous-shell`, awaiting the owner's review and PR
+([23/10](23-porous-shell/10-plan-run-record/README.md)): a `porous` graph source — seeds in any
+volume, one Delaunay, the distance to its complex — in `dualc_field`, `dualc_field_view` and the
+C ABI, by the [porous shell plan](../raw/2026-10-19-porous-shell-plan.md); #63–#68 DONE. Before it, **the hygiene + editor run**
 ([17/22](17-code-audit-and-hardening/22-hygiene-plan-run.md)) closed 2026-10-21 on branch
 `feat/hygiene-and-editor`, awaiting the owner's push and PR: **#35** DONE ([D-65](../decisions/01-settled.md)),
 **#34** PARTIAL (E12, the `GridField` normal, open again: [17/20](17-code-audit-and-hardening/20-gridfield-normal.md)),
@@ -39,11 +40,11 @@ the block records the table links ([D-43](../decisions/01-settled.md)).
 
 | Date | What landed | Record |
 | --- | --- | --- |
+| 2026-10-22 | **Porous shell run closed** — the `porous` source in `dualc_field`, the viewer and the C ABI, #63–#68 DONE; the branch awaits its PR. | [23/10](23-porous-shell/10-plan-run-record/README.md) |
 | 2026-10-21 | **Hygiene + editor run closed** — #35 DONE (`repeat`'s neighbours pruned, exact), #34 PARTIAL (E12 reopened), the gate builds the C ABI (#53, the remote run owed), the standalone UI moved to DualCEditor; the branch awaits its PR. | [17/22](17-code-audit-and-hardening/22-hygiene-plan-run.md) |
 | 2026-10-16 | **Block 21 closed** — the consolidation plan's eleven units harvested; its PR merged 2026-10-19 (`5ce5b1c`). | [21/09](21-cli-consolidation/09-plan-run.md) |
 | 2026-10-16 | **#60** — seven side CLIs retired into `dualc_field` + `dualc_field_view`, each tested path twinned, pages 01–07 and 10 tombstones. | [21/08](21-cli-consolidation/08-retire-tools.md) |
 | 2026-10-16 | **#59** — `dualc_field --slice AXIS=VALUE`: any graph sampled on a plane to PNG + SVG, `dualc_slice`'s output byte-identical. | [21/06](21-cli-consolidation/06-slice-any-graph.md) |
-| 2026-10-15 | **#58** — 2D profiles under `revolve` / `extrude` in the graph: `dualc_lift`'s recipes byte-identical, and in the viewer. | [21/05](21-cli-consolidation/05-2d-profiles-and-lifts.md) |
 
 **The shipped keystone (2026-06-14 … 2026-07-06)** — builds #1–#3, the C ABI (#19) and
 the client layer's move to Boletus, each DONE with its evidence in
@@ -61,7 +62,8 @@ row (cited by ID).
 
 1. **Porous shell** ([23](23-porous-shell/README.md)) — the `porous` source, run unattended;
    the one status table is [23 § The pages of this block](23-porous-shell/README.md#the-pages-of-this-block).
-   #63–#68 DONE; #69, the graded nodes' negative-`t` gap, DEFERRED ([#69](../decisions/README.md)).
+   #63–#68 DONE; #69, the graded nodes' negative-`t` gap, DEFERRED ([#69](../decisions/README.md));
+   the owner's review list is [23/10/03](23-porous-shell/10-plan-run-record/03-owners-review.md).
 2. **Engine hardening — the audit's open findings**
    ([17](17-code-audit-and-hardening/README.md)) — a standing ledger, not a phase; the
    one status table is [17 § Tracked items](17-code-audit-and-hardening/README.md#tracked-items--status-at-a-glance).
