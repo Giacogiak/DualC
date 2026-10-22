@@ -246,8 +246,8 @@ driver marks this unit done.
   marks this unit done. The loss audit above covers it: run it again only if `plan/` changes
   after this commit. `.plan-run/` is gitignored and stays.
 - `docs/roadmap/README.md` is 6 B under its cap; the next status change there needs a trim.
-- `index-staleness` (INFO, report-only) lists 17 pages; 23/README stays on it even though it
-  was committed with roadmap/README in `aecc4b4` (the check reads commit order, and the two
-  share a commit), and `design/13-porous-shell.md` joined it from P08.1's last commit. Both
+- `index-staleness` (INFO, report-only) lists 17 pages after `f503350`: 23/README cleared,
+  and lint run 10 joined it (its two links were re-pointed in `aecc4b4`, after the lint
+  index's last commit); `design/13-porous-shell.md` joined it from P08.1's last commit. Both
   index rows were re-read and are right.
 - Next free IDs: block 24, #70, D-76, lint run 11, design page 14.
