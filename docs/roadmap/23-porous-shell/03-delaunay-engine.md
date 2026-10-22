@@ -72,6 +72,14 @@ The infinite vertex costs about 15 % over the prototype's 1.24 s (`-O2`). An ASa
 scratch build ran 20k points with duplicates, a 12³ grid with duplicates and a flat input
 clean.
 
+Memory: the output costs 16 + 16 B per tet (vertices + neighbours), on top of the 32 B per tet
+of the working array. Speed lead, not built: BRIO or a parallel build, as long as it stays
+deterministic (the build is sequential, about 1.4 s per 100k seeds).
+
+A pitfall the P01 prototype hit (it segfaulted): when the cavity's tets are freed, record
+each outer neighbour's back-pointer index **before** a freed slot can be reused; relinking
+after reuse corrupts the adjacency.
+
 ## The tests
 
 Five `porous:` cases in `tests/test_porous.cpp`, 0.8 s together:
@@ -81,7 +89,7 @@ Five `porous:` cases in `tests/test_porous.cpp`, 0.8 s together:
 | The tets fill the convex hull by Euler's formula | 3,000 white-noise points, and a sphere's `poisson` seeds. V − E + F − T = 1 and the hull surface's χ = 2. Every hull edge is on two hull faces. No point lies beyond a hull face. Every point is used. The neighbours are symmetric across the same face. No flat tet. 5–7 tets per point |
 | No point is inside a tet's circumsphere | 400 random tets against every point, on white noise and on a sphere's `random` seeds |
 | A regular grid gives no degenerate tet | The `jitter=0` lattice of a box, and an 8³ integer grid: all the structure checks above, the empty sphere, and Σ\|orient3d\| = 6 × 7³ exactly |
-| Same points, same tet list | Two runs are equal. Pinned digests: 5,000 white-noise points `0x05c997ba5690c4c5`, which is unique for general position, and the 9³ grid `0xf248fc73c6345e82`, which also pins the Morton order. A CI OS that differs fails here |
+| Same points, same tet list | Two runs are equal. Pinned digests: 5,000 white-noise points `0x05c997ba5690c4c5`, which is unique for general position, and the 9³ grid `0xf248fc73c6345e82`, which also pins the Morton order. A CI OS that differs fails here. Reading it: only the grid digest fails → the Morton key's float arithmetic differs on that OS; the cloud digest fails → a predicate is not exact there (FMA or x87 first) |
 | Delaunay rejects what does not span 3D, skips duplicates | 3 points, coplanar, collinear, all equal, NaN and the ceiling all throw. Three repeats are reported as 500, 501, 502, and the tets equal those without them. A requested token throws `Cancelled` |
 
 ---

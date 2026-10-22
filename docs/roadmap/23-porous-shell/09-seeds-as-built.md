@@ -63,7 +63,8 @@ on the torus at spacing 0.05, about 21 µs each for the `MeshSource` default sig
 
 The ceilings stand: 2,000,000 seeds on a mesh volume is about 6 minutes unrelaxed, and each
 Lloyd iteration costs 32 `valueAt` per seed. A lead for P04's docs, not built: bake a mesh
-volume to a grid (`bakeToGrid`) before `porous`, or reuse one sample pool across iterations.
+volume to a grid (`bakeToGrid`) before `porous`, or reuse one sample pool across iterations (it cuts `valueAt` by the iteration count but
+costs about 1 KB per seed).
 
 ---
 

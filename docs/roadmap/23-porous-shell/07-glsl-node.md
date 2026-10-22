@@ -115,7 +115,10 @@ All measurements: this host, GCC 15, Release, one process at a time.
   - Worst error 1.4e-7 (Delaunay walls); 0 of 4096 points over 2e-3 in each of the 12 runs.
   - It caught nothing that the GPU had not already shown. It did show that the first draft's
     logic was right as well, so the failures were the driver's.
-- **The GLSL on Mesa's llvmpipe 21.1.8** (LLVM 21.1.8). The context came from EGL
+- **GCC 15's `-Wnonnull`** fired a false positive on a `std::vector` initialiser-list
+  assignment in the new code; it was rewritten away to keep the build warning-free (do not
+  "simplify" it back).
+- **The GLSL on Mesa 26.0.8's llvmpipe** (LLVM 21.1.8). The context came from EGL
   surfaceless with `LIBGL_ALWAYS_SOFTWARE=1`, so neither X nor the GPU was used; the program
   stopped unless `GL_RENDERER` named llvmpipe. The shaders were the committed value shader,
   the uploads `uploadData2D` and `uploadGrid3D`, and the comparison the harness's 16³ lattice

@@ -103,7 +103,17 @@ Each cost a unit time once:
 - *Audit a docs move before committing it;* P06.1 and P08.1 both audited after, and P08.1's
   audit found a clause to restore (P06.1, P08.1).
 - *`design/` rejects "since"* (`design-no-history`) (P06.1, P08.1).
-- *`pkill -f <pattern>` matches its own shell;* use `pgrep -a`, then `kill <pid>` (P08.1).
+- *`pkill -f <pattern>` matches its own shell;* use `pgrep -a`, then `kill <pid>` (P08.1). So
+  does `pgrep -f` in a wait loop: P08.2's never ended (P08.2).
+- *`docs_loss_audit.py --scope docs/` against `HEAD~1` burned 6 CPU-minutes* before it was
+  stopped; a narrower `--scope` is refused (every base docs file must be in scope). Use
+  explicit SHAs and read one page with `--source <page> --only sentence evidence` (P08.1).
+- *`ctest -N | grep -ci porous` reads one too many:* the `Test project …/DualC-porous/build`
+  header matches (40 for 39 cases) (P08.2).
+- *The `links` check reads `plan/` too:* a handoff's link broke after the 23/10 folder move,
+  and the first `--docs --strict` failed on it (P08.2).
+- *`roadmap/README.md` sits at the cap* (15,354 of 15,360 B after the close): the next status
+  change there needs a trim first (P08.2).
 - *`/tmp` does not survive a reboot:* P05.1's and P05.2's scratch harnesses and P08.1's first
   logs went with it (P08.1).
 

@@ -38,7 +38,7 @@ porous(volume[, control], spacing=S, cells=…, mode=…, dist=…, spacing2=…
 | `relax` | `0` | Lloyd iterations, a whole number in 0–50: more regular cells, slower to build |
 | `seed` | `0` | The random stream, a whole number in 0–2⁵³; the same graph gives the same cells on any OS |
 | `smooth` | `0` | The smooth-min radius that rounds the cells' corners; ≥ 0, and below `B` for `struts` |
-| `jitter` | `1` | `dist=jitter` only: the displacement, in grid pitches; `0` is a regular grid |
+| `jitter` | `1` | `dist=jitter` only: the displacement, in grid pitches; `0` is a regular grid. Graded (`spacing2`), `jitter` and `random` thin a layout drawn at the smaller spacing, so a graded `dist=jitter` is no longer a lattice, even at `0` |
 
 **What the value is.** For `walls`, the distance to the nearest wall; for `struts`, the
 distance to the nearest edge, capped at `B − smooth`, where `B` is the larger spacing (or the
@@ -97,6 +97,9 @@ time; roadmap 23 [#63](../../roadmap/23-porous-shell/02-record.md#63-determinist
   sponge sample 1,280,976 triangles in 54 s at a 0.44 GB peak (V8).
 - **Threads.** `relax` runs on every hardware thread whatever `--threads` says; the seeds
   are bit-identical at any count.
+- **Counts.** `dualc_field` does not print the node's seed, tet or bin counts; they are
+  `PorousField::stats()` in the library (seeds, pad seeds, tets, faces, edges, segments, bins,
+  packed bytes), shown by the hidden test `porous: the end-to-end cases' seeds and tets`.
 
 ## Through the C ABI and the viewer
 

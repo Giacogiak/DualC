@@ -62,7 +62,9 @@ Each is **Chosen in-run (pending owner review)** where it refines the defaults t
    Segments that are a point, or the same float segment twice (the two triangles of a
    regular grid's square give one Voronoi edge), are dropped too, else the fold would count
    one strut twice. Walls drop nothing: the walks need the whole graph. A tighter rule needs
-   the volume's values and a Lipschitz bound, which only #65 has.
+   the volume's values and a Lipschitz bound, which only #65 has (it could prune struts by the
+   volume's value along each segment, but only for a 1-Lipschitz volume: `MeshSource` and the
+   exact primitives are, a TPMS is not).
 6. **Walks are capped at 1,024 steps** (then 0). Measured maximum: 3 seed steps, 20 tet steps.
 7. **Start bins and the bin cap.** A bin's start seed is the one nearest its centre among the
    seeds in it; an empty bin takes the nearest of its 26 neighbours' starts, by a forward and

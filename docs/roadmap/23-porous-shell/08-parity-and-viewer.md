@@ -69,15 +69,20 @@ not open their window, and the NV92 was not touched again.
 **What ran instead** was the committed harness and viewer, unchanged, with only the context
 replaced. A scratch `initWindow` (`/tmp/p052/egl_init.cpp`, not committed) does four things:
 
-- it opens EGL surfaceless (`dlopen("libEGL.so.1")`, a 3.3 core context, the attributes of
-  07 § Measured);
+- it opens EGL surfaceless: `dlopen("libEGL.so.1")`, `eglGetDisplay(0)` with
+  `EGL_PLATFORM=surfaceless`, `eglBindAPI(0x30A2)` (OpenGL), a 3.3 core context
+  `eglCreateContext(dpy, nullptr, nullptr, {0x3098,3, 0x30FB,3, 0x30FD,1, 0x3038})`
+  (major, minor, core profile, none), `eglMakeCurrent` with no surfaces;
 - it loads glad through `eglGetProcAddress`;
 - it exits unless `GL_RENDERER` names llvmpipe;
 - it binds a 1600 × 1200 RGBA8 FBO in place of the default framebuffer. The snapshot path
   never rebinds 0.
 
-The binaries link it first, before the build-gl objects, with
-`-Wl,--allow-multiple-definition`. GLFW's other calls are no-ops on an uninitialised
+It defines `dce::gl::initWindow` and returns a dummy `GLFWwindow*`. The binaries link it
+first, before build-gl's own `dualc_glsl_parity.cpp.o` / `dualc_field_view.cpp.o` and the
+target's static libs, with `-Wl,--allow-multiple-definition`; the link line is the target's
+own, from `ninja -C build-gl -t commands <target>`. Put the parity binary at
+`<dir>/examples/dualc_glsl_parity` and `check.py --gpu --strict --build-dir <dir>` drives it. GLFW's other calls are no-ops on an uninitialised
 library. Every run had `LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=surfaceless`, under `timeout`
 and `prlimit --as=8000000000`.
 

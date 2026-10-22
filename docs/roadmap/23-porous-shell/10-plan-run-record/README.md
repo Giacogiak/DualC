@@ -68,8 +68,13 @@ above it).
    surfaceless context while X was hung ([08](../08-parity-and-viewer.md#the-gpu-tier-run-on-llvmpipe)).
    An `--egl` mode for the harness is the owner's call.
 6. **What only CI can confirm:** the pinned digests (seeds, tets, packed arrays) on macOS and
-   Windows, and MSVC's build of the vendored `predicates.c` with its shim
-   ([03](../03-delaunay-engine.md)). The branch's first CI run decides; if only the struts
+   Windows, MSVC's build of the vendored `predicates.c` with its shim
+   ([03](../03-delaunay-engine.md)), MSVC `/W4` on the porous C++ sources (written with
+   explicit casts, no shadowing, `std::snprintf`; never compiled by MSVC), and the component
+   test's seed 3 being watertight ([06](../06-sponge-end-to-end.md#the-in-run-choices); its
+   other seeds' open edges are a membrane under a cell thick, not a floating-point tie, so
+   another OS should not flip it).
+   How to read a tet digest failure: [03 § The tests](../03-delaunay-engine.md#the-tests). The branch's first CI run decides; if only the struts
    digests fail, look at `voronoiEdge`'s line parameters first.
 
 ## For the owner's review
@@ -106,18 +111,38 @@ pushed: the push, the PR and the CI reading are the owner's (`main` is protected
 
 **How the run went.**
 
+- **P01.1 stopped on a path, not on its work** (2026-10-21 18:00): it wrote its handoff under
+  `plan/handoffs/`, as the split said, while the manifest's per-unit `handoff` paths named the
+  repo root, so the driver's `handoff` check failed. The owner fixed the twelve paths
+  (`9b1b4f1`), re-verified P01.1 with `planRun.mjs verify P01.1` and relaunched (20:33).
 - **No unit stopped on a question** ([D-73](../../../decisions/03-settled-continued.md)): every
   open choice took the study's defaults table or was made and written for review
   ([02](02-in-run-choices.md)).
 - **P04.2's first attempt was OOM-killed** (2026-10-21 22:27): a `--depth 8` sponge went past
-  the free RAM and systemd-oomd killed the session tree with the run. The owner added the
-  memory rule (`b1865d7`: one heavy process at a time, `prlimit`, depth ≤ 7, ctests under
-  1 GB); the second attempt kept to it.
+  the free RAM and systemd-oomd killed the session tree with the run — the whole VS Code
+  scope the driver had been started from, so nothing ran until the morning. The basis: a
+  unit-sphere sponge took 2.1–3.3 GB at `--depth 7` on this 22 GB, 8-core host. The owner
+  added the memory rule (`b1865d7`): one heavy process at a time and never `ctest -j` on
+  contouring cases, `prlimit --as=8000000000` on ad-hoc runs, depth ≤ 7 (a larger depth only
+  as a measured exception after `free -g`), ctests under 1 GB, mesh checkers streaming or under
+  ~2M faces. The driver was relaunched in its own `systemd-run --user --scope` with
+  `MemoryMax=15G` and `OOMPolicy=continue`, so an oversized case dies alone; the second
+  attempt kept to the rule.
 - **P05.1 hung the host's NV92** with a first GLSL draft (a `STACK_LIMIT` trap,
-  [07](../07-glsl-node.md#a-first-draft-hung-this-hosts-gpu)). X stayed hung until a reboot
-  during P08.1; every GL run of P05.2 and P08.1 was on llvmpipe, and the NV92 ran no
-  committed case.
-- **The checks at the end held:** P01–P07 ran their own ctests and the docs tier; P08.1's four
+  [07](../07-glsl-node.md#a-first-draft-hung-this-hosts-gpu)). X stayed hung (the PGRAPH
+  timeout at 10:07; `glxinfo` hung too) and the owner force-rebooted the host at about 11:33,
+  during P08.1. P08.1 was resumed in its own session (`planRun.mjs finish P08.1`, nothing
+  lost: its uncommitted design/13 draft survived on disk), and the rest of the run had
+  `LIBGL_ALWAYS_SOFTWARE=1` forced on its scope. Every GL run of P05.2 and P08.1 was on
+  llvmpipe, and the NV92 ran no committed case.
+- **P08.2 stopped with its harvest staged, not committed:** a background wait loop
+  (`until ! pgrep -f "docs_loss_audit.py --base 0d2a8e8"`) matched its own command line and
+  ran to the tool's time limit, long after the gate and the audit had finished. The session
+  reported `failed`; `planRun.mjs finish P08.2` resumed it and it committed.
+- **The checks at the end held** (the owner's rule of 2026-10-19, which for this run replaced
+  AGENTS.md's full gate before every code commit): P01–P07 ran their own ctests and the docs
+  tier, the driver's `smoke` re-ran `porous|field_graph|field_glsl`, and P08 alone ran the full
+  gate, `--gpu --strict`, `--docs --strict` and the semantic lint; P08.1's four
   gates were green on their first run, and its only repairs were the lint's.
 - **The byte cap shaped the record:** `01-settled.md` full → `03-settled-continued.md`
   (D-75); 02 at 15,357 B → #63's detail moved verbatim to 09 (P06.1); design/10 full →
