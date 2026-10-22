@@ -165,7 +165,7 @@ for you, in one place (§ 1).
 | [09-conventions.md](09-conventions.md) | — | project-wide conventions: units and frames, export-format dispatch and the `.part` temp-then-rename, PowerShell quoting, keyboard-layout independence, primitive parameter forms, testing conventions |
 | [10-invariants-and-tolerances.md](10-invariants-and-tolerances.md) | — | the output invariants, the ≥ 2–3 cells rule, `mix`, the `BBox` sentinels, `--tile-depth`'s range, the cancellation and progress hooks, every numeric constant |
 | [11-glossary.md](11-glossary.md) | — | one line per term, and the ID vocabulary (`#N`, Tier 1 item, § A–G, build / pillar) |
-| [12-field-graph.md](12-field-graph.md) | — | the rules the examples layer's field graph adds to the library: one reader for builder and codegen, per-node bake and its margin, the 2D typing rule, what the preview cannot show as exported |
+| [12-field-graph.md](12-field-graph.md) | — | the rules the examples layer's field graph adds to the library: one reader for builder and codegen, per-node bake and its margin, the 2D typing rule, the porous source's invariants (build-time volume, 1-Lipschitz, the bin bound, determinism, the texture layout), what the preview cannot show as exported |
 
 ## Things we do not do
 

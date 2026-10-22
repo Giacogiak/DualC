@@ -47,66 +47,13 @@ between calls in one process; the plan's rule gives the fallback the win. Eviden
 plan § 3 P02 in `tests/test_porous.cpp`, and the seeds-per-second rate on a mesh volume at
 three spacings recorded here.
 
-**2026-10-21 — what was built.** `include/dualc/porous.h` (`Pcg32`, `SeedDistribution`,
-`DensityRamp`, `densityRampWeight`, `SeedParams`, `SeedSet`, `generatePorousSeeds`,
-`kPorousMaxSeeds` = 2,000,000, `kPorousMaxRelax` = 50), `src/implicit/porous_seeds.cpp`
-(compiled `-ffp-contract=off` on GCC/Clang) and the header-only `src/internal/seed_grid.h`
-(a uniform grid of point indices with O(1) insertion and an exact nearest query, ties to the
-smaller index; P03 can reuse it for the start bins). Bit-identical on any OS: the only
-randomness is PCG32 (its first six outputs for `(42, 54)` equal O'Neill's reference, tested),
-and the only transcendental, the gaussian ramp's exponential, is DualC's own range-reduced
-polynomial (exact to 1e-14 against libm, tested). Lloyd's samples are evaluated in parallel
-and summed in sample order, so the thread count does not change the bits (tested 0 vs 1).
-Errors are `std::invalid_argument` (P04's node maps them to `GraphError`); a requested token
-throws `Cancelled` (polled every 4,096 candidates and every 65,536 Lloyd samples).
-
-**Chosen in-run (pending owner review)**, each a refinement of a † row of the defaults table:
-
-- **Lloyd weights by (spacing / spacing(x))⁵, not ³.** A centroidal Voronoi tessellation of
-  density ρ has cells of size ρ^(−1/(d+2)) (Du, Faber, Gunzburger 1999), so ρ ∝ spacing(x)⁻⁵
-  is what keeps the cell size proportional to the spacing in 3D. Measured on the graded box of
-  the test (spacing 0.5 → 0.8, expected dense/sparse ratio 4.096), mean of four seeds: no relax
-  4.01; relax 10 3.91 with either exponent; relax 30 3.96 with ⁵ and 3.78 with ³.
-- **Lloyd draws 32 fresh samples per seed per iteration from the stream `Pcg32(seed, i + 1)`**
-  (placement uses `Pcg32(seed, 0)`). Samples outside `V < pad` are dropped, not redrawn.
-- **Bridson's background grid** is a linked-list grid at `max(rmin, rmax/2)`, not `rmin/√3`:
-  the conflict search then spans at most 5³ cells even with a graded radius. When the active
-  list empties, a scan over cells of `rmax` (4 tries each) restarts it, so every connected
-  part of the volume gets seeds. Shell candidates come from rejection in a cube, no trigonometry.
-- **`jitter` and `random` grade by thinning:** the grid or the white noise is laid at the
-  smaller spacing and a point is kept with probability (min spacing / spacing(x))³.
-- **A box ceiling before allocation:** a padded box holding more than 32 × 2,000,000 cells of
-  the smaller spacing is refused up front; the seed ceiling itself is checked per accepted seed.
-- `spacing2` ≠ `spacing` without a control, or a graded density with `d1 = d0`, is an error.
-
-**2026-10-21 — the properties tested** (`ctest -R porous`, 10 cases, 3.7 s with the graph and
-codegen cases): same seed → same digest and another seed → another, on a sphere and a box,
-all three distributions, graded, `relax=2`; Poisson minimum distance ≥ 0.99 × the local
-`(r(a) + r(b))/2`, uniform and graded; graded density ratio within 20 % of
-(spacing2/spacing)³ for every distribution and for `poisson` + `relax=10` (measured 4.23,
-4.34, 3.47 and 3.93 against 4.096 for seed 5; means over 20 seeds 4.03, 4.18, 4.08); every
-seed has `V < pad` and is flagged pad exactly where `V > 0`; `relax=10` lowers the interior
-cell-volume CV (box: poisson 0.119 → 0.092, random 0.421 → 0.119; sphere: 0.152 → 0.095,
-0.388 → 0.124); a requested token, and one flipped mid-build, mid-relax, throws `Cancelled`;
-bad parameters and both ceilings throw; the grid's nearest equals brute force.
-
-**2026-10-21 — measured: seeds per second** (the hidden case
-`build/tests/dualc_tests "[porous-bench]"`; this Linux host, 8 threads, GCC 15, Release,
-`poisson`, two runs, the slower given). The volume's `valueAt` dominates: 8.6 calls per seed
-on the torus at spacing 0.05, about 21 µs each for the `MeshSource` default sign.
-
-| Volume | Spacing | Seeds | `relax=0` seeds/s | `relax=5` seeds/s |
-| --- | --- | --- | --- | --- |
-| demo torus 1 / 0.35, 9,216 triangles, `MeshSource` | 0.1 | 2,562 | 5,760 | 1,129 |
-| the same | 0.05 | 15,594 | 5,511 | 991 |
-| the same | 0.025 | 106,484 | 5,466 | 913 |
-| analytic sphere r = 1 | 0.1 | 3,458 | 54,949 | 29,888 |
-| the same | 0.05 | 23,344 | 54,647 | 27,482 |
-| the same | 0.025 | 171,247 | 56,514 | 23,302 |
-
-The ceilings stand: 2,000,000 seeds on a mesh volume is about 6 minutes unrelaxed, and each
-Lloyd iteration costs 32 `valueAt` per seed. A lead for P04's docs, not built: bake a mesh
-volume to a grid (`bakeToGrid`) before `porous`, or reuse one sample pool across iterations.
+**2026-10-21 — P02.1, the seeds.** `generatePorousSeeds` (`dualc/porous.h`,
+`src/implicit/porous_seeds.cpp`): PCG32, bit-identical on any OS and at any thread count;
+the six properties tested (`ctest -R porous`, 10 cases); about 55,000 seeds/s in an analytic
+sphere and 5,500/s in a mesh torus, unrelaxed. **Chosen in-run (pending owner review):**
+Lloyd weighted by ⁵ not ³ and drawing its own streams, Bridson's grid at `max(rmin, rmax/2)`,
+`jitter` / `random` graded by thinning, a box ceiling before allocation. What was built, the
+choices, the tests and the rates: [09](09-seeds-as-built.md).
 
 ## #64 Delaunay tetrahedralization and the packed complex
 
@@ -189,9 +136,24 @@ hung); the viewer takes the context's limits; snapshots
 
 ## #67 The C ABI test and the documentation
 
-**PLANNED** — P06. `cli_c_abi_porous` (an in-memory mesh volume, the expression form), the
-"vocabulary widening" entry in 14/04, the `11-dualc_field` and `12-dualc_field_view` pages, the
-design section and `STRUCTURE.md`.
+**DONE** 2026-10-22 — P06.1. Planned: `cli_c_abi_porous` (an in-memory mesh volume, the
+expression form), the "vocabulary widening" entry in 14/04, the `11-dualc_field` and
+`12-dualc_field_view` pages, the design section and `STRUCTURE.md`.
+
+**2026-10-22 — T1.** `dualc_c_demo … porous` over an in-memory cube: the JSON and the
+shorthand contour byte-identical, 144,140 faces, watertight; the plain expression call over a
+sphere 80,116, watertight; a missing `spacing` and an ungraded `spacing2` are located errors;
+a token cancels the contour and the export (6.3 s, 0.45 GB). `c_abi` 6/6. The version stays
+`dualc 0.5.2` by block 14's rule ([14/04](../14-c-abi/04-abi-0-4-0.md#the-porous-source-vocabulary-widening-no-abi-version-move)).
+The usage page is [11/16](../../command_reference/11-dualc_field/16-porous-shell.md) (keys,
+nine recipes run or taken from [06](06-sponge-end-to-end.md), the cost guide, depth 8 tiled
+at 0.44 GB); the viewer's node and P17–P18 are on 12/02; the invariants on
+[design/12](../../design/12-field-graph.md#the-porous-source); a host's usage in
+`capi/README.md`. **Chosen in-run (pending owner review):** #63's detail moved to
+[09](09-seeds-as-built.md) to make room here; the node's `relax` ignores `--threads` and
+`numThreads` (documented, not changed); the skinned sphere recipe is listed with its 8
+non-manifold edges at depth 7. **For the owner's review:** P17 live and P18 on the NV92
+(the steps are in the P06.1 handoff, gathered by P08).
 
 ## #68 The Boletus implementation plan
 

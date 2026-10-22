@@ -41,7 +41,7 @@ lives in `examples/field_graph.{h,cpp}`, a separate translation unit that
 | `-o PATH` | `field.obj` | Output mesh; `.obj` / `.stl` / `.3mf` by extension ([export formats](../README.md#export-formats--o-extension-dispatch)). With `--slice`, the PNG + SVG base (default `field_slice`). |
 | `--depth N` | `7` | Octree max depth; cell size ≈ root extent / `2^N`. |
 | `--collapse E` | `0` | Adaptive octree cell-collapse *during* contouring (QEF energy, length²); helps flat regions, ~nil on dense TPMS. How it works and [which lighter-files lever](05-decimation.md#which-lighter-files-lever---collapse-vs---decimate-vs---tile-depth) to reach for: [05](05-decimation.md). |
-| `--decimate R` | off | **Post-contour QEM decimation** (monolithic only): keep fraction `R` ∈ (0,1) of the triangles (e.g. `0.1` ≈ 10× lighter) via a global [meshoptimizer](https://github.com/zeux/meshoptimizer) simplify on the finished mesh, before export. Global (quality-optimal), watertight in/out. **Monolithic only** — cannot combine with `--tile-depth`. See [Decimation](05-decimation.md#decimation---decimate----simplify). |
+| `--decimate R` | off | **Post-contour QEM decimation**: keep fraction `R` ∈ (0,1) of the triangles (e.g. `0.1` ≈ 10× lighter) via a global, quality-optimal [meshoptimizer](https://github.com/zeux/meshoptimizer) simplify on the finished mesh, before export; watertight in/out. **Monolithic only** — cannot combine with `--tile-depth`. See [Decimation](05-decimation.md#decimation---decimate----simplify). |
 | `--simplify E` | off | Like `--decimate` but targets an **absolute geometric error** of `E` world units (mm) instead of a keep-ratio; the triangle count falls as far as that error allows. Mutually exclusive with `--decimate`; monolithic only. |
 | `--bounds x0,y0,z0,x1,y1,z1` | auto | Explicit root box. Required when the graph is **unbounded** (a bare `plane`, an infinite source, or a `repeat`); otherwise the sampler auto-fits to the field's bounds (padded ~5 %). |
 | `--tile-depth D` | off | **Streaming / tiled export** for dense parts that would OOM the monolithic contourer. Contour in bounded-memory tiles of `2^D` cells each and stream triangles to disk; peak RAM is one tile. `.stl` or `.3mf` output ([the 3MF path](08-3mf-and-weld.md#the-3mf-path--o-3mf)); useful range `2 ≤ D ≤ depth − 1`. See [Streaming / tiled export](06-streaming-tiled-export.md#streaming--tiled-export---tile-depth). |
@@ -99,6 +99,7 @@ own and links back here for the options table.
 | [Six composition samples](13-composition-samples.md) | The six `examples/samples/` graphs that were `dualc_csg_demo`'s recipes, each byte-identical. |
 | [A TPMS lattice inside a mesh](14-tpms-in-mesh.md) | The graph `dualc_lattice` composed, its three mesh-derived defaults written out, wavelength vs. thickness, the six TPMS formulas. |
 | [Diagnostics](15-diagnostics.md) | The located graph errors, the cases caught, the runtime warnings. |
+| [The porous shell](16-porous-shell.md) | `porous`: a sponge, foam or bone in any volume — keys, recipes, cost. |
 
 ## Diagnostics
 
@@ -147,7 +148,7 @@ dualc_field gyroid_box.json --depth 7 --threads 1 -o part.3mf
 
 Eleven ready-to-run samples ship next to the binary (sources in `examples/samples/`):
 `gyroid_box.json`, `mesh_lattice.json`, the six of [13](13-composition-samples.md) and three
-`porous-*.json` sponges ([23/06](../../roadmap/23-porous-shell/06-sponge-end-to-end.md#the-samples)).
+`porous-*.json` sponges ([16](16-porous-shell.md#recipes)).
 
 ## Recipes
 
@@ -171,6 +172,7 @@ Eleven ready-to-run samples ship next to the binary (sources in `examples/sample
 | C1–C7 | Primitives overridden, displaced, composed | [12](12-primitive-catalogue.md#recipes) |
 | K1–K6 | The six composition samples | [13](13-composition-samples.md#recipes) |
 | Y1, T7–T14 | Lattices in a mesh: the six types, shells, real-mesh infill, the defaults computed | [14](14-tpms-in-mesh.md#recipes) |
+| V1–V9 | Porous sponges, foams, bones | [16](16-porous-shell.md#recipes) |
 
 ## Scope
 
@@ -190,6 +192,5 @@ input — preview equals export by construction
 
 ---
 
-← Back to the [Command Reference index](../README.md) · Live preview:
-[12-dualc_field_view/](../12-dualc_field_view/README.md) · Design:
+← Back to the [Command Reference index](../README.md) · Design:
 [roadmap/12](../../roadmap/12-field-graph-and-app/README.md)

@@ -13,7 +13,8 @@ the 4 strut lattices (with `nodeRadius`), all 30 analytic primitives (the open
 bounds), the 7 booleans, every decorator and domain operator, the three-child
 `mix`, the `mesh` / `winding` sources (baked to a `sampler3D`), and the 2D profiles
 under `revolve` / `extrude` (a `polygon` up to 64 vertices,
-[11/09](../11-dualc_field/09-2d-profiles-and-lifts.md)). Every scalar
+[11/09](../11-dualc_field/09-2d-profiles-and-lifts.md)), and the `porous` source
+([11/16](../11-dualc_field/16-porous-shell.md)). Every scalar
 parameter is a live uniform (`tab` + nudge), including the `graded-*` ramps and
 `mix`'s `lo`/`hi` — and `mix` blends *values*, so between two different crystals it
 leaves a gap ([design/10](../../design/10-invariants-and-tolerances.md#mix-blends-values-not-shapes)). Every node is
@@ -23,6 +24,15 @@ count is the *Latest verification* line of
 Emission is a deduped DAG: a duplicated subtree compiles once and a duplicated
 `mesh`/`winding` bakes once. A genuinely unknown op is rejected with a located
 error.
+
+**The `porous` node** uploads the export's own cells as 2D data textures, so its preview
+is the export's field. `smooth` is its one live uniform; every other key changes the cells,
+so an edit to it in the file rebuilds them on reload. A nudge multiplies the value, so a
+`smooth` of 0 stays 0 — write a small `smooth` in the graph first; a `struts` `smooth`
+nudged to `B` (at least the larger spacing) or past it fills the shell. Past the context's texture limits the node
+falls back to a grid baked at `--grid-res` and the viewer says so on stderr; when the
+context allows more than the guaranteed 2048 rows and 16 units, it prints `recompiling for
+this context's limits (R rows, U units)` and uses them.
 
 ## Recipes
 
@@ -44,6 +54,8 @@ error.
 | P14 | Headless PNG (`--snapshot`) |
 | P15 | Headless PNG of an infinite TPMS with `--bounds` |
 | P16 | `--es` portability check, headless |
+| P17 | A porous sponge, live — nudge `smooth`, the wall thickness and the rim's `k` |
+| P18 | Headless PNG of the porous sponge sample |
 
 ### Examples
 
@@ -118,6 +130,11 @@ dualc_field_view --expr 'intersection(box(min=[-1,-1,-1],max=[1,1,1]),octet(wave
 # P13 — A morph, live: tab to the mix node's lo / hi and slide them to sweep the
 # bcc->fcc transition band across the part in real time.
 dualc_field_view --expr 'intersection(box(min=[-1,-1,-1],max=[1,1,1]),mix(bcc(wavelength=0.5,radius=0.06),fcc(wavelength=0.5,radius=0.06),plane(1,0,0,0),lo=-0.6,hi=0.6))'
+
+# P17 — A porous foam in a sphere, live: tab to smooth (rounds the cells' corners),
+# thickness (the walls) or k (the rim) and nudge. Editing spacing, seed or cells in a
+# file rebuilds the cells on reload.
+dualc_field_view --expr "smooth-intersection(sphere(radius=1),onion(porous(sphere(radius=1),spacing=0.3,smooth=0.02),thickness=0.04),k=0.1)"
 ```
 
 The two recipes above that name `data/foot.obj`, in **PowerShell 5.1 form**
@@ -144,6 +161,9 @@ dualc_field_view --expr "neovius(wavelength=0.5)" --bounds -1,-1,-1,1,1,1 --snap
 # P16 — Portability check: render with the WebGL2-subset shader (#version 300 es)
 # instead of desktop 330 core. The body is identical; renders the same here.
 dualc_field_view --expr "sphere(radius=1)" --es --snapshot es.png
+
+# P18 — The porous sponge sample (walls thickening outwards), no window.
+dualc_field_view porous-sponge.json --snapshot sponge.png
 ```
 
 `--bounds` is needed only for **infinite** fields (a bare `plane` /

@@ -144,7 +144,7 @@ DualC/
 │   ├── CMakeLists.txt         Builds dualc_capi SHARED + the C demo + the cli_c_abi CTest
 │   ├── dualc_c.h              Public C header: opaque DualcField, flat params/mesh, the extern "C" entry points
 │   ├── dualc_c.cpp            Shim: parse (JSON/--expr) → FieldGraph::build → contour/writeField; no exception escapes
-│   ├── dualc_c_demo.c         C-compiled smoke test (proves the header is C-clean): build → proxy → export STL
+│   ├── dualc_c_demo.c         C-compiled smoke test (proves the header is C-clean): build → proxy → export STL; modes mesh, inmem, cancel, threads, porous (roadmap 23 #67)
 │   ├── README.md              API + build + usage for the C ABI
 │   └── CSHARP_WRAPPER_HANDOFF.md  Client-side P/Invoke hand-off notes (the client itself lives in Boletus)
 │
