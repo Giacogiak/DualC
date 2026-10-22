@@ -459,7 +459,10 @@ float dcRoundTA(float x) { return sign(x) * floor(abs(x) + 0.5); }
 float dcDispSine(vec3 q)   { return sin(q.x) * sin(q.y) * sin(q.z); }
 float dcDispGyroid(vec3 q) { return sin(q.x)*cos(q.y) + sin(q.y)*cos(q.z) + sin(q.z)*cos(q.x); }
 float dcDispBumps(vec3 q)  { return cos(q.x) + cos(q.y) + cos(q.z); }
-
+)GLSL"
+// MSVC caps one string literal at 16,380 bytes (C2026), so the library is
+// adjacent literals the compiler joins; keep each piece under that cap.
+R"GLSL(
 // ---- porous (roadmap 23 #66) ----------------------------------------------
 // src/implicit/porous_complex.cpp's query over the same packed arrays, read
 // from 2D data textures (item i at texel (i % 2048, i / 2048)): the bins, the

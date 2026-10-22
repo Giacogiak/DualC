@@ -76,6 +76,14 @@ above it).
    another OS should not flip it).
    How to read a tet digest failure: [03 § The tests](../03-delaunay-engine.md#the-tests). The branch's first CI run decides; if only the struts
    digests fail, look at `voronoiEdge`'s line parameters first.
+   *2026-10-22, the first CI run (push of `061454e`):* Ubuntu, docs, gpu green; macOS passed
+   every digest; three fixes. MSVC C2026: `kLibrary` (24 KB) passed one literal's 16,380 B
+   cap, now adjacent pieces (`examples/field_glsl.cpp`). macOS: the bin-vs-brute test's
+   reference called `porous_complex.h`'s inline distances with arm64 FMA, now
+   `-ffp-contract=off` on `tests/test_porous.cpp`. sanitize: ASan caught
+   `predicates.c`'s `fast_expansion_sum_zeroelim` reading one past its inputs on the flat
+   set's exact `orient3d` (unused value, caller's stack); the file is not ASan-instrumented
+   now, still byte-identical. Windows's digests and `/W4` wait for the next run.
 
 ## For the owner's review
 

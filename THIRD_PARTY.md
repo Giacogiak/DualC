@@ -111,6 +111,9 @@ in DualC's own files:
   K&R definitions, which C23 removed), with no FMA contraction
   (`-ffp-contract=off`; `/fp:precise` on MSVC), which its exact arithmetic
   needs, and with its warnings silenced, as for the QEF files.
+  Under `DUALC_SANITIZE=address` it is also built `-fno-sanitize=address`:
+  `fast_expansion_sum_zeroelim` reads one element past its inputs (a value it
+  never uses, in the caller's stack arrays), which ASan reports (roadmap 23/10).
 
 Re-syncing with upstream is a file copy; a new external symbol upstream would
 need a rename line in `exact_predicates.c` (`nm` on the object lists them).

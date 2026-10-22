@@ -263,8 +263,17 @@ if(MSVC)
     COMPILE_OPTIONS "/W0;/fp:precise"
     INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/src/internal/compat")
 else()
+  # Under DUALC_SANITIZE the file is not ASan-instrumented: its
+  # fast_expansion_sum_zeroelim reads one element past its inputs (the value is
+  # never used; the inputs are the caller's stack arrays), which the sanitize
+  # CI job reports on the first exact orient3d. The file stays byte-identical
+  # to upstream; UBSan still covers it.
+  set(_dualc_pred_opts "-w;-ffp-contract=off")
+  if(DUALC_SANITIZE MATCHES "address")
+    list(APPEND _dualc_pred_opts "-fno-sanitize=address")
+  endif()
   set_source_files_properties(src/internal/exact_predicates.c PROPERTIES
-    COMPILE_OPTIONS "-w;-ffp-contract=off")
+    COMPILE_OPTIONS "${_dualc_pred_opts}")
 endif()
 
 if(DUALC_BUILD_TESTS)
