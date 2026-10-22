@@ -81,7 +81,7 @@ strut counts twice. Walls drop nothing: the walks need the whole graph.
 - **The fold.** The quadratic smooth minimum `min(a, b) − h²k/4`, `h = max(k − |a−b|, 0)/k`,
   folded over the candidates within `k` of the minimum in ascending (distance, index) order,
   so the value depends only on those, symmetrically and continuously. At `k = 0` it is the
-  minimum. The result is clamped at 0 — walls and struts alike, as a smoothed junction
+  minimum; a positive `k` only lowers the value, by less than `k`. The result is clamped at 0 — walls and struts alike, as a smoothed junction
   dips below 0 and `onion`'s `|·|` would thin the material there.
 - **The walks** stop at `kPorousMaxWalk` = 1024 steps and return 0.
 
