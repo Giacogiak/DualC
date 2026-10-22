@@ -174,14 +174,18 @@ sphere sample, seed 3 at depth 6, no new item for the rim. Numbers: [06](06-spon
 
 ## #66 The porous node in GLSL and dualc_field_view
 
-**PARTIAL** — P05.1 (T1) 2026-10-22; T2 is P05.2. Planned: data textures by [01 § (d)](01-study.md#d-the-gpu-layout),
+**DONE** 2026-10-22 — P05; the NV92 run is the owner's review. Planned: data textures by [01 § (d)](01-study.md#d-the-gpu-layout),
 the four cases, the `emitBakedGrid` fallback; acceptance: GL-free tests, four parity cases
 (count bumped), the viewer's structural rebuild, the GPU tier green.
 
-**2026-10-22 — T1.** The builder's own `PorousField::packed()` arrays as 3–4 data textures,
-a `smooth` uniform, the bake past `GlslLimits`; three `porous: field_glsl` cases; 20 graphs
-match `valueAt` within 2.4e-7 on llvmpipe. A first draft hung this host's NV92.
-**Chosen in-run (pending owner review):** [07](07-glsl-node.md#the-in-run-choices).
+**2026-10-22 — T1.** The builder's `packed()` as data textures, a `smooth` uniform,
+the bake past `GlslLimits`; 20 graphs within 2.4e-7 on llvmpipe; a first draft hung the
+NV92 ([07](07-glsl-node.md)).
+**2026-10-22 — T2.** Five parity cases, 87/87 through the gate's wrapper on llvmpipe (X
+hung); the viewer takes the context's limits; snapshots
+([08](08-parity-and-viewer.md)).
+**Chosen in-run (pending owner review):** [07](07-glsl-node.md#the-in-run-choices),
+[08](08-parity-and-viewer.md#the-in-run-choices).
 
 ## #67 The C ABI test and the documentation
 
