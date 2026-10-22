@@ -79,4 +79,11 @@ if(DUALC_BUILD_TESTS)
   add_test(NAME cli_c_abi_threads
     COMMAND dualc_c_demo unused.stl threads
     WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_c_demo>)
+  # The porous source (roadmap 23 #67): porous(mesh(id=...)) over an in-memory
+  # cube, from the shorthand and from JSON, byte-identical and watertight; the
+  # plain expression call over a sphere; a located error; a cancelled contour
+  # and export. Depth 6, about 0.4 GB.
+  add_test(NAME cli_c_abi_porous
+    COMMAND dualc_c_demo c_abi_porous.stl porous
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_c_demo>)
 endif()
