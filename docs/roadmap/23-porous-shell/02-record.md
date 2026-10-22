@@ -157,9 +157,22 @@ non-manifold edges at depth 7. **For the owner's review:** P17 live and P18 on t
 
 ## #68 The Boletus implementation plan
 
-**PLANNED** — P07. A raw plan on Boletus's branch `feat/porous-shell-plan`, commit only: the
+**DONE** 2026-10-22 — P07.1. Planned: a raw plan on Boletus's branch `feat/porous-shell-plan`, commit only: the
 DualC pin, the `Ops.cs` entry, a *Porous Shell* component, the preview, the tests, the D-NN
 rows it would open; one pointer line here or in [15](../15-boletus-handoff.md).
+
+**2026-10-22 — T1.** Boletus `docs/raw/2026-10-22-porous-shell-plan.md` and its `docs/raw/README.md`
+row, commit `1ccbe23` on Boletus `feat/porous-shell-plan` (cut from Boletus `main` at `2423275`,
+which is untouched; not pushed); Boletus's `check.py --docs --strict` PASS. Its findings: the
+node needs no ABI change, and Boletus's `dualc-links` reads this tree with 0 missing; Boletus's
+`OpSchema.ChildCount` is exact, so the plan widens it to a 1–2 range; Boletus's `Proxy preview`
+creates the field on the solve thread, so the uncancellable build blocks the canvas (its D-50,
+DEFERRED); its Live preview hands the viewer a mesh volume as an OBJ, and whether that yields
+the in-memory path's cells is untested (its Step 5 test, D-52 if they differ). The re-pin
+waits for this branch's merge into `main` on GitHub. It names Boletus D-49 … D-52, block 11,
+items from #35, without writing them. **Chosen in-run (pending owner review):** one Sources
+component, all twelve keys as inputs (`Jitter` appended to the raw plan's list), a key emitted
+only off DualC's default, the ranges left to DualC's located errors, `Seed` a 32-bit integer.
 
 ## #69 Graded nodes miss a negative thickness in cellOverlaps
 

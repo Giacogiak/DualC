@@ -32,8 +32,12 @@ Delaunay engine and the packed complex as built and measured; [05](05-porous-fie
 | #65 The porous node on the CPU | [02](02-record.md#65-the-porous-node-on-the-cpu) · [05](05-porous-field.md) · [06](06-sponge-end-to-end.md) | DONE 2026-10-22 (P04; the in-run choices pending owner review) |
 | #66 The porous node in GLSL and dualc_field_view | [02](02-record.md#66-the-porous-node-in-glsl-and-dualc_field_view) · [07](07-glsl-node.md) · [08](08-parity-and-viewer.md) | DONE 2026-10-22 (P05; parity on llvmpipe, the NV92 and the in-run choices pending owner review) |
 | #67 The C ABI test and the documentation | [02](02-record.md#67-the-c-abi-test-and-the-documentation) | DONE 2026-10-22 (P06; the in-run choices and the viewer recipes pending owner review) |
-| #68 The Boletus implementation plan | [02](02-record.md#68-the-boletus-implementation-plan) | PLANNED — P07 |
+| #68 The Boletus implementation plan | [02](02-record.md#68-the-boletus-implementation-plan) | DONE 2026-10-22 (P07; Boletus branch `feat/porous-shell-plan`, the in-run defaults pending owner review) |
 | #69 Graded nodes miss a negative thickness in cellOverlaps | [02](02-record.md#69-graded-nodes-miss-a-negative-thickness-in-celloverlaps) | DEFERRED — trigger in the decisions index |
+
+**The Boletus plan** is `docs/raw/2026-10-22-porous-shell-plan.md` in the Boletus repository,
+on its branch `feat/porous-shell-plan` (commit only, not pushed); the pointer from the
+Boletus boundary is [15 § DualC retains](../15-boletus-handoff.md#dualc-retains--engine--abi-boletus-only-requests-these-upstream).
 
 ---
 

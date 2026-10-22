@@ -41,6 +41,7 @@ is the *driver* (the reason to do them), not the owner.
 | Static `/MT` MSVC-runtime build of `dualc_capi.dll` | build/CMake | **Boletus-driven** — needed for Boletus Phase 4 zero-prereq Yak install |
 | DAG-ref serialization superset (`id`/`ref`, `let … in …`) | [12 §A](12-field-graph-and-app/README.md) | **Boletus-driven** — wanted when large GH canvases share sub-fields |
 | Cancel token + progress callback (`*_with_progress` twins, ABI 0.5.0) | [14/05](14-c-abi/05-progress-and-cancel.md) | **DONE** (2026-09-22) — Boletus-driven: its D-30 / 07 § 7 ask, the "Cancel ■" button and the real % of `Write to File` Phase C; the token object supersedes the sketch's callback-return shape |
+| The `porous` source (sponge / foam / bone) and its use from a host mesh | [23](23-porous-shell/README.md), [11/16](../command_reference/11-dualc_field/16-porous-shell.md) | **PLANNED** on the Boletus side — an implementation plan only (D-72): Boletus `docs/raw/2026-10-22-porous-shell-plan.md` on Boletus branch `feat/porous-shell-plan`, commit only (2026-10-22, [23 #68](23-porous-shell/02-record.md#68-the-boletus-implementation-plan)) |
 
 ---
 
