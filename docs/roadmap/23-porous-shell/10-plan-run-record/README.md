@@ -169,6 +169,19 @@ pushed: the push, the PR and the CI reading are the owner's (`main` is protected
     paths, and a few measurements carried on [01](01-measurements-and-lessons.md#measurements-only-the-handoffs-held)
     (the ABI test's sizes, the rim variants at depth 6, the scale notes, MSVC's D9025).
 
+*2026-10-22, `plan/` deleted (D-51).* Before the deletion, every handoff and the manifest's
+rules were checked against `docs/` fact by fact (four read-only audits, three handoffs each).
+About twenty facts only the handoffs held were carried in `beba1a3`: the EGL-surfaceless recipe
+([08](../08-parity-and-viewer.md#the-gpu-tier-run-on-llvmpipe)), how to read a tet digest
+failure ([03](../03-delaunay-engine.md#the-tests)), the run's stops and the lessons above and
+in [01](01-measurements-and-lessons.md#what-the-run-taught). The rest was present or run
+bookkeeping. The loss audit, run before the commit (`--base beba1a3 --head <scratch>
+--scope docs/ plan/ --annex plan/`, a scratch triage with no rules): no row from the two
+record pages the commit touches; the annex's residual 1,349 sentence, 382 evidence, 142
+heading and 111 identifier rows are the handoffs' wording, triaged by the fact audit above;
+the rest is the known whole-tree noise. The split, the manifest and the handoffs stay in git
+history (`beba1a3`).
+
 ---
 
 ← Back to [block 23](../README.md) · the [Roadmap index](../../README.md).

@@ -76,7 +76,7 @@ ctest **408 / 408** (39 of them the run's porous cases), GPU parity **87 / 87** 
 The branch holds the hygiene run's commits (`adc465b` and below) under this run's. So:
 
 1. Push and merge `feat/hygiene-and-editor` first (its own PR, 17/22).
-2. After the commit that deletes `plan/` (D-51):
+2. `plan/` is deleted (D-51, after the run), so push the branch:
 
    ```bash
    git push -u origin feat/porous-shell
