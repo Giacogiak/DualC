@@ -23,6 +23,8 @@ Delaunay engine and the packed complex as built and measured; [05](05-porous-fie
 [06](06-sponge-end-to-end.md) are #65's, the field and the graph token, and the sponge end to end;
 [07](07-glsl-node.md) and [08](08-parity-and-viewer.md) are #66's, the GLSL emitter and its data textures, and the parity and the viewer;
 [09](09-seeds-as-built.md) is #63's, the seed generator as built, moved out of 02 when 02 reached its cap.
+[10](10-plan-run-record.md) is the run's close: the gates P08 ran, what stays open after them, and
+the run's record.
 
 | Item | Page | Status |
 | --- | --- | --- |
