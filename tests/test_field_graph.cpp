@@ -1,6 +1,7 @@
 #include "field_graph.h"
 
 #include "dualc/pipeline.h"
+#include "dualc/porous.h"
 
 #include "geometrycentral/surface/meshio.h"
 #include "geometrycentral/surface/surface_mesh.h"
@@ -11,11 +12,17 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
+#include <cstdlib>
 #include <filesystem>
+#include <iostream>
+#include <map>
 #include <memory>
+#include <numeric>
 #include <string>
 #include <tuple>
+#include <utility>
 #include <vector>
 
 // Tests for the field-graph parser/builder (examples/field_graph.{h,cpp}). The
@@ -1057,4 +1064,101 @@ TEST_CASE("porous: childBakeMargin hands the volume the pad and the control noth
       parseShorthand("porous(" + a + ", plane(1,0,0,0), spacing=0.3, spacing2=0.5, d1=1)");
   REQUIRE(childBakeMargin(g, 0, 0.0) == 0.5);
   REQUIRE(childBakeMargin(g, 1, 0.7) == 0.0);
+}
+
+namespace {
+
+// The connected surfaces of a contoured mesh: a union-find over its faces,
+// two faces joined when they share an edge. A sponge's outer skin is one
+// surface and every closed cavity adds one, so a count above 1 means the walls
+// enclose pores. The counter is the test's, not the library's (raw plan § 3
+// P04 T2).
+std::size_t countSurfaces(geometrycentral::surface::SurfaceMesh& m) {
+  const std::vector<std::vector<std::size_t>> faces = m.getFaceVertexList();
+  std::vector<std::size_t> parent(faces.size());
+  std::iota(parent.begin(), parent.end(), std::size_t{0});
+  auto find = [&](std::size_t x) {
+    while (parent[x] != x) x = parent[x] = parent[parent[x]];
+    return x;
+  };
+  std::map<std::pair<std::size_t, std::size_t>, std::size_t> firstFace;
+  for (std::size_t f = 0; f < faces.size(); ++f) {
+    const std::vector<std::size_t>& v = faces[f];
+    for (std::size_t i = 0; i < v.size(); ++i) {
+      const std::size_t a = v[i], b = v[(i + 1) % v.size()];
+      const auto key = std::make_pair(std::min(a, b), std::max(a, b));
+      const auto [it, fresh] = firstFace.emplace(key, f);
+      if (!fresh) parent[find(f)] = find(it->second);
+    }
+  }
+  std::size_t roots = 0;
+  for (std::size_t f = 0; f < faces.size(); ++f)
+    if (find(f) == f) ++roots;
+  return roots;
+}
+
+}  // namespace
+
+// The sponge end to end (#65, P04 T2): the foam recipe on the unit sphere,
+// its rim rounded by a smooth-intersection, contours to a closed mesh whose
+// walls enclose cavities. The crisp `intersection` of the same graph leaves
+// a few non-manifold edges where a pore nearly breaks through the sphere, at
+// every seed and at depth 6 and 7 -- the rim limit an `intersection` of a thin
+// shell already has (23/06); `k` = 0.1 is three cells here. Depth 6 keeps the
+// case near 0.4 GB and a second.
+TEST_CASE("porous: a walls sponge contours watertight with more than one component",
+          "[field_graph][porous]") {
+  FixedResolver meshes{nullptr, nullptr};
+  FieldGraph fg = FieldGraph::build(
+      parseShorthand("smooth-intersection(sphere(radius=1), "
+                     "onion(porous(sphere(radius=1), spacing=0.4, seed=3), "
+                     "thickness=0.06), k=0.1)"),
+      meshes);
+  dualc::SamplerParams sp;
+  sp.maxDepth = 6;
+  dualc::ContourerParams cp;
+  dualc::Diagnostics diag;
+  auto [mesh, geom, normals] = dualc::dualContourField(fg.field(), sp, cp, &diag);
+  REQUIRE_FALSE(diag.emptyContour);
+  REQUIRE(diag.outputBoundaryEdges == 0);
+  REQUIRE(diag.outputNonManifoldEdges == 0);
+  REQUIRE(diag.outputWatertight);
+  const std::size_t surfaces = countSurfaces(*mesh);
+  INFO("faces " << mesh->nFaces() << ", surfaces " << surfaces);
+  REQUIRE(surfaces > 1);
+}
+
+// The sizes behind 23/06's table: the seeds, pad seeds, tets and packed
+// primitives of every porous node the end-to-end cases contour, and the build
+// time. Hidden; run it from build/examples (the bracket is read by bare name,
+// or from DUALC_POROUS_BENCH_MESH).
+TEST_CASE("porous: the end-to-end cases' seeds and tets", "[.][porous-bench]") {
+  const char* env = std::getenv("DUALC_POROUS_BENCH_MESH");
+  const std::string mesh = std::string("mesh(path=\"") + (env ? env : "bracket.obj") + "\")";
+  const std::string sphere = "sphere(radius=1)";
+  const std::vector<std::string> nodes = {
+      "porous(" + sphere + ", spacing=0.25)",
+      "porous(" + sphere + ", cells=delaunay, spacing=0.5)",
+      "porous(" + sphere + ", mode=struts, spacing=0.25)",
+      "porous(" + sphere + ", cells=delaunay, mode=struts, spacing=0.4)",
+      "porous(" + sphere + ", spacing=0.4, seed=3)",
+      "porous(" + mesh + ", spacing=0.15)",
+      "porous(" + mesh + ", cells=delaunay, spacing=0.3)",
+      "porous(" + mesh + ", mode=struts, spacing=0.15)",
+      "porous(" + mesh + ", cells=delaunay, mode=struts, spacing=0.25)",
+  };
+  FileMeshResolver files;
+  for (const std::string& n : nodes) {
+    const auto t0 = std::chrono::steady_clock::now();
+    FieldGraph fg = FieldGraph::build(parseShorthand(n), files);
+    const double ms = std::chrono::duration<double, std::milli>(
+                          std::chrono::steady_clock::now() - t0).count();
+    const auto* f = dynamic_cast<const dualc::PorousField*>(&fg.field());
+    REQUIRE(f != nullptr);
+    const dualc::PorousField::Stats& st = f->stats();
+    std::cout << n << ": seeds " << st.seeds << " (pad " << st.padSeeds << "), tets "
+              << st.tets << ", faces " << st.delaunayFaces << ", edges " << st.delaunayEdges
+              << ", segments " << st.segments << ", packed " << st.packedBytes
+              << " B, build " << ms << " ms\n";
+  }
 }

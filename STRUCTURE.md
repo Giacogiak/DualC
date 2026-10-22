@@ -119,7 +119,8 @@ DualC/
 │   │                            `--force-hold` (Windows) pins the sharing-violation case (no CTest; `check.py --io-stress`)
 │   ├── samples/              Ready-to-run field-graphs (gyroid_box.json, mesh_lattice.json) copied next to dualc_field,
 │   │                            with the retired dualc_csg_demo's six recipes as graphs (cube_minus_sphere.json, smooth_blend.json,
-│   │                            displaced_sphere.json, mesh_shell.json, mesh_minus_sphere.json, twisted_mesh.json)
+│   │                            displaced_sphere.json, mesh_shell.json, mesh_minus_sphere.json, twisted_mesh.json), and three
+│   │                            porous sponges (porous-sponge.json, porous-foam-bracket.json, porous-bone-bracket.json; roadmap 23 #65)
 │   └── third_party/          Host-only I/O deps (never linked into libdualc)
 │       ├── miniz.{c,h}          ZIP/deflate for 3MF export (MIT)
 │       ├── miniz_LICENSE.txt

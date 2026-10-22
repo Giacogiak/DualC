@@ -145,8 +145,9 @@ cat graph.json | dualc_field - -o out.obj
 dualc_field gyroid_box.json --depth 7 --threads 1 -o part.3mf
 ```
 
-Eight ready-to-run samples ship next to the binary (sources in `examples/samples/`):
-`gyroid_box.json`, `mesh_lattice.json` and the six of [13](13-composition-samples.md).
+Eleven ready-to-run samples ship next to the binary (sources in `examples/samples/`):
+`gyroid_box.json`, `mesh_lattice.json`, the six of [13](13-composition-samples.md) and three
+`porous-*.json` sponges ([23/06](../../roadmap/23-porous-shell/06-sponge-end-to-end.md#the-samples)).
 
 ## Recipes
 

@@ -144,8 +144,8 @@ dropped. The layout, rules and numbers are in [04](04-complex-and-bins.md).
 
 ## #65 The porous node on the CPU
 
-**PARTIAL** 2026-10-21 — P04.1 built the field and the token (T1); the end-to-end sponge
-(T2) next. Planned as: `PorousField` and the `porous` graph token (build, shorthand, JSON round
+**DONE** 2026-10-22 — P04.1 built the field and the token (T1), P04.2 contoured the sponge
+end to end (T2). Planned as: `PorousField` and the `porous` graph token (build, shorthand, JSON round
 trip, `rejectUnreadParams`, `--list`); acceptance: Lipschitz-1 sampled, the smoothing bound of
 the defaults table, unknown keys rejected, and a contoured `walls` sponge that is watertight
 with more than one connected component; samples in `examples/samples/`.
@@ -161,6 +161,16 @@ the round trip. **Chosen in-run (pending owner review):** the struts capped at `
 (P03's cap at `B` steps by about 0.18 k at k > 0, measured); `smooth` ≥ `B` an error for
 struts; `childBakeMargin` hands the volume the pad; no cancel token reaches the graph build.
 The contract, the key table and the numbers are in [05](05-porous-field.md).
+
+**2026-10-22 — T2, the sponge end to end.** The four recipes ran through `dualc_field -o` on
+the unit sphere and the bracket, both `cells`, both `mode`s, at depth 6 and 7 (7: 4–23 s,
+1.6–3.2 GB). Every walls case encloses cavities. The bracket's Voronoi foam and sponge are
+watertight with a crisp rim. On the sphere, a crisp rim leaves 2–16 non-manifold edges at
+any depth, as an existing clipped gyroid does; a `smooth-intersection` (k 0.1, depth 7) closes
+it on 8 seeds of 8. Delaunay walls need the node's `smooth`. Test: `porous: a walls sponge
+contours watertight with more than one component`. Samples: `examples/samples/porous-*.json`
+(three). **Chosen in-run (pending owner review):** the smoothed rim in the test and the
+sphere sample, seed 3 at depth 6, no new item for the rim. Numbers: [06](06-sponge-end-to-end.md).
 
 ## #66 The porous node in GLSL and dualc_field_view
 

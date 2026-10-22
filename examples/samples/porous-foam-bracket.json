@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "units": "mm",
+  "root": {
+    "op": "intersection",
+    "in": [
+      { "op": "mesh", "path": "bracket.obj" },
+      {
+        "op": "onion",
+        "thickness": 0.025,
+        "in": [
+          {
+            "op": "porous",
+            "spacing": 0.15,
+            "in": [
+              { "op": "mesh", "path": "bracket.obj" }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
