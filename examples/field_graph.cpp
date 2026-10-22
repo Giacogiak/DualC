@@ -979,15 +979,15 @@ double readLiftParam(const GraphNode& n) {
 }
 
 dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes,
-                                    double margin);
+                                    double margin, unsigned threads);
 
 // `margin` is the bake margin the ancestors hand down (childBakeMargin); only
-// a baked mesh / winding node reads it.
+// a baked mesh / winding node reads it, and bakes on `threads` workers.
 dualc::FieldPtr buildField(const GraphNode& n, MeshResolver& meshes,
-                           double margin) {
+                           double margin, unsigned threads) {
   ReadScope scope{n};
   try {
-    dualc::FieldPtr f = buildFieldUnchecked(n, meshes, margin);
+    dualc::FieldPtr f = buildFieldUnchecked(n, meshes, margin, threads);
     rejectUnreadParams(n);
     return f;
   } catch (const std::invalid_argument& e) {
@@ -1002,10 +1002,10 @@ dualc::FieldPtr buildField(const GraphNode& n, MeshResolver& meshes,
 }
 
 dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes,
-                                    double margin) {
+                                    double margin, unsigned threads) {
   const std::string& op = n.op;
   auto child = [&](std::size_t i) {
-    return buildField(n.in[i], meshes, childBakeMargin(n, i, margin));
+    return buildField(n.in[i], meshes, childBakeMargin(n, i, margin), threads);
   };
 
   // 1. Booleans (two children).
@@ -1052,7 +1052,7 @@ dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes,
     MeshHandle h = id.empty() ? meshes.resolve(path) : meshes.resolveId(id);
     auto src = std::make_shared<dualc::MeshSource>(*h.mesh, *h.geom, interp, sm);
     if (nb.res == 0) return src;
-    return bakeMeshNode(*src, nb, margin);
+    return bakeMeshNode(*src, nb, margin, threads);
   }
   if (op == "winding") {
     std::string path = strParam(n, "path", "");
@@ -1064,7 +1064,7 @@ dualc::FieldPtr buildFieldUnchecked(const GraphNode& n, MeshResolver& meshes,
     MeshHandle h = id.empty() ? meshes.resolve(path) : meshes.resolveId(id);
     dualc::FieldPtr wf = dualc::windingNumberField(*h.mesh, *h.geom);
     if (nb.res == 0) return wf;
-    return bakeWindingNode(*wf, nb, margin);
+    return bakeWindingNode(*wf, nb, margin, threads);
   }
 
   // 3b. The lifts: one 2D profile child each. A profile anywhere else is a
@@ -1265,24 +1265,27 @@ dualc::BBox nodeBakeRegion(const dualc::BBox& nodeBounds, double pad) {
 }
 
 dualc::FieldPtr bakeMeshNode(const dualc::MeshSource& src, const NodeBake& b,
-                             double margin) {
+                             double margin, unsigned threads) {
   const dualc::BBox region =
       nodeBakeRegion(src.bounds(), std::max(b.band, margin));
   const dualc::Vector3 e = region.extent();
   const double cell = std::max({e.x, e.y, e.z}) / (b.res - 1);
   double band = b.band > 0.0 ? b.band : 3.0 * cell;
   if (margin > 0.0) band = std::max(band, margin + 3.0 * cell);
-  return src.bakeToGrid(region, dualc::Vector3i{b.res, b.res, b.res}, band);
+  return src.bakeToGrid(region, dualc::Vector3i{b.res, b.res, b.res}, band,
+                        threads);
 }
 
 dualc::FieldPtr bakeWindingNode(const dualc::ImplicitField& winding,
-                                const NodeBake& b, double margin) {
+                                const NodeBake& b, double margin,
+                                unsigned threads) {
   return dualc::bakeToGrid(winding, nodeBakeRegion(winding.bounds(), margin),
-                           dualc::Vector3i{b.res, b.res, b.res});
+                           dualc::Vector3i{b.res, b.res, b.res}, threads);
 }
 
-FieldGraph FieldGraph::build(const GraphNode& root, MeshResolver& meshes) {
-  return FieldGraph(buildField(root, meshes, 0.0));
+FieldGraph FieldGraph::build(const GraphNode& root, MeshResolver& meshes,
+                             unsigned bakeThreads) {
+  return FieldGraph(buildField(root, meshes, 0.0, bakeThreads));
 }
 
 }  // namespace fieldgraph

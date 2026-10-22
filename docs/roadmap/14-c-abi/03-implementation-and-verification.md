@@ -55,7 +55,8 @@ matches the file writers face-for-face.
   `add_subdirectory(capi)` only when ON, and only valid with
   `DUALC_BUILD_EXAMPLES` (it links the two example static libs — enforced with a
   `FATAL_ERROR`). Default builds are unperturbed (the option only gates the
-  subdir).
+  subdir). *(2026-10-21: the CMake default stays `OFF`, but `scripts/check.py` configures
+  with it `ON`, so every gate run and CI build job links the ABI — [06 #53](06-linux-shared-library.md).)*
 - **Target:** `add_library(dualc_capi SHARED …)` + `add_library(dualc::capi ALIAS …)`.
   Compiled with `DUALC_CAPI_BUILD` (switches the macro to `dllexport`),
   `POSITION_INDEPENDENT_CODE ON` (no-op on MSVC; since 2026-10-07 the root build sets it for the

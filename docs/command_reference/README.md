@@ -133,6 +133,7 @@ defaults:
 | `--depth N` | Octree max depth; cell size = root extent / `2^N`. | ✓ | `genus2` only | ✓ | — |
 | `--collapse E` | Adaptive cell-collapse threshold (QEF energy, length²); how it works: [11/05](11-dualc_field/05-decimation.md#which-lighter-files-lever---collapse-vs---decimate-vs---tile-depth). | ✓ | — | ✓ | — |
 | `--bounds x0,…,z1` | Explicit root / sampling box for unbounded fields. | — | — | ✓ | ✓ |
+| `--threads N` | Worker threads, `0` = all; output unchanged. | — | — | ✓ | ✓ |
 | `--expr` / `-` (stdin) | Field-graph shorthand instead of a JSON file. | — | — | ✓ | ✓ |
 
 ## Resolution & thin features

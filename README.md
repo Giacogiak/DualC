@@ -56,7 +56,7 @@ tests on Windows (Visual Studio 2022) and Linux (GCC 15, CMake 4, Ninja; on Ubun
 `sudo apt install cmake ninja-build g++`); the tests and examples also compile one C file
 (miniz), so they need a C compiler next to the C++ one. The GL
 tools and the C ABI are opt-in (`-DDUALC_BUILD_FIELD_VIEW`, `_GLSL_PARITY`, `_C_ABI`,
-all `OFF` by default); none of them adds a dependency
+all `OFF` by default; `scripts/check.py` turns `_C_ABI` on); none of them adds a dependency
 to `libdualc`. Two diagnostics options are `OFF` / empty by default too:
 `-DDUALC_WERROR=ON` makes a warning in DualC's own code an error (`-Werror` / `/WX`; CI's
 build jobs turn it on), and `-DDUALC_SANITIZE=address,undefined` instruments DualC's own

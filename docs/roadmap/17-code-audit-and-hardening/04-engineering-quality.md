@@ -113,22 +113,7 @@ symmetric strut cells. Comment restated, seam points added ([15](15-test-coverag
 ## #33 Build & tooling hardening
 **DONE (2026-10-06).** The last four sub-items landed as CMake options and CI jobs
 ([14](14-build-hardening-ci.md)); `clang-tidy` is left out and coverage moves to #32 — see
-*Still open* below. What follows is the full original scope.
-Global C++ dialect flags are set before the third-party `add_subdirectory`
-calls and leak into geometry-central and polyscope. The sibling probes use
-`CMAKE_SOURCE_DIR`, so DualC cannot be `add_subdirectory`'d into a larger tree without
-overriding cache variables — despite that being the only supported consumption mode.
-Transitive dependencies (Eigen, nanort, nanoflann, happly) are inherited by comment; nanort
-is structurally load-bearing but undeclared. Catch2 is pinned by mutable git tag rather than
-SHA, with no shallow clone and no offline fallback. `DUALC_BUILD_TESTS` and
-`DUALC_BUILD_EXAMPLES` default ON, so any subproject consumer triggers a network fetch and 21
-test translation units unasked (`PROJECT_IS_TOP_LEVEL` is the fix). No sanitizer option, no
-`-Werror` / `/WX` switch, no `clang-tidy`, no `CMAKE_EXPORT_COMPILE_COMMANDS`, no coverage —
-ASan/UBSan are flagged as high-value and near-free given the raw-pointer octree, hand-written
-BVH and vendored float SVD. The third-party layering rule (host-only deps never link into
-`libdualc`) is enforced by comments only; a CI assertion on `LINK_LIBRARIES` would make it
-real. And a clean clone does not build: the demo `.obj` meshes are gitignored and the
-`copy_if_different` POST_BUILD step fails against a missing source.
+*Still open* below. The full original scope was moved verbatim to [12 § #33](12-engineering-quality-records.md#33--build-hardening-three-batches) on 2026-10-19.
 
 The `install()` / export-set / `dualcConfig.cmake` half of the audit's rank-13 item is
 already tracked as [10 #8](../10-infrastructure-and-integration.md); only the
@@ -145,9 +130,9 @@ How each sub-item closed, dated: [12 § #33](12-engineering-quality-records.md#3
 `docs/raw/study/T-unit-testing.md:462-463`.
 
 ## #34 API hygiene batch
-**PARTIAL: DONE (2026-09-01, 2026-09-10); the rest PLANNED.** Two of the bullets have
-landed — `FieldPtr` const-ness, and the `RepeatField` fold below, which turned out not to
-be hygiene at all but the only wrong-**geometry** defect in the batch. Every claim in this
+**PARTIAL 2026-10-21** — all landed but the `GridField` normal (E12, reopened; batches
+09-01, 09-10, 10-19, 10-20). The `RepeatField` fold below turned out not to be hygiene at all
+but the only wrong-**geometry** defect in the batch. Every claim in this
 entry was re-verified against `ebe929a` before any of it was scoped, after
 [#26](03-correctness-and-robustness/03-diagnostics-item.md#26-a-diagnostics-channel-for-the-silent-failure-surface)
 found one of the audit's claims had never been true: **all of #34's held**. The list:
@@ -155,8 +140,10 @@ found one of the audit's claims had never been true: **all of #34's held**. The 
 - ~~`FieldPtr` is `shared_ptr<ImplicitField>`, not `shared_ptr<const ImplicitField>`~~ —
   **DONE 2026-09-01**; the audit's "compiles unchanged" did **not** hold (four host-side
   `dynamic_cast` sites) — record: [08 § `FieldPtr`](08-argument-validation.md#the-earlier-batch-fieldptr-const-ness);
-- `gradientAt` is documented as a gradient and returns a **unit direction**, which is why
-  `NormalizedField` has to recompute the magnitude by finite differences — still open;
+- ~~`gradientAt` is documented as a gradient and returns a **unit direction**, which is why
+  `NormalizedField` has to recompute the magnitude by finite differences~~ — **DONE
+  2026-10-20**: the unit direction is the contract; `trueGradientAt` carries |∇f| for
+  `normalizedOf` and the Newton step — record: [19](19-gradient-contract.md);
 - ~~no argument validation anywhere~~ — **DONE 2026-09-10**: `std::invalid_argument` at
   construction, reported by `dualc_field` with the node's locator; three deliberate
   non-rejections and the full record: [**08**](08-argument-validation.md);
@@ -171,11 +158,13 @@ found one of the audit's claims had never been true: **all of #34's held**. The 
 - **found while adding those guards: `scaled(f, s)` with negative `s` returned the
   complement of the solid** — fixed rather than rejected (a negative factor is a legitimate
   point reflection); record: [08](08-argument-validation.md);
-- `ContourerParams` has no thread-count knob, so a caller restricting the sampler still gets
-  all hardware threads in the contourer;
+- ~~`ContourerParams` has no thread-count knob, so a caller restricting the sampler still gets
+  all hardware threads in the contourer~~ — **DONE 2026-10-19**: `numThreads` on it and on both
+  bakes, through the C ABI (0.5.2) and `dualc_field --threads`, byte-identical at 1/2/all,
+  proven red — record: [18](18-contourer-threads.md);
 - `GridField::gradientAt` returns a normalised direction that is discontinuous across cell
-  boundaries, which callers assuming a true gradient magnitude (such as
-  `closestSurfacePoint`'s Newton step) silently rely on.
+  boundaries — **OPEN again 2026-10-21**: every continuous node stencil (central +35 %, minmod
+  +18 %) raised the CAD pair's mean deviation, so the cell gradient was restored — [20](20-gridfield-normal.md).
 
 *(2026-09-18: the landed bullets are condensed to one line + link each — the removed
 text is verbatim in 07 and 08, the `FieldPtr` paragraph in 08 — to bring this page under
@@ -184,21 +173,20 @@ the size cap; [19 Phase 5](../19-docs-layers/README.md).)*
 `docs/raw/study/A5-implicit-field-algebra.md:239-245,376-382`,
 `docs/raw/study/B3-memory-ownership-performance.md:236-237`, `docs/raw/study/B4-concurrency.md:173`,
 `docs/raw/study/A2-sampling-octree-oracles.md:385-391`.
+*2026-10-19:* the [hygiene + editor run](../../raw/2026-10-19-hygiene-and-editor-plan.md) takes up the three open bullets — the
+`gradientAt` contract, the contourer thread count, the `GridField` normal — by the owner's
+decision (raw plan § 1); the contract stays a unit direction, [D-65](../../decisions/01-settled.md).
+*2026-10-20:* the contract is written (header, design § 10.1) and the 30 overrides censused — [19](19-gradient-contract.md).
 
 ## #35 `RepeatField` neighbour-set optimisation
-**PLANNED.** [#34](#34-api-hygiene-batch)'s `RepeatField` fix costs **2.3×** on strut
+**DONE** 2026-10-21 ([21](21-repeat-pruning.md)). [#34](#34-api-hygiene-batch)'s `RepeatField` fix costs **2.3×** on strut
 lattices (39 s → 91 s, octet at depth 7) because a child that overhangs its period takes
 eight child evaluations instead of one. The cost was accepted deliberately — correctness
 first, with the number recorded rather than left for a user to discover — and this item is
 the follow-up.
 
-Two candidate levers, neither yet tried:
-- **Per-axis neighbours.** Visit offsets only on axes where the child actually overhangs.
-  Cheap and exact, but no help for the case that motivated it: a strut cell has corner caps
-  and so overhangs on all three axes.
-- **Early-out on the home copy.** Skip a neighbour when the home copy's value is already
-  smaller than the closest the neighbour's translated box could possibly be. This is where
-  the win would come from, since most points are nowhere near a seam.
+Two candidate levers, per-axis neighbours and an early-out on the home copy (the text is
+verbatim in [21](21-repeat-pruning.md#the-levers-as-04-planned-them), with what became of each).
 
 A third, larger option is to make the *cells* fit their period, which would put strut
 lattices back on the single-fold fast path by construction rather than by optimisation.
@@ -207,6 +195,11 @@ lattices back on the single-fold fast path by construction rather than by optimi
 the single fold was already exact ([15](15-test-coverage-batches.md#the-strut-lattice-oracle-certified-what-it-claimed)).
 A symmetry flag on the cell is a fourth lever. Open: why the fix moves root-box vertices
 ([20/04](../20-public-delivery/04-hosted-ci-plan-run.md)).
+*2026-10-19:* implemented ahead of its trigger by the owner's decision (raw plan § 1) in the
+[hygiene + editor run](../../raw/2026-10-19-hygiene-and-editor-plan.md): measured, with the levers in the plan's order, and the
+output must stay byte-identical.
+*2026-10-21:* DONE — every copy that cannot win the minimum is skipped, so the output is bit
+for bit the 8-neighbour minimum; 2.7–2.9× → 1.2–1.3× the single fold (octet, depth 7, two sessions) — [21](21-repeat-pruning.md).
 
 ---
 

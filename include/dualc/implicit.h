@@ -46,13 +46,41 @@ public:
   // Field value at p (negative inside, positive outside, zero on surface).
   virtual double valueAt(const Vector3& p) const = 0;
 
-  // Field gradient at p. Normalized, this is the outward surface normal
-  // where valueAt == 0.
+  // The unit outward direction of increasing value at p: on the surface
+  // (valueAt == 0) it is the outward normal. Its length is 1, except inside
+  // smooth blends, `mix` and `elongated`'s flat band, where it is a lerp (or
+  // a projection) of unit vectors and may be shorter, never longer. Where the
+  // direction is undefined (the gradient vanishes) it is (0,0,1).
+  //
+  // It is NOT the gradient's magnitude: a non-metric field (a TPMS, a
+  // winding number, a lerp) has |grad f| != 1 and this does not say so. A
+  // caller that needs |grad f| uses trueGradientAt().
   virtual Vector3 gradientAt(const Vector3& p) const = 0;
+
+  // The gradient of valueAt at p, magnitude kept: |trueGradientAt| is the
+  // rate the value changes per world unit (1 on a metric SDF, k on a TPMS of
+  // wavenumber k). For the callers that need |grad f| -- normalizedOf and the
+  // Newton step of closestSurfacePoint. Default: a central difference of
+  // valueAt (step 1e-4, six valueAt calls); overridden where it is exact and
+  // cheap (sphere, plane, GridField) and forwarded, chain rule applied, by
+  // the nodes that pass their child's value through. Zero where the field is
+  // flat; no fallback direction.
+  virtual Vector3 trueGradientAt(const Vector3& p) const;
 
   // Conservative axis-aligned extent of the surface. May be invalid (an
   // empty field); the sampler then falls back to a unit root box.
   virtual BBox bounds() const = 0;
+
+  // True when bounds() also bounds the value from below: for every p
+  // OUTSIDE bounds(), valueAt(p) >= the Euclidean distance from p to
+  // bounds(). A metric SDF of a solid inside its box has it (sphere, box,
+  // capsule, a round cone with neither cap swallowing the other), and so
+  // does a hard union of such; a Lipschitz-1 field need not (0.5 * an SDF is
+  // Lipschitz-1 and fails it). Default false, the safe answer. `repeated`
+  // and `repeatedLimited` read it once, at construction, to skip a neighbour
+  // copy that provably cannot be the closest -- their output is unchanged by
+  // a true claim and wrong after a false one.
+  virtual bool boundsBoundValue() const { return false; }
 
   // --- derived; overridable for closed-form fast paths ---
 
@@ -87,9 +115,11 @@ public:
   // Closest point on the surface to q, with the field's normal there. Used
   // by the Hermite sampler as a fallback when `edgeHit` misses a known
   // crossing (single-precision grazing on a thin feature). Default impl
-  // does one Newton step via valueAt / gradientAt -- good enough on a
-  // Lipschitz-1 SDF; MeshSource overrides with a direct BVH closest-point
-  // query. Returns false on a degenerate / empty field.
+  // does one Newton step, q - f * G / |G|^2 with G = trueGradientAt(q) --
+  // exact on a plane, first-order on any field, metric or not -- and takes
+  // the normal at the result from gradientAt; MeshSource overrides with a
+  // direct BVH closest-point query. Returns false on a degenerate / empty
+  // field (G vanishes or is not finite).
   virtual bool closestSurfacePoint(const Vector3& q,
                                    Vector3& outP, Vector3& outN) const;
 };
@@ -151,7 +181,9 @@ public:
   // bakeToGrid() for a mesh -- the expensive BVH SDF query runs only on the
   // band, not the whole res^3 lattice. `bandWidth` is raised to a safe floor
   // (1.5x the largest cell) if smaller; pick it >= the boolean blend radius so
-  // a later smooth blend stays exact.
+  // a later smooth blend stays exact. `numThreads` workers sample the band
+  // (0 = all hardware threads); every voxel is written by one worker only, so
+  // the grid is bit-identical regardless of it.
   //
   // `region` may be ANY box: padded around the mesh, flush with its AABB, only
   // partly overlapping it, or strictly inside the solid. (It did once have to
@@ -167,7 +199,7 @@ public:
   // consumer that needs a conservative (never-overshooting) distance -- a sphere
   // tracer -- must not step by this field unnormalized.
   FieldPtr bakeToGrid(const BBox& region, const Vector3i& resolution,
-                      double bandWidth) const;
+                      double bandWidth, unsigned numThreads = 0) const;
 
   // Facts about the input mesh, measured once at construction and free to
   // read (the edge counts fall out of the pseudonormal topology pass). They
@@ -212,7 +244,13 @@ public:
   WindingNumberField& operator=(const WindingNumberField&) = delete;
 
   double  valueAt(const Vector3& p)    const override;
+  // The unit direction of trueGradientAt, (0,0,1) where it vanishes (far
+  // from the mesh, where w is flat to the FD's resolution).
   Vector3 gradientAt(const Vector3& p) const override;
+  // Straddle-aware finite difference of 0.5 - w, magnitude kept: central
+  // where w is smooth, one-sided where the stencil would cross a triangle
+  // (w jumps by 1 there). Step 1e-4 of the padded AABB's diagonal.
+  Vector3 trueGradientAt(const Vector3& p) const override;
   BBox    bounds() const override;
   bool    isInside(const Vector3& p)   const override;
   bool    edgeHit(const Vector3& a, const Vector3& b,
@@ -231,8 +269,11 @@ FieldPtr windingNumberField(
 
 // An ImplicitField backed by a dense 3D signed-distance grid. `valueAt` is a
 // trilinear interpolation (O(1), a few dozen flops); `gradientAt` is the
-// analytic gradient of that interpolant. A baked SDF stays ~Lipschitz-1, so
-// the default cellOverlaps / edgeHit behave well on it.
+// direction of that interpolant's analytic gradient, normalised to unit
+// length ((0,0,1) where it vanishes) -- not its magnitude, which is
+// trueGradientAt()'s. It is continuous inside a cell and jumps across its
+// faces (#34: a continuous blend cost sharp edges accuracy). A baked SDF
+// stays ~Lipschitz-1, so the default cellOverlaps / edgeHit behave well on it.
 //
 // This exists so an *expensive* field -- notably a MeshSource, or a whole
 // tree of them -- can be sampled once into a grid and then queried millions
@@ -252,6 +293,9 @@ public:
 
   double  valueAt(const Vector3& p)    const override;
   Vector3 gradientAt(const Vector3& p) const override;
+  // The trilinear interpolant's analytic gradient, unnormalised (exact for
+  // valueAt, so the Newton step's; discontinuous across cell faces).
+  Vector3 trueGradientAt(const Vector3& p) const override;
   BBox    bounds() const override;
 
   // Read-only access to the baked grid, for handing it to a GPU 3D texture or
@@ -270,15 +314,17 @@ private:
 // Sample `src` once into a dense SDF grid covering `region` and return it as
 // a GridField. The grid has `resolution` samples along each axis (>= 2). Bake
 // cost is resolution.x*y*z `src.valueAt` calls, paid once and parallelised
-// across hardware threads; every later query is an O(1) trilinear lookup.
+// across `numThreads` workers (0 = all hardware threads; the grid is
+// bit-identical regardless of it); every later query is an O(1) trilinear
+// lookup.
 //
 // Memory: 4 * rx * ry * rz bytes (float storage) -- e.g. 129^3 ~= 8 MB.
 FieldPtr bakeToGrid(const ImplicitField& src, const BBox& region,
-                    const Vector3i& resolution);
+                    const Vector3i& resolution, unsigned numThreads = 0);
 
 // Cubic-resolution convenience overload (`resolution` samples on every axis).
 FieldPtr bakeToGrid(const ImplicitField& src, const BBox& region,
-                    int resolution);
+                    int resolution, unsigned numThreads = 0);
 
 // --- Boolean combinators -------------------------------------------------
 //

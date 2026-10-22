@@ -14,7 +14,8 @@ arbitrary composed field — the thing the Polyscope viewer cannot do at lattice
 density. Why a standalone app and not in-Rhino: Rhino cannot host the raymarch
 viewport (the reason the in-Rhino path fell back to LOD meshes); a host side-car
 provides raymarch *beside* Rhino instead (now a Boletus deliverable —
-[15-boletus-handoff.md](../15-boletus-handoff.md)).
+[15-boletus-handoff.md](../15-boletus-handoff.md)). *(2026-10-21: the Web build and every
+interactive UI item moved to DualCEditor — [22](../22-dualceditor-handoff/README.md).)*
 
 **Implemented:** `examples/dualc_field_view.cpp` (opt-in
 `-DDUALC_BUILD_FIELD_VIEW=ON`). Loads a `.fld`/`.json`/stdin/`--expr` graph
@@ -50,11 +51,9 @@ table, the parity value-shader, or the C++ export path, so exported geometry is
 unchanged and `uClipMask==0` is bit-identical to today *(2026-09-20: asserted from the
 shader — the cut is a `max()` gated by `uClipMask` — not measured by a snapshot diff)*. This is distinct from the
 still-deferred open-surface **clip mask** in §F (which masks an *open* surface by a
-*second* field; this is half-space clipping of a *solid* body). UI sliders are
-deferred to the public release — the uniforms are the hook a slider / the Rhino
-side-car drives. *(2026-09-18: trigger for the sliders is row D-17 of the
-[decisions index](../../decisions/README.md); 2026-10-03: the public release happened, the
-sliders are PLANNED.)*
+*second* field; this is half-space clipping of a *solid* body). The UI sliders
+(D-17) moved to DualCEditor, which shipped a section tool on these uniforms —
+[22](../22-dualceditor-handoff/README.md).
 
 ### Disk file-watch (auto-reload)
 **DONE (2026-07-03).** `dualc_field_view` now polls
@@ -75,39 +74,8 @@ mtime poll + bounds-recompute in the reload block); `libdualc` untouched; no CTe
 (GL). Only Boletus re-vendors the rebuilt exe.
 
 ### Real-time parameter push (uniform IPC channel)
-**DEFERRED** — a performance optimization; trigger below. The file-watch above drives
-the **structural-reload** tier for
-*every* GH edit: it rewrites the file and the viewer **recompiles the whole shader**
-whether a node was added or a slider merely nudged. That is correct and universal,
-and it needed **no** new protocol — but each change pays a shader recompile
-(~tens-to-hundreds of ms by graph complexity). For the **number-only** case
-(dragging one knob on an existing node) that recompile is wasteful: the generated
-GLSL is identical, only a uniform moved. Recall the **two edit tiers** (§D above +
-[command_reference/12 › Why two tiers](../../command_reference/12-dualc_field_view/README.md)):
-`l` / file-watch = **recompile** (shape changed); `[`/`]` = **one `glUniform`, no
-recompile, instant** (a number changed). The deferred optimization is to let a host
-drive the *second* tier programmatically — a command channel carrying
-`set <paramKey> <value>` lines that map straight to `setBinding()`/`glUniform` with
-**no** recompile.
-
-- **Improvement:** latency only. Today a slider *scrub* updates in small hitches (a
-  recompile per step); with uniform push the lattice would **morph fluidly at frame
-  rate** — continuous, video-game-like. **Not** a capability the viewer lacks (every
-  field previews today); purely smoothness for continuous scrubbing.
-- **Why deferred:** needs a **real IPC channel** (e.g. `--command-port N` or a
-  non-blocking stdin protocol) on the viewer + a sender on the host — new plumbing
-  both sides, where the file-watch needed none. And it *only* helps scalar edits: a
-  structure change (add/remove node, swap op) **still** recompiles, so the host must
-  classify scalar-only vs. structural and route accordingly, keyed to the codegen's
-  binding-table `paramKey`s. Structure changes fall back to a `reload` command / the
-  file-watch.
-- **Ownership:** the channel lives in DualC (`dualc_field_view`); **Boletus is the
-  driver** (the reason to build it — its `Volume` diff classifies the edit and
-  sends). Companion write-up on the Boletus side, same detail:
-  [Boletus `docs/roadmap/07-upstream-coordination/02-viewer-and-uniform-push.md §6`](../../../Boletus/docs/roadmap/07-upstream-coordination/02-viewer-and-uniform-push.md#6-real-time-parameter-push-uniform-ipc-channel--deferred-performance-optimization).
-- **Trigger:** a workflow that leans on **continuous slider scrubbing** of a dense
-  lattice and finds the per-change recompile hitch limiting. Until then the
-  file-watch is sufficient.
+Moved to DualCEditor (D-25), its parameter edits uniform-only there; the intent, verbatim,
+and how the delivered item differs: [22](../22-dualceditor-handoff/README.md).
 
 ---
 

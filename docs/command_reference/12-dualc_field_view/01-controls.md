@@ -103,7 +103,8 @@ This split is the whole point of the binding-table design:
 
 A host drives the structural tier over the file-watch; pushing a parameter edit
 from a host as a uniform-only update would need a command channel, which is not
-built — [12/03 § Real-time parameter push](../../roadmap/12-field-graph-and-app/03-raymarch-app.md#real-time-parameter-push-uniform-ipc-channel).
+built; DualCEditor edits uniforms in its own process instead —
+[12/03 § Real-time parameter push](../../roadmap/12-field-graph-and-app/03-raymarch-app.md#real-time-parameter-push-uniform-ipc-channel).
 
 ### Section planes (viewport-only inspection)
 

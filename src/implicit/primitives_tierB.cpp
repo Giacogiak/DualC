@@ -155,6 +155,18 @@ BBox RoundConeField::bounds() const {
                                     b_ + Vector3::constant(r2_)));
 }
 
+// valueAt is the exact distance to the hull of the two end balls only while
+// neither ball swallows the other, |r1 - r2| < |b - a|; past that the cone
+// term is not a distance, so the claim is withheld.
+bool RoundConeField::boundsBoundValue() const {
+  if (!(r1_ >= 0.0 && r2_ >= 0.0)) return false;
+  const Vector3 ba = b_ - a_;
+  const double l2 = dot(ba, ba);
+  if (l2 < 1e-30) return true;  // valueAt is the sphere (a, r1)
+  const double rr = r1_ - r2_;
+  return rr * rr < l2;
+}
+
 // ---- Infinite cylinder --------------------------------------------------
 
 InfiniteCylinderField::InfiniteCylinderField(const Vector3& axisPoint,

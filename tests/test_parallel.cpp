@@ -4,14 +4,20 @@
 // promised in a comment:
 //   1. Output is bit-identical regardless of numThreads (SamplerParams docs
 //      the guarantee; nothing tested it -- `numThreads` did not appear
-//      anywhere under tests/).
+//      anywhere under tests/). Since #34 the same holds for
+//      ContourerParams::numThreads and the two bakes' thread count, and a
+//      contourer at numThreads = 1 is shown to really run its solves serially.
 //   2. An exception thrown by fn propagates out of parallelFor instead of
 //      reaching std::terminate.
 
+#include "dualc/contourer.h"
 #include "dualc/implicit.h"
 #include "dualc/pipeline.h"
 #include "dualc/primitives.h"
+#include "dualc/progress.h"
+#include "dualc/sampler.h"
 
+#include "demo_meshes.h"
 #include "internal/parallel.h"
 
 #include "geometrycentral/surface/surface_mesh.h"
@@ -107,6 +113,116 @@ TEST_CASE("Contouring is bit-identical regardless of numThreads",
   // A thread count above the work item count exercises the clamp in
   // parallelFor (threads > n) rather than a fresh code path in the sampler.
   requireIdentical(serial, contourWithThreads(*field, 64));
+}
+
+namespace {
+
+ContourResult contourOctreeWithThreads(const HermiteOctree& octree,
+                                       unsigned threads) {
+  ContourerParams cp;
+  cp.numThreads = threads;
+  auto [mesh, geom, normals] = contourHermiteOctree(octree, cp);
+  REQUIRE(mesh != nullptr);
+
+  ContourResult r;
+  r.nVertices = mesh->nVertices();
+  r.nFaces    = mesh->nFaces();
+  r.normals   = normals;
+  for (auto v : mesh->vertices()) r.positions.push_back(geom->inputVertexPositions[v]);
+  return r;
+}
+
+void requireSameGrid(const FieldPtr& a, const FieldPtr& b) {
+  const auto* ga = dynamic_cast<const GridField*>(a.get());
+  const auto* gb = dynamic_cast<const GridField*>(b.get());
+  REQUIRE(ga != nullptr);
+  REQUIRE(gb != nullptr);
+  REQUIRE(ga->values() == gb->values());  // float ==, element by element
+}
+
+// Records the Contour stage's reports only.
+struct ContourReports final : ProgressSink {
+  std::vector<std::size_t> done;
+  std::size_t total = 0;
+  void report(Stage stage, std::size_t d, std::size_t t) noexcept override {
+    if (stage != Stage::Contour) return;
+    done.push_back(d);
+    total = t;
+  }
+};
+
+} // namespace
+
+// #34: the contourer's QEF pre-solve takes its thread count from
+// ContourerParams. One octree, contoured at several counts, gives the same
+// mesh -- the sampler is out of the picture.
+TEST_CASE("The contourer is bit-identical regardless of its numThreads",
+          "[parallel][determinism]") {
+  auto field = makeBusyField();
+  SamplerParams sp;
+  sp.maxDepth = 6;
+  const HermiteOctree octree = sampleFieldToHermiteOctree(*field, sp);
+
+  const ContourResult serial = contourOctreeWithThreads(octree, 1);
+  REQUIRE(serial.nFaces > 0);
+  requireIdentical(serial, contourOctreeWithThreads(octree, 2));
+  requireIdentical(serial, contourOctreeWithThreads(octree, 0));
+  requireIdentical(serial, contourOctreeWithThreads(octree, 64));
+}
+
+// The proof that the count reaches the contourer, not just that the output is
+// unchanged: parallelForPolled's serial path (threads <= 1) polls after every
+// max(1, n/64) items, so the pre-solve's half of the Contour stage reports
+// exactly every multiple of that step below n. The threaded path polls on a
+// 100 ms timer instead and cannot produce that sequence for this octree.
+// Before #34 the pre-solve always ran on all hardware threads.
+TEST_CASE("ContourerParams::numThreads = 1 runs the leaf solves serially",
+          "[parallel][progress]") {
+  auto field = makeBusyField();
+  SamplerParams sp;
+  sp.maxDepth = 6;
+  const HermiteOctree octree = sampleFieldToHermiteOctree(*field, sp);
+
+  ContourerParams cp;
+  cp.numThreads = 1;
+  ContourReports sink;
+  contourHermiteOctree(octree, cp, nullptr, nullptr, &sink);
+
+  REQUIRE(sink.total % 2 == 0);
+  const std::size_t n = sink.total / 2;  // leaves; the stage total is 2n
+  REQUIRE(n >= 128);                     // enough for >= 63 serial polls
+  const std::size_t every = n / 64 == 0 ? 1 : n / 64;
+
+  std::vector<std::size_t> expected, seen;
+  for (std::size_t k = every; k < n; k += every) expected.push_back(k);
+  for (std::size_t d : sink.done)
+    if (d > 0 && d < n) seen.push_back(d);
+  REQUIRE(seen == expected);
+}
+
+// #34: both bakes take a thread count; every voxel is written by one worker,
+// so the grid is the same at any count.
+TEST_CASE("bakeToGrid and MeshSource::bakeToGrid are bit-identical regardless "
+          "of their thread count", "[parallel][determinism][grid]") {
+  const BBox region{Vector3{-1.2, -1.2, -1.2}, Vector3{1.2, 1.2, 1.2}};
+
+  SECTION("bakeToGrid") {
+    auto field = makeBusyField();
+    const FieldPtr serial = bakeToGrid(*field, region, 40, 1);
+    requireSameGrid(serial, bakeToGrid(*field, region, 40, 2));
+    requireSameGrid(serial, bakeToGrid(*field, region, 40, 0));
+    requireSameGrid(serial, bakeToGrid(*field, region, 40));
+  }
+
+  SECTION("MeshSource::bakeToGrid (narrow band)") {
+    auto [mesh, geom] = dce::makeTorus(0.8, 0.3);
+    MeshSource src(*mesh, *geom);
+    const Vector3i res{36, 36, 36};
+    const FieldPtr serial = src.bakeToGrid(region, res, 0.2, 1);
+    requireSameGrid(serial, src.bakeToGrid(region, res, 0.2, 3));
+    requireSameGrid(serial, src.bakeToGrid(region, res, 0.2, 0));
+    requireSameGrid(serial, src.bakeToGrid(region, res, 0.2));
+  }
 }
 
 TEST_CASE("parallelFor propagates an exception instead of terminating",

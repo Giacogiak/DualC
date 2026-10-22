@@ -3,6 +3,8 @@
 #include "dualc/primitives.h"
 #include "dualc/sampler.h"
 
+#include "example_common.h"  // dce::strutCellSegments
+
 #include "geometrycentral/surface/surface_mesh.h"
 #include "geometrycentral/surface/vertex_position_geometry.h"
 
@@ -11,6 +13,8 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
+#include <cstdint>
 #include <limits>
 #include <memory>
 #include <utility>
@@ -106,6 +110,233 @@ TEST_CASE("repeatedLimited tiles a finite number of copies", "[domain]") {
   REQUIRE_FALSE(b.isInfinite());
   REQUIRE(b.min.x == Approx(-1.0));
   REQUIRE(b.max.x == Approx(9.0));
+}
+
+// Roadmap 17 #35: both repeats skip a neighbour copy that provably cannot win
+// the strict `<` minimum -- a copy read twice, or (when the child claims
+// boundsBoundValue) a copy whose box is farther than the best so far. The
+// claim is that this changes nothing, bit for bit. Two witnesses per case:
+// the same repeat over a pass-through child that withholds the claim (the box
+// skip off), and a hand-written copy of the 8-neighbour loop that predates the
+// skips (no skip at all). Values and gradients must match with ==.
+
+namespace {
+
+// Forwards everything to its child; claims boundsBoundValue only when told
+// to, and counts child reads so the test can see the skip actually fires.
+// The mutable counter is test-only: the test evaluates on one thread.
+class ClaimProbe : public ImplicitField {
+public:
+  ClaimProbe(FieldPtr child, bool forwardClaim)
+      : child_(std::move(child)), forwardClaim_(forwardClaim) {}
+
+  double valueAt(const Vector3& p) const override {
+    ++reads;
+    return child_->valueAt(p);
+  }
+  Vector3 gradientAt(const Vector3& p) const override {
+    return child_->gradientAt(p);
+  }
+  Vector3 trueGradientAt(const Vector3& p) const override {
+    return child_->trueGradientAt(p);
+  }
+  BBox bounds() const override { return child_->bounds(); }
+  bool boundsBoundValue() const override {
+    return forwardClaim_ && child_->boundsBoundValue();
+  }
+  bool cellOverlaps(const BBox& c) const override {
+    return child_->cellOverlaps(c);
+  }
+
+  mutable std::size_t reads = 0;
+
+private:
+  FieldPtr child_;
+  bool     forwardClaim_;
+};
+
+double sgnOf(double x) { return x < 0.0 ? -1.0 : (x > 0.0 ? 1.0 : 0.0); }
+
+// The 8-neighbour minimum as domain_ops.cpp computed it at db50b2e, before
+// any copy was skipped: home tile plus the +/-1 neighbour per axis, ids
+// clamped into [0, count-1] when `count` is given, first strict minimum kept.
+double eightCopyMin(const ImplicitField& child, const Vector3& s,
+                    const Vector3i* count, const Vector3& p,
+                    Vector3& bestLocal) {
+  auto idOf = [](double v, double t) {
+    return (t > 0.0) ? std::round(v / t) : 0.0;
+  };
+  auto clampId = [](double v, int n) {
+    const double hi = static_cast<double>(std::max(n - 1, 0));
+    return v < 0.0 ? 0.0 : (v > hi ? hi : v);
+  };
+  const Vector3 id{idOf(p.x, s.x), idOf(p.y, s.y), idOf(p.z, s.z)};
+  const Vector3 o{sgnOf(p.x - s.x * id.x), sgnOf(p.y - s.y * id.y),
+                  sgnOf(p.z - s.z * id.z)};
+  double best = std::numeric_limits<double>::infinity();
+  for (int k = 0; k < 2; ++k) {
+    for (int j = 0; j < 2; ++j) {
+      for (int i = 0; i < 2; ++i) {
+        Vector3 rid{id.x + i * o.x, id.y + j * o.y, id.z + k * o.z};
+        if (count) {
+          rid.x = clampId(rid.x, count->x);
+          rid.y = clampId(rid.y, count->y);
+          rid.z = clampId(rid.z, count->z);
+        }
+        const Vector3 r{p.x - s.x * rid.x, p.y - s.y * rid.y,
+                        p.z - s.z * rid.z};
+        const double d = child.valueAt(r);
+        if (d < best) {
+          best = d;
+          bestLocal = r;
+        }
+      }
+    }
+  }
+  return best;
+}
+
+bool sameVec(const Vector3& a, const Vector3& b) {
+  return a.x == b.x && a.y == b.y && a.z == b.z;
+}
+
+// The octet unit cell example_common's makeStrutLattice tiles -- capsules,
+// or (tapered) two round cones per strut -- built here untiled so it can be
+// wrapped in a ClaimProbe.
+FieldPtr octetCell(double wavelength, double radius, double nodeRadius) {
+  FieldPtr cell;
+  auto add = [&cell](FieldPtr f) { cell = cell ? unionOf(cell, f) : f; };
+  for (const auto& sg : dce::strutCellSegments("octet", wavelength)) {
+    if (nodeRadius == radius) {
+      add(std::make_shared<CapsuleField>(sg.first, sg.second, radius));
+    } else {
+      const Vector3 mid = (sg.first + sg.second) * 0.5;
+      add(std::make_shared<RoundConeField>(sg.first, mid, nodeRadius, radius));
+      add(std::make_shared<RoundConeField>(mid, sg.second, radius, nodeRadius));
+    }
+  }
+  return cell;
+}
+
+struct PruneCase {
+  const char* name;
+  FieldPtr    child;
+  Vector3     period;
+  bool        limited;
+  Vector3i    count;
+  BBox        region;
+  bool        claims;   // the child claims boundsBoundValue
+};
+
+void checkPrunedEqualsUnpruned(const PruneCase& c) {
+  INFO("case: " << c.name);
+  REQUIRE(c.child->boundsBoundValue() == c.claims);
+
+  auto withClaim = std::make_shared<ClaimProbe>(c.child, true);
+  auto without   = std::make_shared<ClaimProbe>(c.child, false);
+  FieldPtr pruned = c.limited
+      ? repeatedLimited(withClaim, c.period, c.count)
+      : repeated(withClaim, c.period);
+  FieldPtr unpruned = c.limited
+      ? repeatedLimited(without, c.period, c.count)
+      : repeated(without, c.period);
+  const Vector3i* count = c.limited ? &c.count : nullptr;
+
+  // A 25^3 grid over the region whose coordinates on a repeated axis are
+  // exact multiples of period/8 -- so it lands on tile centres, where the
+  // neighbour offset is 0 and the repeat skip fires, and on seams -- plus
+  // 4,000 pseudo-random points.
+  std::vector<Vector3> pts;
+  const int n = 24;
+  auto coord = [&](int a, int i) {
+    const double s = c.period[a];
+    const double lo = c.region.min[a], hi = c.region.max[a];
+    if (s > 0.0) {
+      const double m0 = std::ceil(lo / (s / 8.0));
+      const double m1 = std::floor(hi / (s / 8.0));
+      return s * ((m0 + std::round((m1 - m0) * i / n)) / 8.0);
+    }
+    return lo + (hi - lo) * i / n;
+  };
+  for (int i = 0; i <= n; ++i)
+    for (int j = 0; j <= n; ++j)
+      for (int k = 0; k <= n; ++k)
+        pts.push_back(Vector3{coord(0, i), coord(1, j), coord(2, k)});
+  std::uint64_t state = 0x9E3779B97F4A7C15ull;
+  auto unit = [&state]() {  // splitmix64, the same on every platform
+    std::uint64_t z = (state += 0x9E3779B97F4A7C15ull);
+    z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ull;
+    z = (z ^ (z >> 27)) * 0x94D049BB133111EBull;
+    z ^= z >> 31;
+    return static_cast<double>(z >> 11) * 0x1.0p-53;
+  };
+  for (int i = 0; i < 4000; ++i) {
+    pts.push_back(Vector3{
+        c.region.min.x + (c.region.max.x - c.region.min.x) * unit(),
+        c.region.min.y + (c.region.max.y - c.region.min.y) * unit(),
+        c.region.min.z + (c.region.max.z - c.region.min.z) * unit()});
+  }
+
+  std::size_t mismatches = 0;
+  withClaim->reads = without->reads = 0;
+  for (const Vector3& p : pts) {
+    Vector3 local;
+    const double ref = eightCopyMin(*c.child, c.period, count, p, local);
+    const Vector3 refGrad = c.child->gradientAt(local);
+    const Vector3 refTrue = c.child->trueGradientAt(local);
+    const bool ok = pruned->valueAt(p) == ref && unpruned->valueAt(p) == ref &&
+                    sameVec(pruned->gradientAt(p), refGrad) &&
+                    sameVec(unpruned->gradientAt(p), refGrad) &&
+                    sameVec(pruned->trueGradientAt(p), refTrue) &&
+                    sameVec(unpruned->trueGradientAt(p), refTrue);
+    if (!ok && mismatches++ == 0) {
+      UNSCOPED_INFO("first mismatch at (" << p.x << ", " << p.y << ", "
+                                          << p.z << ")");
+    }
+  }
+  CHECK(mismatches == 0);
+
+  // The skip must actually fire on a claimant, or the test proves nothing.
+  if (c.claims) CHECK(withClaim->reads < without->reads);
+  else          CHECK(withClaim->reads == without->reads);
+}
+
+BBox regionOf(const Vector3& lo, const Vector3& hi) {
+  BBox b;
+  b.min = lo;
+  b.max = hi;
+  return b;
+}
+
+} // namespace
+
+TEST_CASE("Pruned repeats equal the 8-neighbour minimum bit for bit",
+          "[domain][repeat]") {
+  const double w = 0.4;
+  const Vector3 lattice{w, w, w};
+  const BBox latticeBox = regionOf(Vector3{-0.6, -0.6, -0.6}, Vector3{0.6, 0.6, 0.6});
+  const std::vector<PruneCase> cases = {
+      {"sphere across a seam", std::make_shared<SphereField>(Vector3{0.4, 0.0, 0.0}, 0.3),
+       Vector3{1.0, 0.0, 0.0}, false, Vector3i{1, 1, 1},
+       regionOf(Vector3{-1.5, -0.5, -0.5}, Vector3{1.5, 0.5, 0.5}), true},
+      {"sphere across two seams", std::make_shared<SphereField>(Vector3{0.4, 0.15, 0.0}, 0.3),
+       Vector3{1.0, 1.0, 0.0}, false, Vector3i{1, 1, 1},
+       regionOf(Vector3{-1.5, -1.5, -0.5}, Vector3{1.5, 1.5, 0.5}), true},
+      {"octet cell (capsules)", octetCell(w, 0.05, 0.05), lattice, false,
+       Vector3i{1, 1, 1}, latticeBox, true},
+      {"tapered octet cell (round cones)", octetCell(w, 0.05, 0.08), lattice, false,
+       Vector3i{1, 1, 1}, latticeBox, true},
+      {"round box (no claim)",
+       std::make_shared<RoundBoxField>(Vector3{-0.1, -0.3, -0.25}, Vector3{0.6, 0.3, 0.2}, 0.05),
+       Vector3{1.0, 0.0, 0.4}, false, Vector3i{1, 1, 1},
+       regionOf(Vector3{-1.5, -0.5, -1.0}, Vector3{1.5, 0.5, 1.0}), false},
+      {"limited sphere", std::make_shared<SphereField>(Vector3{0.4, 0.0, 0.0}, 0.3),
+       Vector3{1.0, 0.0, 0.0}, true, Vector3i{3, 1, 1},
+       regionOf(Vector3{-1.0, -0.5, -0.5}, Vector3{3.0, 0.5, 0.5}), true},
+      {"limited octet cell", octetCell(w, 0.05, 0.05), lattice, true,
+       Vector3i{3, 2, 2}, regionOf(Vector3{-0.6, -0.6, -0.6}, Vector3{1.4, 1.0, 1.0}), true},
+  };
+  for (const PruneCase& c : cases) checkPrunedEqualsUnpruned(c);
 }
 
 TEST_CASE("twisted leaves the twist axis unchanged", "[domain]") {

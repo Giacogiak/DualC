@@ -697,11 +697,10 @@ contourHermiteOctree(const HermiteOctree& octree, const ContourerParams& params,
   if (cancel) cancel->throwIfRequested("contouring");
 
   // Pre-solve every leaf's QEF (one per surface component under MDC) across
-  // all hardware threads. solveLeaf is a pure deterministic function of the
-  // leaf, so the cached results are bit-identical to solving lazily -- the
-  // traversal below still allocates vertex indices in its own serial order.
-  // (The thread count stays resolveThreadCount(0): ContourerParams has no
-  // thread knob -- that absence is open item #34, not this pass's business.)
+  // params.numThreads workers (0 = all hardware threads). solveLeaf is a pure
+  // deterministic function of the leaf, so the cached results are
+  // bit-identical to solving lazily -- the traversal below still allocates
+  // vertex indices in its own serial order.
   std::vector<const HermiteNode*> leaves;
   collectLeaves(octree.root(), leaves);
   std::vector<internal::MultiLeafSolve> solved(leaves.size());
@@ -716,12 +715,12 @@ contourHermiteOctree(const HermiteOctree& octree, const ContourerParams& params,
     // leaves first touched by the serial traversal below.
     progress->report(Stage::Contour, 0, 2 * leafTotal);
     internal::parallelForPolled(
-        leafTotal, internal::resolveThreadCount(0), solveOne,
+        leafTotal, params.numThreads, solveOne,
         [&](std::size_t done, std::size_t) {
           progress->report(Stage::Contour, done, 2 * leafTotal);
         });
   } else {
-    internal::parallelFor(leafTotal, internal::resolveThreadCount(0), solveOne);
+    internal::parallelFor(leafTotal, params.numThreads, solveOne);
   }
   state.leafSolveCache.reserve(leaves.size());
   for (std::size_t i = 0; i < leaves.size(); ++i) {

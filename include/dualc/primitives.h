@@ -48,7 +48,9 @@ public:
   SphereField(const Vector3& center, double radius);
   double  valueAt(const Vector3& p) const override;
   Vector3 gradientAt(const Vector3& p) const override;
+  Vector3 trueGradientAt(const Vector3& p) const override;
   BBox    bounds() const override;
+  bool    boundsBoundValue() const override { return true; }
 
 private:
   Vector3 c_;
@@ -61,6 +63,7 @@ public:
   BoxField(const Vector3& min, const Vector3& max);
   double valueAt(const Vector3& p) const override;
   BBox   bounds() const override;
+  bool   boundsBoundValue() const override;
 
 private:
   Vector3 c_;   // centre
@@ -89,6 +92,7 @@ public:
   PlaneField(const Vector3& normal, double offset);
   double  valueAt(const Vector3& p) const override;
   Vector3 gradientAt(const Vector3& p) const override;
+  Vector3 trueGradientAt(const Vector3& p) const override;
   BBox    bounds() const override;
 
 private:
@@ -102,6 +106,7 @@ public:
   CapsuleField(const Vector3& a, const Vector3& b, double radius);
   double valueAt(const Vector3& p) const override;
   BBox   bounds() const override;
+  bool   boundsBoundValue() const override { return r_ >= 0.0; }
 
 private:
   Vector3 a_, b_;
@@ -199,6 +204,7 @@ public:
                  double radiusA, double radiusB);
   double valueAt(const Vector3& p) const override;
   BBox   bounds() const override;
+  bool   boundsBoundValue() const override;
 
 private:
   Vector3 a_, b_;

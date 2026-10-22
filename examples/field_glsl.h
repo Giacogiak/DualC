@@ -100,12 +100,14 @@ inline constexpr int kMaxGlslPolygonVertices = 64;
 // resolution of every mesh/winding node without its own `bake=N` (a node with
 // one uploads the builder's grid unchanged) -- because the bake region IS `bounds`,
 // tightening `bounds` concentrates that resolution on the region of interest
-// rather than spreading it over the whole mesh AABB. Throws GraphError
+// rather than spreading it over the whole mesh AABB. `bakeThreads` is the
+// worker count of every bake (0 = all hardware threads). Throws GraphError
 // (op-located) on an op the codegen does not yet support, or any builder-style
 // semantic problem.
 GlslScene compileToGlsl(const GraphNode& root, MeshResolver& meshes,
                         const dualc::BBox& bounds,
-                        int gridRes = kDefaultMeshGridRes);
+                        int gridRes = kDefaultMeshGridRes,
+                        unsigned bakeThreads = 0);
 
 // Assemble the full fragment shader for the live sphere-tracer (app): version
 // header + fixed primitive/op library + the scene's generated source + the fixed

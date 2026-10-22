@@ -28,9 +28,13 @@ is rejected at construction is [17/08](../roadmap/17-code-audit-and-hardening/08
 | `clampVertexToCell` | `true` | Whether to constrain QEF minimisers to stay inside their cell. |
 | `clampToleranceCells` | 1.0 | When clamping, how many cell-widths of drift to tolerate before falling back to the QEF mass point instead of componentwise-clamping ([§ 4.4](04-qef-manifold-collapse.md#44-the-per-cell-qef)). |
 | `manifoldDC` | `true` | Manifold Dual Contouring: one QEF vertex per surface component in a cube instead of always one per cell. Fixes the "pinch across one cell" class of non-manifold edges. When `false`, the contourer falls back to byte-identical single-vertex behaviour ([§ 4.5](04-qef-manifold-collapse.md#45-manifold-dual-contouring)). |
+| `numThreads` | 0 | Worker threads for the per-leaf QEF pre-solve; 0 means all hardware threads. Each leaf is solved alone and vertex indices are assigned afterwards in serial traversal order, so **the mesh is bit-identical regardless of this value** ([§ 4](03-contourer-recursion.md)). The C ABI fills it from `DualcContourParams.numThreads`, `dualc_field` from `--threads`. |
 
-`ContourerParams` has **no thread knob**; the contourer's QEF pre-solve hard-codes
-`resolveThreadCount(0)`. Neither struct carries a field that is read nowhere: a public field
+The two bakes take the same kind of count as a trailing argument, default 0:
+`bakeToGrid(src, region, resolution, numThreads)` and
+`MeshSource::bakeToGrid(region, resolution, bandWidth, numThreads)` — every voxel is written by
+one worker, so the grid is bit-identical at any count. Neither struct carries a field that is
+read nowhere: a public field
 that silently does nothing is a promise the library does not keep
 ([17 #28](../roadmap/17-code-audit-and-hardening/04-engineering-quality.md#28-delete-the-two-dead-public-parameters)).
 

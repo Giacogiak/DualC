@@ -19,7 +19,7 @@ status and trigger, and links to both.
   **B1–B5** (architecture, API and type design, memory and performance, concurrency,
   build and licensing).
 - [`06-findings-ledger-testing.md`](06-findings-ledger-testing.md) — the 13 findings **C42–C54** from
-  **T** (testing). (All finding ids are the ledger's, assigned 2026-08-31; the study has none.) Split out of `02` on 2026-09-10 at the 15 KB size limit.
+  **T** (testing). (Finding ids are the ledger's, 2026-08-31; the study has none.) Split out of `02` 2026-09-10 at the 15 KB cap.
 - [`03-correctness-and-robustness/`](03-correctness-and-robustness/README.md) — tracked items
   **#22–#26** and **#46**: the findings that can make DualC produce a wrong answer or abort.
 - [`04-engineering-quality.md`](04-engineering-quality.md) — tracked items **#27–#35**:
@@ -34,22 +34,22 @@ status and trigger, and links to both.
   rest: `DUALC_WERROR`, `DUALC_SANITIZE`, the layering assertion and the per-target dialect,
   the first warnings and sanitizer findings, and the CI runs that proved each one red.
 - [`15-test-coverage-batches.md`](15-test-coverage-batches.md) — the delivery record of
-  **#32**: Batch A (the corrected counts, the 38 `Approx(0.0)` margins and their gate check,
-  a working directory per test case, the serial-`ctest` decision) and Batch B (the missing
-  tests, the CLI content checks, coverage measured once, the strut-oracle correction).
+  **#32**, Batches A and B: margins, counts, the missing tests, coverage measured once.
 - [`16-windows-rename-race/README.md`](16-windows-rename-race/README.md) — the record of **#52**, the
-  Windows export I/O flake Boletus reported: the rc 2 sites ranked, the alternative
-  hypotheses, the `dualc_io_stress` instrument and its experiment workflow, the decision
-  criteria fixed before the runs, the five samples' evidence, the verdict (an inherited
-  handle, not a scanner) and what shipped (non-inheritable output handles, the bounded
-  retry, the error line in the ABI, 0.5.1).
+  Windows export I/O flake Boletus reported: the desk analysis fixed before the runs, the
+  `dualc_io_stress` experiment's five samples, the verdict (an inherited handle, not a
+  scanner) and what shipped (non-inheritable output handles, the bounded retry, ABI 0.5.1).
 - [`17-viewer-silhouette-specks.md`](17-viewer-silhouette-specks.md) — **#61**, dark specks on
   `dualc_field_view`'s grazing silhouettes (DEFERRED, one renderer seen).
-- [`07-repeat-tiling-fix.md`](07-repeat-tiling-fix.md) — the full record for #34's first
-  item: `repeat` read only the folded tile, which put wrong geometry in shipped strut
-  lattices; the conditional fix, its measured 2.3× cost, and the oracle test it showed to
-  be certifying less than it claims. Both strut-lattice claims are corrected by measurement in
-  [15](15-test-coverage-batches.md#the-strut-lattice-oracle-certified-what-it-claimed).
+- [`18-contourer-threads.md`](18-contourer-threads.md) — #34's thread-count delivery record.
+- [`19-gradient-contract.md`](19-gradient-contract.md) — #34's `gradientAt` contract, 30-override census, `trueGradientAt`.
+- [`20-gridfield-normal.md`](20-gridfield-normal.md) — #34's `GridField` normal: stencils measured, E12 open.
+- [`21-repeat-pruning.md`](21-repeat-pruning.md) — #35: `repeat`'s neighbours pruned, byte-identical.
+- [`22-hygiene-plan-run.md`](22-hygiene-plan-run.md) — the hygiene + editor run harvested: counts, plan corrections, the in-run choices for review, what it left open.
+- [`07-repeat-tiling-fix.md`](07-repeat-tiling-fix.md) — #34's first item: `repeat` read
+  only the folded tile; the conditional fix, its 2.3× cost, the oracle test it showed to
+  certify less than it claims (both strut-lattice claims corrected in
+  [15](15-test-coverage-batches.md#the-strut-lattice-oracle-certified-what-it-claimed)).
 - [`08-argument-validation.md`](08-argument-validation.md) — #34's second batch: fail-fast
   argument validation across the field layer, the `BBox{}` sentinel that was invisible to
   `isValid()`, and the negative-`scaled()` complement bug the guards exposed.
@@ -60,14 +60,10 @@ status and trigger, and links to both.
 - [`11-diagnostics-verification.md`](11-diagnostics-verification.md) — #26's evidence
   pages: the claim-by-claim re-scoping, the verification digests, the untested branch
   (moved out of `05` on 2026-09-18).
-- [`09-local-checks-gate/`](09-local-checks-gate/README.md) — the local checks gate (a folder since 2026-09-21)
-  (`scripts/check.py`) that stands in for CI: the check
-  list, the doc-size ratchet, why every check was proven to fail, and exactly
-  which of #31/#32/#33 it does and does not move.
-- [`10-docs-system-screening.md`](10-docs-system-screening.md) — the 2026-09-11 audit
-  of the documentation system itself: the verdict (accurate data, redundant and
-  half-enforced system), the seven semantic gate checks, the one-ledger clean-up, the
-  unknown-parameter-key defect the recipes exposed, and the split pass (four frozen files → folders).
+- [`09-local-checks-gate/`](09-local-checks-gate/README.md) — the gate (`scripts/check.py`, a folder since
+  2026-09-21): the checks, the size ratchet, each proven to fail, its share of #31–#33.
+- [`10-docs-system-screening.md`](10-docs-system-screening.md) — the 2026-09-11 audit of the docs
+  system: verdict, seven semantic checks, one ledger, the unknown-key defect, the split pass.
 
 87 findings total. **Five defects and two coverage gaps were fixed by the 2026-08-21
 screening batch** — see [01 §
@@ -130,13 +126,15 @@ full entries, with evidence and triggers, live in two files:
 audit, is on its own page, [`15`](16-windows-rename-race/README.md).
 
 **Latest verification** (the one home of the counts; every other page links here):
-`ctest` **302** on Linux and macOS and **304** on Windows (306 locally with the C ABI's four) (2026-10-07, CI's three `build` jobs on the
+`ctest` **302** on Linux and macOS and **304** on Windows (306 locally with the C ABI) (2026-10-07, CI's three `build` jobs on the
 merge of #52 over #32 — two writer cases run everywhere, two more only on Windows, [16](16-windows-rename-race/README.md);
 300 earlier that day, [15](15-test-coverage-batches.md); 270 on 2026-10-06; 256 on 2026-09-17, [19/01](../19-docs-layers/01-record-phases-0-2.md)); `dualc_glsl_parity` **73/73**
 (2026-10-06, asserted by `check.py --gpu` against `parity_expected_cases` in CI's required
 `gpu` job — [13](13-parity-gate-binding.md)); the same 270 pass under ASan + UBSan in CI's
 `sanitize` job (2026-10-06, [14](14-build-hardening-ci.md)); the same 270 pass under `ctest -j 8`,
-three runs in a row (2026-10-07, Linux, [15](15-test-coverage-batches.md)).
+three runs in a row (2026-10-07, Linux, [15](15-test-coverage-batches.md)). Local, branch
+`feat/hygiene-and-editor`, not yet in CI: ctest **369**, C ABI in (2026-10-21, Linux, [21](21-repeat-pruning.md#gates)), parity
+**82/82** ([19](19-gradient-contract.md#gates)).
 
 | Item | Title | Status |
 | --- | --- | --- |
@@ -152,8 +150,8 @@ three runs in a row (2026-10-07, Linux, [15](15-test-coverage-batches.md)).
 | [#31](04-engineering-quality.md#31-make-the-cpugpu-parity-gate-binding) | Make the CPU/GPU parity gate binding | **DONE** 2026-10-06 ([13](13-parity-gate-binding.md)) |
 | [#32](04-engineering-quality.md#32-test-coverage-ledger) | Test-coverage ledger | **DONE** 2026-10-07 — Batch A and Batch B ([15](15-test-coverage-batches.md)) |
 | [#33](04-engineering-quality.md#33-build--tooling-hardening) | Build & tooling hardening | **DONE** 2026-10-06 ([14](14-build-hardening-ci.md)); batches 2026-08-31, 09-01, 09-10; nanort + clean-clone 2026-09-21 by [20 #47](../20-public-delivery/01-pin-geometry-central.md) |
-| [#34](04-engineering-quality.md#34-api-hygiene-batch) | API hygiene batch | **PARTIAL** — batches 2026-09-10 (×2), 09-11 (unknown keys, [10](10-docs-system-screening.md)) |
-| [#35](04-engineering-quality.md#35-repeatfield-neighbour-set-optimisation) | `RepeatField` neighbour-set optimisation | PLANNED — born from #34's fix on 2026-09-10, no ledger finding behind it |
+| [#34](04-engineering-quality.md#34-api-hygiene-batch) | API hygiene batch | **PARTIAL** 2026-10-21 — E12 reopened, [20](20-gridfield-normal.md); batches [18](18-contourer-threads.md), [19](19-gradient-contract.md) |
+| [#35](04-engineering-quality.md#35-repeatfield-neighbour-set-optimisation) | `RepeatField` neighbour-set optimisation | **DONE** 2026-10-21 — ~1.3× the fold, exact ([21](21-repeat-pruning.md)); born from #34's fix, no ledger finding |
 | [#46](03-correctness-and-robustness/02-precision-and-celloverlaps.md#46-offsetfield-does-not-forward-celloverlaps) | `OffsetField` does not forward `cellOverlaps` | **DONE** 2026-09-21 — opened 2026-09-20 from the first semantic lint ([19/08/01](../19-docs-layers/08-semantic-lint/01-2026-09-20-first-run.md)), no ledger finding behind it |
 | [#52](16-windows-rename-race/README.md#52-windows-export-io-flake--the-part-rename-under-an-on-access-scanner) | Windows export I/O flake — the `.part` rename under an on-access scanner | **DONE** 2026-10-07 — opened the same day from Boletus's ask, no ledger finding behind it; the holder was an inherited handle, not a scanner |
 | [#61](17-viewer-silhouette-specks.md#61-dark-specks-on-grazing-silhouettes-in-dualc_field_view) | Dark specks on grazing silhouettes in `dualc_field_view` | DEFERRED — opened 2026-10-16 at block 21's P03.2 check, no ledger finding behind it |

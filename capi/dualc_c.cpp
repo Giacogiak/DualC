@@ -96,6 +96,7 @@ void applyParams(const DualcContourParams& p, dualc::SamplerParams& sp,
   }
   cp.simplificationError = p.collapse;
   cp.manifoldDC = (p.manifold != 0);
+  cp.numThreads = p.numThreads;
 }
 
 // Flatten the C++ diagnostics into the ABI struct. Booleans become 0/1 ints

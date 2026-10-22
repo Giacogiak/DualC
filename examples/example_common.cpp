@@ -191,6 +191,18 @@ bool parseBounds(const std::string& s, dualc::BBox& out) {
   return true;
 }
 
+bool parseThreadCount(const std::string& s, unsigned& out) {
+  if (s.empty() || s.size() > 4) return false;
+  unsigned v = 0;
+  for (char c : s) {
+    if (!std::isdigit(static_cast<unsigned char>(c))) return false;
+    v = v * 10 + static_cast<unsigned>(c - '0');
+  }
+  if (v > kMaxThreadCount) return false;
+  out = v;
+  return true;
+}
+
 std::function<double(const dualc::Vector3&)> namedBump(const std::string& spec) {
   const std::vector<std::string> parts = splitComma(spec);
   const std::string name = parts.empty() ? "" : parts[0];

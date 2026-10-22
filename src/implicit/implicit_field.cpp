@@ -1,5 +1,7 @@
 #include "dualc/implicit.h"
 
+#include "internal/fd_gradient.h"
+
 #include <cmath>
 
 namespace dualc {
@@ -68,20 +70,27 @@ bool ImplicitField::edgeHit(const Vector3& a, const Vector3& b,
   return true;
 }
 
+Vector3 ImplicitField::trueGradientAt(const Vector3& p) const {
+  return internal::fdTrueGradient(*this, p);
+}
+
 bool ImplicitField::closestSurfacePoint(const Vector3& q,
                                         Vector3& outP, Vector3& outN) const {
-  // One Newton step on the field. On a Lipschitz-1 SDF q - (f/|grad|) * grad
-  // lands within a small fraction of the true surface; refining once at the
-  // projected point gives a clean normal. Fields with degenerate gradients
-  // (a constant, an infinity, the empty field) return false.
-  const double  f = valueAt(q);
-  const Vector3 g = gradientAt(q);
-  const double  m = g.norm();
-  if (!(m > 1e-12)) return false;
-  outP = q - g * (f / m);
-  const Vector3 g2 = gradientAt(outP);
-  const double  m2 = g2.norm();
-  outN = (m2 > 1e-12) ? (g2 / m2) : (g / m);
+  // One Newton step on the field: q - f * G/|G|^2, i.e. along the unit
+  // direction G/|G| by f/|G|, with G the TRUE gradient. Stepping by f along a
+  // unit direction (as gradientAt gives) is the same step only where
+  // |grad f| = 1; on a TPMS or a winding field it over- or undershoots by the
+  // factor |grad f|. The normal at the projected point is gradientAt's unit
+  // direction. Fields with degenerate gradients (a constant, an infinity,
+  // the empty field) return false.
+  const double  f  = valueAt(q);
+  const Vector3 g  = trueGradientAt(q);
+  const double  m2 = dot(g, g);
+  if (!(m2 > 1e-24) || !std::isfinite(m2) || !std::isfinite(f)) return false;
+  outP = q - g * (f / m2);
+  const Vector3 n  = gradientAt(outP);
+  const double  nn = n.norm();
+  outN = (nn > 1e-12) ? (n / nn) : (g / std::sqrt(m2));
   return true;
 }
 

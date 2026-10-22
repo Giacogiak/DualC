@@ -40,7 +40,7 @@ corrections, the lessons, what is left open.
 | #58 2D profiles and `revolve` / `extrude` in the graph | [01](01-record.md#58-2d-profiles-and-revolve--extrude-in-the-graph) | DONE 2026-10-15 — P03 T1 (CPU) + T2 (GPU); measured in [05](05-2d-profiles-and-lifts.md) |
 | #59 Slice any graph | [01](01-record.md#59-slice-any-graph) | DONE 2026-10-16 — P04 T1; measured in [06](06-slice-any-graph.md) |
 | #60 Retire the eight tools | [01](01-record.md#60-retire-the-eight-tools) | DONE 2026-10-16 — seven retired (`dualc_boolean` kept, D-60): P05 docs ([07](07-docs-migration.md)), P06 code, tests, tombstones ([08](08-retire-tools.md)) |
-| The plan's run, harvested (P07) | [09](09-plan-run.md#the-consolidation-plans-run--p01-to-p07-harvested) | DONE 2026-10-16 — block 21 closed; the branch awaits the owner's PR |
+| The plan's run, harvested (P07) | [09](09-plan-run.md#the-consolidation-plans-run--p01-to-p07-harvested) | DONE 2026-10-16 — block 21 closed; merged 2026-10-19 (`5ce5b1c`) |
 
 ---
 

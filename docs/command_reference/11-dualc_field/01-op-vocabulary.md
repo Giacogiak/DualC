@@ -163,7 +163,7 @@ previews them (a `polygon` up to 64 vertices).
 | op | params |
 | --- | --- |
 | `mirror` | `normal`:[x,y,z] (req) |
-| `repeat` | `period`:[x,y,z] (req) — *infinite → needs `--bounds`*. A child **wider than its period** costs ~8× more per evaluation: it must consult neighbouring tiles ([roadmap 17/07](../../roadmap/17-code-audit-and-hardening/07-repeat-tiling-fix.md)). |
+| `repeat` | `period`:[x,y,z] (req) — *infinite → needs `--bounds`*. A child **wider than its period** must consult neighbouring tiles ([roadmap 17/07](../../roadmap/17-code-audit-and-hardening/07-repeat-tiling-fix.md)); copies that provably cannot win are skipped, so a strut lattice costs ~1.3× the single fold, not ~3× ([17/21](../../roadmap/17-code-audit-and-hardening/21-repeat-pruning.md)). |
 | `repeat-limited` | `period`:[x,y,z] (req), `count`:[nx,ny,nz] (req) |
 | `twist` | `radiansPerUnit` (req), `axis`:`"x"`\|`"y"`\|`"z"` |
 | `bend` | `curvature` (req), `axis`:`"x"`\|`"y"`\|`"z"` |

@@ -60,7 +60,18 @@ public:
     return (a_->valueAt(p) <= b_->valueAt(p)) ? a_->gradientAt(p)
                                               : b_->gradientAt(p);
   }
+  Vector3 trueGradientAt(const Vector3& p) const override {
+    return (a_->valueAt(p) <= b_->valueAt(p)) ? a_->trueGradientAt(p)
+                                              : b_->trueGradientAt(p);
+  }
   BBox bounds() const override { return bboxUnion(a_->bounds(), b_->bounds()); }
+  // min(a, b) >= min(dist to box a, dist to box b) >= dist to their hull.
+  // Both boxes must be real: bboxUnion drops an invalid one, and the
+  // operand behind it would then be bounded by nothing.
+  bool boundsBoundValue() const override {
+    return a_->boundsBoundValue() && b_->boundsBoundValue() &&
+           a_->bounds().isValid() && b_->bounds().isValid();
+  }
   bool isInside(const Vector3& p) const override {
     return a_->isInside(p) || b_->isInside(p);
   }
@@ -83,6 +94,10 @@ public:
   Vector3 gradientAt(const Vector3& p) const override {
     return (a_->valueAt(p) >= b_->valueAt(p)) ? a_->gradientAt(p)
                                               : b_->gradientAt(p);
+  }
+  Vector3 trueGradientAt(const Vector3& p) const override {
+    return (a_->valueAt(p) >= b_->valueAt(p)) ? a_->trueGradientAt(p)
+                                              : b_->trueGradientAt(p);
   }
   BBox bounds() const override {
     return bboxIntersection(a_->bounds(), b_->bounds());
@@ -114,6 +129,10 @@ public:
     if (a_->valueAt(p) >= -b_->valueAt(p)) return a_->gradientAt(p);
     return b_->gradientAt(p) * -1.0;
   }
+  Vector3 trueGradientAt(const Vector3& p) const override {
+    if (a_->valueAt(p) >= -b_->valueAt(p)) return a_->trueGradientAt(p);
+    return b_->trueGradientAt(p) * -1.0;
+  }
   BBox bounds() const override { return a_->bounds(); }  // a \ b is subset of a
   bool isInside(const Vector3& p) const override {
     return a_->isInside(p) && !b_->isInside(p);
@@ -142,6 +161,13 @@ public:
       return (va <= vb) ? a_->gradientAt(p) : b_->gradientAt(p);
     }
     return ((va >= vb) ? a_->gradientAt(p) : b_->gradientAt(p)) * -1.0;
+  }
+  Vector3 trueGradientAt(const Vector3& p) const override {
+    const double va = a_->valueAt(p), vb = b_->valueAt(p);
+    if (std::min(va, vb) >= -std::max(va, vb)) {
+      return (va <= vb) ? a_->trueGradientAt(p) : b_->trueGradientAt(p);
+    }
+    return ((va >= vb) ? a_->trueGradientAt(p) : b_->trueGradientAt(p)) * -1.0;
   }
   BBox bounds() const override { return bboxUnion(a_->bounds(), b_->bounds()); }
   bool isInside(const Vector3& p) const override {

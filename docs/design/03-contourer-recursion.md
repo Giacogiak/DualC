@@ -20,12 +20,12 @@ const auto solveOne = [&](std::size_t i) {
 };
 if (progress) {   // polled, so the sink reports from the calling thread only
   progress->report(Stage::Contour, 0, 2 * leafTotal);
-  internal::parallelForPolled(leafTotal, internal::resolveThreadCount(0), solveOne,
+  internal::parallelForPolled(leafTotal, params.numThreads, solveOne,
                               [&](std::size_t done, std::size_t) {
                                 progress->report(Stage::Contour, done, 2 * leafTotal);
                               });
 } else {
-  internal::parallelFor(leafTotal, internal::resolveThreadCount(0), solveOne);
+  internal::parallelFor(leafTotal, params.numThreads, solveOne);
 }
 ```
 
@@ -34,8 +34,8 @@ The two hooks — the per-leaf cancellation poll and the polled loop — are
 touches a result. Only the pre-solve is parallel. The traversal, vertex-index allocation and triangle emission
 are strictly serial, which is exactly what makes the output bit-identical regardless of
 thread count: `solveLeaf` is a pure function of the leaf, and index assignment happens
-later, in deterministic traversal order. (`ContourerParams` has no thread knob; the call
-site hard-codes `resolveThreadCount(0)`.) A cache miss in `leafVertexIndex` falls back to an
+later, in deterministic traversal order. The worker count is `ContourerParams::numThreads`
+(0 = all hardware threads, [§ 7](06-parameters-and-vendoring.md#contourerparams--includedualccontourerh)). A cache miss in `leafVertexIndex` falls back to an
 inline solve, so correctness never depends on the pre-pass having run.
 
 **2. The recursion** (`cellProc(octree.root(), state)`).

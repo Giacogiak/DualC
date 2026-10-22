@@ -193,11 +193,13 @@ bool hasBakedNode(const GraphNode& n);
 dualc::BBox nodeBakeRegion(const dualc::BBox& nodeBounds, double pad);
 
 // Bake a mesh / winding source as NodeBake and the handed-down margin say;
-// both return a GridField.
+// both return a GridField, sampled by `threads` workers (0 = all hardware
+// threads; the grid is bit-identical regardless of it).
 dualc::FieldPtr bakeMeshNode(const dualc::MeshSource& src, const NodeBake& b,
-                             double margin);
+                             double margin, unsigned threads = 0);
 dualc::FieldPtr bakeWindingNode(const dualc::ImplicitField& winding,
-                                const NodeBake& b, double margin);
+                                const NodeBake& b, double margin,
+                                unsigned threads = 0);
 
 // The 2D layer (implicit2d.h). A profile is a 2D field, legal only as the one
 // child of a lift: `revolve(profile, offset=O)` spins it around y (profile x =
@@ -236,8 +238,10 @@ class FieldGraph {
  public:
   // Lower a parsed node tree to a FieldPtr, resolving mesh sources via `meshes`.
   // Throws GraphError on any semantic problem (unknown op, wrong arity, bad
-  // param, mesh-not-found).
-  static FieldGraph build(const GraphNode& root, MeshResolver& meshes);
+  // param, mesh-not-found). `bakeThreads` is the worker count of every
+  // per-node bake (`bake=N`); 0 = all hardware threads.
+  static FieldGraph build(const GraphNode& root, MeshResolver& meshes,
+                          unsigned bakeThreads = 0);
 
   const dualc::ImplicitField& field() const { return *field_; }
   const dualc::FieldPtr& fieldPtr() const { return field_; }

@@ -60,6 +60,14 @@ Vector3 SphereField::gradientAt(const Vector3& p) const {
   return (n > 1e-12) ? d * (1.0 / n) : Vector3{0.0, 0.0, 1.0};
 }
 
+Vector3 SphereField::trueGradientAt(const Vector3& p) const {
+  // |p - c| - r is a metric distance: its gradient is the unit radial
+  // direction, undefined (zero here) only at the centre.
+  const Vector3 d = p - c_;
+  const double n = d.norm();
+  return (n > 1e-12) ? d * (1.0 / n) : Vector3{0.0, 0.0, 0.0};
+}
+
 BBox SphereField::bounds() const {
   return boxMinMax(c_ - Vector3::constant(r_), c_ + Vector3::constant(r_));
 }
@@ -75,6 +83,11 @@ double BoxField::valueAt(const Vector3& p) const {
 }
 
 BBox BoxField::bounds() const { return boxMinMax(c_ - h_, c_ + h_); }
+
+// Exact outside: the distance to the box itself, which is its bounds.
+bool BoxField::boundsBoundValue() const {
+  return h_.x >= 0.0 && h_.y >= 0.0 && h_.z >= 0.0;
+}
 
 // ---- Round box ----------------------------------------------------------
 
@@ -99,6 +112,8 @@ double PlaneField::valueAt(const Vector3& p) const {
 }
 
 Vector3 PlaneField::gradientAt(const Vector3&) const { return n_; }
+
+Vector3 PlaneField::trueGradientAt(const Vector3&) const { return n_; }
 
 BBox PlaneField::bounds() const { return BBox::infinite(); }
 

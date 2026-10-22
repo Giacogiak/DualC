@@ -1,5 +1,6 @@
 #include "dualc/implicit.h"
 #include "dualc/pipeline.h"
+#include "dualc/primitives.h"
 
 #include "internal/distance_grid.h"
 
@@ -9,6 +10,7 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <algorithm>
 #include <cmath>
 #include <vector>
 
@@ -112,6 +114,104 @@ TEST_CASE("GridField::gradientAt is unit length and outward", "[grid]") {
   REQUIRE(g.x == Approx(1.0).margin(0.1));
   REQUIRE(g.y == Approx(0.0).margin(0.1));
   REQUIRE(g.z == Approx(0.0).margin(0.1));
+}
+
+TEST_CASE("GridField::gradientAt is continuous across cell faces",
+          "[.][grid][e12]") {
+  // HIDDEN, red on the shipped normal: #34's E12 is open again (P04b, record
+  // 17/20). P04.1's blend of per-node central differences passed it, and so
+  // does minmod, but no continuous stencil measured kept the sharp CAD pair's
+  // accuracy, so gradientAt is the cell gradient's direction again, which
+  // jumps by 0.245 rad here at every eps. Kept, not deleted, as the probe a
+  // future stencil must pass: run it with `dualc_tests "[e12]"`.
+  // Probe a coarse baked sphere at +-eps either side of a node plane, on each
+  // axis, near the surface: the angle between the two normals must vanish
+  // with eps.
+  const SphereField sphere(Vector3{0.05, -0.1, 0.15}, 1.0);
+  const BBox region{Vector3{-1.5, -1.5, -1.5}, Vector3{1.5, 1.5, 1.5}};
+  const int res = 13;  // cell = 0.25
+  const double cell = 3.0 / (res - 1);
+  FieldPtr grid = bakeToGrid(sphere, region, res, 1);
+
+  auto angle = [](const Vector3& a, const Vector3& b) {
+    return std::atan2(cross(a, b).norm(), dot(a, b));
+  };
+
+  const Vector3 dirs[] = {Vector3{0.31, 0.62, 0.72}, Vector3{-0.83, 0.17, 0.53},
+                          Vector3{0.44, -0.79, 0.43}, Vector3{-0.21, -0.36, -0.91}};
+  double worst[3] = {0.0, 0.0, 0.0};  // eps = 1e-2, 1e-4, 1e-6 cells
+  for (const Vector3& d : dirs) {
+    for (int axis = 0; axis < 3; ++axis) {
+      Vector3 p = Vector3{0.05, -0.1, 0.15} + d.normalize();
+      // Snap one coordinate onto the nearest node plane.
+      p[axis] = region.min[axis] +
+                std::round((p[axis] - region.min[axis]) / cell) * cell;
+      Vector3 e{0.0, 0.0, 0.0};
+      const double eps[] = {1e-2 * cell, 1e-4 * cell, 1e-6 * cell};
+      for (int k = 0; k < 3; ++k) {
+        e[axis] = eps[k];
+        const Vector3 lo = grid->gradientAt(p - e);
+        const Vector3 hi = grid->gradientAt(p + e);
+        REQUIRE(lo.norm() == Approx(1.0).margin(1e-12));
+        REQUIRE(hi.norm() == Approx(1.0).margin(1e-12));
+        worst[k] = std::max(worst[k], angle(lo, hi));
+      }
+    }
+  }
+  CAPTURE(worst[0], worst[1], worst[2]);
+  // The angle shrinks with eps, linearly (the blend is Lipschitz in p).
+  REQUIRE(worst[0] < 1e-1);
+  REQUIRE(worst[1] < 1e-3);
+  REQUIRE(worst[2] < 1e-5);
+}
+
+TEST_CASE("GridField::gradientAt keeps a face's normal one cell from a "
+          "sharp edge",
+          "[grid]") {
+  // #34's P04b (record 17/20): a baked box, its faces off the node planes.
+  // One cell from an edge, the probe's own cell sees only its face, so the
+  // cell gradient is exact; a node stencil that reaches across the edge mixes
+  // the other face in (P04.1's central differences: 9.7 degrees here).
+  const BoxField box(Vector3{-0.9, -0.9, -0.9}, Vector3{0.9, 0.9, 0.9});
+  const BBox region{Vector3{-1.5, -1.5, -1.5}, Vector3{1.5, 1.5, 1.5}};
+  FieldPtr grid = bakeToGrid(box, region, 13, 1);  // cell = 0.25
+
+  struct Probe { Vector3 p, n; };
+  const Probe probes[] = {
+      {Vector3{0.9, 0.65, 0.1}, Vector3{1.0, 0.0, 0.0}},   // x face, y edge
+      {Vector3{0.65, 0.9, -0.2}, Vector3{0.0, 1.0, 0.0}},  // y face, x edge
+      {Vector3{-0.65, 0.1, 0.9}, Vector3{0.0, 0.0, 1.0}},  // z face, x edge
+  };
+  for (const Probe& pr : probes) {
+    const Vector3 g = grid->gradientAt(pr.p);
+    const double deg =
+        std::atan2(cross(g, pr.n).norm(), dot(g, pr.n)) * 180.0 / M_PI;
+    CAPTURE(pr.p, deg);
+    REQUIRE(deg < 1.0);
+  }
+}
+
+TEST_CASE("closestSurfacePoint on a GridField steps by the trilinear "
+          "gradient and returns gradientAt",
+          "[grid]") {
+  // The sampler's miss fallback on a baked node (#34, 17/20): the Newton step
+  // reads trueGradientAt -- the interpolant's own gradient, magnitude kept --
+  // and only the normal at the projected point comes from gradientAt.
+  const SphereField sphere(Vector3{0.0, 0.0, 0.0}, 1.0);
+  const BBox region{Vector3{-1.5, -1.5, -1.5}, Vector3{1.5, 1.5, 1.5}};
+  FieldPtr grid = bakeToGrid(sphere, region, 25, 1);  // cell = 0.125
+
+  const Vector3 qs[] = {Vector3{1.07, 0.11, -0.04}, Vector3{-0.3, 0.88, 0.2},
+                        Vector3{0.5, -0.5, 0.75}};
+  for (const Vector3& q : qs) {
+    Vector3 p, n;
+    REQUIRE(grid->closestSurfacePoint(q, p, n));
+    const Vector3 g = grid->trueGradientAt(q);
+    REQUIRE((p - (q - g * (grid->valueAt(q) / dot(g, g)))).norm() < 1e-15);
+    REQUIRE((n - grid->gradientAt(p)).norm() < 1e-15);
+    REQUIRE(std::abs(grid->valueAt(p)) < 0.02);
+    REQUIRE(dot(n, p.normalize()) > 0.99);
+  }
 }
 
 TEST_CASE("GridField clamps queries outside the region", "[grid]") {

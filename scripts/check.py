@@ -1427,6 +1427,25 @@ def generator_args(config):
     return gen + ["-DCMAKE_BUILD_TYPE=%s" % config]
 
 
+# The options every gate configure sets. The C ABI is in since 2026-10-21
+# (roadmap 14 #53): every build job then links libdualc_capi and runs the
+# cli_c_abi* cases, which is the proof that the .so links on Linux with no
+# -fPIC from the caller. The CMake defaults stay OFF; only the gate turns
+# them on.
+GATE_OPTIONS = ("DUALC_BUILD_TESTS", "DUALC_BUILD_EXAMPLES", "DUALC_BUILD_C_ABI")
+
+
+def cache_options_on(cache, names):
+    """True when every one of `names` is ON in the CMakeCache.txt at `cache`."""
+    on = set()
+    with open(cache, encoding="utf-8", errors="replace") as f:
+        for line in f:
+            m = re.match(r"([A-Za-z0-9_]+):BOOL=(\S+)", line)
+            if m and m.group(2).upper() in ("ON", "TRUE", "1", "YES"):
+                on.add(m.group(1))
+    return set(names) <= on
+
+
 @check("configure", "build", "cmake configure (reuses the build dir unless --clean)")
 def check_configure(ctx):
     bd = build_dir(ctx)
@@ -1434,15 +1453,17 @@ def check_configure(ctx):
     # commit unless -DDUALC_GC_DIR names a local tree (roadmap 20 #47).
     # -D KEY=VALUE (roadmap 17 #33) is how CI turns on DUALC_WERROR and
     # DUALC_SANITIZE: an existing build dir is re-configured in place with them
-    # rather than skipped, so a define is never silently dropped.
+    # rather than skipped, so a define is never silently dropped. The same holds
+    # for a build dir configured before one of GATE_OPTIONS joined the gate.
     defines = ["-D" + d for d in ctx.args.define]
     cache = os.path.join(ctx.root, bd, "CMakeCache.txt")
-    if os.path.exists(cache) and not ctx.args.clean and not defines:
+    if (os.path.exists(cache) and not ctx.args.clean and not defines
+            and cache_options_on(cache, GATE_OPTIONS)):
         return Result(SKIP, "%s already configured (use --clean to redo)" % bd)
     gen = ([] if os.path.exists(cache) and not ctx.args.clean
            else generator_args(ctx.args.config))
     cmd = (["cmake", "-S", ".", "-B", bd] + gen +
-           ["-DDUALC_BUILD_TESTS=ON", "-DDUALC_BUILD_EXAMPLES=ON"] + defines)
+           ["-D%s=ON" % o for o in GATE_OPTIONS] + defines)
     rc, out = run(cmd, cwd=ctx.root)
     if rc == 127:
         return Result(SKIP, "cmake not on PATH")

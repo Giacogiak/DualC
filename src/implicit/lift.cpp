@@ -1,5 +1,7 @@
 #include "dualc/implicit2d.h"
 
+#include "internal/fd_gradient.h"
+
 #include <algorithm>
 #include <cmath>
 #include <utility>
@@ -7,20 +9,6 @@
 namespace dualc {
 
 namespace {
-
-// Central-difference gradient of a 3D field's own valueAt.
-Vector3 fdGradient(const ImplicitField& f, const Vector3& p) {
-  constexpr double e = 1e-4;
-  const double dx = f.valueAt(Vector3{p.x + e, p.y, p.z}) -
-                    f.valueAt(Vector3{p.x - e, p.y, p.z});
-  const double dy = f.valueAt(Vector3{p.x, p.y + e, p.z}) -
-                    f.valueAt(Vector3{p.x, p.y - e, p.z});
-  const double dz = f.valueAt(Vector3{p.x, p.y, p.z + e}) -
-                    f.valueAt(Vector3{p.x, p.y, p.z - e});
-  const Vector3 g{dx, dy, dz};
-  const double n = g.norm();
-  return (n > 1e-12) ? g * (1.0 / n) : Vector3{0.0, 0.0, 1.0};
-}
 
 // length(max(d, 0)) for a 2D vector (dx, dy).
 double len2max0(double dx, double dy) {
@@ -42,7 +30,7 @@ double RevolveField::valueAt(const Vector3& p) const {
 }
 
 Vector3 RevolveField::gradientAt(const Vector3& p) const {
-  return fdGradient(*this, p);
+  return internal::fdGradientDirection(*this, p);
 }
 
 BBox RevolveField::bounds() const {
@@ -68,7 +56,7 @@ double ExtrudeField::valueAt(const Vector3& p) const {
 }
 
 Vector3 ExtrudeField::gradientAt(const Vector3& p) const {
-  return fdGradient(*this, p);
+  return internal::fdGradientDirection(*this, p);
 }
 
 BBox ExtrudeField::bounds() const {

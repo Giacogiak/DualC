@@ -401,6 +401,17 @@ if(DUALC_BUILD_TESTS)
               --depth 5 -o cli_field_lattice.${ext}
       WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
   endforeach()
+  # --threads 1 on the baked boolean: the per-node bakes, the sampler and the
+  # contourer all run serially, and cli_field_threads_same holds the mesh
+  # byte-identical to cli_field_boolean_bake's at all hardware threads (#34).
+  add_test(NAME cli_field_threads
+    COMMAND dualc_field --expr "smooth-union(mesh(path=\"cube.obj\",bake=64),mesh(path=\"cube.obj\",bake=64),k=0.3)"
+            --depth 5 --threads 1 -o cli_field_threads.obj
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
+  add_test(NAME cli_field_threads_bad
+    COMMAND dualc_field --expr "sphere(radius=1)" --threads -1)
+  set_tests_properties(cli_field_threads_bad PROPERTIES
+    PASS_REGULAR_EXPRESSION "--threads expects a whole number 0..1024")
   add_test(NAME cli_field_slice_refuse
     COMMAND dualc_field --expr "sphere(radius=1)" --slice z=0 --depth 5)
   set_tests_properties(cli_field_slice_refuse PROPERTIES
@@ -505,6 +516,12 @@ f 10 11 15\nf 10 15 14\nf 12 9 13\nf 12 13 16
     WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
   set_tests_properties(cli_field_boolean_same PROPERTIES
     FIXTURES_REQUIRED "cli_boolean;cli_field_boolean")
+  add_test(NAME cli_field_threads_same
+    COMMAND ${CMAKE_COMMAND} -E compare_files cli_field_boolean_bake.obj cli_field_threads.obj
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_field>)
+  set_tests_properties(cli_field_threads PROPERTIES FIXTURES_SETUP cli_field_threads)
+  set_tests_properties(cli_field_threads_same PROPERTIES
+    FIXTURES_REQUIRED "cli_field_boolean_bake;cli_field_threads")
   # The same mesh in three formats: STL and 3MF must carry exactly the OBJ's
   # triangle count.
   foreach(ext stl 3mf)

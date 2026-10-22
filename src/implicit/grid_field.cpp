@@ -105,7 +105,7 @@ double GridField::valueAt(const Vector3& p) const {
   return c0 + (c1 - c0) * fz;
 }
 
-Vector3 GridField::gradientAt(const Vector3& p) const {
+Vector3 GridField::trueGradientAt(const Vector3& p) const {
   const Impl& m = *impl_;
   int ix, iy, iz;
   double fx, fy, fz;
@@ -139,7 +139,15 @@ Vector3 GridField::gradientAt(const Vector3& p) const {
   const double dfz = bilerp(c001 - c000, c101 - c100,
                             c011 - c010, c111 - c110, fx, fy);
 
-  Vector3 g{dfx * m.inv.x, dfy * m.inv.y, dfz * m.inv.z};
+  return Vector3{dfx * m.inv.x, dfy * m.inv.y, dfz * m.inv.z};
+}
+
+Vector3 GridField::gradientAt(const Vector3& p) const {
+  // The contract's unit direction of the same interpolant gradient. It jumps
+  // across cell faces (#34, E12 open), but a continuous node-gradient blend --
+  // central, minmod, ratio switch or crease mask -- moved the sharp CAD pair's
+  // mean deviation above this one's in every variant measured: 17/20.
+  const Vector3 g = trueGradientAt(p);
   const double n = g.norm();
   return (n > 1e-12) ? (g / n) : Vector3{0.0, 0.0, 1.0};
 }
@@ -151,7 +159,7 @@ BBox GridField::bounds() const { return impl_->region; }
 // ===========================================================================
 
 FieldPtr bakeToGrid(const ImplicitField& src, const BBox& region,
-                    const Vector3i& resolution) {
+                    const Vector3i& resolution, unsigned numThreads) {
   if (resolution.x < 2 || resolution.y < 2 || resolution.z < 2) {
     throw std::invalid_argument(
         "bakeToGrid: resolution must be >= 2 on every axis");
@@ -167,9 +175,9 @@ FieldPtr bakeToGrid(const ImplicitField& src, const BBox& region,
 
   // Sample the field on the lattice. Each z-slab is independent, so the bake
   // -- the only place the expensive source field is touched -- parallelises
-  // trivially across hardware threads.
+  // trivially across `numThreads` workers.
   internal::parallelFor(
-      static_cast<std::size_t>(rz), internal::resolveThreadCount(0),
+      static_cast<std::size_t>(rz), numThreads,
       [&](std::size_t izu) {
         const int iz = static_cast<int>(izu);
         const double z = region.min.z + cell.z * iz;
@@ -189,8 +197,9 @@ FieldPtr bakeToGrid(const ImplicitField& src, const BBox& region,
 }
 
 FieldPtr bakeToGrid(const ImplicitField& src, const BBox& region,
-                    int resolution) {
-  return bakeToGrid(src, region, Vector3i{resolution, resolution, resolution});
+                    int resolution, unsigned numThreads) {
+  return bakeToGrid(src, region, Vector3i{resolution, resolution, resolution},
+                    numThreads);
 }
 
 } // namespace dualc

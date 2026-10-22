@@ -26,6 +26,11 @@ struct ContourerParams {
   // class of non-manifold edges (Schaefer/Ju/Warren 2007). When false the
   // contourer falls back to the pre-MDC single-vertex behaviour.
   bool   manifoldDC          = true;
+  // Worker threads for the per-leaf QEF pre-solve. 0 => use all hardware
+  // threads. Each leaf is solved independently and vertex indices are assigned
+  // afterwards in serial traversal order, so the mesh is bit-identical
+  // regardless of this value.
+  unsigned numThreads        = 0;
 };
 
 // Bottom-up adaptive cell collapse (Ju/Schaefer/Warren simplifyOctree).

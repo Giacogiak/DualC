@@ -143,7 +143,8 @@ std::size_t MeshSource::nonManifoldEdgeCount() const {
 
 FieldPtr MeshSource::bakeToGrid(const BBox& region,
                                 const Vector3i& resolution,
-                                double bandWidth) const {
+                                double bandWidth,
+                                unsigned numThreads) const {
   if (resolution.x < 2 || resolution.y < 2 || resolution.z < 2) {
     throw std::invalid_argument(
         "MeshSource::bakeToGrid: resolution must be >= 2 on every axis");
@@ -165,7 +166,7 @@ FieldPtr MeshSource::bakeToGrid(const BBox& region,
   //    `bandWidth` of it. Cheap BVH-AABB overlap, no SDF. Parallel z-slabs.
   std::vector<char> band(n, 0);
   internal::parallelFor(
-      static_cast<std::size_t>(rz), internal::resolveThreadCount(0),
+      static_cast<std::size_t>(rz), numThreads,
       [&](std::size_t izu) {
         const int iz = static_cast<int>(izu);
         const double z = region.min.z + cell.z * iz;
@@ -193,7 +194,7 @@ FieldPtr MeshSource::bakeToGrid(const BBox& region,
   const std::size_t plane = static_cast<std::size_t>(rx) *
                             static_cast<std::size_t>(ry);
   internal::parallelFor(
-      bandIdx.size(), internal::resolveThreadCount(0), [&](std::size_t k) {
+      bandIdx.size(), numThreads, [&](std::size_t k) {
         const std::size_t i = bandIdx[k];
         const int iz  = static_cast<int>(i / plane);
         const int rem = static_cast<int>(i % plane);

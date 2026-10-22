@@ -76,7 +76,8 @@ subset** (a `--es` flag selects the header; desktop gets `330 core`), so the sam
 engine later serves a Web build and the Rhino side-car. `dualc_raymarch` stays as
 the tuned, dependency-light single-TPMS view; the formulas it pioneered are now
 shared library functions in the codegen prelude, held to the C++ originals by the
-`dualc_glsl_parity` gate.
+`dualc_glsl_parity` gate. *(2026-10-21: the Web build moved to DualCEditor —
+[22](22-dualceditor-handoff/README.md).)*
 
 ---
 

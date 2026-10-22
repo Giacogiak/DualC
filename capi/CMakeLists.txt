@@ -21,16 +21,17 @@ target_compile_features(dualc_capi PRIVATE cxx_std_17)
 dualc_target_options(dualc_capi)
 
 # DUALC_CAPI_BUILD switches the export macro to dllexport while building the
-# DLL; only the extern "C" entry points are exported. PIC is a no-op on MSVC
-# but lets the same target build a Linux .so later. Version string is the CMake
-# project version, embedded as a C string literal.
+# DLL; only the extern "C" entry points are exported. Version string is the
+# CMake project version, embedded as a C string literal.
 target_compile_definitions(dualc_capi PRIVATE
   DUALC_CAPI_BUILD
   "DUALC_C_VERSION_STR=\"${PROJECT_VERSION}\"")
 # The shared library itself; the static libraries it links are position-
 # independent too, by the root CMakeLists setting CMAKE_POSITION_INDEPENDENT_CODE
 # whenever DUALC_BUILD_C_ABI is on (roadmap 14 #53) -- without that the Linux
-# link fails on the host layer's thread_local (R_X86_64_TPOFF32 / __tls_guard).
+# link fails on the host layer's thread_local (R_X86_64_TPOFF32, local-exec
+# TLS). PIC is a no-op on MSVC. scripts/check.py configures with the ABI on, so
+# every gate run links this .so and runs the cli_c_abi* cases.
 set_target_properties(dualc_capi PROPERTIES POSITION_INDEPENDENT_CODE ON)
 if(MSVC)
   target_compile_definitions(dualc_capi PRIVATE _CRT_SECURE_NO_WARNINGS)
@@ -71,5 +72,11 @@ if(DUALC_BUILD_TESTS)
   # sees every stage end at done == total.
   add_test(NAME cli_c_abi_cancel
     COMMAND dualc_c_demo c_abi_cancel.stl cancel
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_c_demo>)
+  # 0.5.2: DualcContourParams.numThreads reaches the contourer -- at 1 thread
+  # its leaf solves report on the serial path's cadence, and 1, 2 and 0
+  # threads give a byte-identical mesh (roadmap 17 #34).
+  add_test(NAME cli_c_abi_threads
+    COMMAND dualc_c_demo unused.stl threads
     WORKING_DIRECTORY $<TARGET_FILE_DIR:dualc_c_demo>)
 endif()

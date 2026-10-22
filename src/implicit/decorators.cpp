@@ -51,6 +51,9 @@ public:
   Vector3 gradientAt(const Vector3& p) const override {
     return child_->gradientAt(p);  // a level-set shift leaves the gradient
   }
+  Vector3 trueGradientAt(const Vector3& p) const override {
+    return child_->trueGradientAt(p);
+  }
   BBox bounds() const override {
     return expandBBox(child_->bounds(), std::max(r_, 0.0));
   }
@@ -83,6 +86,11 @@ public:
     // d/dp [ |f| - t ] = sign(f) * grad f.
     const double v = child_->valueAt(p);
     const Vector3 g = child_->gradientAt(p);
+    return (v >= 0.0) ? g : (g * -1.0);
+  }
+  Vector3 trueGradientAt(const Vector3& p) const override {
+    const double v = child_->valueAt(p);
+    const Vector3 g = child_->trueGradientAt(p);
     return (v >= 0.0) ? g : (g * -1.0);
   }
   BBox bounds() const override {
@@ -277,6 +285,14 @@ public:
         child_->gradientAt(localFromWorld_.transformPoint(p));
     return worldFromLocal_.transformDirection(gLocal);
   }
+  Vector3 trueGradientAt(const Vector3& p) const override {
+    // Chain rule: grad_world = L^T grad_local, L = localFromWorld's linear
+    // part. L is a rotation (the class supports rigid matrices only), so
+    // L^T = L^-1 = worldFromLocal's linear part, the same map gradientAt uses.
+    const Vector3 gLocal =
+        child_->trueGradientAt(localFromWorld_.transformPoint(p));
+    return worldFromLocal_.transformDirection(gLocal);
+  }
   bool isInside(const Vector3& p) const override {
     return child_->isInside(localFromWorld_.transformPoint(p));
   }
@@ -339,7 +355,9 @@ public:
   explicit NormalizedField(FieldPtr child) : child_(std::move(child)) {}
 
   double valueAt(const Vector3& p) const override {
-    return child_->valueAt(p) / std::max(trueGradMag(p), kEps);
+    // The child's TRUE gradient: its gradientAt() is a unit direction (the
+    // contract), so dividing by that would be a no-op.
+    return child_->valueAt(p) / std::max(child_->trueGradientAt(p).norm(), kEps);
   }
   Vector3 gradientAt(const Vector3& p) const override {
     // First-order: away from where grad f goes to zero, the normalised
@@ -360,22 +378,6 @@ public:
   BBox bounds() const override { return child_->bounds(); }
 
 private:
-  // True |grad f| via central differences on the child's *value*. The child's
-  // gradientAt() returns a unit direction (correct for SDF primitives and for
-  // contour normals) and so cannot supply the magnitude this normalisation
-  // needs -- dividing by it would be a no-op. Step matches PrimitiveField's
-  // central difference.
-  double trueGradMag(const Vector3& p) const {
-    constexpr double e = 1e-4;
-    const double dx = child_->valueAt(Vector3{p.x + e, p.y, p.z}) -
-                      child_->valueAt(Vector3{p.x - e, p.y, p.z});
-    const double dy = child_->valueAt(Vector3{p.x, p.y + e, p.z}) -
-                      child_->valueAt(Vector3{p.x, p.y - e, p.z});
-    const double dz = child_->valueAt(Vector3{p.x, p.y, p.z + e}) -
-                      child_->valueAt(Vector3{p.x, p.y, p.z - e});
-    return Vector3{dx, dy, dz}.norm() / (2.0 * e);
-  }
-
   static constexpr double kEps = 1e-9;
   FieldPtr child_;
 };
@@ -404,6 +406,12 @@ public:
     // f(p) = |s|*child(p/s), so grad f = sign(s) * grad child(p/s); the child
     // returns a unit direction, and a reflected domain flips it.
     const Vector3 g = child_->gradientAt(p / s_);
+    return (s_ < 0.0) ? Vector3{-g.x, -g.y, -g.z} : g;
+  }
+  Vector3 trueGradientAt(const Vector3& p) const override {
+    // Chain rule: d/dp [|s| child(p/s)] = (|s|/s) grad child(p/s), the same
+    // sign(s) factor; a uniform scale keeps the magnitude.
+    const Vector3 g = child_->trueGradientAt(p / s_);
     return (s_ < 0.0) ? Vector3{-g.x, -g.y, -g.z} : g;
   }
   bool isInside(const Vector3& p) const override {

@@ -71,6 +71,9 @@ void printUsage() {
     "                    while the view moves, then snaps to full-res when it\n"
     "                    settles -- keeps a heavy lattice smooth to navigate.\n"
     "                    1.0 disables it (always full-res). Range [0.1, 1.0].\n"
+    "  --threads N       Worker threads for the mesh / winding bakes (default 0\n"
+    "                    = all hardware threads; the grids are identical at\n"
+    "                    every N).\n"
     "  --es              Emit a #version 300 es shader (WebGL2 subset) instead\n"
     "                    of desktop 330 core. For portability checks.\n"
     "  --snapshot PATH   Render one frame headless to a PNG and exit.\n"
@@ -129,6 +132,7 @@ int main(int argc, char** argv) {
   dualc::BBox userBounds;
   int gridRes = dce::fieldgraph::kDefaultMeshGridRes;
   float previewScale = 0.5f;  // resolution factor while the view is moving
+  unsigned bakeThreads = 0;   // --threads: bake workers, 0 = all hardware threads
 
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
@@ -140,6 +144,14 @@ int main(int argc, char** argv) {
     else if (a == "--expr") { const char* v = needValue("--expr"); if (!v) return 2; expr = v; useExpr = true; }
     else if (a == "--grid-res") { const char* v = needValue("--grid-res"); if (!v) return 2; gridRes = std::atoi(v); }
     else if (a == "--preview-scale") { const char* v = needValue("--preview-scale"); if (!v) return 2; previewScale = float(std::atof(v)); }
+    else if (a == "--threads") {
+      const char* v = needValue("--threads"); if (!v) return 2;
+      if (!dce::parseThreadCount(v, bakeThreads)) {
+        std::cerr << "[dualc_field_view] --threads expects a whole number 0.."
+                  << dce::kMaxThreadCount << " (0 = all hardware threads)\n";
+        return 2;
+      }
+    }
     else if (a == "--es") { emitES = true; }
     else if (a == "--snapshot") { const char* v = needValue("--snapshot"); if (!v) return 2; snapshotPath = v; }
     else if (a == "--bounds") {
@@ -195,7 +207,7 @@ int main(int argc, char** argv) {
   dualc::BBox bounds = userBounds;
   if (!haveBounds) {
     try {
-      auto fg = dce::fieldgraph::FieldGraph::build(root, resolver);
+      auto fg = dce::fieldgraph::FieldGraph::build(root, resolver, bakeThreads);
       bounds = fg.field().bounds();
     } catch (const dce::fieldgraph::GraphError& e) {
       std::cerr << "[dualc_field_view] field-graph error"
@@ -215,7 +227,8 @@ int main(int argc, char** argv) {
   // ---- compile the graph to GLSL ------------------------------------------
   auto compile = [&](const GraphNode& g, GlslScene& scene) -> bool {
     try {
-      scene = dce::fieldgraph::compileToGlsl(g, resolver, bounds, gridRes);
+      scene = dce::fieldgraph::compileToGlsl(g, resolver, bounds, gridRes,
+                                             bakeThreads);
       return true;
     } catch (const dce::fieldgraph::GraphError& e) {
       std::cerr << "[dualc_field_view] codegen error"
@@ -553,7 +566,7 @@ int main(int argc, char** argv) {
         // re-framed -- keep the user's orbit; 'r' resets it.
         if (!haveBounds) {
           try {
-            auto fg = dce::fieldgraph::FieldGraph::build(g, resolver);
+            auto fg = dce::fieldgraph::FieldGraph::build(g, resolver, bakeThreads);
             const dualc::BBox nb = fg.field().bounds();
             if (nb.isValid()) {
               const dualc::Vector3 e = nb.extent() * 0.05;  // 5% pad, as at startup
