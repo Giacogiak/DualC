@@ -111,6 +111,14 @@ finding 7, the Linux C ABI link failure, is tracked as
 readable only after login, one failure in 0.01 s gives nothing to debug, and 550 Linux runs
 did not reproduce it.
 
+*2026-10-27, D-52's trigger met:* the second failure. The `push` run on `main` at `a345c1a`
+(the hygiene merge, 2026-10-22, [run 39837665632](https://github.com/Giacogiak/DualC/actions/runs/39837665632))
+failed in `sanitize` alone (Ubuntu, ASan + UBSan): `parallelForPolled does the same work
+and polls on the caller only`, 1 of 369. Every other job was green. It passed in the
+`sanitize` jobs of the next runs (`13ee7bf`, `4f02b51`), with no change touching it. The log
+needs a login, so the failing assertion is still unknown: reading it is the first step of
+the chase.
+
 ---
 
 ← Back to the [topic README](README.md) · the [Roadmap index](../README.md).

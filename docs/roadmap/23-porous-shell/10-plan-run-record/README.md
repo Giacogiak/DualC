@@ -84,6 +84,9 @@ above it).
    `predicates.c`'s `fast_expansion_sum_zeroelim` reading one past its inputs on the flat
    set's exact `orient3d` (unused value, caller's stack); the file is not ASan-instrumented
    now, still byte-identical. Windows's digests and `/W4` wait for the next run.
+   *2026-10-27:* that run (`13ee7bf`, push and PR #3) and `main`'s after the merge
+   (`4f02b51`) passed every job: the digests on all three OSes, MSVC's `predicates.c` and
+   `/W4`. Seed 3's watertightness was not read separately; its ctest passed.
 
 ## For the owner's review
 

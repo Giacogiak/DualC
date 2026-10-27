@@ -199,7 +199,8 @@ the owner's report: the sponge was "extremely laggy" to orbit on a GTX 1050.
 polynomial smin of 1-Lipschitz operands is 1-Lipschitz. The sponge now costs 4–7× fewer
 evaluations per pixel, and 5–9× fewer in the worst pixel. The snapshots are identical
 except 3 pixels in 480,000. Gate: `check.py` 30/30 (1 skipped; ctest 408/408, 0 warnings), parity 87/87 on llvmpipe. The measurements are in [11](11-viewer-trace-cost.md). Pending:
-the owner's orbit on the GTX 1050.
+the owner's orbit on the GTX 1050. Merged into the local `main` only, 2026-10-27, without a
+PR (the owner's choice): it reaches `origin` with the next PR from that `main`.
 
 ---
 

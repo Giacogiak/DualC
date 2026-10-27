@@ -92,6 +92,13 @@ which is Boletus's ([15](../15-boletus-handoff.md)).
   ctest output of `build (ubuntu-24.04)` and `sanitize`, and in `build (windows-2022)` and
   `build (macos-14)` too, since those are the first hosted builds of the DLL and `.dylib`.
   #53 flips to DONE when the Ubuntu job shows them green.
+- *2026-10-27, the remote runs.* PR #2 merged on 2026-10-22. The `push` run on `main` at
+  `a345c1a` passed `build (ubuntu-24.04)` (ctest 369/369) and the Windows and macOS builds.
+  Its `sanitize` failed on D-52's flake, not on a `cli_c_abi` case
+  ([17/14](../17-code-audit-and-hardening/14-build-hardening-ci.md)). The runs at `13ee7bf`
+  and `4f02b51` (PR #3) were green in every job. The annotations give counts only; the
+  `cli_c_abi*` lines are in the job logs, which need a login. So the flip waits for the
+  owner to read them.
 
 ---
 
