@@ -27,7 +27,8 @@ Delaunay engine and the packed complex as built and measured; [05](05-porous-fie
 gates P08 ran, what stays open after them, the per-unit table, the measurements and lessons
 ([01](10-plan-run-record/01-measurements-and-lessons.md)), every in-run choice
 ([02](10-plan-run-record/02-in-run-choices.md)) and the owner's review list
-([03](10-plan-run-record/03-owners-review.md)).
+([03](10-plan-run-record/03-owners-review.md)). [11](11-viewer-trace-cost.md) is #70's, the
+viewer's trace cost on a sponge, measured and fixed after the merge.
 
 | Item | Page | Status |
 | --- | --- | --- |
@@ -39,6 +40,7 @@ gates P08 ran, what stays open after them, the per-unit table, the measurements 
 | #67 The C ABI test and the documentation | [02](02-record.md#67-the-c-abi-test-and-the-documentation) | DONE 2026-10-22 (P06; the in-run choices and the viewer recipes pending owner review) |
 | #68 The Boletus implementation plan | [02](02-record.md#68-the-boletus-implementation-plan) | DONE 2026-10-22 (P07; Boletus branch `feat/porous-shell-plan`, the in-run defaults pending owner review) |
 | #69 Graded nodes miss a negative thickness in cellOverlaps | [02](02-record.md#69-graded-nodes-miss-a-negative-thickness-in-celloverlaps) | DEFERRED — trigger in the decisions index |
+| #70 Smooth booleans keep the viewer's metric step | [02](02-record.md#70-smooth-booleans-keep-the-viewers-metric-step) · [11](11-viewer-trace-cost.md) | DONE 2026-10-27 (the GTX 1050 orbit pending the owner) |
 
 **The Boletus plan** is `docs/raw/2026-10-22-porous-shell-plan.md` in the Boletus repository,
 on its branch `feat/porous-shell-plan` (commit only, not pushed); the pointer from the

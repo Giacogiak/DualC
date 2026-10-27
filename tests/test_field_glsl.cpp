@@ -710,6 +710,17 @@ TEST_CASE("porous: field_glsl reads every key, rejects an unknown one, keeps chi
   CHECK(s.generatedSource.find("sdGyroid(p") == std::string::npos);
   CHECK(s.stepScale == 1.0f);
   CHECK(s.featureScale == 0.25f);
+  // A smooth boolean of 1-Lipschitz operands is 1-Lipschitz, so the sponge
+  // recipe keeps the metric step (#70); a TPMS operand still lowers it.
+  const GlslScene sponge = compileToGlsl(
+      parseShorthand("smooth-intersection(sphere(radius=1), onion(porous(sphere(radius=1), "
+                     "spacing=0.3, smooth=0.02), thickness=0.04), k=0.1)"),
+      resolver, box(-1.2, 1.2));
+  CHECK(sponge.stepScale == 1.0f);
+  const GlslScene tpms = compileToGlsl(
+      parseShorthand("smooth-union(sphere(radius=1), gyroid(wavelength=0.5), k=0.1)"),
+      resolver, box(-1.2, 1.2));
+  CHECK(tpms.stepScale == 0.5f);
   // A repeated porous node uploads its arrays once (DAG dedup).
   const GlslScene d = compileToGlsl(
       parseShorthand("union(onion(porous(sphere(radius=1), spacing=0.3), thickness=0.02), "

@@ -685,8 +685,8 @@ uniform float uTanHalfFov, uAspect;
 uniform vec3  uBoundsMin, uBoundsMax;
 uniform vec3  uLightDir;
 uniform float uStepMin, uStepMax, uHmem, uStepScale;
-// 1.0 when the whole graph is a true (Lipschitz-1) SDF -- no TPMS / smooth
-// boolean / warp -- so the trace can step by the distance directly (plain
+// 1.0 when the whole graph is 1-Lipschitz -- no TPMS / warp / baked source --
+// so the trace can step by the distance directly (plain
 // sphere tracing) and skip the per-step gradient sampling. 0.0 keeps the
 // gradient-normalized conservative step for non-metric fields.
 uniform float uMetricSDF;
@@ -2007,12 +2007,15 @@ float nodeStepScale(const GraphNode& n) {
   if (op == "normalize") return 1.0f;  // re-normalises its subtree
   if (isTpmsOp(op)) return 0.5f;
   BoolOp bop;
+  // Every boolean keeps its operands' scale, the smooth ones included: the
+  // polynomial smin's gradient is exactly h*grad(a) + (1-h)*grad(b) (the
+  // -k*h*(1-h) term's derivative cancels the lerp's), so a smooth boolean of
+  // 1-Lipschitz operands is 1-Lipschitz and the metric step stays safe. A fixed
+  // 0.6 here sent every sponge recipe down the 7-evaluation gradient path,
+  // 4-7x the evaluations for no closer hit (roadmap 23 #70).
   if (parseBoolOp(op, bop)) {
     float s = 1.0f;
     for (const GraphNode& ch : n.in) s = std::min(s, nodeStepScale(ch));
-    if (bop == BoolOp::SmoothUnion || bop == BoolOp::SmoothIntersection ||
-        bop == BoolOp::SmoothDifference)
-      s = std::min(s, 0.6f);
     return s;
   }
   if (op == "twist" || op == "bend" || op == "displace") {

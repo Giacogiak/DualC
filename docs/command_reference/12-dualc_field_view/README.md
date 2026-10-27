@@ -60,11 +60,12 @@ measurements and the design:
 [12/04 § Adaptive-resolution preview](../../roadmap/12-field-graph-and-app/04-preview-performance.md#adaptive-resolution-preview--metric-sdf-fast-path).
 
 **Metric SDF fast-path (automatic, no flag).** When the whole graph is a true
-distance field (struts, analytic primitives, hard booleans, metric decorators — no
-TPMS, smooth boolean, `twist`/`bend`/`displace` or baked `mesh`/`winding`) the
+1-Lipschitz field (struts, analytic primitives, `porous`, hard and smooth booleans, metric
+decorators — no TPMS, `twist`/`bend`/`displace` or baked `mesh`/`winding`) the
 tracer steps by the distance directly and skips the per-step gradient sampling —
 about 7× fewer SDF evaluations, which is why strut lattices and analytic CSG
-preview far faster than a normalized-TPMS shell. Baked sources keep the
+preview far faster than a raw-TPMS shell; a porous sponge recipe takes it too
+([23/11](../../roadmap/23-porous-shell/11-viewer-trace-cost.md)). Baked sources keep the
 conservative step and measurably do not pay for it
 ([12/07 § H1](../../roadmap/12-field-graph-and-app/07-mesh-preview-sweep.md#h1-the-metric-fast-path-traced-a-field-that-is-not-a-distance-field)).
 

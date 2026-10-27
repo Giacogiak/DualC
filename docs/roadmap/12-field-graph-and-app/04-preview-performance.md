@@ -31,6 +31,7 @@ to 69 (`aa0d577`) the same day — [05/03](../05-tpms-lattices/03-crystal-blendi
   gradient-normalized conservative step unchanged. Set once per frame from
   `scene.stepScale`.
   > **Corrected 2026-08-25** — baked `mesh`/`winding` sources are NOT exact SDFs and are now excluded from this fast path: [12/07 §H1](07-mesh-preview-sweep.md#h1-the-metric-fast-path-traced-a-field-that-is-not-a-distance-field).
+  > **Corrected 2026-10-27** — smooth booleans no longer leave the fast path: the polynomial smin of 1-Lipschitz operands is 1-Lipschitz, and their 0.6 cost a porous sponge 4–7× the evaluations ([23/11](../23-porous-shell/11-viewer-trace-cost.md), #70).
 - **Adaptive render-scale.** New **`--preview-scale S`** flag (default and range:
   [command_reference/12](../../command_reference/12-dualc_field_view/README.md)). While the camera/param/section is *moving* (tracked
   by `OrbitState.dragging` + a `lastInteract` timestamp stamped in the input

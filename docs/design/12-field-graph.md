@@ -84,6 +84,17 @@ determinism, the ceilings — is [13](13-porous-shell.md). The graph adds these 
   or more units than `maxTextureUnits`, sends the node to the baked grid instead (a
   `GlslScene` note, step scale 0.5).
 
+## The trace's step rule
+
+`nodeStepScale` gives the graph one step scale, the minimum over its nodes: a TPMS 0.5, a
+`twist` / `bend` / `displace` 0.5, a `mesh` 0.6 (baked or not), a `winding` 0.5, a
+`porous` node sent to the baked grid 0.5, `normalize` 1.0 whatever is below it, and every other node, the booleans hard
+and smooth included, its operands' minimum (1.0 at a primitive or `porous`). A smooth
+boolean keeps it because the polynomial smin's gradient is exactly `h∇a + (1 − h)∇b`, so
+1-Lipschitz operands give a 1-Lipschitz blend. At 1.0 the viewer steps by the value
+(`uMetricSDF`); below it, each step pays a 6-point gradient to normalise the step. The
+parity harness and the export never read the scale.
+
 ## What the preview cannot show as exported
 
 The preview is the export's field ([10 § Preview equals export](10-invariants-and-tolerances.md#output-invariants))

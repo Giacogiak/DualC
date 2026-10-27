@@ -530,8 +530,8 @@ int main(int argc, char** argv) {
                             : diag;
     const float stepMin = float(std::min(diag * 0.002, feat * 0.003));
     dce::gl::setU1f(prog, "uStepScale", scene.stepScale);
-    // A stepScale of 1.0 means nodeStepScale found no TPMS / smooth boolean /
-    // warp -- the graph is a true SDF, so the trace can sphere-step by distance
+    // A stepScale of 1.0 means nodeStepScale found no TPMS / warp / baked
+    // source -- the graph is 1-Lipschitz, so the trace can sphere-step by distance
     // and skip the per-step gradient (a large speedup on dense strut lattices).
     dce::gl::setU1f(prog, "uMetricSDF", scene.stepScale >= 0.999f ? 1.0f : 0.0f);
     dce::gl::setU1f(prog, "uStepMin", stepMin);

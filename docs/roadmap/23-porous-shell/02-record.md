@@ -189,6 +189,18 @@ bug class ([17/03 #25](../17-code-audit-and-hardening/03-correctness-and-robustn
 would retire it with the rest). `graded-onion` with a negative `t` is empty, so the gap only
 bites `graded-offset`.
 
+## #70 Smooth booleans keep the viewer's metric step
+
+**DONE** 2026-10-27 — acceptance: a porous sponge recipe (a `smooth-intersection`)
+compiles at step scale 1.0, so `dualc_field_view` steps by the value without the per-step
+gradient, and its image does not move against a fine reference. Opened the same day from
+the owner's report: the sponge was "extremely laggy" to orbit on a GTX 1050.
+`nodeStepScale` (`examples/field_glsl.cpp`) no longer clamps a smooth boolean to 0.6: the
+polynomial smin of 1-Lipschitz operands is 1-Lipschitz. The sponge now costs 4–7× fewer
+evaluations per pixel, and 5–9× fewer in the worst pixel. The snapshots are identical
+except 3 pixels in 480,000. Gate: `check.py` 30/30 (1 skipped; ctest 408/408, 0 warnings), parity 87/87 on llvmpipe. The measurements are in [11](11-viewer-trace-cost.md). Pending:
+the owner's orbit on the GTX 1050.
+
 ---
 
 ← Back to [block 23](README.md).
