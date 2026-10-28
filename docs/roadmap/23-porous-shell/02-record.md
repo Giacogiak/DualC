@@ -202,6 +202,11 @@ except 3 pixels in 480,000. Gate: `check.py` 30/30 (1 skipped; ctest 408/408, 0 
 the owner's orbit on the GTX 1050. Merged into the local `main` only, 2026-10-27, without a
 PR (the owner's choice): it reaches `origin` with the next PR from that `main`.
 
+**2026-10-28:** pushed straight to `origin/main` on the owner's explicit request
+(`4f02b51..01acc74`, a fast-forward, with the session-close commits `ecb5351` and `01acc74`).
+CI run 40648310760 on `01acc74` passed all 7 jobs: `docs`, `gpu`, `sanitize`, and `build` on
+Ubuntu 24.04, macOS 14 and Windows 2022.
+
 ---
 
 ← Back to [block 23](README.md).
