@@ -259,15 +259,21 @@ TEST_CASE("parallelFor propagates an exception instead of terminating",
   }
 
   SECTION("workers stop claiming work once one has failed") {
-    // Not a timing assertion: with 1e6 indices, a run that ignored the failure
-    // flag would execute essentially all of them. Asserting "fewer than all"
-    // is enough to show the early-out works, and cannot flake the other way.
-    constexpr std::size_t kN = 1000000;
+    // Index 0 throws; every other index parks its worker for 1 ms before
+    // returning, so draining kN indices on the three free workers takes ~30 s
+    // and the thrower's catch runs long before that. The bound therefore
+    // fails only when a worker ignores the flag, not when the thrower is
+    // descheduled for a timeslice -- which is how the bare `ran < kN` of the
+    // sibling parallelForPolled case flaked (D-52): a 2-core box let three
+    // free workers claim 1e5 indices in the time one throw took to unwind.
+    constexpr std::size_t kN = 100000;
     std::atomic<std::size_t> ran{0};
     REQUIRE_THROWS_AS(parallelFor(kN, 4,
                                   [&](std::size_t i) {
                                     ran.fetch_add(1, std::memory_order_relaxed);
                                     if (i == 0) throw std::runtime_error("early");
+                                    std::this_thread::sleep_for(
+                                        std::chrono::milliseconds(1));
                                   }),
                       std::runtime_error);
     REQUIRE(ran.load() < kN);
@@ -321,16 +327,33 @@ TEST_CASE("parallelForPolled does the same work and polls on the caller only",
   }
 
   SECTION("a throwing body propagates and joins, on the threaded path") {
+    // Deterministic early-out: index 0 throws, every other index parks its
+    // worker until the poll has run. With an interval of seconds the poll runs
+    // only once the caller has seen `failed`, and a released worker re-checks
+    // that flag before claiming, so at most one index per worker ever runs.
+    // The previous bound, `ran < n` with no park, raced the thrower's unwind
+    // against three free workers draining n = 1e5 and lost 23 times in 400 on
+    // two cores (D-52, the one CI flake). The 10 s deadline on the park only
+    // keeps a broken failure->poll wake from hanging the case.
+    using std::chrono::seconds;
+    using std::chrono::steady_clock;
+    constexpr unsigned kThreads = 4;
+    std::atomic<bool>        released{false};
     std::atomic<std::size_t> ran{0};
     REQUIRE_THROWS_AS(parallelForPolled(
-                          100000, 4,
+                          100000, kThreads,
                           [&](std::size_t i) {
                             ran.fetch_add(1, std::memory_order_relaxed);
-                            if (i == 10) throw std::runtime_error("early");
+                            if (i == 0) throw std::runtime_error("early");
+                            const auto deadline = steady_clock::now() + seconds(10);
+                            while (!released.load() && steady_clock::now() < deadline)
+                              std::this_thread::yield();
                           },
-                          [](std::size_t, std::size_t) {}),
+                          [&](std::size_t, std::size_t) { released.store(true); },
+                          seconds(10)),
                       std::runtime_error);
-    REQUIRE(ran.load() < 100000u);
+    REQUIRE(released.load());
+    REQUIRE(ran.load() <= kThreads);
   }
 
   SECTION("a throwing body propagates on the serial path") {

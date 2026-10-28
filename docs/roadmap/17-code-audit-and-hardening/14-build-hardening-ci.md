@@ -119,6 +119,41 @@ and polls on the caller only`, 1 of 369. Every other job was green. It passed in
 needs a login, so the failing assertion is still unknown: reading it is the first step of
 the chase.
 
+*2026-10-28, D-52 closed — a test defect, not an engine one.* The log was never needed: the
+failure reproduces locally. The Release `dualc_tests` pinned to two cores (`taskset -c 0,1`),
+running only the section *a throwing body propagates and joins, on the threaded path*, failed
+**23 of 400** runs, every one on `REQUIRE(ran.load() < 100000u)` with `100000 < 100000` — the
+row's suspect. Four workers, the body throws at `i == 10`; the throwing worker is descheduled
+between its claim and the store to `failed` (an unwind, slower still under ASan + UBSan), and
+the three free workers drain the other 99,990 indices in a few milliseconds, so every index
+runs exactly once and `ran == n`. The engine kept its promise — the exception propagated and
+every thread joined; the bound measured the scheduler, and a hosted runner with two to four
+cores and a sanitized unwind is where it loses. The sibling `parallelFor` section (1e6
+indices, `i == 0`) has the same shape with ten times the margin: 0/400 under the same load,
+and never failed in CI.
+
+*Fix, `tests/test_parallel.cpp`, both early-out sections.* The polled one is deterministic
+now: index 0 throws, every other index parks its worker until the poll has run — with a 10 s
+interval the poll runs only once the caller has seen `failed` — and a released worker
+re-checks the flag before claiming, so `ran <= threads` holds by construction, and
+`released` asserts the failure→poll wake on the way. The `parallelFor` section has no poll to
+release on, so it keeps the bound and changes what the bound measures: each non-throwing
+index parks 1 ms, `n = 1e5`, and a flake would need the thrower stalled for ~30 s; a broken
+early-out fails after ~30 s instead of hanging. The 10 s park deadline on the polled side
+only keeps a broken wake from hanging the case.
+
+*Verified.* Release, two cores: **0/400 and 0/400** (9 s for the 800 runs; the two sections
+take 3 ms and 1 ms). **Proven to fail:** a standalone harness with the two sections against a
+copy of `parallel.h` whose `if (failed) break;` is removed — `parallelFor` `ran == 100000`
+after 38 s, `parallelForPolled` `ran == 100000` in 8 ms, both red; against the real header
+`ran == 4` and `ran == 1`, green. Under ASan + UBSan (`build-san`, RelWithDebInfo, the CI `sanitize` recipe), two cores: the
+**old** section **4/200**, all `100000 < 100000` — CI's failure, reproduced in the CI
+configuration; the **fixed** sections **0/200 and 0/200**, and `[parallel]` 7/7 cases
+(579,099 assertions). The full gate on the Release tree: `ctest` 408/408, 0 warnings. Finding
+8 joins finding 9: both were timing bounds in tests, neither an engine defect. Not changed:
+the serial `ctest` gate ([15 § The serial gate](15-test-coverage-batches.md#the-serial-gate-is-kept-for-a-new-reason))
+— its cost reason stands, and these two sections no longer depend on it.
+
 ---
 
 ← Back to the [topic README](README.md) · the [Roadmap index](../README.md).

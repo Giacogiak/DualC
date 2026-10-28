@@ -89,7 +89,8 @@ The `ctest` check stays serial. Its correctness reason (C43) is gone. Its cost r
 `-j 8` saves about a third (86 s → 57 s), because the engine already parallelises inside each
 case. Oversubscribing the cores is what exposes the timing-dependent cancel/progress tests:
 [14](14-build-hardening-ci.md) finding 9 was one, and finding 8, the macOS `parallelForPolled`
-flake, is still open. `ctest -j` by hand is safe. The dated line is in
+flake, is still open. *2026-10-28:* finding 8 closed the same way, a test defect
+([14](14-build-hardening-ci.md), D-52). `ctest -j` by hand is safe. The dated line is in
 [09/02](09-local-checks-gate/02-three-decisions.md), the reason in `check_ctest`'s docstring.
 
 ### Proven to fail
