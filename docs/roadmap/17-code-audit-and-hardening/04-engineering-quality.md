@@ -130,8 +130,8 @@ How each sub-item closed, dated: [12 § #33](12-engineering-quality-records.md#3
 `docs/raw/study/T-unit-testing.md:462-463`.
 
 ## #34 API hygiene batch
-**PARTIAL 2026-10-21** — all landed but the `GridField` normal (E12, reopened; batches
-09-01, 09-10, 10-19, 10-20). The `RepeatField` fold below turned out not to be hygiene at all
+**DONE 2026-10-28** — the `GridField` normal (E12) last, by the owner's pick among the measured
+stencils (batches 09-01, 09-10, 10-19, 10-20, 10-28). The `RepeatField` fold below turned out not to be hygiene at all
 but the only wrong-**geometry** defect in the batch. Every claim in this
 entry was re-verified against `ebe929a` before any of it was scoped, after
 [#26](03-correctness-and-robustness/03-diagnostics-item.md#26-a-diagnostics-channel-for-the-silent-failure-surface)
@@ -162,9 +162,9 @@ found one of the audit's claims had never been true: **all of #34's held**. The 
   all hardware threads in the contourer~~ — **DONE 2026-10-19**: `numThreads` on it and on both
   bakes, through the C ABI (0.5.2) and `dualc_field --threads`, byte-identical at 1/2/all,
   proven red — record: [18](18-contourer-threads.md);
-- `GridField::gradientAt` returns a normalised direction that is discontinuous across cell
-  boundaries — **OPEN again 2026-10-21**: every continuous node stencil (central +35 %, minmod
-  +18 %) raised the CAD pair's mean deviation, so the cell gradient was restored — [20](20-gridfield-normal.md).
+- ~~`GridField::gradientAt` returns a normalised direction that is discontinuous across cell
+  boundaries~~ — **DONE 2026-10-28**: the minmod node blend, continuous, the CAD pair's
+  +18 % accepted ([D-76](../../decisions/01-settled.md)) — record: [20](20-gridfield-normal/README.md).
 
 *(2026-09-18: the landed bullets are condensed to one line + link each — the removed
 text is verbatim in 07 and 08, the `FieldPtr` paragraph in 08 — to bring this page under

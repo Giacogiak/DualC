@@ -117,13 +117,11 @@ TEST_CASE("GridField::gradientAt is unit length and outward", "[grid]") {
 }
 
 TEST_CASE("GridField::gradientAt is continuous across cell faces",
-          "[.][grid][e12]") {
-  // HIDDEN, red on the shipped normal: #34's E12 is open again (P04b, record
-  // 17/20). P04.1's blend of per-node central differences passed it, and so
-  // does minmod, but no continuous stencil measured kept the sharp CAD pair's
-  // accuracy, so gradientAt is the cell gradient's direction again, which
-  // jumps by 0.245 rad here at every eps. Kept, not deleted, as the probe a
-  // future stencil must pass: run it with `dualc_tests "[e12]"`.
+          "[grid][e12]") {
+  // #34's E12 (record 17/20): the cell gradient's direction jumped by 0.245
+  // rad here at every eps; the blend of per-node minmod gradients, shipped
+  // 2026-10-28 after the owner's pick among the measured stencils, is
+  // Lipschitz in p, so the angle is linear in eps. Hidden from P04b to then.
   // Probe a coarse baked sphere at +-eps either side of a node plane, on each
   // axis, near the surface: the angle between the two normals must vanish
   // with eps.
@@ -171,7 +169,8 @@ TEST_CASE("GridField::gradientAt keeps a face's normal one cell from a "
   // #34's P04b (record 17/20): a baked box, its faces off the node planes.
   // One cell from an edge, the probe's own cell sees only its face, so the
   // cell gradient is exact; a node stencil that reaches across the edge mixes
-  // the other face in (P04.1's central differences: 9.7 degrees here).
+  // the other face in (P04.1's central differences: 9.7 degrees here). The
+  // shipped minmod picks the smaller one-sided difference, so it does not.
   const BoxField box(Vector3{-0.9, -0.9, -0.9}, Vector3{0.9, 0.9, 0.9});
   const BBox region{Vector3{-1.5, -1.5, -1.5}, Vector3{1.5, 1.5, 1.5}};
   FieldPtr grid = bakeToGrid(box, region, 13, 1);  // cell = 0.25

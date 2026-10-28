@@ -6,7 +6,7 @@ It is a **delta run** over [08](08-2026-10-19-after-contourer-threads.md), which
 thread count (P02). Since then the run changed the `gradientAt` contract and added
 `trueGradientAt` (P03, [17/19](../../17-code-audit-and-hardening/19-gradient-contract.md)),
 changed and then restored the `GridField` normal (P04, P04b,
-[17/20](../../17-code-audit-and-hardening/20-gridfield-normal.md)), made the gate build the
+[17/20](../../17-code-audit-and-hardening/20-gridfield-normal/README.md)), made the gate build the
 C ABI (P05, [14/06](../../14-c-abi/06-linux-shared-library.md)) and pruned the repeats'
 neighbour set behind a new `boundsBoundValue` claim (P06,
 [17/21](../../17-code-audit-and-hardening/21-repeat-pruning.md)). Those sessions edited

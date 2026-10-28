@@ -25,8 +25,8 @@ was pushed: the push, the PR and the CI reading are the owner's (`main` is prote
 | P02.1 | #34 thread count, ABI 0.5.2 | [18](18-contourer-threads.md) | `dc0a261`; the owner's answer `db8ffef` (#62) |
 | P03.1 | #34 `gradientAt` contract, the census | [19](19-gradient-contract.md) | `e9c7c59` |
 | P03.2 | #34 `trueGradientAt`, the Newton step | [19](19-gradient-contract.md#the-true-gradient-path) | `2f1f2ea` |
-| P04.1 | #34 a continuous `GridField` normal | [20](20-gridfield-normal.md) | `f939a35` |
-| P04b.1 | #34 limited stencils; the cell gradient restored | [20 § P04b](20-gridfield-normal.md#p04b--a-limited-node-stencil-measured) | `220e4df` |
+| P04.1 | #34 a continuous `GridField` normal | [20](20-gridfield-normal/README.md) | `f939a35` |
+| P04b.1 | #34 limited stencils; the cell gradient restored | [20](20-gridfield-normal/README.md) | `220e4df` |
 | P05.1 | #53 the gate builds the C ABI | [14/06](../14-c-abi/06-linux-shared-library.md) | `5da4cd0` |
 | P06.1 | #35 the pruned neighbour set | [21](21-repeat-pruning.md) | `6a231c7` |
 | P06.2 | #35 byte-identity, the speed-up | [21](21-repeat-pruning.md#gates) | `594c1d5` |
@@ -97,8 +97,8 @@ record page too; accepting one costs nothing, the alternative is named.
 | P02.1 | `--threads` capped at 1024 (a typo such as `-1` exits 2) | no cap | [18](18-contourer-threads.md) |
 | P03.1 | `elongated` named with the smooth blends and `mix` as shortening `gradientAt` | the plan's two | [19](19-gradient-contract.md) |
 | P03.2 | (a) hard booleans, mirror, both repeats forward `trueGradientAt`; the graded decorators do not · (b) a sphere's is zero at its centre · (c) the winding Newton test at edge 4 and 0.25, not 1 (at 1 the old step wins 10 of 24 points) · (d) `MeshSource` keeps the FD default | (d): forward its unit `gradientAt` — exact off the surface, 6 BVH queries cheaper | [19](19-gradient-contract.md#the-true-gradient-path) |
-| P04.1 | the record on a new page, 20, not appended to 19; its fallback and its loosened P03 assertion were undone by P04b | append to 19 | [20](20-gridfield-normal.md) |
-| P04b.1 | (a) **the cell gradient shipped, #34 PARTIAL** · (b) the continuity test hidden `[.][grid][e12]`, not deleted · (c) the angle mask's chord criterion | (a): minmod — continuous, crease test green, case A +18 % — or the 40° angle mask (A +6 %); either re-applies its branch and sets #34 DONE | [20 § P04b](20-gridfield-normal.md#p04b--a-limited-node-stencil-measured) |
+| P04.1 | the record on a new page, 20, not appended to 19; its fallback and its loosened P03 assertion were undone by P04b | append to 19 | [20](20-gridfield-normal/README.md) |
+| P04b.1 | (a) **the cell gradient shipped, #34 PARTIAL** · (b) the continuity test hidden `[.][grid][e12]`, not deleted · (c) the angle mask's chord criterion | (a): minmod — continuous, crease test green, case A +18 % — or the 40° angle mask (A +6 %); either re-applies its branch and sets #34 DONE | [20 § P04b](20-gridfield-normal/01-stencils-measured.md#p04b--a-limited-node-stencil-measured) |
 | P05.1 | (a) the C ABI built by every CI job, macOS and Windows included — their first hosted `.dylib` / `.dll` · (b) re-configure in place when a gate option is missing from the cache · (c) the sanitized check in its own build dir | (a): if `build (macos-14)` goes red, fix it or a per-OS rule in `GATE_OPTIONS`; (b): require `--clean`, and old `build/` dirs silently skip the ABI | [14/06](../14-c-abi/06-linux-shared-library.md), this page |
 | P06.1 | lever (b) as a public opt-in virtual, `boundsBoundValue`; lever (a) not kept (it breaks value identity); home tile first in `cellOverlaps` (unplanned, exact, 67.5 → 56.9 s); six reference meshes, not three | an internal type check on known primitives, or no lever (b) (≈ 2.9×) | [21](21-repeat-pruning.md) |
 | P06.2 | lever (c) not taken at 1.30–1.31×, on the plan's bar: the fold's mesh is not byte-identical (3,452 OBJ lines differ); the levers' text moved 04 → 21 verbatim; the speed-up on 21, not a new page | take (c) and accept a new reference mesh | [21](21-repeat-pruning.md) |
@@ -130,8 +130,8 @@ None blocks the PR; each has its home.
 | --- | --- | --- |
 | #53's remote proof | the five `cli_c_abi*` lines in `build (ubuntu-24.04)` → #53 DONE in 14/06, 14's README and the roadmap README | [14/06](../14-c-abi/06-linux-shared-library.md) |
 | 17's Latest verification | the CI counts after the push replace text there (the README is at the cap) | [README](README.md) |
-| E12 and #34 | the owner's pick among the measured stencils (§ The in-run choices, P04b.1) | [20 § P04b](20-gridfield-normal.md#p04b--a-limited-node-stencil-measured) |
-| The stencil variants' source | scratch, `/tmp/p04b/src/grid_field_variants.cpp` (variant by `P04B_V`, ratio by `P04B_R`), gone at the next reboot; each formula is on 20. The deviation evaluator links `build/libdualc.a` and every `examples/libdualc_examples_*.a`, `_decimate`, `_img` and `_slice` included; the hidden test runs as `dualc_tests "[e12]"` | [20](20-gridfield-normal.md) |
+| E12 and #34 | the owner's pick among the measured stencils (§ The in-run choices, P04b.1) — minmod, 2026-10-28 | [20](20-gridfield-normal/README.md) |
+| The stencil variants' source | scratch, `/tmp/p04b/src/grid_field_variants.cpp` (variant by `P04B_V`, ratio by `P04B_R`), gone at the next reboot; each formula is on 20. The deviation evaluator links `build/libdualc.a` and every `examples/libdualc_examples_*.a`, `_decimate`, `_img` and `_slice` included; the hidden test runs as `dualc_tests "[e12]"` | [20](20-gridfield-normal/README.md) |
 | #11's trigger, "work needing before/after numbers" | met by #34 and #35, which built scratch benchmarks under `/tmp`, none committed — build the suite or re-word the trigger, the owner's call | [lint run 09](../19-docs-layers/08-semantic-lint/09-2026-10-21-after-hygiene-run.md), [#11](../../decisions/README.md) |
 | The editor's Q7, an OBJ that fails to load | reproduced at the close: the trigger is a **negative (relative) face index** (`f -4 -3 -2 -1`), not the comment or `o` line. geometry-central's reader (`simple_polygon_mesh.cpp`, `parseFaceIndex` and the line after it, pinned upstream) reads a negative index as a line continuation and, at the file's end, calls `substr(npos)`. `dualc_field` exits 2 with `basic_string::substr`; the same faces with positive indices load | this page |
 | The GLSL mirror of `repeat` | still reads all 8 copies; parity holds, pruning it is not planned | [21](21-repeat-pruning.md) |

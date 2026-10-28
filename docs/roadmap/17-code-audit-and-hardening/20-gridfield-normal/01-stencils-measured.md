@@ -1,10 +1,7 @@
-# #34 — a continuous `GridField` normal
+# The `GridField` normal — P04 and P04b, the stencils measured
 
-The record of the last open bullet of
-[04 #34](04-engineering-quality.md#34-api-hygiene-batch) (audit finding E12), unit P04 of the
-[hygiene + editor run](../../raw/2026-10-19-hygiene-and-editor-plan.md), on branch
-`feat/hygiene-and-editor`, 2026-10-20. It builds on P03's `trueGradientAt`
-([19](19-gradient-contract.md#the-true-gradient-path)).
+Part of [20](README.md) (#34, E12); a folder since 2026-10-28, the sections below are the
+2026-10-20 / 10-21 record verbatim. What shipped since: [02](02-minmod-shipped.md).
 
 > **2026-10-21, P04b:** the blend below was reverted; `gradientAt` is the cell gradient's
 > direction again and #34 is PARTIAL, E12 open — [§ P04b](#p04b--a-limited-node-stencil-measured).
@@ -65,7 +62,7 @@ binary at `e4be7ec`, *new* this unit, *pre* the precomputed variant. Deviation i
 of the exact graph (the same expression, no `bake`) at every output vertex, measured by a
 scratch evaluator linked against `libdualc_examples_fieldgraph`, 21/04's method. Its *old*
 rows reproduce
-[21/04](../21-cli-consolidation/04-mesh-node-bake.md#the-measurements)'s figures (0.00851 /
+[21/04](../../21-cli-consolidation/04-mesh-node-bake.md#the-measurements)'s figures (0.00851 /
 0.00186, 1.71 / 0.0129). Shift is the distance between the same vertex in old and new.
 
 | Case | Wall s old / new / pre | RSS MB old / new / pre | Faces | Verts |
@@ -197,9 +194,9 @@ gradientAt*.
 ## Gates
 
 Full gate `python3 scripts/check.py` (same host): see the
-[block README's Latest verification](README.md). No GLSL path moved, so `--gpu` was not run;
-the last parity count is P03.2's 82 / 82 ([19](19-gradient-contract.md#gates)).
+[block README's Latest verification](../README.md). No GLSL path moved, so `--gpu` was not run;
+the last parity count is P03.2's 82 / 82 ([19](../19-gradient-contract.md#gates)).
 
 ---
 
-← Back to the [block README](README.md) · the [Roadmap index](../README.md).
+← Back to [20 — the `GridField` normal](README.md) · the [audit ledger](../README.md) · the [Roadmap index](../../README.md).

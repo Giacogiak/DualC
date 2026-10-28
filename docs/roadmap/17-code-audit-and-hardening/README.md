@@ -43,7 +43,7 @@ status and trigger, and links to both.
   `dualc_field_view`'s grazing silhouettes (DEFERRED, one renderer seen).
 - [`18-contourer-threads.md`](18-contourer-threads.md) — #34's thread-count delivery record.
 - [`19-gradient-contract.md`](19-gradient-contract.md) — #34's `gradientAt` contract, 30-override census, `trueGradientAt`.
-- [`20-gridfield-normal.md`](20-gridfield-normal.md) — #34's `GridField` normal: stencils measured, E12 open.
+- [`20-gridfield-normal/`](20-gridfield-normal/README.md) — #34's `GridField` normal (folder): stencils measured, minmod shipped.
 - [`21-repeat-pruning.md`](21-repeat-pruning.md) — #35: `repeat`'s neighbours pruned, byte-identical.
 - [`22-hygiene-plan-run.md`](22-hygiene-plan-run.md) — the hygiene + editor run harvested: counts, plan corrections, the in-run choices for review, what it left open.
 - [`07-repeat-tiling-fix.md`](07-repeat-tiling-fix.md) — #34's first item: `repeat` read
@@ -132,9 +132,8 @@ merge of #52 over #32 — two writer cases run everywhere, two more only on Wind
 (2026-10-06, asserted by `check.py --gpu` against `parity_expected_cases` in CI's required
 `gpu` job — [13](13-parity-gate-binding.md)); the same 270 pass under ASan + UBSan in CI's
 `sanitize` job (2026-10-06, [14](14-build-hardening-ci.md)); the same 270 pass under `ctest -j 8`,
-three runs in a row (2026-10-07, Linux, [15](15-test-coverage-batches.md)). Local, branch
-`feat/hygiene-and-editor`, not yet in CI: ctest **369**, C ABI in (2026-10-21, Linux, [21](21-repeat-pruning.md#gates)), parity
-**82/82** ([19](19-gradient-contract.md#gates)).
+three runs in a row (2026-10-07, Linux, [15](15-test-coverage-batches.md)). Local, Linux, C ABI in:
+ctest **408** (2026-10-28, [20](20-gridfield-normal/README.md)), parity **82/82** ([19](19-gradient-contract.md#gates)).
 
 | Item | Title | Status |
 | --- | --- | --- |
@@ -150,7 +149,7 @@ three runs in a row (2026-10-07, Linux, [15](15-test-coverage-batches.md)). Loca
 | [#31](04-engineering-quality.md#31-make-the-cpugpu-parity-gate-binding) | Make the CPU/GPU parity gate binding | **DONE** 2026-10-06 ([13](13-parity-gate-binding.md)) |
 | [#32](04-engineering-quality.md#32-test-coverage-ledger) | Test-coverage ledger | **DONE** 2026-10-07 — Batch A and Batch B ([15](15-test-coverage-batches.md)) |
 | [#33](04-engineering-quality.md#33-build--tooling-hardening) | Build & tooling hardening | **DONE** 2026-10-06 ([14](14-build-hardening-ci.md)); batches 2026-08-31, 09-01, 09-10; nanort + clean-clone 2026-09-21 by [20 #47](../20-public-delivery/01-pin-geometry-central.md) |
-| [#34](04-engineering-quality.md#34-api-hygiene-batch) | API hygiene batch | **PARTIAL** 2026-10-21 — E12 reopened, [20](20-gridfield-normal.md); batches [18](18-contourer-threads.md), [19](19-gradient-contract.md) |
+| [#34](04-engineering-quality.md#34-api-hygiene-batch) | API hygiene batch | **DONE** 2026-10-28 — E12 closed, the minmod normal ([20](20-gridfield-normal/README.md)); batches [18](18-contourer-threads.md), [19](19-gradient-contract.md) |
 | [#35](04-engineering-quality.md#35-repeatfield-neighbour-set-optimisation) | `RepeatField` neighbour-set optimisation | **DONE** 2026-10-21 — ~1.3× the fold, exact ([21](21-repeat-pruning.md)); born from #34's fix, no ledger finding |
 | [#46](03-correctness-and-robustness/02-precision-and-celloverlaps.md#46-offsetfield-does-not-forward-celloverlaps) | `OffsetField` does not forward `cellOverlaps` | **DONE** 2026-09-21 — opened 2026-09-20 from the first semantic lint ([19/08/01](../19-docs-layers/08-semantic-lint/01-2026-09-20-first-run.md)), no ledger finding behind it |
 | [#52](16-windows-rename-race/README.md#52-windows-export-io-flake--the-part-rename-under-an-on-access-scanner) | Windows export I/O flake — the `.part` rename under an on-access scanner | **DONE** 2026-10-07 — opened the same day from Boletus's ask, no ledger finding behind it; the holder was an inherited handle, not a scanner |

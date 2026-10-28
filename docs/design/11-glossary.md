@@ -60,7 +60,7 @@ only. The second half is the **ID vocabulary** — what `#N`, "Tier 1 item N", "
 | **Field graph** | The runtime tree of `FieldPtr` nodes built from JSON, an `.fld` file or `--expr`; the one representation the CLIs, the GPU viewer and the C ABI consume (`examples/field_graph.{h,cpp}`). |
 | **`--expr` / shorthand** | The one-line text form of a field graph; it parses to the same node tree as the JSON. |
 | **GLSL codegen** | Compiling a field graph to a straight-line `sceneSDF` for the GPU viewer; the parity harness holds it to the C++ formulas ([10](10-invariants-and-tolerances.md#the-numeric-constants)). |
-| **`bakeToGrid` / `GridField`** | Sample any subtree once into a lattice; the result's `valueAt` is one trilinear lookup — the supported way to amortise an expensive field. |
+| **`bakeToGrid` / `GridField`** | Sample any subtree once into a lattice; the result's `valueAt` is one trilinear lookup, its `gradientAt` the continuous minmod node blend — the supported way to amortise an expensive field. |
 | **Narrow band** | The shell of grid cells near the surface where a bake computes an exact distance; the rest is filled by propagation. |
 | **Tile / owned cells / ghost ring** | In streaming export, a tile is a `2^D`-cell octree of which the outer one-cell ring is ghost cells sampled for continuity and the inner `2^D − 2` are owned and emitted ([10](10-invariants-and-tolerances.md#--tile-depth-the-legal-range-and-the-useful-one)). |
 | **Weld** | Identifying across-tile seam vertices by a quantised position key so the 3MF becomes one manifold object. |

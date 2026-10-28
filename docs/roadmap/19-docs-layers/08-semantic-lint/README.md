@@ -30,6 +30,7 @@ belongs in `design/`; **(d)** an orphan page no page links but its folder README
 | [08-2026-10-19-after-contourer-threads.md](08-2026-10-19-after-contourer-threads.md) | 2026-10-19 | delta run after #34's thread count (P02: contourer, bakes, C ABI 0.5.2, `--threads`; design 03/06): (a) 1 · (b) 1 · (c) 0 · (d) 0 · (e) 0 — 2 fixed, the invariant list and the graph's bake rule |
 | [09-2026-10-21-after-hygiene-run.md](09-2026-10-21-after-hygiene-run.md) | 2026-10-21 | delta run at the hygiene run's close (#34 gradient contract + `trueGradientAt`, the `GridField` normal, #35 pruning, #53 gate; design 08/10): (a) 1 · (b) 0 · (c) 0 · (d) 0 · (e) 1 — the FD-step row fixed; #11's trigger met by the run's scratch benchmarks, the owner's |
 | [10-2026-10-22-after-porous-run.md](10-2026-10-22-after-porous-run.md) | 2026-10-22 | delta run at the porous shell run's close (#63–#67: seeds, exact Delaunay, packed complex, `PorousField`, GLSL data textures; design/06/12): (a) 2 · (b) 2 · (c) 1 · (d) 0 · (e) 1 — 3 fixed (a new `design/13` for the porous library's contract); design/10 at its cap cannot take the porous hooks and constants, D-53's trigger arguably met — the owner's |
+| [11-2026-10-28-after-e12.md](11-2026-10-28-after-e12.md) | 2026-10-28 | delta run after the E12 session (`GridField::gradientAt` minmod, `dualc_mesh_deviation`; design 08/11): (a) 1 · (b) 0 · (c) 0 · (d) 0 · (e) 1 — the sources list's stale `gradientAt` claim fixed, #11's trigger answered by the tool |
 
 ---
 

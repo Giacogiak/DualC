@@ -168,8 +168,12 @@ TEST_CASE("GridField trueGradientAt is the trilinear gradient, unnormalised",
   const Vector3 ref = fd(*grid, p, 1e-6);
   REQUIRE((t - ref).norm() < 1e-6 * t.norm());
   REQUIRE(t.norm() > 2.0);
-  // gradientAt is its direction (again since #34's P04b, 17/20).
-  REQUIRE((grid->gradientAt(p) - t / t.norm()).norm() < 1e-15);
+  // gradientAt is the unit blend of the nodes' minmod gradients (#34, 17/20):
+  // one-sided at a node, so it agrees with the interpolant's direction only
+  // to first order in the cell -- close, not equal.
+  const Vector3 u = grid->gradientAt(p);
+  REQUIRE(u.norm() == Approx(1.0).margin(1e-12));
+  REQUIRE(dot(u, t / t.norm()) > 0.95);
 }
 
 TEST_CASE("Pass-through nodes forward trueGradientAt with the chain rule",

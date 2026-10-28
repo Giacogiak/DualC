@@ -142,14 +142,67 @@ Vector3 GridField::trueGradientAt(const Vector3& p) const {
   return Vector3{dfx * m.inv.x, dfy * m.inv.y, dfz * m.inv.z};
 }
 
+namespace {
+
+// The minmod of the forward and backward differences at a node: the smaller
+// in magnitude when they share a sign, zero when they disagree (a thin
+// feature's two sides cancel), the one existing difference at the grid's
+// boundary. One-sided, so first order at a node, but it never reaches across
+// a crease the way a central difference does -- the stencil of 17/20's
+// measurements that kept the sharp CAD pair's faces (#34, E12).
+double minmodAxis(const std::vector<float>& v, std::size_t i,
+                  std::size_t stride, int idx, int res, double inv) {
+  if (inv == 0.0) return 0.0;  // degenerate axis
+  const double c = v[i];
+  const bool hasF = idx + 1 < res, hasB = idx > 0;
+  const double f = hasF ? (v[i + stride] - c) : 0.0;
+  const double b = hasB ? (c - v[i - stride]) : 0.0;
+  double d;
+  if (hasF && hasB) {
+    d = (f * b > 0.0) ? ((std::abs(f) < std::abs(b)) ? f : b) : 0.0;
+  } else {
+    d = hasF ? f : b;
+  }
+  return d * inv;
+}
+
+} // namespace
+
 Vector3 GridField::gradientAt(const Vector3& p) const {
-  // The contract's unit direction of the same interpolant gradient. It jumps
-  // across cell faces (#34, E12 open), but a continuous node-gradient blend --
-  // central, minmod, ratio switch or crease mask -- moved the sharp CAD pair's
-  // mean deviation above this one's in every variant measured: 17/20.
-  const Vector3 g = trueGradientAt(p);
-  const double n = g.norm();
-  return (n > 1e-12) ? (g / n) : Vector3{0.0, 0.0, 1.0};
+  // The contract's unit direction, continuous everywhere: the trilinear blend
+  // of the 8 corner nodes' minmod gradients (every cell that touches a node
+  // shares it), computed on the fly -- storing them was no faster (17/20).
+  // The interpolant's own gradient, trueGradientAt, jumps across cell faces
+  // and stays the Newton step's; it is the fallback here where the blend
+  // vanishes, then the contract's (0,0,1).
+  const Impl& m = *impl_;
+  int ix, iy, iz;
+  double fx, fy, fz;
+  locate(p.x, m.region.min.x, m.inv.x, m.res.x, ix, fx);
+  locate(p.y, m.region.min.y, m.inv.y, m.res.y, iy, fy);
+  locate(p.z, m.region.min.z, m.inv.z, m.res.z, iz, fz);
+
+  const std::size_t sx = 1;
+  const std::size_t sy = static_cast<std::size_t>(m.res.x);
+  const std::size_t sz = sy * static_cast<std::size_t>(m.res.y);
+
+  Vector3 g{0.0, 0.0, 0.0};
+  for (int c = 0; c < 8; ++c) {
+    const int ax = c & 1, ay = (c >> 1) & 1, az = (c >> 2) & 1;
+    const int nx = ix + ax, ny = iy + ay, nz = iz + az;
+    const double w = (ax ? fx : 1.0 - fx) * (ay ? fy : 1.0 - fy) *
+                     (az ? fz : 1.0 - fz);
+    if (w == 0.0) continue;
+    const std::size_t i = m.index(nx, ny, nz);
+    g.x += w * minmodAxis(m.v, i, sx, nx, m.res.x, m.inv.x);
+    g.y += w * minmodAxis(m.v, i, sy, ny, m.res.y, m.inv.y);
+    g.z += w * minmodAxis(m.v, i, sz, nz, m.res.z, m.inv.z);
+  }
+  double n = g.norm();
+  if (n > 1e-12) return g / n;
+  const Vector3 t = trueGradientAt(p);
+  n = t.norm();
+  return (n > 1e-12) ? (t / n) : Vector3{0.0, 0.0, 1.0};
 }
 
 BBox GridField::bounds() const { return impl_->region; }
