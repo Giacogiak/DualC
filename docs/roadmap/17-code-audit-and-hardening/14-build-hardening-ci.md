@@ -155,6 +155,11 @@ the serial `ctest` gate ([15 § The serial gate](15-test-coverage-batches.md#the
 — its cost reason stands, and these two sections no longer depend on it.
 *2026-10-28, merged:* into local `main` by fast-forward (`4e784a7`), no PR — the owner's
 choice, as #70's; the push and the `sanitize` job's read are owed.
+*Rejected on the way:* dropping the early-out assertion (it is the one proof the `failed`
+flag is honoured — #22's fix would pass without it) and widening `n` (the same race at
+longer odds, which is what the `parallelFor` section's 1e6 had been). Not touched: the
+sibling tests in `test_cancel_progress.cpp` already fixed under finding 9 take the
+one-thread route; `parallel.h` itself, whose contract held.
 
 ---
 
