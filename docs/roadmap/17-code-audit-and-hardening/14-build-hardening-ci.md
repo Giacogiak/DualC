@@ -153,6 +153,8 @@ configuration; the **fixed** sections **0/200 and 0/200**, and `[parallel]` 7/7 
 8 joins finding 9: both were timing bounds in tests, neither an engine defect. Not changed:
 the serial `ctest` gate ([15 § The serial gate](15-test-coverage-batches.md#the-serial-gate-is-kept-for-a-new-reason))
 — its cost reason stands, and these two sections no longer depend on it.
+*2026-10-28, merged:* into local `main` by fast-forward (`4e784a7`), no PR — the owner's
+choice, as #70's; the push and the `sanitize` job's read are owed.
 
 ---
 
