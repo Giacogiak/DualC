@@ -117,6 +117,9 @@ DualC/
 │   ├── dualc_io_stress.cpp    OPT-IN concurrent-export I/O harness (17 #52): N exports at once to the temp dir, every
 │   │                            `.part` rename must land; keeps each `[dualc] error` line, probes the rename again,
 │   │                            `--force-hold` (Windows) pins the sharing-violation case (no CTest; `check.py --io-stress`)
+│   ├── dualc_mesh_deviation.cpp OPT-IN measurement tool (17 #34, #11): |valueAt| of the exact graph at every vertex of a
+│   │                            contoured OBJ, the dihedral histogram, the shift against a reference OBJ (no CTest;
+│   │                            `-DDUALC_BUILD_BENCH=ON`, driven by scripts/bench_e12.py)
 │   ├── samples/              Ready-to-run field-graphs (gyroid_box.json, mesh_lattice.json) copied next to dualc_field,
 │   │                            with the retired dualc_csg_demo's six recipes as graphs (cube_minus_sphere.json, smooth_blend.json,
 │   │                            displaced_sphere.json, mesh_shell.json, mesh_minus_sphere.json, twisted_mesh.json), and three
@@ -196,6 +199,8 @@ DualC/
 │   ├── docs_loss_audit.py     Docs loss audit between two commits: sentences, evidence tokens, headings,
 │   │                            identifiers of the base tree looked for on the head tree; exit 0 = clean
 │   ├── docs_loss_audit.json   Its triage: verdict per residual (record citation, restoring commit), rules, ratchet
+│   ├── bench_e12.py           The GridField-normal measurement round (17 #34): cases A–E through an old and a new
+│   │                            dualc_field, /usr/bin/time ×3, dualc_mesh_deviation on each output, the record's three tables
 │   └── count_nm.py            Dev utility (non-manifold / count analysis)
 │
 ├── data/                      Demo meshes for root-run recipes — *.obj are GITIGNORED; the build generates its own copies under build/data/; `dualc_gen_demo all --dir data` populates this one

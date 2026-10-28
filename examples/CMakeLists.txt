@@ -216,6 +216,17 @@ if(DUALC_BUILD_IO_STRESS)
   dualc_target_options(dualc_io_stress)
 endif()
 
+# dualc_mesh_deviation is the record's measurement tool (roadmap 17 #34 / #11):
+# |valueAt| of the exact graph at every vertex of a contoured OBJ, the
+# dihedral histogram, the shift against a reference OBJ. Opt-in, no CTest:
+# scripts/bench_e12.py drives it on the record's cases.
+if(DUALC_BUILD_BENCH)
+  add_executable(dualc_mesh_deviation dualc_mesh_deviation.cpp)
+  target_link_libraries(dualc_mesh_deviation PRIVATE dualc::dualc dualc_examples_fieldgraph)
+  target_compile_features(dualc_mesh_deviation PRIVATE cxx_std_17)
+  dualc_target_options(dualc_mesh_deviation)
+endif()
+
 # Demo meshes are generated, not checked in: `*.obj` is gitignored and
 # dualc_gen_demo (built right here) is the version-controlled source. One
 # custom command runs it once per build into <build>/data, and every
