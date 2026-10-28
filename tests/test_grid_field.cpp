@@ -190,6 +190,54 @@ TEST_CASE("GridField::gradientAt keeps a face's normal one cell from a "
   }
 }
 
+TEST_CASE("a baked box contours with its edges sharp, not chamfered",
+          "[grid][e12][accuracy]") {
+  // The regression guard for sharp features through a bake (#34, 17/20/02):
+  // the normal a GridField hands the QEF decides whether a box edge comes
+  // out as one ~90 degree crease or as a chamfer of two 20-45 degree bends.
+  // The faces sit on node planes (0.75 = 4 cells of 0.1875), so the trilinear
+  // interpolant is exact on them and at the edges; what rounds or keeps an
+  // edge is the normal alone. (With the faces off the node planes the
+  // interpolant itself rounds the edge and every stencil chamfers: 0.9 gave
+  // 408 chamfer edges with minmod, 435 with the cell gradient.) Measured
+  // 2026-10-28 here: minmod 0 chamfer edges / 180 creases / worst 0.0015;
+  // the cell gradient's direction (shipped before) 0 / 180 / 0.0022; P04's
+  // central blend 72 / 156 / 0.042 -- the bounds below are red on it.
+  const BoxField box(Vector3{-0.75, -0.75, -0.75}, Vector3{0.75, 0.75, 0.75});
+  const BBox region{Vector3{-1.5, -1.5, -1.5}, Vector3{1.5, 1.5, 1.5}};
+  const int res = 17;  // cell = 0.1875
+  FieldPtr grid = bakeToGrid(box, region, res, 1);
+
+  SamplerParams sp;
+  sp.maxDepth = 5;  // 32 octree cells over the region: ~2 per bake cell
+  sp.rootBounds = region;
+  ContourerParams cp;
+  auto [mesh, geom, normals] = dualContourField(*grid, sp, cp);
+  REQUIRE(mesh->nFaces() > 0);
+
+  double worst = 0.0;
+  for (auto v : mesh->vertices()) {
+    worst = std::max(worst, std::abs(box.valueAt(geom->vertexPositions[v])));
+  }
+
+  geom->requireEdgeDihedralAngles();
+  std::size_t chamfer = 0, crease = 0, interior = 0;
+  for (auto e : mesh->edges()) {
+    if (e.isBoundary()) continue;
+    ++interior;
+    const double deg = std::abs(geom->edgeDihedralAngles[e]) * 180.0 / M_PI;
+    if (deg >= 20.0 && deg < 45.0) ++chamfer;
+    if (deg >= 45.0) ++crease;
+  }
+  CAPTURE(worst, chamfer, crease, interior, mesh->nFaces());
+  REQUIRE(interior > 0);
+  // The exact box is 1.5 wide; the baked cell 0.1875.
+  CHECK(worst < 0.01);
+  // The twelve edges come out as one crease each: nothing in the chamfer band.
+  CHECK(chamfer == 0);
+  CHECK(crease > 160);
+}
+
 TEST_CASE("closestSurfacePoint on a GridField steps by the trilinear "
           "gradient and returns gradientAt",
           "[grid]") {

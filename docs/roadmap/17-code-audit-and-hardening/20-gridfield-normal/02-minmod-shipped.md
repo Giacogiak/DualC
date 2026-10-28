@@ -42,6 +42,20 @@ to 1e-12 and `dot > 0.95` with the interpolant's direction, **measured 0.99910**
 gyroid's cell-centre probe (cell 1/16, |∇f| ≈ 2π: first order in the cell, as expected).
 ctest 408 → 409.
 
+**The regression guard** (the owner's ask at the review, 2026-10-28): *a baked box contours
+with its edges sharp, not chamfered* (`[grid][e12][accuracy]`). A `BoxField` baked at 17³
+over ±1.5 (cell 0.1875) with its faces on node planes (±0.75 = 4 cells), contoured at depth
+5 over the same root; the output's worst `|box.valueAt|` must be < 0.01, its 20–45° dihedral
+band empty and its ≥ 45° band over 160 edges. With the faces on node planes the interpolant
+is exact at the faces and edges, so the normal alone decides the edge; off the planes
+(±0.9) the interpolant itself rounds it and every stencil chamfers (408 edges with minmod,
+435 with the cell gradient). Measured: minmod 0 chamfer / 180 crease / worst 0.0015; the
+cell gradient 0 / 180 / 0.0022; P04's central blend (`f939a35`) **72 / 156 / 0.042, red** —
+the guard catches the stencil that softened edges. On the CLI, the same cube baked by a
+`mesh` node (`cube.obj`, `bake=16`, depth 5) went from 768 chamfer edges and max 0.0298
+under the cell gradient to 0 and 0.0200 under minmod; the L-bracket (`bake=32`, depth 6)
+from max 0.0130 to 0.0078, its concave edges' bands kept. ctest 409 → 410.
+
 ## The tool, checked against the record
 
 `dualc_mesh_deviation` ([13](../../../command_reference/13-dualc_mesh_deviation.md),
@@ -107,8 +121,8 @@ the PR text for the review.
 
 ## Gates
 
-Full gate `python3 scripts/check.py` green at both commits (ctest 408 with the tool, 409 with
-the stencil), counts on the [block README](../README.md); `--gpu` not run (no GLSL path
+Full gate `python3 scripts/check.py` green at every commit (ctest 408 with the tool, 409 with
+the stencil, 410 with the guard), counts on the [block README](../README.md); `--gpu` not run (no GLSL path
 moved; the last parity count is P03.2's 82 / 82). Docs gate `--docs --strict` green at the
 close. `docs_loss_audit.py` on the split of page 20 into this folder: clean.
 

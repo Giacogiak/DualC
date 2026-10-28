@@ -22,7 +22,7 @@ live again.
   restored, E12 open.
 - [`02-minmod-shipped.md`](02-minmod-shipped.md) — 2026-10-28: the owner's pick, minmod,
   re-implemented and re-measured on the four cases plus an oversampled one with the new
-  `dualc_mesh_deviation` tool; the tests moved; #34 DONE.
+  `dualc_mesh_deviation` tool; the tests moved, a sharp-edge regression guard; #34 DONE.
 
 ## Entries
 

@@ -133,7 +133,7 @@ merge of #52 over #32 — two writer cases run everywhere, two more only on Wind
 `gpu` job — [13](13-parity-gate-binding.md)); the same 270 pass under ASan + UBSan in CI's
 `sanitize` job (2026-10-06, [14](14-build-hardening-ci.md)); the same 270 pass under `ctest -j 8`,
 three runs in a row (2026-10-07, Linux, [15](15-test-coverage-batches.md)). Local, Linux, C ABI in:
-ctest **408** (2026-10-28, [20](20-gridfield-normal/README.md)), parity **82/82** ([19](19-gradient-contract.md#gates)).
+ctest **410** (2026-10-28, [20](20-gridfield-normal/README.md)), parity **82/82** ([19](19-gradient-contract.md#gates)).
 
 | Item | Title | Status |
 | --- | --- | --- |
